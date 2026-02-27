@@ -73,18 +73,6 @@ document.querySelector('#app').innerHTML = `
         <div id="formatAllFilesNote" style="display:none; margin-top:5px; font-size:11px; color:#9A8A7A;">Applies to all selected files</div>
         <div id="formatTip" style="display:none; margin-top:8px; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:500;"></div>
       </div>
-
-      <div id="qualitySection">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-          <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em;">Quality</div>
-          <span id="qVal" style="display:inline-block; min-width:36px; text-align:center; padding:2px 8px; border-radius:99px; background:#2C1810; color:#F5F0E8; font-weight:700; font-size:12px;">80%</span>
-        </div>
-        <input type="range" id="quality" min="0.1" max="1" step="0.05" value="0.8" style="width:100%; margin-bottom:6px;" />
-        <div style="display:flex; justify-content:space-between; font-size:10px; color:#B0A090; font-weight:500;">
-          <span>Smaller file</span>
-          <span>Higher quality</span>
-        </div>
-      </div>
     </div>
 
     <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert Images</button>
@@ -106,6 +94,9 @@ const sizes = document.getElementById('sizes')
 const fileList = document.getElementById('fileList')
 const qualitySection = document.getElementById('qualitySection')
 const formatTip = document.getElementById('formatTip')
+
+// Fixed quality — converter always uses 0.85
+const FIXED_QUALITY = 0.85
 
 // ===== State =====
 let selectedFiles = []
@@ -169,25 +160,8 @@ function inputFilesArePhotos() {
   return selectedFiles.every(f => f.type === 'image/jpeg' || f.type === 'image/webp')
 }
 
-function updateJpgQualityTip() {
-  const mime = formatSelect.value
-  if (mime !== 'image/jpeg') return
-  const q = parseFloat(qualityInput.value)
-  if (q >= 0.9) {
-    formatTip.style.display = 'block'
-    formatTip.style.background = '#fffbeb'
-    formatTip.style.border = '1px solid #fde68a'
-    formatTip.style.color = '#92400e'
-    formatTip.innerHTML = '💡 At high quality, JPG files can get <strong>larger</strong> than the original. For high quality + small size, try <strong>WebP</strong> instead.'
-  } else {
-    formatTip.style.display = 'none'
-  }
-}
-
 function updateFormatUI() {
   const mime = formatSelect.value
-  qualitySection.style.display = formatSupportsQuality(mime) ? 'block' : 'none'
-
   if (mime === 'image/png') {
     const isPhotos = selectedFiles.length && inputFilesArePhotos()
     formatTip.style.display = 'block'
@@ -197,10 +171,8 @@ function updateFormatUI() {
     formatTip.innerHTML = isPhotos
       ? '⚠️ Converting photos to PNG will likely <strong>increase file size</strong>. Use JPG or WebP to reduce size.'
       : 'ℹ️ PNG is lossless — best for screenshots and graphics with transparency.'
-  } else if (mime === 'image/webp') {
-    formatTip.style.display = 'none'
   } else {
-    updateJpgQualityTip()
+    formatTip.style.display = 'none'
   }
 }
 
@@ -362,10 +334,6 @@ dropZone.addEventListener('drop', (e) => {
 })
 
 formatSelect.addEventListener('change', () => updateFormatUI())
-qualityInput.addEventListener('input', () => {
-  qVal.textContent = Math.round(parseFloat(qualityInput.value) * 100) + '%'
-  updateJpgQualityTip()
-})
 
 // ===== Convert =====
 convertBtn.addEventListener('click', async () => {
@@ -374,7 +342,7 @@ convertBtn.addEventListener('click', async () => {
   clearResultsUI()
 
   const mime = formatSelect.value
-  const quality = parseFloat(qualityInput.value)
+  const quality = FIXED_QUALITY
 
   try {
     if (selectedFiles.length === 1) {
