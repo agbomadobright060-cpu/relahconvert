@@ -3,7 +3,7 @@ import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool } from './app/router.js'
 
 const currentTool = getCurrentTool()
-const bg = currentTool ? '#F2F2F2' : '#F5F0E8'
+const bg = '#F2F2F2'
 
 if (document.head) {
   const fontLink = document.createElement('link')
@@ -57,7 +57,7 @@ document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       ${badgeHTML}
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(32px,6vw,48px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${titleHTML}</h1>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${titleHTML}</h1>
       <p style="font-size:13px; color:#7A6A5A; margin:0;">${descText}</p>
     </div>
 
