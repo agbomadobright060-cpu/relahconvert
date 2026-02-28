@@ -212,23 +212,21 @@ document.addEventListener('drop', (e) => {
   validateAndAdd(Array.from(e.dataTransfer.files || []))
 })
 
-// ── Auto-load file passed from compress "What's next?" ────────
+// Auto-load file passed from compress "What's next?"
 async function loadPendingFile() {
-  const blobUrl = sessionStorage.getItem('pendingBlobUrl')
-  const fileMeta = sessionStorage.getItem('pendingFile')
-  if (!blobUrl || !fileMeta) return
-  sessionStorage.removeItem('pendingBlobUrl')
-  sessionStorage.removeItem('pendingFile')
+  const data = sessionStorage.getItem('pendingFileData')
+  const name = sessionStorage.getItem('pendingFileName')
+  const type = sessionStorage.getItem('pendingFileType')
+  if (!data || !name || !type) return
+  sessionStorage.removeItem('pendingFileData')
+  sessionStorage.removeItem('pendingFileName')
+  sessionStorage.removeItem('pendingFileType')
   try {
-    const { name, type } = JSON.parse(fileMeta)
-    const res = await fetch(blobUrl)
+    const res = await fetch(data)
     const blob = await res.blob()
-    URL.revokeObjectURL(blobUrl)
     const file = new File([blob], name, { type })
     validateAndAdd([file])
-  } catch (e) {
-    // silently fail if blob expired
-  }
+  } catch (e) {}
 }
 
 loadPendingFile()

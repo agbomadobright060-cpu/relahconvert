@@ -162,19 +162,23 @@ function showResultBar(originalBytes, outputBytes) {
 
   nextSteps.style.display = 'block'
 
-  // Wire up "What's next?" buttons to carry file to next tool
   nextSteps.querySelectorAll('.next-link').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (!lastBlob) { window.location.href = btn.getAttribute('data-href'); return }
-      const url = btn.getAttribute('data-href')
-      const file = new File([lastBlob], selectedFiles.length === 1 ? selectedFiles[0].name : 'compressed.jpg', { type: lastBlob.type })
-      const dt = new DataTransfer()
-      dt.items.add(file)
-      sessionStorage.setItem('pendingFile', JSON.stringify({ name: file.name, type: file.type }))
-      // Store blob URL in sessionStorage for target page
-      const blobUrl = URL.createObjectURL(lastBlob)
-      sessionStorage.setItem('pendingBlobUrl', blobUrl)
-      window.location.href = url
+      const href = btn.getAttribute('data-href')
+      if (!lastBlob) { window.location.href = href; return }
+      const fileName = selectedFiles.length === 1 ? selectedFiles[0].name : 'compressed.jpg'
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          sessionStorage.setItem('pendingFileData', e.target.result)
+          sessionStorage.setItem('pendingFileName', fileName)
+          sessionStorage.setItem('pendingFileType', lastBlob.type)
+        } catch (err) {
+          // sessionStorage full (large file) — navigate anyway
+        }
+        window.location.href = href
+      }
+      reader.readAsDataURL(lastBlob)
     })
   })
 }
