@@ -30,9 +30,11 @@ if (document.head) {
     .savings-circle .circle-fill { fill:none; stroke:#C84B31; stroke-width:8; stroke-linecap:round; stroke-dasharray:226; transition: stroke-dashoffset 1s ease; }
     .circle-label { font-family:'Fraunces',serif; font-weight:900; font-size:15px; color:#2C1810; text-anchor:middle; dominant-baseline:middle; }
     .result-stats { flex:1; }
-    .result-saved { font-family:'Fraunces',serif; font-weight:900; font-size:18px; color:#2C1810; margin:0 0 4px; }
+    .result-saved { font-size:14px; color:#2C1810; margin:0 0 4px; font-weight:400; }
     .result-sizes { font-size:13px; color:#7A6A5A; display:flex; align-items:center; gap:8px; }
     .result-arrow { color:#C84B31; font-size:16px; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
+    .next-link:hover { border-color:#C84B31; color:#C84B31; }
   `
   document.head.appendChild(style)
 }
@@ -42,7 +44,6 @@ document.title = 'Image Compressor — Compress JPG and WebP Free'
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         Image <em style="font-style:italic; color:#C84B31;">Compressor</em>
       </h1>
@@ -68,9 +69,9 @@ document.querySelector('#app').innerHTML = `
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">What's next?</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="/jpg-to-png" style="padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff;">Convert to PNG</a>
-        <a href="/jpg-to-webp" style="padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff;">Convert to WebP</a>
-        <a href="/png-to-jpg" style="padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff;">Convert to JPG</a>
+        <button class="next-link" data-href="/jpg-to-png">Convert to PNG</button>
+        <button class="next-link" data-href="/jpg-to-webp">Convert to WebP</button>
+        <button class="next-link" data-href="/png-to-jpg">Convert to JPG</button>
       </div>
     </div>
   </div>
@@ -86,6 +87,7 @@ const nextSteps = document.getElementById('nextSteps')
 
 let selectedFiles = []
 let currentDownloadUrl = null
+let lastBlob = null
 
 function getQuality(mime) {
   if (mime === 'image/jpeg') return 0.6
@@ -159,6 +161,22 @@ function showResultBar(originalBytes, outputBytes) {
   })
 
   nextSteps.style.display = 'block'
+
+  // Wire up "What's next?" buttons to carry file to next tool
+  nextSteps.querySelectorAll('.next-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!lastBlob) { window.location.href = btn.getAttribute('data-href'); return }
+      const url = btn.getAttribute('data-href')
+      const file = new File([lastBlob], selectedFiles.length === 1 ? selectedFiles[0].name : 'compressed.jpg', { type: lastBlob.type })
+      const dt = new DataTransfer()
+      dt.items.add(file)
+      sessionStorage.setItem('pendingFile', JSON.stringify({ name: file.name, type: file.type }))
+      // Store blob URL in sessionStorage for target page
+      const blobUrl = URL.createObjectURL(lastBlob)
+      sessionStorage.setItem('pendingBlobUrl', blobUrl)
+      window.location.href = url
+    })
+  })
 }
 
 async function compressFile(file) {
@@ -240,8 +258,8 @@ function validateAndAdd(incoming) {
   if (wrongFormat.length) showWarning(`Only JPG and WebP can be compressed. ${wrongFormat.length} file(s) were skipped.`)
   if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
 
-  const map = new Map(selectedFiles.map(f => [fileKey(f), f]))
-  for (const f of valid) map.set(fileKey(f), f)
+  const map = new Map()
+  for (const f of [...selectedFiles, ...valid]) map.set(fileKey(f), f)
   let merged = Array.from(map.values())
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
@@ -255,7 +273,10 @@ function validateAndAdd(incoming) {
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
 
-fileInput.addEventListener('change', () => validateAndAdd(Array.from(fileInput.files || [])))
+fileInput.addEventListener('change', () => {
+  validateAndAdd(Array.from(fileInput.files || []))
+  fileInput.value = ''
+})
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
@@ -263,6 +284,7 @@ compressBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
   setConverting()
   cleanupOldUrl()
+  lastBlob = null
   resultBar.style.display = 'none'
   downloadLink.style.display = 'none'
   nextSteps.style.display = 'none'
@@ -270,6 +292,7 @@ compressBtn.addEventListener('click', async () => {
   try {
     if (selectedFiles.length === 1) {
       const { blob, filename, originalSize, outputSize } = await compressFile(selectedFiles[0])
+      lastBlob = blob
       currentDownloadUrl = URL.createObjectURL(blob)
       downloadLink.href = currentDownloadUrl
       downloadLink.download = filename
@@ -300,6 +323,7 @@ compressBtn.addEventListener('click', async () => {
       showResultBar(totalOriginal, totalOutput)
     }
     setIdle()
+    fileInput.value = ''
   } catch (err) {
     alert(err?.message || 'Compression error')
     if (selectedFiles.length) setIdle(); else setDisabled()
