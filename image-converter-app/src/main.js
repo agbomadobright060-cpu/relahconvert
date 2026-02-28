@@ -26,7 +26,21 @@ if (document.head) {
 
 const currentTool = getCurrentTool()
 
-// Build format badges for dropzone
+// Title HTML — tool pages get styled like "JPG to PNG Converter" with italic coral last word
+function buildTitleHTML(tool) {
+  if (!tool) return 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'
+  // Split title at last word "Converter" to style it
+  const parts = tool.title.split(' ')
+  const last = parts.pop()
+  return parts.join(' ') + ' <em style="font-style:italic; color:#C84B31;">' + last + '</em>'
+}
+
+const titleHTML = buildTitleHTML(currentTool)
+const descText = currentTool ? currentTool.description : 'Convert PNG, JPG and WebP instantly. Files never leave your device.'
+
+const badgeHTML = currentTool ? '' : `
+  <div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>`
+
 const formatBadges = currentTool
   ? currentTool.inputFormats.map(f => {
       const label = f === 'image/jpeg' ? 'JPG' : f === 'image/png' ? 'PNG' : 'WebP'
@@ -36,16 +50,6 @@ const formatBadges = currentTool
      <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">JPG</span>
      <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">WebP</span>`
 
-// Build title HTML
-const titleHTML = currentTool
-  ? currentTool.title
-  : 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'
-
-const descText = currentTool
-  ? currentTool.description
-  : 'Convert PNG, JPG and WebP instantly. Files never leave your device.'
-
-// Build format selector — hidden on tool pages, visible on homepage
 const formatSelectorHTML = currentTool
   ? `<input type="hidden" id="formatSelect" value="${currentTool.outputFormat}" />`
   : `<div style="background:#ffffff; border:1px solid #DDD5C8; border-radius:12px; padding:16px; margin-bottom:12px;">
@@ -61,7 +65,7 @@ const formatSelectorHTML = currentTool
 document.querySelector('#app').innerHTML = `
   <div style="max-width:560px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>
+      ${badgeHTML}
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(32px,6vw,48px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${titleHTML}</h1>
       <p style="font-size:13px; color:#7A6A5A; margin:0;">${descText}</p>
     </div>
