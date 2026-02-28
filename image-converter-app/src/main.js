@@ -212,28 +212,47 @@ document.addEventListener('drop', (e) => {
   validateAndAdd(Array.from(e.dataTransfer.files || []))
 })
 
-// Auto-load file passed from compress "What's next?" — bypasses format validation
-async function loadPendingFile() {
-  const data = sessionStorage.getItem('pendingFileData')
-  const name = sessionStorage.getItem('pendingFileName')
-  const type = sessionStorage.getItem('pendingFileType')
-  if (!data || !name || !type) return
-  sessionStorage.removeItem('pendingFileData')
-  sessionStorage.removeItem('pendingFileName')
-  sessionStorage.removeItem('pendingFileType')
+// IndexedDB helpers
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => {
+      store.clear()
+      resolve(req.result || [])
+    }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+
+// Auto-load files passed from compress "What's next?" via IndexedDB
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
   try {
-    const res = await fetch(data)
-    const blob = await res.blob()
-    const file = new File([blob], name, { type })
-    // Bypass format validation — file comes pre-processed from compressor
-    selectedFiles = [file]
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    // Bypass format validation — files come pre-processed from compressor
+    selectedFiles = files
     clearResultsUI()
     renderPreviews()
     setIdleEnabled()
   } catch (e) {}
 }
 
-loadPendingFile()
+loadPendingFiles()
 
 convertBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return

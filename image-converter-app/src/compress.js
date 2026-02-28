@@ -87,7 +87,29 @@ const nextSteps = document.getElementById('nextSteps')
 
 let selectedFiles = []
 let currentDownloadUrl = null
-let lastBlob = null
+let compressedBlobs = []
+
+// IndexedDB helpers
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  store.clear()
+  files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = resolve
+    tx.onerror = reject
+  })
+}
 
 function getOutputMime(mime) {
   if (mime === 'image/png') return 'image/jpeg'
@@ -168,22 +190,16 @@ function showResultBar(originalBytes, outputBytes) {
   nextSteps.style.display = 'block'
 
   nextSteps.querySelectorAll('.next-link').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const href = btn.getAttribute('data-href')
-      if (!lastBlob) { window.location.href = href; return }
-      const ext = lastBlob.type === 'image/jpeg' ? 'jpg' : 'webp'
-      const baseName = selectedFiles.length === 1 ? sanitizeBaseName(selectedFiles[0].name) : 'compressed'
-      const fileName = `${baseName}-compressed.${ext}`
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        try {
-          sessionStorage.setItem('pendingFileData', e.target.result)
-          sessionStorage.setItem('pendingFileName', fileName)
-          sessionStorage.setItem('pendingFileType', lastBlob.type)
-        } catch (err) {}
-        window.location.href = href
+      if (!compressedBlobs.length) { window.location.href = href; return }
+      try {
+        await saveFilesToIDB(compressedBlobs)
+        sessionStorage.setItem('pendingFromIDB', '1')
+      } catch (e) {
+        // fallback: do nothing, just navigate
       }
-      reader.readAsDataURL(lastBlob)
+      window.location.href = href
     })
   })
 }
@@ -212,7 +228,7 @@ async function compressFile(file) {
           const ext = outputMime === 'image/jpeg' ? 'jpg' : 'webp'
           const base = sanitizeBaseName(file.name)
           const filename = `${base}-compressed.${ext}`
-          resolve({ blob, filename, originalSize: file.size, outputSize: blob.size })
+          resolve({ blob, filename, originalSize: file.size, outputSize: blob.size, type: outputMime })
         }, outputMime, quality)
       }
       img.src = e.target.result
@@ -294,15 +310,15 @@ compressBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
   setConverting()
   cleanupOldUrl()
-  lastBlob = null
+  compressedBlobs = []
   resultBar.style.display = 'none'
   downloadLink.style.display = 'none'
   nextSteps.style.display = 'none'
 
   try {
     if (selectedFiles.length === 1) {
-      const { blob, filename, originalSize, outputSize } = await compressFile(selectedFiles[0])
-      lastBlob = blob
+      const { blob, filename, originalSize, outputSize, type } = await compressFile(selectedFiles[0])
+      compressedBlobs = [{ blob, name: filename, type }]
       currentDownloadUrl = URL.createObjectURL(blob)
       downloadLink.href = currentDownloadUrl
       downloadLink.download = filename
@@ -317,10 +333,11 @@ compressBtn.addEventListener('click', async () => {
 
       for (let i = 0; i < selectedFiles.length; i++) {
         compressBtn.textContent = `Compressing ${i + 1}/${selectedFiles.length}...`
-        const { blob, filename, originalSize, outputSize } = await compressFile(selectedFiles[i])
+        const { blob, filename, originalSize, outputSize, type } = await compressFile(selectedFiles[i])
         totalOriginal += originalSize
         totalOutput += outputSize
         const safeName = uniqueName(usedNames, filename)
+        compressedBlobs.push({ blob, name: safeName, type })
         zip.file(safeName, blob)
       }
 
