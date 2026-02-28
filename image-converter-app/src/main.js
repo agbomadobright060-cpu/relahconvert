@@ -212,7 +212,7 @@ document.addEventListener('drop', (e) => {
   validateAndAdd(Array.from(e.dataTransfer.files || []))
 })
 
-// Auto-load file passed from compress "What's next?"
+// Auto-load file passed from compress "What's next?" — bypasses format validation
 async function loadPendingFile() {
   const data = sessionStorage.getItem('pendingFileData')
   const name = sessionStorage.getItem('pendingFileName')
@@ -225,7 +225,11 @@ async function loadPendingFile() {
     const res = await fetch(data)
     const blob = await res.blob()
     const file = new File([blob], name, { type })
-    validateAndAdd([file])
+    // Bypass format validation — file comes pre-processed from compressor
+    selectedFiles = [file]
+    clearResultsUI()
+    renderPreviews()
+    setIdleEnabled()
   } catch (e) {}
 }
 
