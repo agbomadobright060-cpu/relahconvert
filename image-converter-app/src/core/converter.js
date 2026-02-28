@@ -1,6 +1,6 @@
 import JSZip from 'jszip'
 import { mimeToExt, mimeToLabel, sanitizeBaseName, uniqueName } from './utils.js'
-// Load a File into an HTMLImageElement
+
 export function fileToImage(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -15,7 +15,6 @@ export function fileToImage(file) {
   })
 }
 
-// Convert a canvas to a Blob
 export function canvasToBlob(canvas, mime, quality) {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -25,13 +24,17 @@ export function canvasToBlob(canvas, mime, quality) {
   })
 }
 
-// Convert a single file and return { blob, originalSize, outputSize, filename }
 export async function convertFile(file, mime, quality) {
   const img = await fileToImage(file)
   const canvas = document.createElement('canvas')
   canvas.width = img.width
   canvas.height = img.height
-  canvas.getContext('2d').drawImage(img, 0, 0)
+  const ctx = canvas.getContext('2d')
+  if (mime === 'image/jpeg') {
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }
+  ctx.drawImage(img, 0, 0)
 
   const blob = await canvasToBlob(canvas, mime, quality)
   const ext = mimeToExt(mime)
@@ -42,7 +45,6 @@ export async function convertFile(file, mime, quality) {
   return { blob, originalSize: file.size, outputSize: blob.size, filename }
 }
 
-// Convert multiple files and return a ZIP blob + size totals
 export async function convertFilesToZip(files, mime, quality, onProgress) {
   const zip = new JSZip()
   const usedNames = new Set()
@@ -62,7 +64,12 @@ export async function convertFilesToZip(files, mime, quality, onProgress) {
     const canvas = document.createElement('canvas')
     canvas.width = img.width
     canvas.height = img.height
-    canvas.getContext('2d').drawImage(img, 0, 0)
+    const ctx = canvas.getContext('2d')
+    if (mime === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+    ctx.drawImage(img, 0, 0)
 
     const blob = await canvasToBlob(canvas, mime, quality)
     totalNew += blob.size
