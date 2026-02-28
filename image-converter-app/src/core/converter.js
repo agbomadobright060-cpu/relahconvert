@@ -1,6 +1,5 @@
 import JSZip from 'jszip'
 import { mimeToExt, mimeToLabel, sanitizeBaseName, uniqueName } from './utils.js'
-
 // Load a File into an HTMLImageElement
 export function fileToImage(file) {
   return new Promise((resolve, reject) => {

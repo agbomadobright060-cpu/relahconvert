@@ -1,5 +1,7 @@
 import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
+import { getCurrentTool } from './app/router.js'
+
 if (document.head) {
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
@@ -22,12 +24,15 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
+// Load tool config from URL
+const currentTool = getCurrentTool()
+
 document.querySelector('#app').innerHTML = `
   <div style="max-width:560px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(32px,6vw,48px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">Image <em style="font-style:italic; color:#C84B31;">Converter</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Convert PNG, JPG and WebP instantly. Files never leave your device.</p>
+      <h1 id="toolTitle" style="font-family:'Fraunces',serif; font-size:clamp(32px,6vw,48px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${currentTool ? currentTool.title : 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'}</h1>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">${currentTool ? currentTool.description : 'Convert PNG, JPG and WebP instantly. Files never leave your device.'}</p>
     </div>
 
     <label id="dropZone" for="fileInput" style="display:block; width:100%; box-sizing:border-box; padding:24px 16px; border:2px dashed #C4B8A8; border-radius:12px; text-align:center; cursor:pointer; margin-bottom:12px; background:#FAF6EF; transition:all 0.18s ease;">
@@ -69,6 +74,12 @@ const convertBtn = document.getElementById('convertBtn')
 const downloadLink = document.getElementById('downloadLink')
 const sizes = document.getElementById('sizes')
 const fileList = document.getElementById('fileList')
+
+// Apply tool config if on a specific tool route
+if (currentTool) {
+  document.title = currentTool.title
+  formatSelect.value = currentTool.outputFormat
+}
 
 const FIXED_QUALITY = 0.85
 let selectedFiles = []
