@@ -40,5 +40,12 @@ export const tools = {
     inputFormats: ['image/webp'],
     outputFormat: 'image/png',
     slug: 'webp-to-png'
+  },
+  'compress': {
+    title: 'Image Compressor',
+    description: 'Compress JPG, PNG and WebP images free. No upload required.',
+    inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    outputFormat: null,
+    slug: 'compress'
   }
 }
