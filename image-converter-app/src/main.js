@@ -1,6 +1,5 @@
-import { convertFile, convertFilesToZip } from './converter.js'
-import { LIMITS, formatSize, fileKey, totalBytes } from './utils.js'
-
+import { convertFile, convertFilesToZip } from './core/converter.js'
+import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 if (document.head) {
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
