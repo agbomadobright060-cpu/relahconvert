@@ -171,7 +171,9 @@ function showResultBar(originalBytes, outputBytes) {
     btn.addEventListener('click', () => {
       const href = btn.getAttribute('data-href')
       if (!lastBlob) { window.location.href = href; return }
-      const fileName = selectedFiles.length === 1 ? selectedFiles[0].name : 'compressed.jpg'
+      const ext = lastBlob.type === 'image/jpeg' ? 'jpg' : 'webp'
+      const baseName = selectedFiles.length === 1 ? sanitizeBaseName(selectedFiles[0].name) : 'compressed'
+      const fileName = `${baseName}-compressed.${ext}`
       const reader = new FileReader()
       reader.onload = (e) => {
         try {
