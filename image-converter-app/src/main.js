@@ -24,33 +24,31 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-// Load tool config from URL
 const currentTool = getCurrentTool()
 
-document.querySelector('#app').innerHTML = `
-  <div style="max-width:560px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
-    <div style="margin-bottom:20px;">
-      <div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>
-      <h1 id="toolTitle" style="font-family:'Fraunces',serif; font-size:clamp(32px,6vw,48px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${currentTool ? currentTool.title : 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'}</h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${currentTool ? currentTool.description : 'Convert PNG, JPG and WebP instantly. Files never leave your device.'}</p>
-    </div>
+// Build format badges for dropzone
+const formatBadges = currentTool
+  ? currentTool.inputFormats.map(f => {
+      const label = f === 'image/jpeg' ? 'JPG' : f === 'image/png' ? 'PNG' : 'WebP'
+      return `<span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">${label}</span>`
+    }).join('')
+  : `<span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">PNG</span>
+     <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">JPG</span>
+     <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">WebP</span>`
 
-    <label id="dropZone" for="fileInput" style="display:block; width:100%; box-sizing:border-box; padding:24px 16px; border:2px dashed #C4B8A8; border-radius:12px; text-align:center; cursor:pointer; margin-bottom:12px; background:#FAF6EF; transition:all 0.18s ease;">
-      <div style="font-size:24px; margin-bottom:6px;">🖼️</div>
-      <div id="dzTitle" style="font-family:'Fraunces',serif; font-weight:700; font-size:16px; color:#2C1810; margin-bottom:4px;">Drop images here or click to upload</div>
-      <div id="dzSub" style="font-size:12px; color:#9A8A7A; font-weight:500;">You can drop multiple times to add more files</div>
-      <div style="margin-top:10px; display:flex; gap:6px; justify-content:center;">
-        <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">PNG</span>
-        <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">JPG</span>
-        <span style="font-size:10px; font-weight:600; color:#C84B31; background:#FDE8E3; padding:2px 8px; border-radius:99px;">WebP</span>
-      </div>
-    </label>
+// Build title HTML
+const titleHTML = currentTool
+  ? currentTool.title
+  : 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'
 
-    <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" />
-    <div id="sizes" style="margin:0 0 10px; font-size:14px;"></div>
-    <div id="fileList" style="display:none; margin-bottom:12px; border:1px solid #DDD5C8; border-radius:10px; background:#FAF6EF; overflow:hidden;"></div>
+const descText = currentTool
+  ? currentTool.description
+  : 'Convert PNG, JPG and WebP instantly. Files never leave your device.'
 
-    <div style="background:#ffffff; border:1px solid #DDD5C8; border-radius:12px; padding:16px; margin-bottom:12px;">
+// Build format selector — hidden on tool pages, visible on homepage
+const formatSelectorHTML = currentTool
+  ? `<input type="hidden" id="formatSelect" value="${currentTool.outputFormat}" />`
+  : `<div style="background:#ffffff; border:1px solid #DDD5C8; border-radius:12px; padding:16px; margin-bottom:12px;">
       <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;">Output Format</div>
       <select id="formatSelect" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500; background:#FAF6EF; color:#2C1810; outline:none; cursor:pointer; transition:all 0.15s;">
         <option value="image/jpeg">Convert to JPG</option>
@@ -58,12 +56,35 @@ document.querySelector('#app').innerHTML = `
         <option value="image/webp">Convert to WebP</option>
       </select>
       <div id="formatAllFilesNote" style="display:none; margin-top:5px; font-size:11px; color:#9A8A7A;">Applies to all selected files</div>
+    </div>`
+
+document.querySelector('#app').innerHTML = `
+  <div style="max-width:560px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
+    <div style="margin-bottom:20px;">
+      <div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(32px,6vw,48px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${titleHTML}</h1>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">${descText}</p>
     </div>
+
+    <label id="dropZone" for="fileInput" style="display:block; width:100%; box-sizing:border-box; padding:24px 16px; border:2px dashed #C4B8A8; border-radius:12px; text-align:center; cursor:pointer; margin-bottom:12px; background:#FAF6EF; transition:all 0.18s ease;">
+      <div style="font-size:24px; margin-bottom:6px;">🖼️</div>
+      <div id="dzTitle" style="font-family:'Fraunces',serif; font-weight:700; font-size:16px; color:#2C1810; margin-bottom:4px;">Drop images here or click to upload</div>
+      <div id="dzSub" style="font-size:12px; color:#9A8A7A; font-weight:500;">You can drop multiple times to add more files</div>
+      <div style="margin-top:10px; display:flex; gap:6px; justify-content:center;">${formatBadges}</div>
+    </label>
+
+    <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" />
+    <div id="sizes" style="margin:0 0 10px; font-size:14px;"></div>
+    <div id="fileList" style="display:none; margin-bottom:12px; border:1px solid #DDD5C8; border-radius:10px; background:#FAF6EF; overflow:hidden;"></div>
+
+    ${formatSelectorHTML}
 
     <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert Images</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
   </div>
 `
+
+if (currentTool) document.title = currentTool.title
 
 const fileInput = document.getElementById('fileInput')
 const dropZone = document.getElementById('dropZone')
@@ -74,12 +95,6 @@ const convertBtn = document.getElementById('convertBtn')
 const downloadLink = document.getElementById('downloadLink')
 const sizes = document.getElementById('sizes')
 const fileList = document.getElementById('fileList')
-
-// Apply tool config if on a specific tool route
-if (currentTool) {
-  document.title = currentTool.title
-  formatSelect.value = currentTool.outputFormat
-}
 
 const FIXED_QUALITY = 0.85
 let selectedFiles = []
