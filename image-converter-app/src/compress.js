@@ -12,7 +12,6 @@ if (document.head) {
   const style = document.createElement('style')
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes fillCircle { from { stroke-dashoffset: 226; } to { stroke-dashoffset: var(--dash-offset); } }
     #app > div { animation: fadeUp 0.4s ease both; }
     #compressBtn:not(:disabled):hover { background: #A63D26 !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,49,0.35) !important; }
     #compressBtn { transition: all 0.18s ease; }
@@ -38,7 +37,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = 'Image Compressor — Compress JPG, PNG, WebP Free'
+document.title = 'Image Compressor — Compress JPG and WebP Free'
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
@@ -47,7 +46,7 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         Image <em style="font-style:italic; color:#C84B31;">Compressor</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Compress JPG, PNG and WebP images free. Files never leave your device.</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">Compress JPG and WebP images free. Files never leave your device.</p>
     </div>
 
     <div id="uploadArea" style="margin-bottom:16px;">
@@ -57,7 +56,7 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop images anywhere</span>
     </div>
 
-    <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" />
+    <input type="file" id="fileInput" multiple accept="image/jpeg,image/webp" style="display:none;" />
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
 
@@ -88,20 +87,12 @@ const nextSteps = document.getElementById('nextSteps')
 let selectedFiles = []
 let currentDownloadUrl = null
 
-// ── quality map ──────────────────────────────────────────────
 function getQuality(mime) {
-  if (mime === 'image/jpeg') return 0.72
-  if (mime === 'image/webp') return 0.72
-  if (mime === 'image/png') return 0.72  // PNG will be output as WebP
-  return 0.72
+  if (mime === 'image/jpeg') return 0.6
+  if (mime === 'image/webp') return 0.65
+  return 0.6
 }
 
-function getOutputMime(mime) {
-  if (mime === 'image/png') return 'image/webp'   // best compression for PNG in browser
-  return mime
-}
-
-// ── state helpers ─────────────────────────────────────────────
 function setDisabled() {
   compressBtn.disabled = true
   compressBtn.textContent = 'Compress Images'
@@ -134,7 +125,6 @@ function showWarning(msg) {
   setTimeout(() => { warning.style.display = 'none' }, 4000)
 }
 
-// ── circle result bar ─────────────────────────────────────────
 function showResultBar(originalBytes, outputBytes) {
   const saved = Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
   const circumference = 226
@@ -161,7 +151,6 @@ function showResultBar(originalBytes, outputBytes) {
     </div>
   `
 
-  // animate circle after render
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const circle = document.getElementById('circleAnim')
@@ -172,11 +161,8 @@ function showResultBar(originalBytes, outputBytes) {
   nextSteps.style.display = 'block'
 }
 
-// ── compress single file ──────────────────────────────────────
 async function compressFile(file) {
-  const outputMime = getOutputMime(file.type)
   const quality = getQuality(file.type)
-
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('File read failed'))
@@ -188,19 +174,18 @@ async function compressFile(file) {
         canvas.width = img.width
         canvas.height = img.height
         const ctx = canvas.getContext('2d')
-        if (outputMime === 'image/jpeg') {
+        if (file.type === 'image/jpeg') {
           ctx.fillStyle = '#ffffff'
           ctx.fillRect(0, 0, canvas.width, canvas.height)
         }
         ctx.drawImage(img, 0, 0)
         canvas.toBlob((blob) => {
           if (!blob) return reject(new Error('Compression failed'))
-
-          const ext = outputMime === 'image/jpeg' ? 'jpg' : outputMime === 'image/webp' ? 'webp' : 'png'
+          const ext = file.type === 'image/jpeg' ? 'jpg' : 'webp'
           const base = sanitizeBaseName(file.name)
           const filename = `${base}-compressed.${ext}`
           resolve({ blob, filename, originalSize: file.size, outputSize: blob.size })
-        }, outputMime, quality)
+        }, file.type, quality)
       }
       img.src = e.target.result
     }
@@ -208,7 +193,6 @@ async function compressFile(file) {
   })
 }
 
-// ── previews ──────────────────────────────────────────────────
 function renderPreviews() {
   if (!selectedFiles.length) {
     previewGrid.style.display = 'none'
@@ -249,8 +233,11 @@ function renderPreviews() {
 }
 
 function validateAndAdd(incoming) {
-  const valid = incoming.filter(f => f.type && f.type.startsWith('image/') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
-  const tooBig = incoming.filter(f => f.size > LIMITS.MAX_PER_FILE_BYTES)
+  const valid = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
+  const wrongFormat = incoming.filter(f => f.type !== 'image/jpeg' && f.type !== 'image/webp')
+  const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp') && f.size > LIMITS.MAX_PER_FILE_BYTES)
+
+  if (wrongFormat.length) showWarning(`Only JPG and WebP can be compressed. ${wrongFormat.length} file(s) were skipped.`)
   if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
 
   const map = new Map(selectedFiles.map(f => [fileKey(f), f]))
@@ -272,7 +259,6 @@ fileInput.addEventListener('change', () => validateAndAdd(Array.from(fileInput.f
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
-// ── compress click ────────────────────────────────────────────
 compressBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
   setConverting()
