@@ -39,7 +39,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = 'Image Compressor — Compress JPG and WebP Free'
+document.title = 'Image Compressor — Compress JPG, PNG and WebP Free'
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
@@ -47,7 +47,7 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         Image <em style="font-style:italic; color:#C84B31;">Compressor</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Compress JPG and WebP images free. Files never leave your device.</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">Compress JPG, PNG and WebP images free. Files never leave your device.</p>
     </div>
 
     <div id="uploadArea" style="margin-bottom:16px;">
@@ -57,7 +57,7 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop images anywhere</span>
     </div>
 
-    <input type="file" id="fileInput" multiple accept="image/jpeg,image/webp" style="display:none;" />
+    <input type="file" id="fileInput" multiple accept="image/jpeg,image/webp,image/png" style="display:none;" />
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
 
@@ -88,6 +88,11 @@ const nextSteps = document.getElementById('nextSteps')
 let selectedFiles = []
 let currentDownloadUrl = null
 let lastBlob = null
+
+function getOutputMime(mime) {
+  if (mime === 'image/png') return 'image/jpeg'
+  return mime
+}
 
 function getQuality(mime) {
   if (mime === 'image/jpeg') return 0.6
@@ -173,9 +178,7 @@ function showResultBar(originalBytes, outputBytes) {
           sessionStorage.setItem('pendingFileData', e.target.result)
           sessionStorage.setItem('pendingFileName', fileName)
           sessionStorage.setItem('pendingFileType', lastBlob.type)
-        } catch (err) {
-          // sessionStorage full (large file) — navigate anyway
-        }
+        } catch (err) {}
         window.location.href = href
       }
       reader.readAsDataURL(lastBlob)
@@ -184,7 +187,8 @@ function showResultBar(originalBytes, outputBytes) {
 }
 
 async function compressFile(file) {
-  const quality = getQuality(file.type)
+  const outputMime = getOutputMime(file.type)
+  const quality = getQuality(outputMime)
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('File read failed'))
@@ -196,18 +200,18 @@ async function compressFile(file) {
         canvas.width = img.width
         canvas.height = img.height
         const ctx = canvas.getContext('2d')
-        if (file.type === 'image/jpeg') {
+        if (outputMime === 'image/jpeg') {
           ctx.fillStyle = '#ffffff'
           ctx.fillRect(0, 0, canvas.width, canvas.height)
         }
         ctx.drawImage(img, 0, 0)
         canvas.toBlob((blob) => {
           if (!blob) return reject(new Error('Compression failed'))
-          const ext = file.type === 'image/jpeg' ? 'jpg' : 'webp'
+          const ext = outputMime === 'image/jpeg' ? 'jpg' : 'webp'
           const base = sanitizeBaseName(file.name)
           const filename = `${base}-compressed.${ext}`
           resolve({ blob, filename, originalSize: file.size, outputSize: blob.size })
-        }, file.type, quality)
+        }, outputMime, quality)
       }
       img.src = e.target.result
     }
@@ -255,11 +259,11 @@ function renderPreviews() {
 }
 
 function validateAndAdd(incoming) {
-  const valid = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
-  const wrongFormat = incoming.filter(f => f.type !== 'image/jpeg' && f.type !== 'image/webp')
-  const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp') && f.size > LIMITS.MAX_PER_FILE_BYTES)
+  const valid = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp' || f.type === 'image/png') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
+  const wrongFormat = incoming.filter(f => f.type !== 'image/jpeg' && f.type !== 'image/webp' && f.type !== 'image/png')
+  const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp' || f.type === 'image/png') && f.size > LIMITS.MAX_PER_FILE_BYTES)
 
-  if (wrongFormat.length) showWarning(`Only JPG and WebP can be compressed. ${wrongFormat.length} file(s) were skipped.`)
+  if (wrongFormat.length) showWarning(`Unsupported format. ${wrongFormat.length} file(s) were skipped.`)
   if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
 
   const map = new Map()
