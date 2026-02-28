@@ -89,7 +89,6 @@ const downloadLink = document.getElementById('downloadLink')
 const sizes = document.getElementById('sizes')
 const previewGrid = document.getElementById('previewGrid')
 const warning = document.getElementById('warning')
-const uploadArea = document.getElementById('uploadArea')
 
 const FIXED_QUALITY = 0.85
 let selectedFiles = []
@@ -155,7 +154,6 @@ function renderPreviews() {
       </div>`
   }).join('')
 
-  // Add "add more" card
   previewGrid.innerHTML += `
     <label id="addMoreBtn" for="fileInput" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:158px; border:2px dashed #CCC; border-radius:10px; cursor:pointer; color:#999; font-size:13px; gap:6px; transition:all 0.15s;">
       <span style="font-size:28px;">+</span>
@@ -177,7 +175,6 @@ function renderPreviews() {
 function validateAndAdd(incoming) {
   const allImages = incoming.filter(f => f.type && f.type.startsWith('image/'))
 
-  // Format validation on tool pages
   if (currentTool && currentTool.inputFormats.length) {
     const wrong = allImages.filter(f => !currentTool.inputFormats.includes(f.type))
     if (wrong.length) {
@@ -214,6 +211,27 @@ document.addEventListener('drop', (e) => {
   e.preventDefault()
   validateAndAdd(Array.from(e.dataTransfer.files || []))
 })
+
+// ── Auto-load file passed from compress "What's next?" ────────
+async function loadPendingFile() {
+  const blobUrl = sessionStorage.getItem('pendingBlobUrl')
+  const fileMeta = sessionStorage.getItem('pendingFile')
+  if (!blobUrl || !fileMeta) return
+  sessionStorage.removeItem('pendingBlobUrl')
+  sessionStorage.removeItem('pendingFile')
+  try {
+    const { name, type } = JSON.parse(fileMeta)
+    const res = await fetch(blobUrl)
+    const blob = await res.blob()
+    URL.revokeObjectURL(blobUrl)
+    const file = new File([blob], name, { type })
+    validateAndAdd([file])
+  } catch (e) {
+    // silently fail if blob expired
+  }
+}
+
+loadPendingFile()
 
 convertBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
