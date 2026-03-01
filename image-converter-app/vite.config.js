@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         compress: resolve(__dirname, 'compress.html'),
+        resize: resolve(__dirname, 'resize.html'),
       }
     }
   }
