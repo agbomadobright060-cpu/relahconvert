@@ -236,7 +236,6 @@ async function loadFilesFromIDB() {
   })
 }
 
-// Auto-load files passed from compress "What's next?" via IndexedDB
 async function loadPendingFiles() {
   if (!sessionStorage.getItem('pendingFromIDB')) return
   sessionStorage.removeItem('pendingFromIDB')
@@ -244,7 +243,7 @@ async function loadPendingFiles() {
     const records = await loadFilesFromIDB()
     if (!records.length) return
     const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
-    // Bypass format validation — files come pre-processed from compressor
+    // Bypass format validation — files come pre-processed from compressor/resizer
     selectedFiles = files
     clearResultsUI()
     renderPreviews()
@@ -252,7 +251,11 @@ async function loadPendingFiles() {
   } catch (e) {}
 }
 
-loadPendingFiles()
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadPendingFiles)
+} else {
+  loadPendingFiles()
+}
 
 convertBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
