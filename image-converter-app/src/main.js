@@ -6,6 +6,34 @@ import { injectHeader } from './core/header.js'
 const currentTool = getCurrentTool()
 const bg = '#F2F2F2'
 
+// Related links: same output format, different input
+const relatedLinks = {
+  'jpg-to-png':  [{ href: '/webp-to-png', label: 'Convert WebP to PNG' }],
+  'png-to-jpg':  [{ href: '/webp-to-jpg', label: 'Convert WebP to JPG' }],
+  'jpg-to-webp': [{ href: '/png-to-webp', label: 'Convert PNG to WebP' }],
+  'webp-to-jpg': [{ href: '/png-to-jpg',  label: 'Convert PNG to JPG' }],
+  'png-to-webp': [{ href: '/jpg-to-webp', label: 'Convert JPG to WebP' }],
+  'webp-to-png': [{ href: '/jpg-to-png',  label: 'Convert JPG to PNG' }],
+}
+
+// What's next after conversion based on output format
+const nextStepsMap = {
+  'image/png':  [
+    { href: '/compress',   label: 'Compress Image' },
+    { href: '/resize',     label: 'Resize Image' },
+    { href: '/png-to-pdf', label: 'Convert to PDF' },
+  ],
+  'image/jpeg': [
+    { href: '/compress',   label: 'Compress Image' },
+    { href: '/resize',     label: 'Resize Image' },
+    { href: '/jpg-to-pdf', label: 'Convert to PDF' },
+  ],
+  'image/webp': [
+    { href: '/compress',   label: 'Compress Image' },
+    { href: '/resize',     label: 'Resize Image' },
+  ],
+}
+
 if (document.head) {
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
@@ -27,6 +55,10 @@ if (document.head) {
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     #addMoreBtn:hover { border-color:#C84B31 !important; color:#C84B31 !important; }
+    .related-link { font-size:13px; color:#C84B31; text-decoration:none; font-weight:500; }
+    .related-link:hover { text-decoration:underline; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; background:#fff; cursor:pointer; text-decoration:none; display:inline-block; }
+    .next-link:hover { border-color:#C84B31; color:#C84B31; }
   `
   document.head.appendChild(style)
 }
@@ -42,6 +74,14 @@ const titleHTML = buildTitleHTML(currentTool)
 const descText = currentTool ? currentTool.description : 'Convert PNG, JPG and WebP instantly. Files never leave your device.'
 const badgeHTML = currentTool ? '' : `<div style="display:inline-block; background:#C84B31; color:#F5F0E8; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; border-radius:4px; margin-bottom:10px;">Free · No upload · Browser only</div>`
 
+// Related links HTML
+const slug = currentTool ? currentTool.slug : ''
+const related = relatedLinks[slug] || []
+const relatedHTML = related.length ? `
+  <div style="margin-top:8px; font-size:13px; color:#9A8A7A;">
+    Also convert: ${related.map(r => `<a href="${r.href}" class="related-link">${r.label}</a>`).join(' · ')}
+  </div>` : ''
+
 const formatSelectorHTML = currentTool
   ? `<input type="hidden" id="formatSelect" value="${currentTool.outputFormat}" />`
   : `<div style="background:#ffffff; border:1px solid #DDD5C8; border-radius:12px; padding:16px; margin-bottom:12px;">
@@ -51,7 +91,6 @@ const formatSelectorHTML = currentTool
         <option value="image/png">Convert to PNG</option>
         <option value="image/webp">Convert to WebP</option>
       </select>
-      <div id="formatAllFilesNote" style="display:none; margin-top:5px; font-size:11px; color:#9A8A7A;">Applies to all selected files</div>
     </div>`
 
 document.querySelector('#app').innerHTML = `
@@ -59,7 +98,8 @@ document.querySelector('#app').innerHTML = `
     <div style="margin-bottom:20px;">
       ${badgeHTML}
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${titleHTML}</h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${descText}</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0 0 4px;">${descText}</p>
+      ${relatedHTML}
     </div>
 
     <div id="uploadArea" style="margin-bottom:16px;">
@@ -78,12 +118,15 @@ document.querySelector('#app').innerHTML = `
 
     <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert Images</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
+
+    <div id="nextSteps" style="display:none; margin-top:20px;">
+      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">What's next?</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsLinks"></div>
+    </div>
   </div>
 `
 
 if (currentTool) document.title = currentTool.title
-
-// Inject All Tools nav
 injectHeader()
 
 const fileInput = document.getElementById('fileInput')
@@ -93,6 +136,8 @@ const downloadLink = document.getElementById('downloadLink')
 const sizes = document.getElementById('sizes')
 const previewGrid = document.getElementById('previewGrid')
 const warning = document.getElementById('warning')
+const nextSteps = document.getElementById('nextSteps')
+const nextStepsLinks = document.getElementById('nextStepsLinks')
 
 const FIXED_QUALITY = 0.85
 let selectedFiles = []
@@ -129,6 +174,7 @@ function cleanupOldUrl() {
 function clearResultsUI() {
   cleanupOldUrl()
   downloadLink.style.display = 'none'
+  nextSteps.style.display = 'none'
   sizes.textContent = ''
 }
 
@@ -136,6 +182,14 @@ function showWarning(msg) {
   warning.style.display = 'block'
   warning.textContent = msg
   setTimeout(() => { warning.style.display = 'none' }, 4000)
+}
+
+function showNextSteps(outputMime) {
+  const steps = nextStepsMap[outputMime] || nextStepsMap['image/jpeg']
+  nextStepsLinks.innerHTML = steps.map(s =>
+    `<a href="${s.href}" class="next-link">${s.label}</a>`
+  ).join('')
+  nextSteps.style.display = 'block'
 }
 
 function renderPreviews() {
@@ -209,12 +263,8 @@ function validateAndAdd(incoming) {
 }
 
 fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])) })
-
 document.addEventListener('dragover', (e) => e.preventDefault())
-document.addEventListener('drop', (e) => {
-  e.preventDefault()
-  validateAndAdd(Array.from(e.dataTransfer.files || []))
-})
+document.addEventListener('drop', (e) => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -279,6 +329,7 @@ convertBtn.addEventListener('click', async () => {
       downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
       sizes.textContent = ''
     }
+    showNextSteps(mime)
     setIdleEnabled()
   } catch (err) {
     alert(err?.message || 'Conversion error')
