@@ -16,7 +16,7 @@ export function injectHeader() {
       max-width: 960px;
       margin: 0 auto;
       padding: 0 16px;
-      height: 52px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -25,7 +25,7 @@ export function injectHeader() {
     #site-header .logo {
       font-family: 'Fraunces', serif;
       font-weight: 900;
-      font-size: 18px;
+      font-size: 26px;
       color: #2C1810;
       text-decoration: none;
       letter-spacing: -0.02em;
@@ -89,14 +89,14 @@ export function injectHeader() {
     #dropdown-menu {
       display: none;
       position: fixed;
-      top: 52px;
+      top: 64px;
       left: 0;
       right: 0;
       background: #fff;
       border-bottom: 1px solid #E8E0D5;
       box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       z-index: 99;
-      max-height: calc(100vh - 52px);
+      max-height: calc(100vh - 64px);
       overflow-y: auto;
     }
     #dropdown-menu.open { display: block; }
