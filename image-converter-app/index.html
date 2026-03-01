@@ -4,10 +4,330 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>image-converter-app</title>
+    <title>RelahConvert — Free Online Image Tools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap">
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #F2F2F2; font-family: 'DM Sans', sans-serif; }
+
+      #site-header {
+        background: #fff;
+        border-bottom: 1px solid #E8E0D5;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .header-inner {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 16px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .logo {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 18px;
+        color: #2C1810;
+        text-decoration: none;
+        letter-spacing: -0.02em;
+        flex-shrink: 0;
+      }
+      .logo em { font-style: italic; color: #C84B31; }
+      .desktop-nav { display: flex; align-items: center; gap: 2px; }
+      .nav-link {
+        padding: 6px 11px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #5A4A3A;
+        text-decoration: none;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .nav-link:hover { background: #F5F0E8; color: #C84B31; }
+      .more-btn {
+        padding: 6px 11px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #5A4A3A;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .more-btn:hover { background: #F5F0E8; color: #C84B31; }
+      .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
+      .more-btn.open .arrow { transform: rotate(180deg); }
+      .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .hamburger span { display: block; width: 22px; height: 2px; background: #2C1810; border-radius: 2px; }
+      #dropdown-menu {
+        display: none;
+        position: fixed;
+        top: 52px;
+        left: 0; right: 0;
+        background: #fff;
+        border-bottom: 1px solid #E8E0D5;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        z-index: 99;
+        max-height: calc(100vh - 52px);
+        overflow-y: auto;
+      }
+      #dropdown-menu.open { display: block; }
+      .dropdown-inner {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 16px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 8px;
+      }
+      .dropdown-inner a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #2C1810;
+        text-decoration: none;
+        transition: all 0.15s;
+      }
+      .dropdown-inner a:hover { background: #F5F0E8; color: #C84B31; }
+
+      /* Hero */
+      .hero {
+        text-align: center;
+        padding: 56px 16px 40px;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      .hero h1 {
+        font-family: 'Fraunces', serif;
+        font-size: clamp(32px, 6vw, 52px);
+        font-weight: 900;
+        color: #2C1810;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+      }
+      .hero h1 em { font-style: italic; color: #C84B31; }
+      .hero p {
+        font-size: 15px;
+        color: #7A6A5A;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #FDE8E3;
+        color: #C84B31;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        letter-spacing: 0.04em;
+      }
+
+      /* Tools grid */
+      .tools-section {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 16px 60px;
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .tool-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px;
+        text-decoration: none;
+        border: 1.5px solid transparent;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        transition: all 0.2s;
+        display: block;
+      }
+      .tool-card:hover {
+        border-color: #C84B31;
+        box-shadow: 0 4px 16px rgba(200,75,49,0.12);
+        transform: translateY(-2px);
+      }
+      .tool-card .icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #FDE8E3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+      .tool-card h2 {
+        font-family: 'Fraunces', serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #2C1810;
+        margin-bottom: 6px;
+        letter-spacing: -0.01em;
+      }
+      .tool-card p {
+        font-size: 13px;
+        color: #7A6A5A;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 640px) {
+        .desktop-nav { display: none; }
+        .hamburger { display: flex; }
+        .tools-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tool-card { padding: 14px; }
+        .tool-card .icon { width: 36px; height: 36px; font-size: 16px; margin-bottom: 8px; }
+        .tool-card h2 { font-size: 13px; }
+        .tool-card p { display: none; }
+        .hero { padding: 36px 16px 28px; }
+        .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; }
+        .dropdown-inner a { font-size: 12px; padding: 10px; }
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+
+    <header id="site-header">
+      <div class="header-inner">
+        <a href="/" class="logo">relah<em>convert</em></a>
+        <nav class="desktop-nav">
+          <a href="/compress" class="nav-link">Compress</a>
+          <a href="/resize" class="nav-link">Resize</a>
+          <a href="/jpg-to-png" class="nav-link">JPG to PNG</a>
+          <a href="/jpg-to-pdf" class="nav-link">JPG to PDF</a>
+          <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
+        </nav>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <div id="dropdown-menu">
+      <div class="dropdown-inner">
+        <a href="/jpg-to-png">🖼️ JPG to PNG</a>
+        <a href="/png-to-jpg">🖼️ PNG to JPG</a>
+        <a href="/jpg-to-webp">🔄 JPG to WebP</a>
+        <a href="/webp-to-jpg">🔄 WebP to JPG</a>
+        <a href="/png-to-webp">🔄 PNG to WebP</a>
+        <a href="/webp-to-png">🔄 WebP to PNG</a>
+        <a href="/compress">📦 Compress</a>
+        <a href="/resize">↔️ Resize</a>
+        <a href="/jpg-to-pdf">📄 JPG to PDF</a>
+        <a href="/png-to-pdf">📄 PNG to PDF</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-badge">✦ Free · No Upload · Browser Only</div>
+      <h1>Every image tool<br>you need, <em>free</em></h1>
+      <p>Convert, compress, resize and export images instantly.<br>Your files never leave your device.</p>
+    </section>
+
+    <section class="tools-section">
+      <div class="tools-grid">
+        <a href="/compress" class="tool-card">
+          <div class="icon">📦</div>
+          <h2>Compress Image</h2>
+          <p>Reduce file size of JPG, PNG and WebP images while maintaining quality.</p>
+        </a>
+        <a href="/resize" class="tool-card">
+          <div class="icon">↔️</div>
+          <h2>Resize Image</h2>
+          <p>Resize JPG and PNG images by pixels or percentage instantly.</p>
+        </a>
+        <a href="/jpg-to-png" class="tool-card">
+          <div class="icon">🖼️</div>
+          <h2>JPG to PNG</h2>
+          <p>Convert JPG images to PNG format free. No upload required.</p>
+        </a>
+        <a href="/png-to-jpg" class="tool-card">
+          <div class="icon">🖼️</div>
+          <h2>PNG to JPG</h2>
+          <p>Convert PNG images to JPG format free. No upload required.</p>
+        </a>
+        <a href="/jpg-to-webp" class="tool-card">
+          <div class="icon">🔄</div>
+          <h2>JPG to WebP</h2>
+          <p>Convert JPG images to WebP for smaller file sizes on the web.</p>
+        </a>
+        <a href="/webp-to-jpg" class="tool-card">
+          <div class="icon">🔄</div>
+          <h2>WebP to JPG</h2>
+          <p>Convert WebP images back to JPG format instantly.</p>
+        </a>
+        <a href="/png-to-webp" class="tool-card">
+          <div class="icon">🔄</div>
+          <h2>PNG to WebP</h2>
+          <p>Convert PNG images to WebP format free. No upload required.</p>
+        </a>
+        <a href="/webp-to-png" class="tool-card">
+          <div class="icon">🔄</div>
+          <h2>WebP to PNG</h2>
+          <p>Convert WebP images to PNG format free. No upload required.</p>
+        </a>
+        <a href="/jpg-to-pdf" class="tool-card">
+          <div class="icon">📄</div>
+          <h2>JPG to PDF</h2>
+          <p>Convert one or multiple JPG images to a PDF document instantly.</p>
+        </a>
+        <a href="/png-to-pdf" class="tool-card">
+          <div class="icon">📄</div>
+          <h2>PNG to PDF</h2>
+          <p>Convert one or multiple PNG images to a PDF document instantly.</p>
+        </a>
+      </div>
+    </section>
+
+    <script>
+      const moreBtn = document.getElementById('moreBtn')
+      const hamburgerBtn = document.getElementById('hamburgerBtn')
+      const dropdown = document.getElementById('dropdown-menu')
+
+      function toggleDropdown(e) {
+        e.stopPropagation()
+        dropdown.classList.toggle('open')
+        if (moreBtn) moreBtn.classList.toggle('open', dropdown.classList.contains('open'))
+      }
+
+      if (moreBtn) moreBtn.addEventListener('click', toggleDropdown)
+      if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDropdown)
+      document.addEventListener('click', () => {
+        dropdown.classList.remove('open')
+        if (moreBtn) moreBtn.classList.remove('open')
+      })
+      dropdown.addEventListener('click', e => e.stopPropagation())
+    </script>
   </body>
 </html>
