@@ -196,9 +196,7 @@ function showResultBar(originalBytes, outputBytes) {
       try {
         await saveFilesToIDB(compressedBlobs)
         sessionStorage.setItem('pendingFromIDB', '1')
-      } catch (e) {
-        // fallback: do nothing, just navigate
-      }
+      } catch (e) {}
       window.location.href = href
     })
   })
@@ -283,6 +281,9 @@ function validateAndAdd(incoming) {
 
   if (wrongFormat.length) showWarning(`Unsupported format. ${wrongFormat.length} file(s) were skipped.`)
   if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
+
+  const hasPng = valid.some(f => f.type === 'image/png')
+  if (hasPng) showWarning('PNG files will be compressed and saved as JPG.')
 
   const map = new Map()
   for (const f of [...selectedFiles, ...valid]) map.set(fileKey(f), f)
