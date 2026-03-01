@@ -184,12 +184,38 @@ function showWarning(msg) {
   setTimeout(() => { warning.style.display = 'none' }, 4000)
 }
 
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+
+let convertedBlobs = []
+
 function showNextSteps(outputMime) {
   const steps = nextStepsMap[outputMime] || nextStepsMap['image/jpeg']
   nextStepsLinks.innerHTML = steps.map(s =>
-    `<a href="${s.href}" class="next-link">${s.label}</a>`
+    `<button class="next-link" data-href="${s.href}">${s.label}</button>`
   ).join('')
   nextSteps.style.display = 'block'
+
+  nextStepsLinks.querySelectorAll('.next-link').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const href = btn.getAttribute('data-href')
+      if (!convertedBlobs.length) { window.location.href = href; return }
+      try {
+        await saveFilesToIDB(convertedBlobs)
+        sessionStorage.setItem('pendingFromIDB', '1')
+      } catch (e) {}
+      window.location.href = href
+    })
+  })
 }
 
 function renderPreviews() {
@@ -308,9 +334,11 @@ convertBtn.addEventListener('click', async () => {
   clearResultsUI()
   const mime = formatSelect.value
   try {
+    convertedBlobs = []
     if (selectedFiles.length === 1) {
       sizes.textContent = 'Processing...'
       const { blob, outputSize, filename } = await convertFile(selectedFiles[0], mime, FIXED_QUALITY)
+      convertedBlobs = [{ blob, name: filename, type: mime }]
       currentDownloadUrl = URL.createObjectURL(blob)
       downloadLink.href = currentDownloadUrl
       downloadLink.download = filename
@@ -318,13 +346,19 @@ convertBtn.addEventListener('click', async () => {
       downloadLink.textContent = `Download (${formatSize(outputSize)})`
       sizes.textContent = ''
     } else {
-      const { zipBlob, zipName } = await convertFilesToZip(
-        selectedFiles, mime, FIXED_QUALITY,
-        (current, total) => { sizes.textContent = `Converting ${current}/${total}...` }
-      )
+      // Convert each file individually to collect blobs, then zip
+      const JSZip = (await import('jszip')).default
+      const zip = new JSZip()
+      for (let i = 0; i < selectedFiles.length; i++) {
+        sizes.textContent = `Converting ${i + 1}/${selectedFiles.length}...`
+        const { blob, filename } = await convertFile(selectedFiles[i], mime, FIXED_QUALITY)
+        convertedBlobs.push({ blob, name: filename, type: mime })
+        zip.file(filename, blob)
+      }
+      const zipBlob = await zip.generateAsync({ type: 'blob' })
       currentDownloadUrl = URL.createObjectURL(zipBlob)
       downloadLink.href = currentDownloadUrl
-      downloadLink.download = zipName
+      downloadLink.download = 'converted-images.zip'
       downloadLink.style.display = 'block'
       downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
       sizes.textContent = ''
