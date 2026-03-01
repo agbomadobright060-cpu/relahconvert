@@ -1,7 +1,7 @@
 import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool } from './app/router.js'
-import { injectToolsNav } from './core/tools-nav.js'
+import { injectHeader } from './core/header.js'
 
 const currentTool = getCurrentTool()
 const bg = '#F2F2F2'
@@ -84,7 +84,7 @@ document.querySelector('#app').innerHTML = `
 if (currentTool) document.title = currentTool.title
 
 // Inject All Tools nav
-injectToolsNav(currentTool ? currentTool.slug : '')
+injectHeader()
 
 const fileInput = document.getElementById('fileInput')
 const formatSelect = document.getElementById('formatSelect')

@@ -1,4 +1,4 @@
-import { injectToolsNav } from './core/tools-nav.js'
+import { injectHeader } from './core/header.js'
 import { jsPDF } from 'jspdf'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, LIMITS } from './core/utils.js'
 
@@ -334,6 +334,6 @@ async function loadPendingFiles() {
 }
 
 loadPendingFiles()
-injectToolsNav(pageSlug)
+injectHeader()
 
 } // end initImageToPdf

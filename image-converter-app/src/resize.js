@@ -1,6 +1,6 @@
 import JSZip from 'jszip'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
-import { injectToolsNav } from './core/tools-nav.js'
+import { injectHeader } from './core/header.js'
 
 const bg = '#F2F2F2'
 
@@ -112,7 +112,7 @@ document.querySelector('#app').innerHTML = `
 `
 
 // Inject All Tools nav
-injectToolsNav('resize')
+injectHeader()
 
 const fileInput = document.getElementById('fileInput')
 const resizeBtn = document.getElementById('resizeBtn')
