@@ -236,14 +236,17 @@ async function loadFilesFromIDB() {
   })
 }
 
+// Auto-load files passed via ?from=idb URL param
 async function loadPendingFiles() {
-  if (!sessionStorage.getItem('pendingFromIDB')) return
-  sessionStorage.removeItem('pendingFromIDB')
+  const params = new URLSearchParams(window.location.search)
+  if (!params.has('from') || params.get('from') !== 'idb') return
+  // Clean URL
+  const cleanUrl = window.location.pathname
+  window.history.replaceState({}, '', cleanUrl)
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
     const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
-    // Bypass format validation — files come pre-processed from compressor/resizer
     selectedFiles = files
     clearResultsUI()
     renderPreviews()
@@ -251,11 +254,7 @@ async function loadPendingFiles() {
   } catch (e) {}
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadPendingFiles)
-} else {
-  loadPendingFiles()
-}
+loadPendingFiles()
 
 convertBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
