@@ -346,19 +346,14 @@ convertBtn.addEventListener('click', async () => {
       downloadLink.textContent = `Download (${formatSize(outputSize)})`
       sizes.textContent = ''
     } else {
-      // Convert each file individually to collect blobs, then zip
-      const JSZip = (await import('jszip')).default
-      const zip = new JSZip()
-      for (let i = 0; i < selectedFiles.length; i++) {
-        sizes.textContent = `Converting ${i + 1}/${selectedFiles.length}...`
-        const { blob, filename } = await convertFile(selectedFiles[i], mime, FIXED_QUALITY)
-        convertedBlobs.push({ blob, name: filename, type: mime })
-        zip.file(filename, blob)
-      }
-      const zipBlob = await zip.generateAsync({ type: 'blob' })
+      const { zipBlob, zipName, convertedBlobs: blobs } = await convertFilesToZip(
+        selectedFiles, mime, FIXED_QUALITY,
+        (current, total) => { sizes.textContent = `Converting ${current}/${total}...` }
+      )
+      convertedBlobs.push(...blobs)
       currentDownloadUrl = URL.createObjectURL(zipBlob)
       downloadLink.href = currentDownloadUrl
-      downloadLink.download = 'converted-images.zip'
+      downloadLink.download = zipName
       downloadLink.style.display = 'block'
       downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
       sizes.textContent = ''

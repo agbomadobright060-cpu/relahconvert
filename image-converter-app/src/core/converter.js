@@ -50,6 +50,7 @@ export async function convertFilesToZip(files, mime, quality, onProgress) {
   const usedNames = new Set()
   const ext = mimeToExt(mime)
   const fmtLabel = mimeToLabel(mime).toLowerCase()
+  const convertedBlobs = []
 
   let totalOriginal = 0
   let totalNew = 0
@@ -78,11 +79,12 @@ export async function convertFilesToZip(files, mime, quality, onProgress) {
     const desired = `${base}.${ext}`
     const safeName = uniqueName(usedNames, desired)
 
+    convertedBlobs.push({ blob, name: safeName, type: mime })
     zip.file(safeName, blob)
   }
 
   const zipBlob = await zip.generateAsync({ type: 'blob' })
   const zipName = `converted-${fmtLabel}.zip`
 
-  return { zipBlob, zipName, totalOriginal, totalNew }
+  return { zipBlob, zipName, totalOriginal, totalNew, convertedBlobs }
 }

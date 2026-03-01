@@ -111,7 +111,6 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
-// Inject All Tools nav
 injectHeader()
 
 const fileInput = document.getElementById('fileInput')
@@ -154,6 +153,28 @@ async function saveFilesToIDB(files) {
     tx.oncomplete = resolve
     tx.onerror = reject
   })
+}
+
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const db = await openDB()
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    const records = await new Promise((res, rej) => {
+      const r = store.getAll()
+      r.onsuccess = () => { store.clear(); res(r.result || []) }
+      r.onerror = rej
+    })
+    if (!records.length) return
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    const valid = files.filter(f => f.type === 'image/jpeg' || f.type === 'image/png')
+    if (!valid.length) return
+    selectedFiles = valid
+    renderPreviews()
+    setIdle()
+  } catch (e) {}
 }
 
 tabPixels.addEventListener('click', () => {
@@ -450,3 +471,5 @@ resizeBtn.addEventListener('click', async () => {
     if (selectedFiles.length) setIdle(); else setDisabled()
   }
 })
+
+loadPendingFiles()
