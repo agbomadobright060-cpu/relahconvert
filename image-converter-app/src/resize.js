@@ -31,6 +31,8 @@ if (document.head) {
     .preset-btn.active { border-color:#C84B31; background:#C84B31; color:#fff; }
     input[type=number]:focus { outline:none; border-color:#C84B31 !important; box-shadow: 0 0 0 3px rgba(200,75,49,0.12); }
     input[type=checkbox] { accent-color:#C84B31; width:15px; height:15px; cursor:pointer; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
+    .next-link:hover { border-color:#C84B31; color:#C84B31; }
   `
   document.head.appendChild(style)
 }
@@ -107,9 +109,9 @@ document.querySelector('#app').innerHTML = `
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">What's next?</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="/compress" style="padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff;">Compress Image</a>
-        <a href="/jpg-to-png" style="padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff;">Convert to PNG</a>
-        <a href="/jpg-to-webp" style="padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff;">Convert to WebP</a>
+        <button class="next-link" data-href="/compress">Compress Image</button>
+        <button class="next-link" data-href="/jpg-to-png">Convert to PNG</button>
+        <button class="next-link" data-href="/jpg-to-webp">Convert to WebP</button>
       </div>
     </div>
   </div>
@@ -134,6 +136,29 @@ let selectedFiles = []
 let currentDownloadUrl = null
 let activeTab = 'pixels'
 let selectedPct = null
+let resizedBlobs = []
+
+// IndexedDB helpers
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  store.clear()
+  files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = resolve
+    tx.onerror = reject
+  })
+}
 
 // Tab switching
 tabPixels.addEventListener('click', () => {
@@ -216,12 +241,10 @@ function renderPreviews() {
   if (!selectedFiles.length) {
     previewGrid.style.display = 'none'
     previewGrid.innerHTML = ''
-    // Reset aspect ratio hint
     aspectRatio = null
     return
   }
 
-  // Set aspect ratio hint from first file
   if (selectedFiles.length === 1) {
     const img = new Image()
     const url = URL.createObjectURL(selectedFiles[0])
@@ -305,24 +328,21 @@ async function resizeFile(file, targetW, targetH) {
       img.onload = () => {
         let w = targetW || img.width
         let h = targetH || img.height
-
         const canvas = document.createElement('canvas')
         canvas.width = w
         canvas.height = h
         const ctx = canvas.getContext('2d')
-
         if (file.type === 'image/jpeg') {
           ctx.fillStyle = '#ffffff'
           ctx.fillRect(0, 0, w, h)
         }
         ctx.drawImage(img, 0, 0, w, h)
-
         canvas.toBlob((blob) => {
           if (!blob) return reject(new Error('Resize failed'))
           const ext = file.type === 'image/jpeg' ? 'jpg' : 'png'
           const base = sanitizeBaseName(file.name)
           const filename = `${base}-${w}x${h}.${ext}`
-          resolve({ blob, filename, outputSize: blob.size })
+          resolve({ blob, filename, outputSize: blob.size, type: file.type })
         }, file.type, file.type === 'image/jpeg' ? 0.92 : undefined)
       }
       img.src = e.target.result
@@ -337,7 +357,6 @@ function getTargetDimensions(file) {
       const w = parseInt(widthInput.value) || null
       const h = parseInt(heightInput.value) || null
       if (!w && !h) return resolve(null)
-
       const img = new Image()
       const url = URL.createObjectURL(file)
       img.onload = () => {
@@ -353,10 +372,8 @@ function getTargetDimensions(file) {
       }
       img.src = url
     } else {
-      // percentage mode
       const pctVal = parseInt(customPct.value)
       if (!pctVal || pctVal <= 0) return resolve(null)
-
       const img = new Image()
       const url = URL.createObjectURL(file)
       img.onload = () => {
@@ -369,10 +386,24 @@ function getTargetDimensions(file) {
   })
 }
 
+// What's next? click handler with IndexedDB
+function bindNextSteps() {
+  nextSteps.querySelectorAll('.next-link').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const href = btn.getAttribute('data-href')
+      if (!resizedBlobs.length) { window.location.href = href; return }
+      try {
+        await saveFilesToIDB(resizedBlobs)
+        sessionStorage.setItem('pendingFromIDB', '1')
+      } catch (e) {}
+      window.location.href = href
+    })
+  })
+}
+
 resizeBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
 
-  // Validate inputs
   if (activeTab === 'pixels' && !widthInput.value && !heightInput.value) {
     showWarning('Please enter a width or height.')
     return
@@ -384,6 +415,7 @@ resizeBtn.addEventListener('click', async () => {
 
   setResizing()
   cleanupOldUrl()
+  resizedBlobs = []
   downloadLink.style.display = 'none'
   nextSteps.style.display = 'none'
 
@@ -391,7 +423,8 @@ resizeBtn.addEventListener('click', async () => {
     if (selectedFiles.length === 1) {
       const dims = await getTargetDimensions(selectedFiles[0])
       if (!dims) { showWarning('Invalid dimensions.'); setIdle(); return }
-      const { blob, filename, outputSize } = await resizeFile(selectedFiles[0], dims.w, dims.h)
+      const { blob, filename, outputSize, type } = await resizeFile(selectedFiles[0], dims.w, dims.h)
+      resizedBlobs = [{ blob, name: filename, type }]
       currentDownloadUrl = URL.createObjectURL(blob)
       downloadLink.href = currentDownloadUrl
       downloadLink.download = filename
@@ -404,8 +437,9 @@ resizeBtn.addEventListener('click', async () => {
         resizeBtn.textContent = `Resizing ${i + 1}/${selectedFiles.length}...`
         const dims = await getTargetDimensions(selectedFiles[i])
         if (!dims) continue
-        const { blob, filename } = await resizeFile(selectedFiles[i], dims.w, dims.h)
+        const { blob, filename, type } = await resizeFile(selectedFiles[i], dims.w, dims.h)
         const safeName = uniqueName(usedNames, filename)
+        resizedBlobs.push({ blob, name: safeName, type })
         zip.file(safeName, blob)
       }
       const zipBlob = await zip.generateAsync({ type: 'blob' })
@@ -416,6 +450,7 @@ resizeBtn.addEventListener('click', async () => {
       downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
     }
     nextSteps.style.display = 'block'
+    bindNextSteps()
     setIdle()
     fileInput.value = ''
   } catch (err) {
