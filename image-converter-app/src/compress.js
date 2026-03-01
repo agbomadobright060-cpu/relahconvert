@@ -111,6 +111,31 @@ async function saveFilesToIDB(files) {
   })
 }
 
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+
+// Auto-load files passed from resize "What's next?"
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    selectedFiles = files
+    renderPreviews()
+    setIdle()
+  } catch (e) {}
+}
+
 function getOutputMime(mime) {
   if (mime === 'image/png') return 'image/jpeg'
   return mime
@@ -288,7 +313,7 @@ function validateAndAdd(incoming) {
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
 
-// Bind What's next? buttons once
+// Bind What's next? buttons
 nextSteps.querySelectorAll('.next-link').forEach(btn => {
   btn.addEventListener('click', async () => {
     const href = btn.getAttribute('data-href')
@@ -307,6 +332,8 @@ fileInput.addEventListener('change', () => {
 })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
+
+loadPendingFiles()
 
 compressBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
