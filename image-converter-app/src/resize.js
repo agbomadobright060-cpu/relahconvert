@@ -1,5 +1,6 @@
 import JSZip from 'jszip'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
+import { injectToolsNav } from './core/tools-nav.js'
 
 const bg = '#F2F2F2'
 
@@ -59,17 +60,12 @@ document.querySelector('#app').innerHTML = `
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
 
-    <!-- Resize Options Panel -->
     <div id="resizePanel" style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:12px;">
       <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Resize Options</div>
-
-      <!-- Tabs -->
       <div style="display:flex; gap:6px; background:#F5F0E8; border-radius:10px; padding:4px; margin-bottom:16px;">
         <button class="tab-btn active" id="tabPixels">By Pixels</button>
         <button class="tab-btn" id="tabPercent">By Percentage</button>
       </div>
-
-      <!-- Pixels Panel -->
       <div id="pixelsPanel">
         <div style="display:flex; gap:12px; align-items:flex-end; margin-bottom:12px;">
           <div style="flex:1;">
@@ -87,8 +83,6 @@ document.querySelector('#app').innerHTML = `
           Maintain aspect ratio
         </label>
       </div>
-
-      <!-- Percentage Panel -->
       <div id="percentPanel" style="display:none;">
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
           <button class="preset-btn" data-pct="25">25% smaller</button>
@@ -117,6 +111,9 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
+// Inject All Tools nav
+injectToolsNav('resize')
+
 const fileInput = document.getElementById('fileInput')
 const resizeBtn = document.getElementById('resizeBtn')
 const downloadLink = document.getElementById('downloadLink')
@@ -138,7 +135,6 @@ let activeTab = 'pixels'
 let selectedPct = null
 let resizedBlobs = []
 
-// IndexedDB helpers
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)
@@ -160,7 +156,6 @@ async function saveFilesToIDB(files) {
   })
 }
 
-// Tab switching
 tabPixels.addEventListener('click', () => {
   activeTab = 'pixels'
   tabPixels.classList.add('active')
@@ -177,7 +172,6 @@ tabPercent.addEventListener('click', () => {
   pixelsPanel.style.display = 'none'
 })
 
-// Preset buttons
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'))
@@ -192,7 +186,6 @@ customPct.addEventListener('input', () => {
   selectedPct = null
 })
 
-// Aspect ratio lock
 let aspectRatio = null
 widthInput.addEventListener('input', () => {
   if (aspectLock.checked && aspectRatio && widthInput.value) {
@@ -386,7 +379,6 @@ function getTargetDimensions(file) {
   })
 }
 
-// What's next? click handler with IndexedDB
 function bindNextSteps() {
   nextSteps.querySelectorAll('.next-link').forEach(btn => {
     btn.addEventListener('click', async () => {

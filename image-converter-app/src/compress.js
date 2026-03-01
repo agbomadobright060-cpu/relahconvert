@@ -1,3 +1,4 @@
+import { injectToolsNav } from './core/tools-nav.js'
 import JSZip from 'jszip'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
 
@@ -334,6 +335,7 @@ document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
 loadPendingFiles()
+injectToolsNav('compress')
 
 compressBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return

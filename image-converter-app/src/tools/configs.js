@@ -43,9 +43,30 @@ export const tools = {
   },
   'compress': {
     title: 'Image Compressor',
-    description: 'Compress JPG and WebP images free. No upload required.',
-    inputFormats: ['image/jpeg', 'image/webp'],
+    description: 'Compress JPG, PNG and WebP images free. No upload required.',
+    inputFormats: ['image/jpeg', 'image/webp', 'image/png'],
     outputFormat: null,
     slug: 'compress'
+  },
+  'resize': {
+    title: 'Image Resizer',
+    description: 'Resize JPG and PNG images free. No upload required.',
+    inputFormats: ['image/jpeg', 'image/png'],
+    outputFormat: null,
+    slug: 'resize'
+  },
+  'jpg-to-pdf': {
+    title: 'JPG to PDF Converter',
+    description: 'Convert JPG images to PDF free. No upload required.',
+    inputFormats: ['image/jpeg'],
+    outputFormat: 'application/pdf',
+    slug: 'jpg-to-pdf'
+  },
+  'png-to-pdf': {
+    title: 'PNG to PDF Converter',
+    description: 'Convert PNG images to PDF free. No upload required.',
+    inputFormats: ['image/png'],
+    outputFormat: 'application/pdf',
+    slug: 'png-to-pdf'
   }
 }
