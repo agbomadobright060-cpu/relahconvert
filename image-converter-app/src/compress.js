@@ -188,20 +188,6 @@ function showResultBar(originalBytes, outputBytes) {
   })
 
   nextSteps.style.display = 'block'
-
-  nextSteps.querySelectorAll('.next-link').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const href = btn.getAttribute('data-href')
-      if (!compressedBlobs.length) { window.location.href = href; return }
-      try {
-        await saveFilesToIDB(compressedBlobs)
-        sessionStorage.setItem('pendingFromIDB', '1')
-        window.location.href = href
-      } catch (e) {
-        window.location.href = href
-      }
-    })
-  })
 }
 
 async function compressFile(file) {
@@ -301,6 +287,19 @@ function validateAndAdd(incoming) {
   renderPreviews()
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
+
+// Bind What's next? buttons once
+nextSteps.querySelectorAll('.next-link').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const href = btn.getAttribute('data-href')
+    if (!compressedBlobs.length) { window.location.href = href; return }
+    try {
+      await saveFilesToIDB(compressedBlobs)
+      sessionStorage.setItem('pendingFromIDB', '1')
+    } catch (e) {}
+    window.location.href = href
+  })
+})
 
 fileInput.addEventListener('change', () => {
   validateAndAdd(Array.from(fileInput.files || []))
