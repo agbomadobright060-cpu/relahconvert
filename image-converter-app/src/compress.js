@@ -101,13 +101,13 @@ function openDB() {
 
 async function saveFilesToIDB(files) {
   const db = await openDB()
-  const tx = db.transaction('pending', 'readwrite')
-  const store = tx.objectStore('pending')
-  store.clear()
-  files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
   return new Promise((resolve, reject) => {
-    tx.oncomplete = resolve
-    tx.onerror = reject
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
   })
 }
 
@@ -196,8 +196,10 @@ function showResultBar(originalBytes, outputBytes) {
       try {
         await saveFilesToIDB(compressedBlobs)
         sessionStorage.setItem('pendingFromIDB', '1')
-      } catch (e) {}
-      window.location.href = href
+        window.location.href = href
+      } catch (e) {
+        window.location.href = href
+      }
     })
   })
 }
