@@ -236,13 +236,9 @@ async function loadFilesFromIDB() {
   })
 }
 
-// Auto-load files passed via ?from=idb URL param
 async function loadPendingFiles() {
-  const params = new URLSearchParams(window.location.search)
-  if (!params.has('from') || params.get('from') !== 'idb') return
-  // Clean URL
-  const cleanUrl = window.location.pathname
-  window.history.replaceState({}, '', cleanUrl)
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return

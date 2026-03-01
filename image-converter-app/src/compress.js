@@ -195,7 +195,8 @@ function showResultBar(originalBytes, outputBytes) {
       if (!compressedBlobs.length) { window.location.href = href; return }
       try {
         await saveFilesToIDB(compressedBlobs)
-        window.location.href = href + '?from=idb'
+        sessionStorage.setItem('pendingFromIDB', '1')
+        window.location.href = href
       } catch (e) {
         window.location.href = href
       }
