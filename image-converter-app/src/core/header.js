@@ -13,14 +13,14 @@ export function injectHeader() {
       z-index: 100;
     }
     #site-header .header-inner {
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 24px;
       height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 24px;
     }
     #site-header .logo {
       font-family: 'Fraunces', serif;
@@ -35,38 +35,40 @@ export function injectHeader() {
     #site-header .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 0;
       flex: 1;
     }
     #site-header .nav-link {
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 8px 14px;
+      font-size: 12px;
       font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: #5A4A3A;
       text-decoration: none;
-      transition: all 0.15s;
+      transition: color 0.15s;
       white-space: nowrap;
     }
-    #site-header .nav-link:hover { background: #F5F0E8; color: #C84B31; }
-    #site-header .nav-link.active { background: #FDE8E3; color: #C84B31; font-weight: 600; }
+    #site-header .nav-link:hover { color: #C84B31; }
+    #site-header .nav-link.active { color: #C84B31; font-weight: 600; }
     #site-header .more-btn {
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 8px 14px;
+      font-size: 12px;
       font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: #5A4A3A;
       background: none;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.15s;
+      gap: 5px;
+      transition: color 0.15s;
       font-family: 'DM Sans', sans-serif;
       white-space: nowrap;
     }
-    #site-header .more-btn:hover { background: #F5F0E8; color: #C84B31; }
+    #site-header .more-btn:hover { color: #C84B31; }
     #site-header .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
     #site-header .more-btn.open .arrow { transform: rotate(180deg); }
     #site-header .hamburger {
@@ -101,9 +103,9 @@ export function injectHeader() {
     }
     #dropdown-menu.open { display: block; }
     #dropdown-menu .dropdown-inner {
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 16px 24px;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 8px;
@@ -124,7 +126,7 @@ export function injectHeader() {
     #dropdown-menu a:hover { background: #F5F0E8; color: #C84B31; }
     #dropdown-menu a.active { background: #FDE8E3; color: #C84B31; }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
       #dropdown-menu .dropdown-inner {
@@ -148,7 +150,7 @@ export function injectHeader() {
     'jpg-to-png': 'JPG to PNG', 'png-to-jpg': 'PNG to JPG',
     'jpg-to-webp': 'JPG to WebP', 'webp-to-jpg': 'WebP to JPG',
     'png-to-webp': 'PNG to WebP', 'webp-to-png': 'WebP to PNG',
-    'compress': 'Compress', 'resize': 'Resize',
+    'compress': 'Compress Image', 'resize': 'Resize Image',
     'jpg-to-pdf': 'JPG to PDF', 'png-to-pdf': 'PNG to PDF',
   }
   const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']

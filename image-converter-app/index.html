@@ -19,54 +19,56 @@
         z-index: 100;
       }
       .header-inner {
-        max-width: 960px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 0 16px;
-        height: 52px;
+        padding: 0 24px;
+        height: 64px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        gap: 24px;
       }
       .logo {
         font-family: 'Fraunces', serif;
         font-weight: 900;
-        font-size: 18px;
+        font-size: 26px;
         color: #2C1810;
         text-decoration: none;
         letter-spacing: -0.02em;
         flex-shrink: 0;
       }
       .logo em { font-style: italic; color: #C84B31; }
-      .desktop-nav { display: flex; align-items: center; gap: 2px; }
+      .desktop-nav { display: flex; align-items: center; gap: 0; }
       .nav-link {
-        padding: 6px 11px;
-        border-radius: 8px;
-        font-size: 13px;
+        padding: 8px 14px;
+        font-size: 12px;
         font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: #5A4A3A;
         text-decoration: none;
-        transition: all 0.15s;
+        transition: color 0.15s;
         white-space: nowrap;
       }
-      .nav-link:hover { background: #F5F0E8; color: #C84B31; }
+      .nav-link:hover { color: #C84B31; }
       .more-btn {
-        padding: 6px 11px;
-        border-radius: 8px;
-        font-size: 13px;
+        padding: 8px 14px;
+        font-size: 12px;
         font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: #5A4A3A;
         background: none;
         border: none;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
         font-family: 'DM Sans', sans-serif;
-        transition: all 0.15s;
+        transition: color 0.15s;
         white-space: nowrap;
       }
-      .more-btn:hover { background: #F5F0E8; color: #C84B31; }
+      .more-btn:hover { color: #C84B31; }
       .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
       .more-btn.open .arrow { transform: rotate(180deg); }
       .hamburger {
@@ -82,20 +84,20 @@
       #dropdown-menu {
         display: none;
         position: fixed;
-        top: 52px;
+        top: 64px;
         left: 0; right: 0;
         background: #fff;
         border-bottom: 1px solid #E8E0D5;
         box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         z-index: 99;
-        max-height: calc(100vh - 52px);
+        max-height: calc(100vh - 64px);
         overflow-y: auto;
       }
       #dropdown-menu.open { display: block; }
       .dropdown-inner {
-        max-width: 960px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 16px;
+        padding: 16px 24px;
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 8px;
@@ -114,7 +116,6 @@
       }
       .dropdown-inner a:hover { background: #F5F0E8; color: #C84B31; }
 
-      /* Hero */
       .hero {
         text-align: center;
         padding: 56px 16px 40px;
@@ -131,12 +132,7 @@
         margin-bottom: 14px;
       }
       .hero h1 em { font-style: italic; color: #C84B31; }
-      .hero p {
-        font-size: 15px;
-        color: #7A6A5A;
-        line-height: 1.6;
-        margin-bottom: 28px;
-      }
+      .hero p { font-size: 15px; color: #7A6A5A; line-height: 1.6; }
       .hero-badge {
         display: inline-flex;
         align-items: center;
@@ -151,15 +147,10 @@
         letter-spacing: 0.04em;
       }
 
-      /* Tools grid */
-      .tools-section {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 0 16px 60px;
-      }
+      .tools-section { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; }
       .tools-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 14px;
       }
       .tool-card {
@@ -178,31 +169,18 @@
         transform: translateY(-2px);
       }
       .tool-card .icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: #FDE8E3;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        margin-bottom: 12px;
+        width: 44px; height: 44px; border-radius: 10px;
+        background: #FDE8E3; display: flex; align-items: center;
+        justify-content: center; font-size: 20px; margin-bottom: 12px;
       }
       .tool-card h2 {
         font-family: 'Fraunces', serif;
-        font-size: 16px;
-        font-weight: 700;
-        color: #2C1810;
-        margin-bottom: 6px;
-        letter-spacing: -0.01em;
+        font-size: 16px; font-weight: 700; color: #2C1810;
+        margin-bottom: 6px; letter-spacing: -0.01em;
       }
-      .tool-card p {
-        font-size: 13px;
-        color: #7A6A5A;
-        line-height: 1.5;
-      }
+      .tool-card p { font-size: 13px; color: #7A6A5A; line-height: 1.5; }
 
-      @media (max-width: 640px) {
+      @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
         .tools-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -217,13 +195,12 @@
     </style>
   </head>
   <body>
-
     <header id="site-header">
       <div class="header-inner">
         <a href="/" class="logo">relah<em>convert</em></a>
         <nav class="desktop-nav">
-          <a href="/compress" class="nav-link">Compress</a>
-          <a href="/resize" class="nav-link">Resize</a>
+          <a href="/compress" class="nav-link">Compress Image</a>
+          <a href="/resize" class="nav-link">Resize Image</a>
           <a href="/jpg-to-png" class="nav-link">JPG to PNG</a>
           <a href="/jpg-to-pdf" class="nav-link">JPG to PDF</a>
           <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
