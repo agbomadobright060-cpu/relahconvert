@@ -1,11 +1,1 @@
-/jpg-to-png /jpg-to-png.html 200
-/png-to-jpg /png-to-jpg.html 200
-/jpg-to-webp /jpg-to-webp.html 200
-/webp-to-jpg /webp-to-jpg.html 200
-/png-to-webp /png-to-webp.html 200
-/webp-to-png /webp-to-png.html 200
-/compress /compress.html 200
-/resize /resize.html 200
-/jpg-to-pdf /jpg-to-pdf.html 200
-/png-to-pdf /png-to-pdf.html 200
 /* /index.html 200
