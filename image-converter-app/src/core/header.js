@@ -24,14 +24,19 @@ export function injectHeader() {
     }
     #site-header .logo {
       font-family: 'Fraunces', serif;
-      font-weight: 900;
-      font-size: 26px;
+      font-size: 24px;
       color: #2C1810;
       text-decoration: none;
       letter-spacing: -0.02em;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      line-height: 1;
     }
-    #site-header .logo em { font-style: italic; color: #C84B31; }
+    #site-header .logo .logo-text { display: flex; align-items: baseline; }
+    #site-header .logo .relah { font-weight: 400; color: #2C1810; }
+    #site-header .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
     #site-header .desktop-nav {
       display: flex;
       align-items: center;
@@ -159,7 +164,13 @@ export function injectHeader() {
   header.id = 'site-header'
   header.innerHTML = `
     <div class="header-inner">
-      <a href="/" class="logo">relah<em>convert</em></a>
+      <a href="/" class="logo">
+        <svg width="16" height="16" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <polygon points="10,1 19,10 10,19 1,10" fill="#C84B31"/>
+          <polygon points="10,1 19,10 10,10" fill="#2C1810" opacity="0.2"/>
+        </svg>
+        <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
+      </a>
       <nav class="desktop-nav">
         ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${shortNames[slug]}</a>`).join('')}
         <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
