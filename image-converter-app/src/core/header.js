@@ -1,6 +1,11 @@
 import { tools } from '../tools/configs.js'
 
 export function injectHeader() {
+  const fontLink = document.createElement('link')
+  fontLink.rel = 'stylesheet'
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
+  document.head.appendChild(fontLink)
+
   const style = document.createElement('style')
   style.textContent = `
     * { box-sizing: border-box; }

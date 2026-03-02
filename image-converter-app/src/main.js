@@ -37,7 +37,7 @@ const nextStepsMap = {
 if (document.head) {
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
-  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap'
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
   document.head.appendChild(fontLink)
   document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
   const style = document.createElement('style')

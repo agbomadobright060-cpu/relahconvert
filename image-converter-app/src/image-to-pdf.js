@@ -9,7 +9,7 @@ export function initImageToPdf({ acceptMime, acceptAttr, toolTitle, toolDesc, pa
 if (document.head) {
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
-  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap'
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
   document.head.appendChild(fontLink)
   document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
   const style = document.createElement('style')
@@ -90,7 +90,7 @@ const modeAll = document.getElementById('modeAll')
 
 let selectedFiles = []
 let currentDownloadUrl = null
-let pdfMode = 'one' // 'one' or 'all'
+let pdfMode = 'one'
 
 modeOne.addEventListener('click', () => {
   pdfMode = 'one'
@@ -225,20 +225,16 @@ function loadImage(file) {
 }
 
 function addImageToPage(pdf, dataUrl, imgType, imgWidth, imgHeight, isFirst) {
-  // A4 dimensions in mm
   const pageW = 210
   const pageH = 297
   const margin = 10
   const maxW = pageW - margin * 2
   const maxH = pageH - margin * 2
-
-  // Scale image to fit within A4 with margins
   const ratio = Math.min(maxW / imgWidth, maxH / imgHeight)
   const w = imgWidth * ratio
   const h = imgHeight * ratio
   const x = (pageW - w) / 2
   const y = (pageH - h) / 2
-
   if (!isFirst) pdf.addPage()
   pdf.addImage(dataUrl, imgType, x, y, w, h)
 }
@@ -253,7 +249,6 @@ async function convertToPdf() {
     const imgType = acceptMime[0] === 'image/jpeg' ? 'JPEG' : 'PNG'
 
     if (pdfMode === 'all' && selectedFiles.length > 1) {
-      // All images in one PDF
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       for (let i = 0; i < selectedFiles.length; i++) {
         convertBtn.textContent = `Converting ${i + 1}/${selectedFiles.length}...`
@@ -267,7 +262,6 @@ async function convertToPdf() {
       downloadLink.style.display = 'block'
       downloadLink.textContent = `Download PDF (${formatSize(pdfBlob.size)})`
     } else {
-      // One PDF per image (or single image)
       if (selectedFiles.length === 1) {
         const { dataUrl, img } = await loadImage(selectedFiles[0])
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
@@ -280,7 +274,6 @@ async function convertToPdf() {
         downloadLink.style.display = 'block'
         downloadLink.textContent = `Download PDF (${formatSize(pdfBlob.size)})`
       } else {
-        // Multiple files → zip of PDFs
         const { default: JSZip } = await import('jszip')
         const zip = new JSZip()
         for (let i = 0; i < selectedFiles.length; i++) {
@@ -312,7 +305,6 @@ async function convertToPdf() {
 
 convertBtn.addEventListener('click', convertToPdf)
 
-// Load pending files from IDB
 async function loadPendingFiles() {
   if (!sessionStorage.getItem('pendingFromIDB')) return
   sessionStorage.removeItem('pendingFromIDB')
