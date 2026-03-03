@@ -153,10 +153,16 @@
         letter-spacing: 0.04em;
       }
 
-      .tools-section { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; flex: 1; }
+      .tools-section {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px 60px;
+        flex: 1;
+        width: 100%;
+      }
       .tools-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 14px;
       }
       .tool-card {
@@ -181,10 +187,10 @@
       }
       .tool-card h2 {
         font-family: 'Fraunces', serif;
-        font-size: 16px; font-weight: 700; color: #2C1810;
+        font-size: 15px; font-weight: 700; color: #2C1810;
         margin-bottom: 6px; letter-spacing: -0.01em;
       }
-      .tool-card p { font-size: 13px; color: #7A6A5A; line-height: 1.5; }
+      .tool-card p { font-size: 12px; color: #7A6A5A; line-height: 1.5; }
 
       /* Footer */
       #site-footer {
@@ -257,10 +263,13 @@
       .lang-select:focus { border-color: #C84B31; }
       .lang-select option { background: #2C1810; color: #C8B8A8; }
 
+      @media (max-width: 900px) {
+        .tools-grid { grid-template-columns: repeat(3, 1fr); }
+      }
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
-        .tools-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .tool-card { padding: 14px; }
         .tool-card .icon { width: 36px; height: 36px; font-size: 16px; margin-bottom: 8px; }
         .tool-card h2 { font-size: 13px; }
@@ -381,7 +390,6 @@
               <li><a href="/contact">Contact Us</a></li>
             </ul>
           </div>
-
           <div class="footer-col">
             <h4>Legal</h4>
             <ul>
@@ -391,7 +399,6 @@
             </ul>
           </div>
         </div>
-
         <div class="footer-bottom">
           <p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p>
           <div class="footer-lang">
