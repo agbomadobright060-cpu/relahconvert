@@ -36,11 +36,29 @@ if (document.head) {
     .result-arrow { color:#C84B31; font-size:16px; }
     .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
     .next-link:hover { border-color:#C84B31; color:#C84B31; }
+    .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:22px; font-weight:900; color:#2C1810; margin:0 0 12px; letter-spacing:-0.02em; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.8; margin:0 0 12px; }
+    .seo-section ol { padding-left:20px; margin:0 0 12px; }
+    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.8; margin-bottom:6px; }
+    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-section .faq-item p { margin:0; }
+    .seo-section .internal-links { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; transition:all 0.15s; }
+    .seo-section .internal-links a:hover { border-color:#C84B31; color:#C84B31; }
+    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 16px 40px; max-width:668px; margin-left:auto; margin-right:auto; }
   `
   document.head.appendChild(style)
 }
 
-document.title = 'Image Compressor — Compress JPG, PNG and WebP Free'
+document.title = 'Image Compressor — Compress JPG, PNG and WebP Free | No Upload'
+
+const metaDesc = document.createElement('meta')
+metaDesc.name = 'description'
+metaDesc.content = 'Compress JPG, PNG and WebP images free without uploading to a server. Browser-based image compression — your files never leave your device. Instant, private, no account needed.'
+document.head.appendChild(metaDesc)
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
@@ -76,6 +94,67 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
   </div>
+
+  <hr class="seo-divider" />
+
+  <div class="seo-section">
+
+    <h2>How to Compress Images Without Uploading</h2>
+    <ol>
+      <li><strong>Select your images</strong> — click "Select Images" or drag and drop JPG, PNG, or WebP files onto the page.</li>
+      <li><strong>Click Compress</strong> — compression runs instantly inside your browser. No upload, no waiting.</li>
+      <li><strong>Download your result</strong> — save your compressed image or ZIP file directly to your device.</li>
+    </ol>
+
+    <h2>The Best Free Image Compressor That Doesn't Upload Your Files</h2>
+    <p>Most online image compression tools upload your images to a remote server, process them, then send them back. That means your files pass through systems you don't control — a real privacy concern for designers handling client assets, businesses with sensitive product images, or anyone who simply doesn't want their files stored on a third-party server.</p>
+    <p>RelahConvert works differently. Compression happens entirely inside your browser using local processing. Your images never leave your device — not even for a millisecond. No uploads, no server storage, no accounts, completely free.</p>
+    <p>Whether you're compressing product photos for an ecommerce store, reducing image sizes before uploading to social media, optimizing website assets to improve page load speed, or simply making files smaller to share by email — this tool handles it instantly and privately.</p>
+
+    <h3>Why Compress Images?</h3>
+    <p>Large image files slow down websites, take longer to upload, and use unnecessary storage space. Compressing images reduces file size while preserving visual quality — making your website faster, your uploads quicker, and your storage leaner. Google also uses page speed as a ranking factor, so compressed images directly improve your SEO performance.</p>
+
+    <h3>Frequently Asked Questions</h3>
+
+    <div class="faq-item">
+      <h4>How do I compress an image without losing quality?</h4>
+      <p>Use the quality slider to find the right balance. For most images, 75–85% quality produces files that look identical to the original at a fraction of the size. The difference is imperceptible to the human eye at these settings.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>What is the best free image compressor that doesn't upload files?</h4>
+      <p>RelahConvert compresses images entirely in your browser with zero server uploads, making it one of the most private free image compression tools available. Your files never leave your device.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Can I compress multiple images at once?</h4>
+      <p>Yes — select multiple images and they'll be compressed in batch. Multiple files are delivered as a ZIP download.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>What image formats are supported?</h4>
+      <p>RelahConvert supports JPG, PNG, and WebP compression. PNG files are converted to JPG during compression for maximum size reduction.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Is there a file size limit?</h4>
+      <p>Since compression runs locally in your browser, there is no server-imposed limit. Performance depends on your device's memory and processing power.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Do you store my images?</h4>
+      <p>Never. All processing happens locally in your browser. Your images are not uploaded to any server, stored, or shared with anyone.</p>
+    </div>
+
+    <h3>Also Try</h3>
+    <div class="internal-links">
+      <a href="/resize">Resize Image</a>
+      <a href="/jpg-to-png">JPG to PNG</a>
+      <a href="/jpg-to-webp">JPG to WebP</a>
+      <a href="/png-to-jpg">PNG to JPG</a>
+    </div>
+
+  </div>
 `
 
 const fileInput = document.getElementById('fileInput')
@@ -90,7 +169,6 @@ let selectedFiles = []
 let currentDownloadUrl = null
 let compressedBlobs = []
 
-// IndexedDB helpers
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)
@@ -313,7 +391,6 @@ function validateAndAdd(incoming) {
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
 
-// Bind What's next? buttons
 nextSteps.querySelectorAll('.next-link').forEach(btn => {
   btn.addEventListener('click', async () => {
     const href = btn.getAttribute('data-href')
