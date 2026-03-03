@@ -193,9 +193,10 @@ export function injectHeader() {
   header.innerHTML = `
     <div class="header-inner">
       <a href="/" class="logo">
-        <svg width="16" height="16" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-          <polygon points="10,1 19,10 10,19 1,10" fill="#C84B31"/>
-          <polygon points="10,1 19,10 10,10" fill="#2C1810" opacity="0.2"/>
+        <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;">
+         <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
+         <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
+         <polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/>
         </svg>
         <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
       </a>
