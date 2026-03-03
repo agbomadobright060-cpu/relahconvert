@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms & Conditions — RelahConvert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100vh; }
+    body { background: #F2F2F2; font-family: 'DM Sans', sans-serif; display: flex; flex-direction: column; }
+    #site-header { background: #fff; border-bottom: 1px solid #E8E0D5; position: sticky; top: 0; z-index: 100; }
+    .header-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .logo { font-family: 'Fraunces', serif; font-size: 24px; color: #2C1810; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; align-items: center; gap: 5px; line-height: 1; }
+    .logo .logo-text { display: flex; align-items: baseline; }
+    .logo .relah { font-weight: 400; color: #2C1810; }
+    .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
+    .desktop-nav { display: flex; align-items: center; gap: 0; }
+    .nav-link { padding: 8px 14px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #5A4A3A; text-decoration: none; transition: color 0.15s; white-space: nowrap; }
+    .nav-link:hover { color: #C84B31; }
+    .more-btn { padding: 8px 14px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #5A4A3A; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'DM Sans', sans-serif; transition: color 0.15s; white-space: nowrap; }
+    .more-btn:hover { color: #C84B31; }
+    .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
+    .more-btn.open .arrow { transform: rotate(180deg); }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; flex-direction: column; gap: 5px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #2C1810; border-radius: 2px; }
+    #dropdown-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: #fff; border-bottom: 1px solid #E8E0D5; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 99; max-height: calc(100vh - 64px); overflow-y: auto; }
+    #dropdown-menu.open { display: block; }
+    .dropdown-inner { max-width: 1100px; margin: 0 auto; padding: 16px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+    .dropdown-inner a { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #2C1810; text-decoration: none; transition: all 0.15s; }
+    .dropdown-inner a:hover { background: #F5F0E8; color: #C84B31; }
+    .page-content { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; flex: 1; }
+    .page-hero { margin-bottom: 40px; }
+    .page-hero h1 { font-family: 'Fraunces', serif; font-size: clamp(28px, 4vw, 42px); font-weight: 900; color: #2C1810; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 10px; }
+    .page-hero h1 em { font-style: italic; color: #C84B31; }
+    .page-hero .updated { font-size: 13px; color: #9A8A7A; }
+    .section { background: #fff; border-radius: 16px; padding: 32px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .section h2 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #2C1810; margin-bottom: 14px; letter-spacing: -0.01em; }
+    .section p { font-size: 14px; color: #5A4A3A; line-height: 1.75; margin-bottom: 12px; }
+    .section p:last-child { margin-bottom: 0; }
+    #site-footer { background: #F2F2F2; font-family: 'DM Sans', sans-serif; padding: 20px 24px; text-align: center; border-top: 1px solid #E8E0D5; }
+    #site-footer .footer-copy { font-size: 12px; color: #9A8A7A; }
+    @media (max-width: 768px) { .desktop-nav { display: none; } .hamburger { display: flex; } .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; } .section { padding: 24px; } }
+  </style>
+</head>
+<body>
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <svg width="16" height="16" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;"><polygon points="10,1 19,10 10,19 1,10" fill="#C84B31"/><polygon points="10,1 19,10 10,10" fill="#2C1810" opacity="0.2"/></svg>
+        <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
+      </a>
+      <nav class="desktop-nav">
+        <a href="/compress" class="nav-link">Compress Image</a>
+        <a href="/resize" class="nav-link">Resize Image</a>
+        <a href="/jpg-to-png" class="nav-link">JPG to PNG</a>
+        <a href="/jpg-to-pdf" class="nav-link">JPG to PDF</a>
+        <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
+      </nav>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div id="dropdown-menu"><div class="dropdown-inner">
+    <a href="/jpg-to-png">🖼️ JPG to PNG</a><a href="/png-to-jpg">🖼️ PNG to JPG</a>
+    <a href="/jpg-to-webp">🔄 JPG to WebP</a><a href="/webp-to-jpg">🔄 WebP to JPG</a>
+    <a href="/png-to-webp">🔄 PNG to WebP</a><a href="/webp-to-png">🔄 WebP to PNG</a>
+    <a href="/compress">📦 Compress</a><a href="/resize">↔️ Resize</a>
+    <a href="/jpg-to-pdf">📄 JPG to PDF</a><a href="/png-to-pdf">📄 PNG to PDF</a>
+  </div></div>
+
+  <main class="page-content">
+    <div class="page-hero">
+      <h1>Terms &amp; <em>Conditions</em></h1>
+      <p class="updated">Last updated: March 2026</p>
+    </div>
+    <div class="section">
+      <h2>Use of Service</h2>
+      <p>RelahConvert is provided free of charge for personal and commercial use. You may use our tools to process images you own or have the rights to. You agree not to use the service for any unlawful purpose.</p>
+    </div>
+    <div class="section">
+      <h2>No Warranty</h2>
+      <p>The service is provided "as is" without warranties of any kind, express or implied. We do not guarantee uninterrupted, error-free, or secure operation of the service.</p>
+    </div>
+    <div class="section">
+      <h2>Limitation of Liability</h2>
+      <p>RelahConvert and its operators are not liable for any direct, indirect, incidental, or consequential loss or damage resulting from your use of the service.</p>
+    </div>
+    <div class="section">
+      <h2>Intellectual Property</h2>
+      <p>The RelahConvert name, logo, and site design are our intellectual property. You may not reproduce, distribute, or use them without prior written permission.</p>
+    </div>
+    <div class="section">
+      <h2>Changes to Terms</h2>
+      <p>We reserve the right to update these terms at any time. Continued use of the service after changes are posted constitutes your acceptance of the updated terms.</p>
+    </div>
+  </main>
+
+  <footer id="site-footer"><p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p></footer>
+  <script>
+    const moreBtn = document.getElementById('moreBtn'), hamburgerBtn = document.getElementById('hamburgerBtn'), dropdown = document.getElementById('dropdown-menu')
+    function toggleDropdown(e) { e.stopPropagation(); dropdown.classList.toggle('open'); if (moreBtn) moreBtn.classList.toggle('open', dropdown.classList.contains('open')); }
+    if (moreBtn) moreBtn.addEventListener('click', toggleDropdown)
+    if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDropdown)
+    document.addEventListener('click', () => { dropdown.classList.remove('open'); if (moreBtn) moreBtn.classList.remove('open'); })
+    dropdown.addEventListener('click', e => e.stopPropagation())
+  </script>
+</body>
+</html>
