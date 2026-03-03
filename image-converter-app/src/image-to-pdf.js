@@ -26,15 +26,13 @@ if (document.head) {
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     #addMoreBtn:hover { border-color:#C84B31 !important; color:#C84B31 !important; }
-    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
-    .next-link:hover { border-color:#C84B31; color:#C84B31; }
   `
   document.head.appendChild(style)
 }
 
 document.title = toolTitle
 
-const [titleMain, titleItalic] = toolTitle.split(' to ')
+const [titleMain] = toolTitle.split(' to ')
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
@@ -66,15 +64,6 @@ document.querySelector('#app').innerHTML = `
 
     <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert to PDF</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
-
-    <div id="nextSteps" style="display:none; margin-top:20px;">
-      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">What's next?</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="/compress" class="next-link">Compress Image</a>
-        <a href="/resize" class="next-link">Resize Image</a>
-        <a href="/jpg-to-png" class="next-link">Convert to PNG</a>
-      </div>
-    </div>
   </div>
 `
 
@@ -83,7 +72,6 @@ const convertBtn = document.getElementById('convertBtn')
 const downloadLink = document.getElementById('downloadLink')
 const previewGrid = document.getElementById('previewGrid')
 const warning = document.getElementById('warning')
-const nextSteps = document.getElementById('nextSteps')
 const pdfModePanel = document.getElementById('pdfModePanel')
 const modeOne = document.getElementById('modeOne')
 const modeAll = document.getElementById('modeAll')
@@ -174,7 +162,6 @@ function renderPreviews() {
       selectedFiles.splice(parseInt(btn.getAttribute('data-index')), 1)
       cleanupOldUrl()
       downloadLink.style.display = 'none'
-      nextSteps.style.display = 'none'
       renderPreviews()
       if (selectedFiles.length) setIdle(); else setDisabled()
     })
@@ -198,7 +185,6 @@ function validateAndAdd(incoming) {
   selectedFiles = merged
   cleanupOldUrl()
   downloadLink.style.display = 'none'
-  nextSteps.style.display = 'none'
   renderPreviews()
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
@@ -243,7 +229,6 @@ async function convertToPdf() {
   setConverting()
   cleanupOldUrl()
   downloadLink.style.display = 'none'
-  nextSteps.style.display = 'none'
 
   try {
     const imgType = acceptMime[0] === 'image/jpeg' ? 'JPEG' : 'PNG'
@@ -294,7 +279,6 @@ async function convertToPdf() {
       }
     }
 
-    nextSteps.style.display = 'block'
     setIdle()
     fileInput.value = ''
   } catch (err) {
