@@ -37,7 +37,7 @@ if (document.head) {
     .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
     .next-link:hover { border-color:#C84B31; color:#C84B31; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-    .seo-section h2 { font-family:'Fraunces',serif; font-size:22px; font-weight:900; color:#2C1810; margin:0 0 12px; letter-spacing:-0.02em; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
     .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.8; margin:0 0 12px; }
     .seo-section ol { padding-left:20px; margin:0 0 12px; }
@@ -48,7 +48,7 @@ if (document.head) {
     .seo-section .internal-links { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
     .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; transition:all 0.15s; }
     .seo-section .internal-links a:hover { border-color:#C84B31; color:#C84B31; }
-    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 16px 40px; max-width:668px; margin-left:auto; margin-right:auto; }
+    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
 }
