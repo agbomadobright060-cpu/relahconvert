@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RelahConvert — Free Online Image Tools</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap">
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: #F2F2F2; font-family: 'DM Sans', sans-serif; }
+      html, body { min-height: 100vh; }
+      body { background: #F2F2F2; font-family: 'DM Sans', sans-serif; display: flex; flex-direction: column; }
 
       #site-header {
         background: #fff;
@@ -152,7 +153,7 @@
         letter-spacing: 0.04em;
       }
 
-      .tools-section { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; }
+      .tools-section { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; flex: 1; }
       .tools-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -185,6 +186,77 @@
       }
       .tool-card p { font-size: 13px; color: #7A6A5A; line-height: 1.5; }
 
+      /* Footer */
+      #site-footer {
+        background: #2C1810;
+        color: #C8B8A8;
+        font-family: 'DM Sans', sans-serif;
+        margin-top: auto;
+      }
+      .footer-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 48px 24px 32px;
+      }
+      .footer-top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .footer-col h4 {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #F5F0E8;
+        margin: 0 0 16px;
+      }
+      .footer-col ul {
+        list-style: none;
+        padding: 0; margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .footer-col ul li a {
+        font-size: 13px;
+        color: #9A8A7A;
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .footer-col ul li a:hover { color: #F5F0E8; }
+      .footer-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 24px;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .footer-copy { font-size: 12px; color: #6A5A4A; }
+      .footer-lang {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #6A5A4A;
+      }
+      .lang-select {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #C8B8A8;
+        font-size: 12px;
+        font-family: 'DM Sans', sans-serif;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        outline: none;
+      }
+      .lang-select:focus { border-color: #C84B31; }
+      .lang-select option { background: #2C1810; color: #C8B8A8; }
+
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
@@ -196,6 +268,7 @@
         .hero { padding: 36px 16px 28px; }
         .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; }
         .dropdown-inner a { font-size: 12px; padding: 10px; }
+        .footer-bottom { flex-direction: column; align-items: flex-start; gap: 12px; }
       }
     </style>
   </head>
@@ -298,6 +371,44 @@
       </div>
     </section>
 
+    <footer id="site-footer">
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-col">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="/about">About Us</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><a href="/terms">Terms &amp; Conditions</a></li>
+              <li><a href="/cookies">Cookie Policy</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p>
+          <div class="footer-lang">
+            <span>🌐</span>
+            <select class="lang-select" id="langSelect">
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+              <option value="pt">Português</option>
+              <option value="de">Deutsch</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </footer>
+
     <script>
       const moreBtn = document.getElementById('moreBtn')
       const hamburgerBtn = document.getElementById('hamburgerBtn')
@@ -316,6 +427,11 @@
         if (moreBtn) moreBtn.classList.remove('open')
       })
       dropdown.addEventListener('click', e => e.stopPropagation())
+
+      const langSelect = document.getElementById('langSelect')
+      if (langSelect) {
+        langSelect.addEventListener('change', () => { langSelect.value = 'en' })
+      }
     </script>
   </body>
 </html>

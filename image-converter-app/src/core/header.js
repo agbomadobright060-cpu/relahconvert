@@ -3,7 +3,7 @@ import { tools } from '../tools/configs.js'
 export function injectHeader() {
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
-  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
   document.head.appendChild(fontLink)
 
   const style = document.createElement('style')
@@ -136,6 +136,19 @@ export function injectHeader() {
     #dropdown-menu a:hover { background: #F5F0E8; color: #C84B31; }
     #dropdown-menu a.active { background: #FDE8E3; color: #C84B31; }
 
+    /* Simple tool page footer */
+    #site-footer {
+      background: #2C1810;
+      font-family: 'DM Sans', sans-serif;
+      padding: 16px 24px;
+      text-align: center;
+      margin-top: auto;
+    }
+    #site-footer .footer-copy {
+      font-size: 12px;
+      color: #6A5A4A;
+    }
+
     @media (max-width: 768px) {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
@@ -198,8 +211,13 @@ export function injectHeader() {
     </div>
   `
 
+  const footer = document.createElement('footer')
+  footer.id = 'site-footer'
+  footer.innerHTML = `<p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p>`
+
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
+  document.body.appendChild(footer)
 
   const moreBtn = document.getElementById('moreBtn')
   const hamburgerBtn = document.getElementById('hamburgerBtn')
