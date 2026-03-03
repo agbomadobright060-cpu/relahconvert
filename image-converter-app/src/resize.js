@@ -34,11 +34,29 @@ if (document.head) {
     input[type=checkbox] { accent-color:#C84B31; width:15px; height:15px; cursor:pointer; }
     .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
     .next-link:hover { border-color:#C84B31; color:#C84B31; }
+    .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.8; margin:0 0 12px; }
+    .seo-section ol { padding-left:20px; margin:0 0 12px; }
+    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.8; margin-bottom:6px; }
+    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-section .faq-item p { margin:0; }
+    .seo-section .internal-links { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; transition:all 0.15s; }
+    .seo-section .internal-links a:hover { border-color:#C84B31; color:#C84B31; }
+    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
 }
 
-document.title = 'Image Resizer — Resize JPG and PNG Free'
+document.title = 'Image Resizer — Resize JPG and PNG Free | No Upload'
+
+const metaDesc = document.createElement('meta')
+metaDesc.name = 'description'
+metaDesc.content = 'Resize images by pixels or percentage free without uploading to a server. Browser-based image resizer — your files never leave your device. Instant, private, no account needed.'
+document.head.appendChild(metaDesc)
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
@@ -108,6 +126,66 @@ document.querySelector('#app').innerHTML = `
         <button class="next-link" data-href="/jpg-to-webp">Convert to WebP</button>
       </div>
     </div>
+  </div>
+
+  <hr class="seo-divider" />
+
+  <div class="seo-section">
+
+    <h2>How to Resize Images Without Uploading</h2>
+    <ol>
+      <li><strong>Select your images</strong> — click "Select Images" or drag and drop JPG or PNG files onto the page.</li>
+      <li><strong>Set your dimensions</strong> — enter exact pixel dimensions or choose a percentage. Enable aspect ratio lock to scale proportionally.</li>
+      <li><strong>Click Resize and download</strong> — your resized image is ready instantly. No upload, no waiting.</li>
+    </ol>
+
+    <h2>The Best Free Image Resizer That Doesn't Upload Your Files</h2>
+    <p>Uploading images just to resize them is slow, unnecessary, and exposes your files to third-party servers. RelahConvert resizes images entirely in your browser — no upload, no server, no privacy risk. Whether you need a precise pixel dimension for a platform requirement or a quick percentage-based resize for web use, the entire process happens locally on your device in seconds.</p>
+    <p>Designers resizing client mockups, developers preparing responsive images, bloggers optimizing featured images, and ecommerce sellers cropping product photos all need fast, private image resizing. This tool handles it instantly without requiring an account or subscription.</p>
+
+    <h3>Why Resize Images?</h3>
+    <p>Images that are too large slow down websites, fail platform upload requirements, and take too long to share by email. Resizing to the correct dimensions ensures your images load fast, display correctly, and meet the specs of every platform — from social media to print.</p>
+
+    <h3>Frequently Asked Questions</h3>
+
+    <div class="faq-item">
+      <h4>How do I resize an image without losing quality?</h4>
+      <p>Reducing an image's dimensions generally preserves quality well. Avoid enlarging images beyond their original size as this reduces sharpness. Use the aspect ratio lock to prevent distortion when entering only one dimension.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>What is the best free image resizer that works in the browser?</h4>
+      <p>RelahConvert resizes images locally in your browser with no uploads, no watermarks, and no accounts — completely free. Your files never leave your device.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Can I resize an image to exact pixels without uploading?</h4>
+      <p>Yes — enter your exact target width and height in pixels. Enable aspect ratio lock to scale proportionally from a single dimension.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Can I resize by percentage instead of pixels?</h4>
+      <p>Yes — switch to "By Percentage" and enter your desired scale, or use the quick preset buttons for 25%, 50%, or 75% smaller.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>What formats are supported for resizing?</h4>
+      <p>JPG and PNG images are fully supported. The output format matches your input — JPG in, JPG out; PNG in, PNG out.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Do you store my images?</h4>
+      <p>Never. All processing happens locally in your browser. Your images are not uploaded to any server, stored, or shared with anyone.</p>
+    </div>
+
+    <h3>Also Try</h3>
+    <div class="internal-links">
+      <a href="/compress">Compress Image</a>
+      <a href="/png-to-jpg">PNG to JPG</a>
+      <a href="/jpg-to-webp">JPG to WebP</a>
+      <a href="/jpg-to-png">JPG to PNG</a>
+    </div>
+
   </div>
 `
 
