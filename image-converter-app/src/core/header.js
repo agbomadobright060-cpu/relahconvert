@@ -9,6 +9,16 @@ export function injectHeader() {
   const style = document.createElement('style')
   style.textContent = `
     * { box-sizing: border-box; }
+    html, body {
+      min-height: 100vh;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    #app {
+      flex: 1;
+    }
     #site-header {
       background: #fff;
       border-bottom: 1px solid #E8E0D5;
@@ -138,15 +148,15 @@ export function injectHeader() {
 
     /* Simple tool page footer */
     #site-footer {
-      background: #2C1810;
+      background: #F2F2F2;
       font-family: 'DM Sans', sans-serif;
-      padding: 16px 24px;
+      padding: 20px 24px;
       text-align: center;
-      margin-top: auto;
+      border-top: 1px solid #E8E0D5;
     }
     #site-footer .footer-copy {
       font-size: 12px;
-      color: #6A5A4A;
+      color: #9A8A7A;
     }
 
     @media (max-width: 768px) {
