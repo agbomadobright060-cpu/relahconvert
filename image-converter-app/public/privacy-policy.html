@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy Policy — RelahConvert</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap">
   <style>
@@ -12,20 +12,16 @@
     body { background: #F2F2F2; font-family: 'DM Sans', sans-serif; display: flex; flex-direction: column; }
     #site-header { background: #fff; border-bottom: 1px solid #E8E0D5; position: sticky; top: 0; z-index: 100; }
     .header-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-    .logo { font-family: 'Fraunces', serif; font-size: 24px; color: #2C1810; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; align-items: center; gap: 5px; line-height: 1; }
-    .logo .logo-text { display: flex; align-items: baseline; }
-    .logo .relah { font-weight: 400; color: #2C1810; }
-    .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
-    .desktop-nav { display: flex; align-items: center; gap: 0; }
+    .logo { font-family: 'Fraunces', serif; font-size: 24px; color: #2C1810; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; align-items: center; gap: 7px; line-height: 1; }
+    .logo .relah { font-weight: 400; } .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
+    .desktop-nav { display: flex; align-items: center; }
     .nav-link { padding: 8px 14px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #5A4A3A; text-decoration: none; transition: color 0.15s; white-space: nowrap; }
     .nav-link:hover { color: #C84B31; }
-    .more-btn { padding: 8px 14px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #5A4A3A; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'DM Sans', sans-serif; transition: color 0.15s; white-space: nowrap; }
-    .more-btn:hover { color: #C84B31; }
-    .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
-    .more-btn.open .arrow { transform: rotate(180deg); }
+    .more-btn { padding: 8px 14px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #5A4A3A; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'DM Sans', sans-serif; transition: color 0.15s; }
+    .more-btn:hover { color: #C84B31; } .more-btn .arrow { font-size: 10px; transition: transform 0.15s; } .more-btn.open .arrow { transform: rotate(180deg); }
     .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; flex-direction: column; gap: 5px; }
     .hamburger span { display: block; width: 22px; height: 2px; background: #2C1810; border-radius: 2px; }
-    #dropdown-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: #fff; border-bottom: 1px solid #E8E0D5; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 99; max-height: calc(100vh - 64px); overflow-y: auto; }
+    #dropdown-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: #fff; border-bottom: 1px solid #E8E0D5; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 99; }
     #dropdown-menu.open { display: block; }
     .dropdown-inner { max-width: 1100px; margin: 0 auto; padding: 16px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
     .dropdown-inner a { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #2C1810; text-decoration: none; transition: all 0.15s; }
@@ -34,75 +30,93 @@
     .page-hero { margin-bottom: 40px; }
     .page-hero h1 { font-family: 'Fraunces', serif; font-size: clamp(28px, 4vw, 42px); font-weight: 900; color: #2C1810; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 10px; }
     .page-hero h1 em { font-style: italic; color: #C84B31; }
-    .page-hero .updated { font-size: 13px; color: #9A8A7A; }
+    .page-hero p { font-size: 13px; color: #9A8A7A; }
     .section { background: #fff; border-radius: 16px; padding: 32px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .section h2 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #2C1810; margin-bottom: 14px; letter-spacing: -0.01em; }
+    .section h2 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #2C1810; margin-bottom: 14px; }
     .section p { font-size: 14px; color: #5A4A3A; line-height: 1.75; margin-bottom: 12px; }
     .section p:last-child { margin-bottom: 0; }
-    .section a { color: #C84B31; text-decoration: none; }
-    .section a:hover { text-decoration: underline; }
-    #site-footer { background: #F2F2F2; font-family: 'DM Sans', sans-serif; padding: 20px 24px; text-align: center; border-top: 1px solid #E8E0D5; }
-    #site-footer .footer-copy { font-size: 12px; color: #9A8A7A; }
-    @media (max-width: 768px) { .desktop-nav { display: none; } .hamburger { display: flex; } .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; } .section { padding: 24px; } }
+    .section a { color: #C84B31; }
+    #site-footer { background: #F2F2F2; padding: 20px 24px; text-align: center; border-top: 1px solid #E8E0D5; }
+    .footer-copy { font-size: 12px; color: #9A8A7A; }
+    .lang-bar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; font-size: 12px; color: #9A8A7A; }
+    .lang-select { background: #fff; border: 1px solid #DDD5C8; color: #5A4A3A; font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 5px 10px; border-radius: 6px; cursor: pointer; outline: none; }
+    .lang-select:focus { border-color: #C84B31; }
+    @media (max-width: 768px) { .desktop-nav { display: none; } .hamburger { display: flex; } .section { padding: 24px; } .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; } }
   </style>
 </head>
 <body>
   <header id="site-header">
     <div class="header-inner">
       <a href="/" class="logo">
-        <svg width="16" height="16" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;"><polygon points="10,1 19,10 10,19 1,10" fill="#C84B31"/><polygon points="10,1 19,10 10,10" fill="#2C1810" opacity="0.2"/></svg>
-        <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
+        <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;"><polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/><polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/><polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/></svg>
+        <span><span class="relah">relah</span><span class="convert">convert</span></span>
       </a>
-      <nav class="desktop-nav">
-        <a href="/compress" class="nav-link">Compress Image</a>
-        <a href="/resize" class="nav-link">Resize Image</a>
-        <a href="/jpg-to-png" class="nav-link">JPG to PNG</a>
-        <a href="/jpg-to-pdf" class="nav-link">JPG to PDF</a>
-        <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
-      </nav>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+      <nav class="desktop-nav" id="desktopNav"></nav>
+      <button class="hamburger" id="hamburgerBtn"><span></span><span></span><span></span></button>
     </div>
   </header>
-  <div id="dropdown-menu"><div class="dropdown-inner">
-    <a href="/jpg-to-png">🖼️ JPG to PNG</a><a href="/png-to-jpg">🖼️ PNG to JPG</a>
-    <a href="/jpg-to-webp">🔄 JPG to WebP</a><a href="/webp-to-jpg">🔄 WebP to JPG</a>
-    <a href="/png-to-webp">🔄 PNG to WebP</a><a href="/webp-to-png">🔄 WebP to PNG</a>
-    <a href="/compress">📦 Compress</a><a href="/resize">↔️ Resize</a>
-    <a href="/jpg-to-pdf">📄 JPG to PDF</a><a href="/png-to-pdf">📄 PNG to PDF</a>
-  </div></div>
+  <div id="dropdown-menu"><div class="dropdown-inner" id="dropdownInner"></div></div>
 
   <main class="page-content">
     <div class="page-hero">
-      <h1>Privacy <em>Policy</em></h1>
-      <p class="updated">Last updated: March 2026</p>
+      <h1 id="heroH1"></h1>
+      <p id="heroSub"></p>
     </div>
-    <div class="section">
-      <h2>No File Uploads</h2>
-      <p>All image processing on RelahConvert happens locally in your browser. Your files are never uploaded to, stored on, or accessed by our servers. We have no access to any images you process.</p>
-    </div>
-    <div class="section">
-      <h2>Data We Collect</h2>
-      <p>We collect minimal anonymous usage data such as page views and browser type through standard web analytics. This helps us understand how the service is used and how to improve it.</p>
-      <p>We do not collect names, email addresses, or any personally identifiable information.</p>
-    </div>
-    <div class="section">
-      <h2>Cookies</h2>
-      <p>We use only essential cookies required for the site to function. No advertising or tracking cookies are used. For more details, see our <a href="/cookies">Cookie Policy</a>.</p>
-    </div>
-    <div class="section">
-      <h2>Third Parties</h2>
-      <p>We do not sell, share, or transfer your data to any third parties for marketing or advertising purposes.</p>
-    </div>
+    <div class="section"><h2 id="s1h"></h2><p id="s1p"></p></div>
+    <div class="section"><h2 id="s2h"></h2><p id="s2p"></p></div>
+    <div class="section"><h2 id="s3h"></h2><p id="s3p"></p></div>
+    <div class="section"><h2 id="s4h"></h2><p id="s4p"></p></div>
   </main>
 
-  <footer id="site-footer"><p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p></footer>
+  <footer id="site-footer">
+    <p class="footer-copy" id="footerCopy"></p>
+    <div class="lang-bar"><span>🌐</span><select class="lang-select" id="langSelect"></select></div>
+  </footer>
+
   <script>
-    const moreBtn = document.getElementById('moreBtn'), hamburgerBtn = document.getElementById('hamburgerBtn'), dropdown = document.getElementById('dropdown-menu')
-    function toggleDropdown(e) { e.stopPropagation(); dropdown.classList.toggle('open'); if (moreBtn) moreBtn.classList.toggle('open', dropdown.classList.contains('open')); }
-    if (moreBtn) moreBtn.addEventListener('click', toggleDropdown)
-    if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDropdown)
-    document.addEventListener('click', () => { dropdown.classList.remove('open'); if (moreBtn) moreBtn.classList.remove('open'); })
-    dropdown.addEventListener('click', e => e.stopPropagation())
+    var T = {
+      en: { nav_more:'More Tools', nav:{'compress':'Compress Image','resize':'Resize Image','jpg-to-png':'JPG to PNG','jpg-to-pdf':'JPG to PDF','png-to-jpg':'PNG to JPG','jpg-to-webp':'JPG to WebP','webp-to-jpg':'WebP to JPG','png-to-webp':'PNG to WebP','webp-to-png':'WebP to PNG','png-to-pdf':'PNG to PDF'}, footer_copy:'© 2026 RelahConvert. All rights reserved.', hero_h1:'Privacy <em>Policy</em>', hero_sub:'Last updated: March 2026', s1_h:'No File Uploads', s1_p:'RelahConvert processes all images entirely within your browser. Your files are never uploaded to our servers, stored, or transmitted to any third party. All conversion, compression, and resizing operations happen locally on your device.', s2_h:'Data We Collect', s2_p:'We do not collect personal data. We do not require account registration. We do not store your images or files. We may use anonymous analytics to understand general usage patterns (e.g. page views), but this data is never linked to your identity or your files.', s3_h:'Cookies', s3_p:'We use a single cookie to remember your language preference. No tracking cookies, advertising cookies, or third-party cookies are used. See our <a href="/cookies">Cookie Policy</a> for more information.', s4_h:'Third Parties', s4_p:'We do not share your data with third parties. We do not serve ads. We do not use third-party trackers or marketing tools.' },
+      fr: { nav_more:"Plus d'outils", nav:{'compress':'Compresser','resize':'Redimensionner','jpg-to-png':'JPG en PNG','jpg-to-pdf':'JPG en PDF','png-to-jpg':'PNG en JPG','jpg-to-webp':'JPG en WebP','webp-to-jpg':'WebP en JPG','png-to-webp':'PNG en WebP','webp-to-png':'WebP en PNG','png-to-pdf':'PNG en PDF'}, footer_copy:'© 2026 RelahConvert. Tous droits réservés.', hero_h1:'Politique de <em>confidentialité</em>', hero_sub:'Dernière mise à jour : mars 2026', s1_h:'Aucun téléchargement de fichiers', s1_p:'RelahConvert traite toutes les images entièrement dans votre navigateur. Vos fichiers ne sont jamais téléchargés sur nos serveurs, ni stockés, ni transmis à un tiers.', s2_h:'Données que nous collectons', s2_p:"Nous ne collectons pas de données personnelles. Nous n'exigeons pas d'inscription. Nous ne stockons pas vos images. Nous pouvons utiliser des analyses anonymes pour comprendre les tendances d'utilisation générales.", s3_h:'Cookies', s3_p:'Nous utilisons un seul cookie pour mémoriser votre préférence de langue. Aucun cookie de suivi ou publicitaire n\'est utilisé. Voir notre <a href="/cookies">politique en matière de cookies</a>.', s4_h:'Tiers', s4_p:"Nous ne partageons pas vos données avec des tiers. Nous ne diffusons pas de publicités. Nous n'utilisons pas de traceurs tiers." },
+      es: { nav_more:'Más herramientas', nav:{'compress':'Comprimir','resize':'Redimensionar','jpg-to-png':'JPG a PNG','jpg-to-pdf':'JPG a PDF','png-to-jpg':'PNG a JPG','jpg-to-webp':'JPG a WebP','webp-to-jpg':'WebP a JPG','png-to-webp':'PNG a WebP','webp-to-png':'WebP a PNG','png-to-pdf':'PNG a PDF'}, footer_copy:'© 2026 RelahConvert. Todos los derechos reservados.', hero_h1:'Política de <em>privacidad</em>', hero_sub:'Última actualización: marzo 2026', s1_h:'Sin carga de archivos', s1_p:'RelahConvert procesa todas las imágenes completamente en tu navegador. Tus archivos nunca se suben a nuestros servidores, ni se almacenan, ni se transmiten a terceros.', s2_h:'Datos que recopilamos', s2_p:'No recopilamos datos personales. No requerimos registro de cuenta. No almacenamos tus imágenes. Podemos usar análisis anónimos para comprender patrones de uso generales.', s3_h:'Cookies', s3_p:'Usamos una sola cookie para recordar tu preferencia de idioma. No se usan cookies de seguimiento ni publicitarias. Ver nuestra <a href="/cookies">política de cookies</a>.', s4_h:'Terceros', s4_p:'No compartimos tus datos con terceros. No mostramos anuncios. No usamos rastreadores de terceros.' },
+      pt: { nav_more:'Mais ferramentas', nav:{'compress':'Comprimir','resize':'Redimensionar','jpg-to-png':'JPG para PNG','jpg-to-pdf':'JPG para PDF','png-to-jpg':'PNG para JPG','jpg-to-webp':'JPG para WebP','webp-to-jpg':'WebP para JPG','png-to-webp':'PNG para WebP','webp-to-png':'WebP para PNG','png-to-pdf':'PNG para PDF'}, footer_copy:'© 2026 RelahConvert. Todos os direitos reservados.', hero_h1:'Política de <em>privacidade</em>', hero_sub:'Última atualização: março de 2026', s1_h:'Sem upload de arquivos', s1_p:'RelahConvert processa todas as imagens completamente no seu navegador. Seus arquivos nunca são enviados para nossos servidores, armazenados ou transmitidos a terceiros.', s2_h:'Dados que coletamos', s2_p:'Não coletamos dados pessoais. Não exigimos registro de conta. Não armazenamos suas imagens. Podemos usar análises anônimas para entender padrões gerais de uso.', s3_h:'Cookies', s3_p:'Usamos um único cookie para lembrar sua preferência de idioma. Nenhum cookie de rastreamento ou publicidade é usado. Veja nossa <a href="/cookies">política de cookies</a>.', s4_h:'Terceiros', s4_p:'Não compartilhamos seus dados com terceiros. Não exibimos anúncios. Não usamos rastreadores de terceiros.' },
+      de: { nav_more:'Mehr Tools', nav:{'compress':'Komprimieren','resize':'Größe ändern','jpg-to-png':'JPG zu PNG','jpg-to-pdf':'JPG zu PDF','png-to-jpg':'PNG zu JPG','jpg-to-webp':'JPG zu WebP','webp-to-jpg':'WebP zu JPG','png-to-webp':'PNG zu WebP','webp-to-png':'WebP zu PNG','png-to-pdf':'PNG zu PDF'}, footer_copy:'© 2026 RelahConvert. Alle Rechte vorbehalten.', hero_h1:'Datenschutz<em>richtlinie</em>', hero_sub:'Zuletzt aktualisiert: März 2026', s1_h:'Kein Datei-Upload', s1_p:'RelahConvert verarbeitet alle Bilder vollständig in Ihrem Browser. Ihre Dateien werden niemals auf unsere Server hochgeladen, gespeichert oder an Dritte übertragen.', s2_h:'Daten, die wir erheben', s2_p:'Wir erheben keine personenbezogenen Daten. Wir erfordern keine Kontoregistrierung. Wir speichern Ihre Bilder nicht. Wir können anonyme Analysen verwenden, um allgemeine Nutzungsmuster zu verstehen.', s3_h:'Cookies', s3_p:'Wir verwenden ein einzelnes Cookie, um Ihre Spracheinstellung zu speichern. Es werden keine Tracking- oder Werbe-Cookies verwendet. Siehe unsere <a href="/cookies">Cookie-Richtlinie</a>.', s4_h:'Dritte', s4_p:'Wir teilen Ihre Daten nicht mit Dritten. Wir schalten keine Werbung. Wir verwenden keine Tracker von Drittanbietern.' },
+      ar: { nav_more:'المزيد من الأدوات', nav:{'compress':'ضغط','resize':'تغيير الحجم','jpg-to-png':'JPG إلى PNG','jpg-to-pdf':'JPG إلى PDF','png-to-jpg':'PNG إلى JPG','jpg-to-webp':'JPG إلى WebP','webp-to-jpg':'WebP إلى JPG','png-to-webp':'PNG إلى WebP','webp-to-png':'WebP إلى PNG','png-to-pdf':'PNG إلى PDF'}, footer_copy:'© 2026 RelahConvert. جميع الحقوق محفوظة.', hero_h1:'سياسة <em>الخصوصية</em>', hero_sub:'آخر تحديث: مارس 2026', s1_h:'لا رفع ملفات', s1_p:'يعالج RelahConvert جميع الصور بالكامل داخل متصفحك. ملفاتك لا تُرفع إلى خوادمنا أبداً، ولا تُخزَّن، ولا تُرسَل إلى أي طرف ثالث.', s2_h:'البيانات التي نجمعها', s2_p:'لا نجمع بيانات شخصية. لا نطلب تسجيل حساب. لا نخزن صورك. قد نستخدم تحليلات مجهولة الهوية لفهم أنماط الاستخدام العامة.', s3_h:'ملفات تعريف الارتباط', s3_p:'نستخدم ملف تعريف ارتباط واحداً لتذكر تفضيل لغتك. لا تُستخدم ملفات تتبع أو إعلانات. انظر <a href="/cookies">سياسة ملفات تعريف الارتباط</a>.', s4_h:'أطراف ثالثة', s4_p:'لا نشارك بياناتك مع أطراف ثالثة. لا نعرض إعلانات. لا نستخدم أدوات تتبع خارجية.' },
+    };
+    var LANGS = [{v:'en',l:'English'},{v:'fr',l:'Français'},{v:'es',l:'Español'},{v:'pt',l:'Português'},{v:'de',l:'Deutsch'},{v:'ar',l:'العربية'}];
+    var ALL_SLUGS = ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','compress','resize','jpg-to-pdf','png-to-pdf'];
+    var ICONS = {'jpg-to-png':'🖼️','png-to-jpg':'🖼️','jpg-to-webp':'🔄','webp-to-jpg':'🔄','png-to-webp':'🔄','webp-to-png':'🔄','compress':'📦','resize':'↔️','jpg-to-pdf':'📄','png-to-pdf':'📄'};
+    var MAIN = ['compress','resize','jpg-to-png','jpg-to-pdf'];
+    var lang = localStorage.getItem('rc_lang') || 'en';
+    var t = T[lang] || T['en'];
+
+    document.getElementById('heroH1').innerHTML = t.hero_h1;
+    document.getElementById('heroSub').textContent = t.hero_sub;
+    document.getElementById('s1h').textContent = t.s1_h;
+    document.getElementById('s1p').textContent = t.s1_p;
+    document.getElementById('s2h').textContent = t.s2_h;
+    document.getElementById('s2p').textContent = t.s2_p;
+    document.getElementById('s3h').textContent = t.s3_h;
+    document.getElementById('s3p').innerHTML = t.s3_p;
+    document.getElementById('s4h').textContent = t.s4_h;
+    document.getElementById('s4p').textContent = t.s4_p;
+    document.getElementById('footerCopy').textContent = t.footer_copy;
+    document.title = t.hero_h1.replace(/<[^>]+>/g,'') + ' | RelahConvert';
+
+    document.getElementById('desktopNav').innerHTML = MAIN.map(function(s){ return '<a href="/'+s+'" class="nav-link">'+t.nav[s]+'</a>'; }).join('') + '<button class="more-btn" id="moreBtn">'+t.nav_more+' <span class="arrow">▼</span></button>';
+    document.getElementById('dropdownInner').innerHTML = ALL_SLUGS.map(function(s){ return '<a href="/'+s+'">'+ICONS[s]+' '+t.nav[s]+'</a>'; }).join('');
+
+    var langSelect = document.getElementById('langSelect');
+    langSelect.innerHTML = LANGS.map(function(l){ return '<option value="'+l.v+'"'+(l.v===lang?' selected':'')+'>'+l.l+'</option>'; }).join('');
+    langSelect.addEventListener('change', function(){ localStorage.setItem('rc_lang', langSelect.value); window.location.reload(); });
+
+    var moreBtn = document.getElementById('moreBtn');
+    var hamburgerBtn = document.getElementById('hamburgerBtn');
+    var dropdown = document.getElementById('dropdown-menu');
+    function toggleDD(e){ e.stopPropagation(); dropdown.classList.toggle('open'); if(moreBtn) moreBtn.classList.toggle('open', dropdown.classList.contains('open')); }
+    if(moreBtn) moreBtn.addEventListener('click', toggleDD);
+    hamburgerBtn.addEventListener('click', toggleDD);
+    document.addEventListener('click', function(){ dropdown.classList.remove('open'); if(moreBtn) moreBtn.classList.remove('open'); });
+    dropdown.addEventListener('click', function(e){ e.stopPropagation(); });
   </script>
 </body>
 </html>
