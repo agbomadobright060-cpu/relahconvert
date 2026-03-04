@@ -5,5 +5,6 @@ initImageToPdf({
   acceptAttr: 'image/jpeg',
   toolTitle: 'JPG to PDF Converter',
   toolDesc: 'Convert JPG images to PDF free. Files never leave your device.',
+  pageSlug: 'jpg-to-pdf',
   outputName: 'images',
 })

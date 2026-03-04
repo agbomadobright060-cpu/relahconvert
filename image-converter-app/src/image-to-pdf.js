@@ -4,6 +4,92 @@ import { formatSize, fileKey, totalBytes, sanitizeBaseName, LIMITS } from './cor
 
 const bg = '#F2F2F2'
 
+const seoContent = {
+  'jpg-to-pdf': {
+    metaDesc: 'Convert JPG to PDF free without uploading to a server. Browser-based JPG to PDF converter — your files never leave your device. Instant, private, no account needed.',
+    h2a: 'How to Convert JPG to PDF Without Uploading',
+    steps: [
+      '<strong>Select your JPG images</strong> — click "Select Images" or drag and drop JPG files onto the page.',
+      '<strong>Choose PDF mode</strong> — one PDF per image, or combine all images into a single PDF.',
+      '<strong>Click Convert and download</strong> — your PDF is ready instantly. No upload, no waiting.',
+    ],
+    h2b: 'The Best Free JPG to PDF Converter That Doesn\'t Upload Your Files',
+    body: `<p>Most JPG to PDF converters upload your images to a remote server before creating the PDF — meaning your photos pass through systems you don't control. RelahConvert converts JPG to PDF entirely inside your browser using local processing. Your images never leave your device at any point during the conversion.</p>
+<p>Whether you're creating a PDF portfolio, sending product images as a document, submitting scanned forms, or packaging multiple photos into a single shareable file, this tool handles it privately and instantly — no account, no subscription, completely free.</p>`,
+    h3why: 'Why Convert JPG to PDF?',
+    why: 'PDF is the universal document format — it preserves image quality, maintains consistent formatting across all devices, and is accepted by every email client, document portal, and printing service. Converting JPG to PDF makes images easy to share professionally and combine into a single organized file.',
+    faqs: [
+      { q: 'How do I convert JPG to PDF without uploading to a server?', a: 'Use RelahConvert — select your JPG images, choose your PDF mode, click Convert, and download. The entire process runs locally in your browser. Nothing is uploaded.' },
+      { q: 'Can I combine multiple JPG images into one PDF?', a: 'Yes — select multiple images and choose "All images in one PDF" mode. Each image becomes a separate page in a single PDF document.' },
+      { q: 'What is the image quality in the output PDF?', a: 'Images are embedded at their original resolution. No quality is lost during the JPG to PDF conversion.' },
+      { q: 'Can I convert multiple JPGs into separate PDFs at once?', a: 'Yes — select multiple images and choose "One PDF per image" mode. All PDFs are delivered in a ZIP download.' },
+      { q: 'Do you store my images or PDFs?', a: 'Never. All processing happens locally in your browser. Your files are not uploaded to any server, stored, or shared with anyone.' },
+    ],
+    internalLinks: [
+      { href: '/png-to-pdf', label: 'PNG to PDF' },
+      { href: '/compress', label: 'Compress Image' },
+      { href: '/jpg-to-png', label: 'JPG to PNG' },
+      { href: '/resize', label: 'Resize Image' },
+    ],
+  },
+  'png-to-pdf': {
+    metaDesc: 'Convert PNG to PDF free without uploading to a server. Browser-based PNG to PDF converter — your files never leave your device. Instant, private, no account needed.',
+    h2a: 'How to Convert PNG to PDF Without Uploading',
+    steps: [
+      '<strong>Select your PNG images</strong> — click "Select Images" or drag and drop PNG files onto the page.',
+      '<strong>Choose PDF mode</strong> — one PDF per image, or combine all images into a single PDF.',
+      '<strong>Click Convert and download</strong> — your PDF is ready instantly. No upload, no waiting.',
+    ],
+    h2b: 'The Best Free PNG to PDF Converter That Doesn\'t Upload Your Files',
+    body: `<p>PNG files are ideal for images with transparency and sharp graphics, but PDF is the standard for sharing documents professionally. Most PNG to PDF tools upload your files to a remote server before converting. RelahConvert converts PNG to PDF entirely inside your browser — your files never leave your device throughout the entire process.</p>
+<p>Designers sharing mockups and UI assets, developers documenting screenshots, and anyone needing to submit PNG images as professional documents will find this tool fast, private, and completely free.</p>`,
+    h3why: 'Why Convert PNG to PDF?',
+    why: 'PDF is the professional standard for sharing images as documents. It\'s accepted by every email client, document portal, and printing service, and preserves your PNG\'s full quality and sharpness in a universally compatible format.',
+    faqs: [
+      { q: 'How do I convert PNG to PDF without uploading to a server?', a: 'Use RelahConvert — select your PNG images, choose your PDF mode, click Convert, and download. The entire process runs locally in your browser. Nothing is uploaded.' },
+      { q: 'Does the PDF preserve PNG transparency?', a: 'Transparent areas in PNG images are rendered with a white background in the PDF, since PDF pages have a white background by default.' },
+      { q: 'Can I combine multiple PNG images into one PDF?', a: 'Yes — select multiple images and choose "All images in one PDF" mode. Each image becomes a separate page in a single PDF.' },
+      { q: 'Can I convert multiple PNGs into separate PDFs at once?', a: 'Yes — select multiple images and choose "One PDF per image" mode. All PDFs are delivered in a ZIP download.' },
+      { q: 'Do you store my images or PDFs?', a: 'Never. All processing happens locally in your browser. Your files are not uploaded to any server, stored, or shared with anyone.' },
+    ],
+    internalLinks: [
+      { href: '/jpg-to-pdf', label: 'JPG to PDF' },
+      { href: '/compress', label: 'Compress Image' },
+      { href: '/png-to-jpg', label: 'PNG to JPG' },
+      { href: '/resize', label: 'Resize Image' },
+    ],
+  },
+}
+
+function buildSeoSection(slug) {
+  const seo = seoContent[slug]
+  if (!seo) return ''
+  return `
+    <hr class="seo-divider" />
+    <div class="seo-section">
+      <h2>${seo.h2a}</h2>
+      <ol>
+        ${seo.steps.map(s => `<li>${s}</li>`).join('')}
+      </ol>
+      <h2>${seo.h2b}</h2>
+      ${seo.body}
+      <h3>${seo.h3why}</h3>
+      <p>${seo.why}</p>
+      <h3>Frequently Asked Questions</h3>
+      ${seo.faqs.map(f => `
+        <div class="faq-item">
+          <h4>${f.q}</h4>
+          <p>${f.a}</p>
+        </div>
+      `).join('')}
+      <h3>Also Try</h3>
+      <div class="internal-links">
+        ${seo.internalLinks.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
+      </div>
+    </div>
+  `
+}
+
 export function initImageToPdf({ acceptMime, acceptAttr, toolTitle, toolDesc, pageSlug, outputName }) {
 
 if (document.head) {
@@ -26,11 +112,33 @@ if (document.head) {
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     #addMoreBtn:hover { border-color:#C84B31 !important; color:#C84B31 !important; }
+    .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.8; margin:0 0 12px; }
+    .seo-section ol { padding-left:20px; margin:0 0 12px; }
+    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.8; margin-bottom:6px; }
+    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-section .faq-item p { margin:0; font-size:14px; color:#5A4A3A; line-height:1.8; }
+    .seo-section .internal-links { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; transition:all 0.15s; }
+    .seo-section .internal-links a:hover { border-color:#C84B31; color:#C84B31; }
+    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
+
+  // Meta description
+  const seo = seoContent[pageSlug]
+  if (seo) {
+    const metaDesc = document.createElement('meta')
+    metaDesc.name = 'description'
+    metaDesc.content = seo.metaDesc
+    document.head.appendChild(metaDesc)
+  }
 }
 
-document.title = toolTitle
+document.title = toolTitle + ' | Free & Private — No Upload'
 
 const [titleMain] = toolTitle.split(' to ')
 
@@ -65,6 +173,8 @@ document.querySelector('#app').innerHTML = `
     <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert to PDF</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
   </div>
+
+  ${buildSeoSection(pageSlug)}
 `
 
 const fileInput = document.getElementById('fileInput')

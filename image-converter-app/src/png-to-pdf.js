@@ -5,5 +5,6 @@ initImageToPdf({
   acceptAttr: 'image/png',
   toolTitle: 'PNG to PDF Converter',
   toolDesc: 'Convert PNG images to PDF free. Files never leave your device.',
+  pageSlug: 'png-to-pdf',
   outputName: 'images',
 })
