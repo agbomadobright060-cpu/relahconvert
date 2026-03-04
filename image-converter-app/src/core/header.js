@@ -1,6 +1,9 @@
 import { tools } from '../tools/configs.js'
+import { getLang, setLang, getT, supportedLangs, langLabels } from './i18n.js'
 
 export function injectHeader() {
+  const t = getT()
+
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
   fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
@@ -9,16 +12,9 @@ export function injectHeader() {
   const style = document.createElement('style')
   style.textContent = `
     * { box-sizing: border-box; }
-    html, body {
-      min-height: 100vh;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-    }
-    #app {
-      flex: 1;
-    }
+    html, body { min-height: 100vh; }
+    body { display: flex; flex-direction: column; }
+    #app { flex: 1; }
     #site-header {
       background: #fff;
       border-bottom: 1px solid #E8E0D5;
@@ -145,8 +141,6 @@ export function injectHeader() {
     }
     #dropdown-menu a:hover { background: #F5F0E8; color: #C84B31; }
     #dropdown-menu a.active { background: #FDE8E3; color: #C84B31; }
-
-    /* Simple tool page footer */
     #site-footer {
       background: #F2F2F2;
       font-family: 'DM Sans', sans-serif;
@@ -154,11 +148,26 @@ export function injectHeader() {
       text-align: center;
       border-top: 1px solid #E8E0D5;
     }
-    #site-footer .footer-copy {
-      font-size: 12px;
-      color: #9A8A7A;
+    #site-footer .footer-copy { font-size: 12px; color: #9A8A7A; }
+    .lang-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
     }
-
+    .lang-bar select {
+      background: #fff;
+      border: 1px solid #DDD5C8;
+      color: #5A4A3A;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      outline: none;
+    }
+    .lang-bar select:focus { border-color: #C84B31; }
     @media (max-width: 768px) {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
@@ -179,13 +188,7 @@ export function injectHeader() {
     'webp-to-jpg': '🔄', 'png-to-webp': '🔄', 'webp-to-png': '🔄',
     'compress': '📦', 'resize': '↔️', 'jpg-to-pdf': '📄', 'png-to-pdf': '📄',
   }
-  const shortNames = {
-    'jpg-to-png': 'JPG to PNG', 'png-to-jpg': 'PNG to JPG',
-    'jpg-to-webp': 'JPG to WebP', 'webp-to-jpg': 'WebP to JPG',
-    'png-to-webp': 'PNG to WebP', 'webp-to-png': 'WebP to PNG',
-    'compress': 'Compress Image', 'resize': 'Resize Image',
-    'jpg-to-pdf': 'JPG to PDF', 'png-to-pdf': 'PNG to PDF',
-  }
+
   const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
 
   const header = document.createElement('header')
@@ -194,15 +197,15 @@ export function injectHeader() {
     <div class="header-inner">
       <a href="/" class="logo">
         <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;">
-         <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
-         <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
-         <polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/>
+          <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
+          <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
+          <polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/>
         </svg>
         <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
       </a>
       <nav class="desktop-nav">
-        ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${shortNames[slug]}</a>`).join('')}
-        <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
+        ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
+        <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
       </nav>
       <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -216,19 +219,37 @@ export function injectHeader() {
     <div class="dropdown-inner">
       ${Object.values(tools).map(tool => `
         <a href="/${tool.slug}" class="${currentPath === tool.slug ? 'active' : ''}">
-          <span>${icons[tool.slug] || '🔧'}</span>${shortNames[tool.slug] || tool.title}
+          <span>${icons[tool.slug] || '🔧'}</span>${t.nav_short[tool.slug] || tool.title}
         </a>
       `).join('')}
     </div>
   `
 
+  const currentLang = getLang()
   const footer = document.createElement('footer')
   footer.id = 'site-footer'
-  footer.innerHTML = `<p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p>`
+  footer.innerHTML = `
+    <p class="footer-copy">${t.footer_copy}</p>
+    <div class="lang-bar">
+      <span>🌐</span>
+      <select id="langSelect">
+        ${supportedLangs.map(l => `<option value="${l}" ${l === currentLang ? 'selected' : ''}>${langLabels[l]}</option>`).join('')}
+      </select>
+    </div>
+  `
 
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
+
+  // Language selector — saves and reloads page
+  const langSelect = footer.querySelector('#langSelect')
+  if (langSelect) {
+    langSelect.addEventListener('change', () => {
+      setLang(langSelect.value)
+      window.location.reload()
+    })
+  }
 
   const moreBtn = document.getElementById('moreBtn')
   const hamburgerBtn = document.getElementById('hamburgerBtn')

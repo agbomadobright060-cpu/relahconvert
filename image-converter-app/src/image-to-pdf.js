@@ -1,6 +1,7 @@
 import { injectHeader } from './core/header.js'
 import { jsPDF } from 'jspdf'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, LIMITS } from './core/utils.js'
+import { getT } from './core/i18n.js'
 
 const bg = '#F2F2F2'
 
@@ -68,20 +69,13 @@ function buildSeoSection(slug) {
     <hr class="seo-divider" />
     <div class="seo-section">
       <h2>${seo.h2a}</h2>
-      <ol>
-        ${seo.steps.map(s => `<li>${s}</li>`).join('')}
-      </ol>
+      <ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol>
       <h2>${seo.h2b}</h2>
       ${seo.body}
       <h3>${seo.h3why}</h3>
       <p>${seo.why}</p>
       <h3>Frequently Asked Questions</h3>
-      ${seo.faqs.map(f => `
-        <div class="faq-item">
-          <h4>${f.q}</h4>
-          <p>${f.a}</p>
-        </div>
-      `).join('')}
+      ${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}
       <h3>Also Try</h3>
       <div class="internal-links">
         ${seo.internalLinks.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
@@ -91,6 +85,8 @@ function buildSeoSection(slug) {
 }
 
 export function initImageToPdf({ acceptMime, acceptAttr, toolTitle, toolDesc, pageSlug, outputName }) {
+
+const t = getT()
 
 if (document.head) {
   const fontLink = document.createElement('link')
@@ -128,7 +124,6 @@ if (document.head) {
   `
   document.head.appendChild(style)
 
-  // Meta description
   const seo = seoContent[pageSlug]
   if (seo) {
     const metaDesc = document.createElement('meta')
@@ -153,9 +148,9 @@ document.querySelector('#app').innerHTML = `
 
     <div id="uploadArea" style="margin-bottom:16px;">
       <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
-        <span style="font-size:18px;">+</span> Select Images
+        <span style="font-size:18px;">+</span> ${t.select_images}
       </label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop images anywhere</span>
+      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${t.drop_hint}</span>
     </div>
 
     <input type="file" id="fileInput" multiple accept="${acceptAttr}" style="display:none;" />
@@ -163,14 +158,14 @@ document.querySelector('#app').innerHTML = `
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
 
     <div id="pdfModePanel" style="display:none; background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:12px;">
-      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">PDF Options</div>
+      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">${t.pdf_options}</div>
       <div style="display:flex; gap:6px; background:#F5F0E8; border-radius:10px; padding:4px;">
-        <button id="modeOne" style="flex:1; padding:10px; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; background:#C84B31; color:#fff; transition:all 0.15s;">One PDF per image</button>
-        <button id="modeAll" style="flex:1; padding:10px; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; background:transparent; color:#9A8A7A; transition:all 0.15s;">All images in one PDF</button>
+        <button id="modeOne" style="flex:1; padding:10px; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; background:#C84B31; color:#fff; transition:all 0.15s;">${t.pdf_mode_one}</button>
+        <button id="modeAll" style="flex:1; padding:10px; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; background:transparent; color:#9A8A7A; transition:all 0.15s;">${t.pdf_mode_all}</button>
       </div>
     </div>
 
-    <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert to PDF</button>
+    <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.pdf_btn}</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
   </div>
 
@@ -192,86 +187,60 @@ let pdfMode = 'one'
 
 modeOne.addEventListener('click', () => {
   pdfMode = 'one'
-  modeOne.style.background = '#C84B31'
-  modeOne.style.color = '#fff'
-  modeAll.style.background = 'transparent'
-  modeAll.style.color = '#9A8A7A'
+  modeOne.style.background = '#C84B31'; modeOne.style.color = '#fff'
+  modeAll.style.background = 'transparent'; modeAll.style.color = '#9A8A7A'
 })
-
 modeAll.addEventListener('click', () => {
   pdfMode = 'all'
-  modeAll.style.background = '#C84B31'
-  modeAll.style.color = '#fff'
-  modeOne.style.background = 'transparent'
-  modeOne.style.color = '#9A8A7A'
+  modeAll.style.background = '#C84B31'; modeAll.style.color = '#fff'
+  modeOne.style.background = 'transparent'; modeOne.style.color = '#9A8A7A'
 })
 
 function cleanupOldUrl() {
   if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null }
 }
-
 function showWarning(msg) {
   warning.style.display = 'block'
   warning.textContent = msg
   setTimeout(() => { warning.style.display = 'none' }, 4000)
 }
-
 function setDisabled() {
-  convertBtn.disabled = true
-  convertBtn.textContent = 'Convert to PDF'
-  convertBtn.style.background = '#C4B8A8'
-  convertBtn.style.cursor = 'not-allowed'
-  convertBtn.style.opacity = '0.7'
+  convertBtn.disabled = true; convertBtn.textContent = t.pdf_btn
+  convertBtn.style.background = '#C4B8A8'; convertBtn.style.cursor = 'not-allowed'; convertBtn.style.opacity = '0.7'
 }
 function setIdle() {
-  convertBtn.disabled = false
-  convertBtn.textContent = 'Convert to PDF'
-  convertBtn.style.background = '#C84B31'
-  convertBtn.style.cursor = 'pointer'
-  convertBtn.style.opacity = '1'
+  convertBtn.disabled = false; convertBtn.textContent = t.pdf_btn
+  convertBtn.style.background = '#C84B31'; convertBtn.style.cursor = 'pointer'; convertBtn.style.opacity = '1'
 }
 function setConverting() {
-  convertBtn.disabled = true
-  convertBtn.textContent = 'Converting...'
-  convertBtn.style.background = '#9A8A7A'
-  convertBtn.style.cursor = 'not-allowed'
-  convertBtn.style.opacity = '1'
+  convertBtn.disabled = true; convertBtn.textContent = t.pdf_btn_loading
+  convertBtn.style.background = '#9A8A7A'; convertBtn.style.cursor = 'not-allowed'; convertBtn.style.opacity = '1'
 }
 
 function renderPreviews() {
   if (!selectedFiles.length) {
-    previewGrid.style.display = 'none'
-    previewGrid.innerHTML = ''
-    pdfModePanel.style.display = 'none'
-    return
+    previewGrid.style.display = 'none'; previewGrid.innerHTML = ''; pdfModePanel.style.display = 'none'; return
   }
-
   previewGrid.style.display = 'grid'
   previewGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))'
   previewGrid.style.gap = '12px'
   pdfModePanel.style.display = selectedFiles.length > 1 ? 'block' : 'none'
-
   previewGrid.innerHTML = selectedFiles.map((f, i) => {
     const url = URL.createObjectURL(f)
-    return `
-      <div class="preview-card">
-        <img src="${url}" alt="${f.name}" onload="URL.revokeObjectURL(this.src)" />
-        <button class="remove-btn" data-index="${i}">✕</button>
-        <div class="fname">${f.name}</div>
-      </div>`
+    return `<div class="preview-card">
+      <img src="${url}" alt="${f.name}" onload="URL.revokeObjectURL(this.src)" />
+      <button class="remove-btn" data-index="${i}">✕</button>
+      <div class="fname">${f.name}</div>
+    </div>`
   }).join('')
-
   previewGrid.innerHTML += `
     <label id="addMoreBtn" for="fileInput" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:158px; border:2px dashed #CCC; border-radius:10px; cursor:pointer; color:#999; font-size:13px; gap:6px; transition:all 0.15s;">
-      <span style="font-size:28px;">+</span>
-      <span>Add more</span>
+      <span style="font-size:28px;">+</span><span>${t.add_more}</span>
     </label>`
-
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedFiles.splice(parseInt(btn.getAttribute('data-index')), 1)
-      cleanupOldUrl()
-      downloadLink.style.display = 'none'
+      cleanupOldUrl(); downloadLink.style.display = 'none'
       renderPreviews()
       if (selectedFiles.length) setIdle(); else setDisabled()
     })
@@ -282,27 +251,20 @@ function validateAndAdd(incoming) {
   const valid = incoming.filter(f => acceptMime.includes(f.type) && f.size <= LIMITS.MAX_PER_FILE_BYTES)
   const wrongFormat = incoming.filter(f => !acceptMime.includes(f.type))
   const tooBig = incoming.filter(f => acceptMime.includes(f.type) && f.size > LIMITS.MAX_PER_FILE_BYTES)
-
-  if (wrongFormat.length) showWarning(`Wrong format. ${wrongFormat.length} file(s) were skipped.`)
-  if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
-
+  if (wrongFormat.length) showWarning(`${t.warn_wrong_fmt_short} ${wrongFormat.length} ${t.warn_wrong_format}`)
+  if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
   const map = new Map()
   for (const f of [...selectedFiles, ...valid]) map.set(fileKey(f), f)
   let merged = Array.from(map.values())
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
-
   selectedFiles = merged
-  cleanupOldUrl()
-  downloadLink.style.display = 'none'
+  cleanupOldUrl(); downloadLink.style.display = 'none'
   renderPreviews()
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
 
-fileInput.addEventListener('change', () => {
-  validateAndAdd(Array.from(fileInput.files || []))
-  fileInput.value = ''
-})
+fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
@@ -321,16 +283,11 @@ function loadImage(file) {
 }
 
 function addImageToPage(pdf, dataUrl, imgType, imgWidth, imgHeight, isFirst) {
-  const pageW = 210
-  const pageH = 297
-  const margin = 10
-  const maxW = pageW - margin * 2
-  const maxH = pageH - margin * 2
+  const pageW = 210, pageH = 297, margin = 10
+  const maxW = pageW - margin * 2, maxH = pageH - margin * 2
   const ratio = Math.min(maxW / imgWidth, maxH / imgHeight)
-  const w = imgWidth * ratio
-  const h = imgHeight * ratio
-  const x = (pageW - w) / 2
-  const y = (pageH - h) / 2
+  const w = imgWidth * ratio, h = imgHeight * ratio
+  const x = (pageW - w) / 2, y = (pageH - h) / 2
   if (!isFirst) pdf.addPage()
   pdf.addImage(dataUrl, imgType, x, y, w, h)
 }
@@ -339,14 +296,12 @@ async function convertToPdf() {
   setConverting()
   cleanupOldUrl()
   downloadLink.style.display = 'none'
-
   try {
     const imgType = acceptMime[0] === 'image/jpeg' ? 'JPEG' : 'PNG'
-
     if (pdfMode === 'all' && selectedFiles.length > 1) {
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       for (let i = 0; i < selectedFiles.length; i++) {
-        convertBtn.textContent = `Converting ${i + 1}/${selectedFiles.length}...`
+        convertBtn.textContent = `${t.pdf_btn_loading} ${i + 1}/${selectedFiles.length}...`
         const { dataUrl, img } = await loadImage(selectedFiles[i])
         addImageToPage(pdf, dataUrl, imgType, img.width, img.height, i === 0)
       }
@@ -355,7 +310,7 @@ async function convertToPdf() {
       downloadLink.href = currentDownloadUrl
       downloadLink.download = `${outputName}.pdf`
       downloadLink.style.display = 'block'
-      downloadLink.textContent = `Download PDF (${formatSize(pdfBlob.size)})`
+      downloadLink.textContent = `${t.download} PDF (${formatSize(pdfBlob.size)})`
     } else {
       if (selectedFiles.length === 1) {
         const { dataUrl, img } = await loadImage(selectedFiles[0])
@@ -367,12 +322,12 @@ async function convertToPdf() {
         downloadLink.href = currentDownloadUrl
         downloadLink.download = `${base}.pdf`
         downloadLink.style.display = 'block'
-        downloadLink.textContent = `Download PDF (${formatSize(pdfBlob.size)})`
+        downloadLink.textContent = `${t.download} PDF (${formatSize(pdfBlob.size)})`
       } else {
         const { default: JSZip } = await import('jszip')
         const zip = new JSZip()
         for (let i = 0; i < selectedFiles.length; i++) {
-          convertBtn.textContent = `Converting ${i + 1}/${selectedFiles.length}...`
+          convertBtn.textContent = `${t.pdf_btn_loading} ${i + 1}/${selectedFiles.length}...`
           const { dataUrl, img } = await loadImage(selectedFiles[i])
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
           addImageToPage(pdf, dataUrl, imgType, img.width, img.height, true)
@@ -385,10 +340,9 @@ async function convertToPdf() {
         downloadLink.href = currentDownloadUrl
         downloadLink.download = `${outputName}-pdfs.zip`
         downloadLink.style.display = 'block'
-        downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
+        downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
       }
     }
-
     setIdle()
     fileInput.value = ''
   } catch (err) {

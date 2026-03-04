@@ -2,9 +2,11 @@ import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool } from './app/router.js'
 import { injectHeader } from './core/header.js'
+import { getT } from './core/i18n.js'
 
 const currentTool = getCurrentTool()
 const bg = '#F2F2F2'
+const t = getT()
 
 const relatedLinks = {
   'jpg-to-png':  [{ href: '/webp-to-png', label: 'Convert WebP to PNG' }],
@@ -17,18 +19,18 @@ const relatedLinks = {
 
 const nextStepsMap = {
   'image/png':  [
-    { href: '/compress',   label: 'Compress Image' },
-    { href: '/resize',     label: 'Resize Image' },
-    { href: '/png-to-pdf', label: 'Convert to PDF' },
+    { href: '/compress',   label: t.next_compress },
+    { href: '/resize',     label: t.next_resize },
+    { href: '/png-to-pdf', label: t.next_to_pdf },
   ],
   'image/jpeg': [
-    { href: '/compress',   label: 'Compress Image' },
-    { href: '/resize',     label: 'Resize Image' },
-    { href: '/jpg-to-pdf', label: 'Convert to PDF' },
+    { href: '/compress',   label: t.next_compress },
+    { href: '/resize',     label: t.next_resize },
+    { href: '/jpg-to-pdf', label: t.next_to_pdf },
   ],
   'image/webp': [
-    { href: '/compress',   label: 'Compress Image' },
-    { href: '/resize',     label: 'Resize Image' },
+    { href: '/compress',   label: t.next_compress },
+    { href: '/resize',     label: t.next_resize },
   ],
 }
 
@@ -239,7 +241,6 @@ if (document.head) {
   `
   document.head.appendChild(style)
 
-  // Meta description
   const slug = currentTool ? currentTool.slug : ''
   const seo = seoContent[slug]
   if (seo) {
@@ -265,21 +266,20 @@ const slug = currentTool ? currentTool.slug : ''
 const related = relatedLinks[slug] || []
 const relatedHTML = related.length ? `
   <div style="margin-top:8px; font-size:13px; color:#9A8A7A;">
-    Also convert: ${related.map(r => `<a href="${r.href}" class="related-link">${r.label}</a>`).join(' · ')}
+    ${t.also_convert} ${related.map(r => `<a href="${r.href}" class="related-link">${r.label}</a>`).join(' · ')}
   </div>` : ''
 
 const formatSelectorHTML = currentTool
   ? `<input type="hidden" id="formatSelect" value="${currentTool.outputFormat}" />`
   : `<div style="background:#ffffff; border:1px solid #DDD5C8; border-radius:12px; padding:16px; margin-bottom:12px;">
-      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;">Output Format</div>
+      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;">${t.convert_output_format}</div>
       <select id="formatSelect" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500; background:#FAF6EF; color:#2C1810; outline:none; cursor:pointer; transition:all 0.15s;">
-        <option value="image/jpeg">Convert to JPG</option>
-        <option value="image/png">Convert to PNG</option>
-        <option value="image/webp">Convert to WebP</option>
+        <option value="image/jpeg">${t.convert_to_jpg}</option>
+        <option value="image/png">${t.convert_to_png}</option>
+        <option value="image/webp">${t.convert_to_webp}</option>
       </select>
     </div>`
 
-// Build SEO section HTML
 function buildSeoSection(slug) {
   const seo = seoContent[slug]
   if (!seo) return ''
@@ -287,20 +287,13 @@ function buildSeoSection(slug) {
     <hr class="seo-divider" />
     <div class="seo-section">
       <h2>${seo.h2a}</h2>
-      <ol>
-        ${seo.steps.map(s => `<li>${s}</li>`).join('')}
-      </ol>
+      <ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol>
       <h2>${seo.h2b}</h2>
       ${seo.body}
       <h3>${seo.h3why}</h3>
       <p>${seo.why}</p>
       <h3>Frequently Asked Questions</h3>
-      ${seo.faqs.map(f => `
-        <div class="faq-item">
-          <h4>${f.q}</h4>
-          <p>${f.a}</p>
-        </div>
-      `).join('')}
+      ${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}
       <h3>Also Try</h3>
       <div class="internal-links">
         ${seo.internalLinks.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
@@ -317,30 +310,24 @@ document.querySelector('#app').innerHTML = `
       <p style="font-size:13px; color:#7A6A5A; margin:0 0 4px;">${descText}</p>
       ${relatedHTML}
     </div>
-
     <div id="uploadArea" style="margin-bottom:16px;">
       <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; transition:background 0.15s;">
-        <span style="font-size:18px;">+</span> Select Images
+        <span style="font-size:18px;">+</span> ${t.select_images}
       </label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop images anywhere</span>
+      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${t.drop_hint}</span>
     </div>
-
     <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" />
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
     <div id="sizes" style="margin:0 0 10px; font-size:14px;"></div>
-
     ${formatSelectorHTML}
-
-    <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Convert Images</button>
+    <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.convert_btn}</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
-
     <div id="nextSteps" style="display:none; margin-top:20px;">
-      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">What's next?</div>
+      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsLinks"></div>
     </div>
   </div>
-
   ${buildSeoSection(slug)}
 `
 
@@ -363,23 +350,21 @@ let currentDownloadUrl = null
 
 function setIdleEnabled() {
   convertBtn.disabled = false
-  convertBtn.textContent = 'Convert Images'
+  convertBtn.textContent = t.convert_btn
   convertBtn.style.background = '#C84B31'
   convertBtn.style.cursor = 'pointer'
   convertBtn.style.opacity = '1'
 }
-
 function setConverting() {
   convertBtn.disabled = true
-  convertBtn.textContent = 'Converting...'
+  convertBtn.textContent = t.convert_btn_loading
   convertBtn.style.background = '#9A8A7A'
   convertBtn.style.cursor = 'not-allowed'
   convertBtn.style.opacity = '1'
 }
-
 function setDisabled() {
   convertBtn.disabled = true
-  convertBtn.textContent = 'Convert Images'
+  convertBtn.textContent = t.convert_btn
   convertBtn.style.background = '#C4B8A8'
   convertBtn.style.cursor = 'not-allowed'
   convertBtn.style.opacity = '0.7'
@@ -388,14 +373,12 @@ function setDisabled() {
 function cleanupOldUrl() {
   if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null }
 }
-
 function clearResultsUI() {
   cleanupOldUrl()
   downloadLink.style.display = 'none'
   nextSteps.style.display = 'none'
   sizes.textContent = ''
 }
-
 function showWarning(msg) {
   warning.style.display = 'block'
   warning.textContent = msg
@@ -422,7 +405,6 @@ function showNextSteps(outputMime) {
     `<button class="next-link" data-href="${s.href}">${s.label}</button>`
   ).join('')
   nextSteps.style.display = 'block'
-
   nextStepsLinks.querySelectorAll('.next-link').forEach(btn => {
     btn.addEventListener('click', async () => {
       const href = btn.getAttribute('data-href')
@@ -445,65 +427,52 @@ function renderPreviews() {
   previewGrid.style.display = 'grid'
   previewGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))'
   previewGrid.style.gap = '12px'
-
   previewGrid.innerHTML = selectedFiles.map((f, i) => {
     const url = URL.createObjectURL(f)
-    return `
-      <div class="preview-card">
-        <img src="${url}" alt="${f.name}" onload="URL.revokeObjectURL(this.src)" />
-        <button class="remove-btn" data-index="${i}">✕</button>
-        <div class="fname">${f.name}</div>
-      </div>`
+    return `<div class="preview-card">
+      <img src="${url}" alt="${f.name}" onload="URL.revokeObjectURL(this.src)" />
+      <button class="remove-btn" data-index="${i}">✕</button>
+      <div class="fname">${f.name}</div>
+    </div>`
   }).join('')
-
   previewGrid.innerHTML += `
     <label id="addMoreBtn" for="fileInput" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:158px; border:2px dashed #CCC; border-radius:10px; cursor:pointer; color:#999; font-size:13px; gap:6px; transition:all 0.15s;">
-      <span style="font-size:28px;">+</span>
-      <span>Add more</span>
+      <span style="font-size:28px;">+</span><span>${t.add_more}</span>
     </label>`
-
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.getAttribute('data-index'))
-      selectedFiles.splice(idx, 1)
+      selectedFiles.splice(parseInt(btn.getAttribute('data-index')), 1)
       clearResultsUI()
       renderPreviews()
-      if (selectedFiles.length) setIdleEnabled()
-      else setDisabled()
+      if (selectedFiles.length) setIdleEnabled(); else setDisabled()
     })
   })
 }
 
 function validateAndAdd(incoming) {
   const allImages = incoming.filter(f => f.type && f.type.startsWith('image/'))
-
   if (currentTool && currentTool.inputFormats.length) {
     const wrong = allImages.filter(f => !currentTool.inputFormats.includes(f.type))
     if (wrong.length) {
       const allowed = currentTool.inputFormats.map(f => f === 'image/jpeg' ? 'JPG' : f === 'image/png' ? 'PNG' : 'WebP').join(', ')
-      showWarning(`Wrong format! This tool only accepts ${allowed} files. ${wrong.length} file(s) were skipped.`)
+      showWarning(`${t.warn_wrong_fmt_tool} ${allowed} ${t.warn_files} ${wrong.length} ${t.warn_wrong_format}`)
     }
   }
-
   const valid = currentTool && currentTool.inputFormats.length
     ? allImages.filter(f => currentTool.inputFormats.includes(f.type))
     : allImages
-
   const tooBig = valid.filter(f => f.size > LIMITS.MAX_PER_FILE_BYTES)
-  if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
-
+  if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
   const filtered = valid.filter(f => f.size <= LIMITS.MAX_PER_FILE_BYTES)
   const map = new Map(selectedFiles.map(f => [fileKey(f), f]))
   for (const f of filtered) map.set(fileKey(f), f)
   let merged = Array.from(map.values())
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
-
   selectedFiles = merged
   clearResultsUI()
   renderPreviews()
-  if (selectedFiles.length) setIdleEnabled()
-  else setDisabled()
+  if (selectedFiles.length) setIdleEnabled(); else setDisabled()
 }
 
 fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])) })
@@ -554,26 +523,26 @@ convertBtn.addEventListener('click', async () => {
   try {
     convertedBlobs = []
     if (selectedFiles.length === 1) {
-      sizes.textContent = 'Processing...'
+      sizes.textContent = t.processing
       const { blob, outputSize, filename } = await convertFile(selectedFiles[0], mime, FIXED_QUALITY)
       convertedBlobs = [{ blob, name: filename, type: mime }]
       currentDownloadUrl = URL.createObjectURL(blob)
       downloadLink.href = currentDownloadUrl
       downloadLink.download = filename
       downloadLink.style.display = 'block'
-      downloadLink.textContent = `Download (${formatSize(outputSize)})`
+      downloadLink.textContent = `${t.download} (${formatSize(outputSize)})`
       sizes.textContent = ''
     } else {
       const { zipBlob, zipName, convertedBlobs: blobs } = await convertFilesToZip(
         selectedFiles, mime, FIXED_QUALITY,
-        (current, total) => { sizes.textContent = `Converting ${current}/${total}...` }
+        (current, total) => { sizes.textContent = `${t.convert_btn_loading} ${current}/${total}...` }
       )
       convertedBlobs.push(...blobs)
       currentDownloadUrl = URL.createObjectURL(zipBlob)
       downloadLink.href = currentDownloadUrl
       downloadLink.download = zipName
       downloadLink.style.display = 'block'
-      downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
+      downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
       sizes.textContent = ''
     }
     showNextSteps(mime)
@@ -581,7 +550,6 @@ convertBtn.addEventListener('click', async () => {
   } catch (err) {
     alert(err?.message || 'Conversion error')
     sizes.textContent = ''
-    if (selectedFiles.length) setIdleEnabled()
-    else setDisabled()
+    if (selectedFiles.length) setIdleEnabled(); else setDisabled()
   }
 })

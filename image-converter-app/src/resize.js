@@ -1,8 +1,10 @@
 import JSZip from 'jszip'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
 import { injectHeader } from './core/header.js'
+import { getT } from './core/i18n.js'
 
 const bg = '#F2F2F2'
+const t = getT()
 
 if (document.head) {
   const fontLink = document.createElement('link')
@@ -49,29 +51,28 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
+
+  document.title = 'Image Resizer — Resize JPG and PNG Free | No Upload'
+  const metaDesc = document.createElement('meta')
+  metaDesc.name = 'description'
+  metaDesc.content = 'Resize images by pixels or percentage free without uploading to a server. Browser-based image resizer — your files never leave your device. Instant, private, no account needed.'
+  document.head.appendChild(metaDesc)
 }
-
-document.title = 'Image Resizer — Resize JPG and PNG Free | No Upload'
-
-const metaDesc = document.createElement('meta')
-metaDesc.name = 'description'
-metaDesc.content = 'Resize images by pixels or percentage free without uploading to a server. Browser-based image resizer — your files never leave your device. Instant, private, no account needed.'
-document.head.appendChild(metaDesc)
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
-        Image <em style="font-style:italic; color:#C84B31;">Resizer</em>
+        ${t.resize_title} <em style="font-style:italic; color:#C84B31;">${t.resize_title_em}</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Resize JPG and PNG images free. Files never leave your device.</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.resize_desc}</p>
     </div>
 
     <div id="uploadArea" style="margin-bottom:16px;">
       <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
-        <span style="font-size:18px;">+</span> Select Images
+        <span style="font-size:18px;">+</span> ${t.select_images}
       </label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop images anywhere</span>
+      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${t.drop_hint}</span>
     </div>
 
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/png" style="display:none;" />
@@ -79,26 +80,26 @@ document.querySelector('#app').innerHTML = `
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
 
     <div id="resizePanel" style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:12px;">
-      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Resize Options</div>
+      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">${t.resize_options}</div>
       <div style="display:flex; gap:6px; background:#F5F0E8; border-radius:10px; padding:4px; margin-bottom:16px;">
-        <button class="tab-btn active" id="tabPixels">By Pixels</button>
-        <button class="tab-btn" id="tabPercent">By Percentage</button>
+        <button class="tab-btn active" id="tabPixels">${t.resize_by_pixels}</button>
+        <button class="tab-btn" id="tabPercent">${t.resize_by_percent}</button>
       </div>
       <div id="pixelsPanel">
         <div style="display:flex; gap:12px; align-items:flex-end; margin-bottom:12px;">
           <div style="flex:1;">
-            <label style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px;">Width (px)</label>
+            <label style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px;">${t.resize_width}</label>
             <input type="number" id="widthInput" min="1" max="10000" placeholder="e.g. 800" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAF6EF;" />
           </div>
           <div style="padding-bottom:12px; color:#9A8A7A; font-size:18px;">×</div>
           <div style="flex:1;">
-            <label style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px;">Height (px)</label>
+            <label style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px;">${t.resize_height}</label>
             <input type="number" id="heightInput" min="1" max="10000" placeholder="e.g. 600" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAF6EF;" />
           </div>
         </div>
         <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#555; cursor:pointer;">
           <input type="checkbox" id="aspectLock" />
-          Maintain aspect ratio
+          ${t.resize_aspect}
         </label>
       </div>
       <div id="percentPanel" style="display:none;">
@@ -108,22 +109,22 @@ document.querySelector('#app').innerHTML = `
           <button class="preset-btn" data-pct="75">75% smaller</button>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <label style="font-size:13px; color:#555; white-space:nowrap;">Custom %</label>
+          <label style="font-size:13px; color:#555; white-space:nowrap;">${t.resize_custom_pct}</label>
           <input type="number" id="customPct" min="1" max="1000" placeholder="e.g. 60" style="width:100px; padding:10px 12px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAF6EF;" />
-          <span style="font-size:13px; color:#9A8A7A;">of original size</span>
+          <span style="font-size:13px; color:#9A8A7A;">${t.resize_of_original}</span>
         </div>
       </div>
     </div>
 
-    <button id="resizeBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">Resize Images</button>
+    <button id="resizeBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.resize_btn}</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
 
     <div id="nextSteps" style="display:none; margin-top:20px;">
-      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">What's next?</div>
+      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="next-link" data-href="/compress">Compress Image</button>
-        <button class="next-link" data-href="/jpg-to-png">Convert to PNG</button>
-        <button class="next-link" data-href="/jpg-to-webp">Convert to WebP</button>
+        <button class="next-link" data-href="/compress">${t.next_compress}</button>
+        <button class="next-link" data-href="/jpg-to-png">${t.next_to_png}</button>
+        <button class="next-link" data-href="/jpg-to-webp">${t.next_to_webp}</button>
       </div>
     </div>
   </div>
@@ -131,53 +132,24 @@ document.querySelector('#app').innerHTML = `
   <hr class="seo-divider" />
 
   <div class="seo-section">
-
     <h2>How to Resize Images Without Uploading</h2>
     <ol>
       <li><strong>Select your images</strong> — click "Select Images" or drag and drop JPG or PNG files onto the page.</li>
       <li><strong>Set your dimensions</strong> — enter exact pixel dimensions or choose a percentage. Enable aspect ratio lock to scale proportionally.</li>
       <li><strong>Click Resize and download</strong> — your resized image is ready instantly. No upload, no waiting.</li>
     </ol>
-
     <h2>The Best Free Image Resizer That Doesn't Upload Your Files</h2>
     <p>Uploading images just to resize them is slow, unnecessary, and exposes your files to third-party servers. RelahConvert resizes images entirely in your browser — no upload, no server, no privacy risk. Whether you need a precise pixel dimension for a platform requirement or a quick percentage-based resize for web use, the entire process happens locally on your device in seconds.</p>
     <p>Designers resizing client mockups, developers preparing responsive images, bloggers optimizing featured images, and ecommerce sellers cropping product photos all need fast, private image resizing. This tool handles it instantly without requiring an account or subscription.</p>
-
     <h3>Why Resize Images?</h3>
     <p>Images that are too large slow down websites, fail platform upload requirements, and take too long to share by email. Resizing to the correct dimensions ensures your images load fast, display correctly, and meet the specs of every platform — from social media to print.</p>
-
     <h3>Frequently Asked Questions</h3>
-
-    <div class="faq-item">
-      <h4>How do I resize an image without losing quality?</h4>
-      <p>Reducing an image's dimensions generally preserves quality well. Avoid enlarging images beyond their original size as this reduces sharpness. Use the aspect ratio lock to prevent distortion when entering only one dimension.</p>
-    </div>
-
-    <div class="faq-item">
-      <h4>What is the best free image resizer that works in the browser?</h4>
-      <p>RelahConvert resizes images locally in your browser with no uploads, no watermarks, and no accounts — completely free. Your files never leave your device.</p>
-    </div>
-
-    <div class="faq-item">
-      <h4>Can I resize an image to exact pixels without uploading?</h4>
-      <p>Yes — enter your exact target width and height in pixels. Enable aspect ratio lock to scale proportionally from a single dimension.</p>
-    </div>
-
-    <div class="faq-item">
-      <h4>Can I resize by percentage instead of pixels?</h4>
-      <p>Yes — switch to "By Percentage" and enter your desired scale, or use the quick preset buttons for 25%, 50%, or 75% smaller.</p>
-    </div>
-
-    <div class="faq-item">
-      <h4>What formats are supported for resizing?</h4>
-      <p>JPG and PNG images are fully supported. The output format matches your input — JPG in, JPG out; PNG in, PNG out.</p>
-    </div>
-
-    <div class="faq-item">
-      <h4>Do you store my images?</h4>
-      <p>Never. All processing happens locally in your browser. Your images are not uploaded to any server, stored, or shared with anyone.</p>
-    </div>
-
+    <div class="faq-item"><h4>How do I resize an image without losing quality?</h4><p>Reducing an image's dimensions generally preserves quality well. Avoid enlarging images beyond their original size as this reduces sharpness. Use the aspect ratio lock to prevent distortion when entering only one dimension.</p></div>
+    <div class="faq-item"><h4>What is the best free image resizer that works in the browser?</h4><p>RelahConvert resizes images locally in your browser with no uploads, no watermarks, and no accounts — completely free. Your files never leave your device.</p></div>
+    <div class="faq-item"><h4>Can I resize an image to exact pixels without uploading?</h4><p>Yes — enter your exact target width and height in pixels. Enable aspect ratio lock to scale proportionally from a single dimension.</p></div>
+    <div class="faq-item"><h4>Can I resize by percentage instead of pixels?</h4><p>Yes — switch to "By Percentage" and enter your desired scale, or use the quick preset buttons for 25%, 50%, or 75% smaller.</p></div>
+    <div class="faq-item"><h4>What formats are supported for resizing?</h4><p>JPG and PNG images are fully supported. The output format matches your input — JPG in, JPG out; PNG in, PNG out.</p></div>
+    <div class="faq-item"><h4>Do you store my images?</h4><p>Never. All processing happens locally in your browser. Your images are not uploaded to any server, stored, or shared with anyone.</p></div>
     <h3>Also Try</h3>
     <div class="internal-links">
       <a href="/compress">Compress Image</a>
@@ -185,7 +157,6 @@ document.querySelector('#app').innerHTML = `
       <a href="/jpg-to-webp">JPG to WebP</a>
       <a href="/jpg-to-png">JPG to PNG</a>
     </div>
-
   </div>
 `
 
@@ -227,10 +198,7 @@ async function saveFilesToIDB(files) {
   const store = tx.objectStore('pending')
   store.clear()
   files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = resolve
-    tx.onerror = reject
-  })
+  return new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject })
 }
 
 async function loadPendingFiles() {
@@ -257,18 +225,13 @@ async function loadPendingFiles() {
 
 tabPixels.addEventListener('click', () => {
   activeTab = 'pixels'
-  tabPixels.classList.add('active')
-  tabPercent.classList.remove('active')
-  pixelsPanel.style.display = 'block'
-  percentPanel.style.display = 'none'
+  tabPixels.classList.add('active'); tabPercent.classList.remove('active')
+  pixelsPanel.style.display = 'block'; percentPanel.style.display = 'none'
 })
-
 tabPercent.addEventListener('click', () => {
   activeTab = 'percent'
-  tabPercent.classList.add('active')
-  tabPixels.classList.remove('active')
-  percentPanel.style.display = 'block'
-  pixelsPanel.style.display = 'none'
+  tabPercent.classList.add('active'); tabPixels.classList.remove('active')
+  percentPanel.style.display = 'block'; pixelsPanel.style.display = 'none'
 })
 
 document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -279,7 +242,6 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
     customPct.value = 100 - selectedPct
   })
 })
-
 customPct.addEventListener('input', () => {
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'))
   selectedPct = null
@@ -287,94 +249,64 @@ customPct.addEventListener('input', () => {
 
 let aspectRatio = null
 widthInput.addEventListener('input', () => {
-  if (aspectLock.checked && aspectRatio && widthInput.value) {
+  if (aspectLock.checked && aspectRatio && widthInput.value)
     heightInput.value = Math.round(widthInput.value / aspectRatio)
-  }
 })
 heightInput.addEventListener('input', () => {
-  if (aspectLock.checked && aspectRatio && heightInput.value) {
+  if (aspectLock.checked && aspectRatio && heightInput.value)
     widthInput.value = Math.round(heightInput.value * aspectRatio)
-  }
 })
 
 function cleanupOldUrl() {
   if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null }
 }
-
 function showWarning(msg) {
   warning.style.display = 'block'
   warning.textContent = msg
   setTimeout(() => { warning.style.display = 'none' }, 4000)
 }
-
 function setDisabled() {
-  resizeBtn.disabled = true
-  resizeBtn.textContent = 'Resize Images'
-  resizeBtn.style.background = '#C4B8A8'
-  resizeBtn.style.cursor = 'not-allowed'
-  resizeBtn.style.opacity = '0.7'
+  resizeBtn.disabled = true; resizeBtn.textContent = t.resize_btn
+  resizeBtn.style.background = '#C4B8A8'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '0.7'
 }
 function setIdle() {
-  resizeBtn.disabled = false
-  resizeBtn.textContent = 'Resize Images'
-  resizeBtn.style.background = '#C84B31'
-  resizeBtn.style.cursor = 'pointer'
-  resizeBtn.style.opacity = '1'
+  resizeBtn.disabled = false; resizeBtn.textContent = t.resize_btn
+  resizeBtn.style.background = '#C84B31'; resizeBtn.style.cursor = 'pointer'; resizeBtn.style.opacity = '1'
 }
 function setResizing() {
-  resizeBtn.disabled = true
-  resizeBtn.textContent = 'Resizing...'
-  resizeBtn.style.background = '#9A8A7A'
-  resizeBtn.style.cursor = 'not-allowed'
-  resizeBtn.style.opacity = '1'
+  resizeBtn.disabled = true; resizeBtn.textContent = t.resize_btn_loading
+  resizeBtn.style.background = '#9A8A7A'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '1'
 }
 
 function renderPreviews() {
   if (!selectedFiles.length) {
-    previewGrid.style.display = 'none'
-    previewGrid.innerHTML = ''
-    aspectRatio = null
-    return
+    previewGrid.style.display = 'none'; previewGrid.innerHTML = ''; aspectRatio = null; return
   }
-
   if (selectedFiles.length === 1) {
     const img = new Image()
     const url = URL.createObjectURL(selectedFiles[0])
-    img.onload = () => {
-      aspectRatio = img.width / img.height
-      widthInput.placeholder = img.width
-      heightInput.placeholder = img.height
-      URL.revokeObjectURL(url)
-    }
+    img.onload = () => { aspectRatio = img.width / img.height; widthInput.placeholder = img.width; heightInput.placeholder = img.height; URL.revokeObjectURL(url) }
     img.src = url
   }
-
   previewGrid.style.display = 'grid'
   previewGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))'
   previewGrid.style.gap = '12px'
-
   previewGrid.innerHTML = selectedFiles.map((f, i) => {
     const url = URL.createObjectURL(f)
-    return `
-      <div class="preview-card">
-        <img src="${url}" alt="${f.name}" onload="URL.revokeObjectURL(this.src)" />
-        <button class="remove-btn" data-index="${i}">✕</button>
-        <div class="fname">${f.name}</div>
-      </div>`
+    return `<div class="preview-card">
+      <img src="${url}" alt="${f.name}" onload="URL.revokeObjectURL(this.src)" />
+      <button class="remove-btn" data-index="${i}">✕</button>
+      <div class="fname">${f.name}</div>
+    </div>`
   }).join('')
-
   previewGrid.innerHTML += `
     <label id="addMoreBtn" for="fileInput" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:158px; border:2px dashed #CCC; border-radius:10px; cursor:pointer; color:#999; font-size:13px; gap:6px; transition:all 0.15s;">
-      <span style="font-size:28px;">+</span>
-      <span>Add more</span>
+      <span style="font-size:28px;">+</span><span>${t.add_more}</span>
     </label>`
-
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedFiles.splice(parseInt(btn.getAttribute('data-index')), 1)
-      cleanupOldUrl()
-      downloadLink.style.display = 'none'
-      nextSteps.style.display = 'none'
+      cleanupOldUrl(); downloadLink.style.display = 'none'; nextSteps.style.display = 'none'
       renderPreviews()
       if (selectedFiles.length) setIdle(); else setDisabled()
     })
@@ -385,28 +317,20 @@ function validateAndAdd(incoming) {
   const valid = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/png') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
   const wrongFormat = incoming.filter(f => f.type !== 'image/jpeg' && f.type !== 'image/png')
   const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/png') && f.size > LIMITS.MAX_PER_FILE_BYTES)
-
-  if (wrongFormat.length) showWarning(`Only JPG and PNG can be resized. ${wrongFormat.length} file(s) were skipped.`)
-  if (tooBig.length) showWarning(`${tooBig.length} file(s) are too large and were skipped.`)
-
+  if (wrongFormat.length) showWarning(`${t.warn_only_jpg_png} ${wrongFormat.length} ${t.warn_wrong_format}`)
+  if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
   const map = new Map()
   for (const f of [...selectedFiles, ...valid]) map.set(fileKey(f), f)
   let merged = Array.from(map.values())
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
-
   selectedFiles = merged
-  cleanupOldUrl()
-  downloadLink.style.display = 'none'
-  nextSteps.style.display = 'none'
+  cleanupOldUrl(); downloadLink.style.display = 'none'; nextSteps.style.display = 'none'
   renderPreviews()
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
 
-fileInput.addEventListener('change', () => {
-  validateAndAdd(Array.from(fileInput.files || []))
-  fileInput.value = ''
-})
+fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
@@ -418,16 +342,12 @@ async function resizeFile(file, targetW, targetH) {
       const img = new Image()
       img.onerror = () => reject(new Error('Image load failed'))
       img.onload = () => {
-        let w = targetW || img.width
-        let h = targetH || img.height
+        const w = targetW || img.width
+        const h = targetH || img.height
         const canvas = document.createElement('canvas')
-        canvas.width = w
-        canvas.height = h
+        canvas.width = w; canvas.height = h
         const ctx = canvas.getContext('2d')
-        if (file.type === 'image/jpeg') {
-          ctx.fillStyle = '#ffffff'
-          ctx.fillRect(0, 0, w, h)
-        }
+        if (file.type === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h) }
         ctx.drawImage(img, 0, 0, w, h)
         canvas.toBlob((blob) => {
           if (!blob) return reject(new Error('Resize failed'))
@@ -483,10 +403,7 @@ function bindNextSteps() {
     btn.addEventListener('click', async () => {
       const href = btn.getAttribute('data-href')
       if (!resizedBlobs.length) { window.location.href = href; return }
-      try {
-        await saveFilesToIDB(resizedBlobs)
-        sessionStorage.setItem('pendingFromIDB', '1')
-      } catch (e) {}
+      try { await saveFilesToIDB(resizedBlobs); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
       window.location.href = href
     })
   })
@@ -494,38 +411,27 @@ function bindNextSteps() {
 
 resizeBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) return
-
-  if (activeTab === 'pixels' && !widthInput.value && !heightInput.value) {
-    showWarning('Please enter a width or height.')
-    return
-  }
-  if (activeTab === 'percent' && !customPct.value) {
-    showWarning('Please enter a percentage.')
-    return
-  }
-
+  if (activeTab === 'pixels' && !widthInput.value && !heightInput.value) { showWarning(t.resize_warn_dims); return }
+  if (activeTab === 'percent' && !customPct.value) { showWarning(t.resize_warn_pct); return }
   setResizing()
   cleanupOldUrl()
   resizedBlobs = []
-  downloadLink.style.display = 'none'
-  nextSteps.style.display = 'none'
-
+  downloadLink.style.display = 'none'; nextSteps.style.display = 'none'
   try {
     if (selectedFiles.length === 1) {
       const dims = await getTargetDimensions(selectedFiles[0])
-      if (!dims) { showWarning('Invalid dimensions.'); setIdle(); return }
+      if (!dims) { showWarning(t.resize_warn_invalid); setIdle(); return }
       const { blob, filename, outputSize, type } = await resizeFile(selectedFiles[0], dims.w, dims.h)
       resizedBlobs = [{ blob, name: filename, type }]
       currentDownloadUrl = URL.createObjectURL(blob)
-      downloadLink.href = currentDownloadUrl
-      downloadLink.download = filename
+      downloadLink.href = currentDownloadUrl; downloadLink.download = filename
       downloadLink.style.display = 'block'
-      downloadLink.textContent = `Download (${formatSize(outputSize)})`
+      downloadLink.textContent = `${t.download} (${formatSize(outputSize)})`
     } else {
       const zip = new JSZip()
       const usedNames = new Set()
       for (let i = 0; i < selectedFiles.length; i++) {
-        resizeBtn.textContent = `Resizing ${i + 1}/${selectedFiles.length}...`
+        resizeBtn.textContent = `${t.resize_btn_loading} ${i + 1}/${selectedFiles.length}...`
         const dims = await getTargetDimensions(selectedFiles[i])
         if (!dims) continue
         const { blob, filename, type } = await resizeFile(selectedFiles[i], dims.w, dims.h)
@@ -535,10 +441,9 @@ resizeBtn.addEventListener('click', async () => {
       }
       const zipBlob = await zip.generateAsync({ type: 'blob' })
       currentDownloadUrl = URL.createObjectURL(zipBlob)
-      downloadLink.href = currentDownloadUrl
-      downloadLink.download = 'resized-images.zip'
+      downloadLink.href = currentDownloadUrl; downloadLink.download = 'resized-images.zip'
       downloadLink.style.display = 'block'
-      downloadLink.textContent = `Download ZIP (${formatSize(zipBlob.size)})`
+      downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
     }
     nextSteps.style.display = 'block'
     bindNextSteps()

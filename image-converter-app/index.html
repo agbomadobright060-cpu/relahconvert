@@ -291,13 +291,7 @@
           </svg>
           <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
         </a>
-        <nav class="desktop-nav">
-          <a href="/compress" class="nav-link">Compress Image</a>
-          <a href="/resize" class="nav-link">Resize Image</a>
-          <a href="/jpg-to-png" class="nav-link">JPG to PNG</a>
-          <a href="/jpg-to-pdf" class="nav-link">JPG to PDF</a>
-          <button class="more-btn" id="moreBtn">More Tools <span class="arrow">▼</span></button>
-        </nav>
+        <nav class="desktop-nav" id="desktopNav"></nav>
         <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -305,128 +299,121 @@
     </header>
 
     <div id="dropdown-menu">
-      <div class="dropdown-inner">
-        <a href="/jpg-to-png">🖼️ JPG to PNG</a>
-        <a href="/png-to-jpg">🖼️ PNG to JPG</a>
-        <a href="/jpg-to-webp">🔄 JPG to WebP</a>
-        <a href="/webp-to-jpg">🔄 WebP to JPG</a>
-        <a href="/png-to-webp">🔄 PNG to WebP</a>
-        <a href="/webp-to-png">🔄 WebP to PNG</a>
-        <a href="/compress">📦 Compress</a>
-        <a href="/resize">↔️ Resize</a>
-        <a href="/jpg-to-pdf">📄 JPG to PDF</a>
-        <a href="/png-to-pdf">📄 PNG to PDF</a>
-      </div>
+      <div class="dropdown-inner" id="dropdownInner"></div>
     </div>
 
     <section class="hero">
-      <div class="hero-badge">✦ Free · No Upload · Browser Only</div>
-      <h1>Every image tool<br>you need, <em>free</em></h1>
-      <p>Convert, compress, resize and export images instantly.<br>Your files never leave your device.</p>
+      <div class="hero-badge" id="heroBadge"></div>
+      <h1 id="heroTitle"></h1>
+      <p id="heroDesc"></p>
     </section>
 
     <section class="tools-section">
-      <div class="tools-grid">
-        <a href="/compress" class="tool-card">
-          <div class="icon">📦</div>
-          <h2>Compress Image</h2>
-          <p>Reduce file size of JPG, PNG and WebP images while maintaining quality.</p>
-        </a>
-        <a href="/resize" class="tool-card">
-          <div class="icon">↔️</div>
-          <h2>Resize Image</h2>
-          <p>Resize JPG and PNG images by pixels or percentage instantly.</p>
-        </a>
-        <a href="/jpg-to-png" class="tool-card">
-          <div class="icon">🖼️</div>
-          <h2>JPG to PNG</h2>
-          <p>Convert JPG images to PNG format free. No upload required.</p>
-        </a>
-        <a href="/png-to-jpg" class="tool-card">
-          <div class="icon">🖼️</div>
-          <h2>PNG to JPG</h2>
-          <p>Convert PNG images to JPG format free. No upload required.</p>
-        </a>
-        <a href="/jpg-to-webp" class="tool-card">
-          <div class="icon">🔄</div>
-          <h2>JPG to WebP</h2>
-          <p>Convert JPG images to WebP for smaller file sizes on the web.</p>
-        </a>
-        <a href="/webp-to-jpg" class="tool-card">
-          <div class="icon">🔄</div>
-          <h2>WebP to JPG</h2>
-          <p>Convert WebP images back to JPG format instantly.</p>
-        </a>
-        <a href="/png-to-webp" class="tool-card">
-          <div class="icon">🔄</div>
-          <h2>PNG to WebP</h2>
-          <p>Convert PNG images to WebP format free. No upload required.</p>
-        </a>
-        <a href="/webp-to-png" class="tool-card">
-          <div class="icon">🔄</div>
-          <h2>WebP to PNG</h2>
-          <p>Convert WebP images to PNG format free. No upload required.</p>
-        </a>
-        <a href="/jpg-to-pdf" class="tool-card">
-          <div class="icon">📄</div>
-          <h2>JPG to PDF</h2>
-          <p>Convert one or multiple JPG images to a PDF document instantly.</p>
-        </a>
-        <a href="/png-to-pdf" class="tool-card">
-          <div class="icon">📄</div>
-          <h2>PNG to PDF</h2>
-          <p>Convert one or multiple PNG images to a PDF document instantly.</p>
-        </a>
-      </div>
+      <div class="tools-grid" id="toolsGrid"></div>
     </section>
 
     <footer id="site-footer">
       <div class="footer-inner">
         <div class="footer-top">
           <div class="footer-col">
-            <h4>Company</h4>
+            <h4 id="footerCompany"></h4>
             <ul>
-              <li><a href="/about">About Us</a></li>
-              <li><a href="/contact">Contact Us</a></li>
+              <li><a href="/about" id="footerAbout"></a></li>
+              <li><a href="/contact" id="footerContact"></a></li>
             </ul>
           </div>
           <div class="footer-col">
-            <h4>Legal</h4>
+            <h4 id="footerLegal"></h4>
             <ul>
-              <li><a href="/privacy-policy">Privacy Policy</a></li>
-              <li><a href="/terms-and-conditions">Terms &amp; Conditions</a></li>
-              <li><a href="/cookies">Cookie Policy</a></li>
+              <li><a href="/privacy-policy" id="footerPrivacy"></a></li>
+              <li><a href="/terms-and-conditions" id="footerTerms"></a></li>
+              <li><a href="/cookies" id="footerCookies"></a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
-          <p class="footer-copy">© 2026 RelahConvert. All rights reserved.</p>
+          <p class="footer-copy" id="footerCopy"></p>
           <div class="footer-lang">
             <span>🌐</span>
-            <select class="lang-select" id="langSelect">
-              <option value="en">English</option>
-              <option value="fr">Français</option>
-              <option value="es">Español</option>
-              <option value="pt">Português</option>
-              <option value="de">Deutsch</option>
-              <option value="ar">العربية</option>
-            </select>
+            <select class="lang-select" id="langSelect"></select>
           </div>
         </div>
       </div>
     </footer>
 
-    <script>
+    <script type="module">
+      import { getLang, setLang, getT, supportedLangs, langLabels } from '/src/core/i18n.js'
+
+      const t = getT()
+      const currentLang = getLang()
+
+      // Nav
+      const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
+      const icons = {
+        'jpg-to-png': '🖼️', 'png-to-jpg': '🖼️', 'jpg-to-webp': '🔄',
+        'webp-to-jpg': '🔄', 'png-to-webp': '🔄', 'webp-to-png': '🔄',
+        'compress': '📦', 'resize': '↔️', 'jpg-to-pdf': '📄', 'png-to-pdf': '📄',
+      }
+      const allSlugs = ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','compress','resize','jpg-to-pdf','png-to-pdf']
+
+      document.getElementById('desktopNav').innerHTML =
+        mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
+        `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
+
+      document.getElementById('dropdownInner').innerHTML =
+        allSlugs.map(slug => `<a href="/${slug}">${icons[slug] || '🔧'} ${t.nav_short[slug]}</a>`).join('')
+
+      // Hero
+      document.getElementById('heroBadge').textContent = t.hero_badge
+      document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
+      document.getElementById('heroDesc').innerHTML = t.hero_desc
+
+      // Tool cards
+      const cardData = [
+        { href: '/compress', icon: '📦', title: t.nav_short['compress'], desc: t.card_compress_desc },
+        { href: '/resize',   icon: '↔️', title: t.nav_short['resize'],   desc: t.card_resize_desc },
+        { href: '/jpg-to-png', icon: '🖼️', title: t.nav_short['jpg-to-png'], desc: t.card_jpg_png_desc },
+        { href: '/png-to-jpg', icon: '🖼️', title: t.nav_short['png-to-jpg'], desc: t.card_png_jpg_desc },
+        { href: '/jpg-to-webp', icon: '🔄', title: t.nav_short['jpg-to-webp'], desc: t.card_jpg_webp_desc },
+        { href: '/webp-to-jpg', icon: '🔄', title: t.nav_short['webp-to-jpg'], desc: t.card_webp_jpg_desc },
+        { href: '/png-to-webp', icon: '🔄', title: t.nav_short['png-to-webp'], desc: t.card_png_webp_desc },
+        { href: '/webp-to-png', icon: '🔄', title: t.nav_short['webp-to-png'], desc: t.card_webp_png_desc },
+        { href: '/jpg-to-pdf', icon: '📄', title: t.nav_short['jpg-to-pdf'], desc: t.card_jpg_pdf_desc },
+        { href: '/png-to-pdf', icon: '📄', title: t.nav_short['png-to-pdf'], desc: t.card_png_pdf_desc },
+      ]
+      document.getElementById('toolsGrid').innerHTML = cardData.map(c => `
+        <a href="${c.href}" class="tool-card">
+          <div class="icon">${c.icon}</div>
+          <h2>${c.title}</h2>
+          <p>${c.desc}</p>
+        </a>`).join('')
+
+      // Footer
+      document.getElementById('footerCompany').textContent = t.footer_company
+      document.getElementById('footerAbout').textContent = t.footer_about
+      document.getElementById('footerContact').textContent = t.footer_contact
+      document.getElementById('footerLegal').textContent = t.footer_legal
+      document.getElementById('footerPrivacy').textContent = t.footer_privacy
+      document.getElementById('footerTerms').textContent = t.footer_terms
+      document.getElementById('footerCookies').textContent = t.footer_cookies
+      document.getElementById('footerCopy').textContent = t.footer_copy
+
+      // Language selector
+      const langSelect = document.getElementById('langSelect')
+      langSelect.innerHTML = supportedLangs.map(l =>
+        `<option value="${l}" ${l === currentLang ? 'selected' : ''}>${langLabels[l]}</option>`
+      ).join('')
+      langSelect.addEventListener('change', () => { setLang(langSelect.value); window.location.reload() })
+
+      // Dropdown toggle
       const moreBtn = document.getElementById('moreBtn')
       const hamburgerBtn = document.getElementById('hamburgerBtn')
       const dropdown = document.getElementById('dropdown-menu')
-
       function toggleDropdown(e) {
         e.stopPropagation()
         dropdown.classList.toggle('open')
         if (moreBtn) moreBtn.classList.toggle('open', dropdown.classList.contains('open'))
       }
-
       if (moreBtn) moreBtn.addEventListener('click', toggleDropdown)
       if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDropdown)
       document.addEventListener('click', () => {
@@ -434,11 +421,6 @@
         if (moreBtn) moreBtn.classList.remove('open')
       })
       dropdown.addEventListener('click', e => e.stopPropagation())
-
-      const langSelect = document.getElementById('langSelect')
-      if (langSelect) {
-        langSelect.addEventListener('change', () => { langSelect.value = 'en' })
-      }
     </script>
   </body>
 </html>
