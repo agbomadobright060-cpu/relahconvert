@@ -226,19 +226,31 @@ function buildSeoSection() {
   `
 }
 
-const toolTitle = isPng
-  ? (t.tool_title?.['png-to-pdf'] || `PNG <em style="font-style:italic; color:#C84B31;">to PDF</em>`)
-  : (t.tool_title?.['jpg-to-pdf'] || `JPG <em style="font-style:italic; color:#C84B31;">to PDF</em>`)
+// Translated title and description per language
+const pdfTitles = {
+  en: { jpg: 'JPG to PDF', png: 'PNG to PDF' },
+  fr: { jpg: 'JPG en PDF', png: 'PNG en PDF' },
+  es: { jpg: 'JPG a PDF', png: 'PNG a PDF' },
+  pt: { jpg: 'JPG para PDF', png: 'PNG para PDF' },
+  de: { jpg: 'JPG zu PDF', png: 'PNG zu PDF' },
+  ar: { jpg: 'JPG إلى PDF', png: 'PNG إلى PDF' },
+}
+const pdfDescs = {
+  en: { jpg: 'Convert JPG images to PDF. Files never leave your device.', png: 'Convert PNG images to PDF. Files never leave your device.' },
+  fr: { jpg: 'Convertissez des images JPG en PDF. Vos fichiers ne quittent jamais votre appareil.', png: 'Convertissez des images PNG en PDF. Vos fichiers ne quittent jamais votre appareil.' },
+  es: { jpg: 'Convierte imágenes JPG a PDF. Los archivos nunca salen de tu dispositivo.', png: 'Convierte imágenes PNG a PDF. Los archivos nunca salen de tu dispositivo.' },
+  pt: { jpg: 'Converta imagens JPG para PDF. Os arquivos nunca saem do seu dispositivo.', png: 'Converta imagens PNG para PDF. Os arquivos nunca saem do seu dispositivo.' },
+  de: { jpg: 'Konvertieren Sie JPG-Bilder in PDF. Ihre Dateien verlassen nie Ihr Gerät.', png: 'Konvertieren Sie PNG-Bilder in PDF. Ihre Dateien verlassen nie Ihr Gerät.' },
+  ar: { jpg: 'حوّل صور JPG إلى PDF. ملفاتك لا تغادر جهازك أبداً.', png: 'حوّل صور PNG إلى PDF. ملفاتك لا تغادر جهازك أبداً.' },
+}
+const _lang = getLang()
+const _key = isPng ? 'png' : 'jpg'
+const _titleText = (pdfTitles[_lang] || pdfTitles['en'])[_key]
+const toolDesc = (pdfDescs[_lang] || pdfDescs['en'])[_key]
 
-const toolDesc = isPng
-  ? (t.tool_desc?.['png-to-pdf'] || 'Convert PNG images to PDF. Files never leave your device.')
-  : (t.tool_desc?.['jpg-to-pdf'] || 'Convert JPG images to PDF. Files never leave your device.')
-
-// Build title HTML with em on last word
-const titleWords = toolTitle.split(' ')
-const titleHTML = titleWords.length > 1
-  ? titleWords.slice(0, -1).join(' ') + ` <em style="font-style:italic; color:#C84B31;">${titleWords[titleWords.length - 1]}</em>`
-  : `<em style="font-style:italic; color:#C84B31;">${toolTitle}</em>`
+// Build title HTML — last word in italic red
+const titleWords = _titleText.split(' ')
+const titleHTML = titleWords.slice(0, -1).join(' ') + ` <em style="font-style:italic; color:#C84B31;">${titleWords[titleWords.length - 1]}</em>`
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
