@@ -2,182 +2,132 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RelahConvert — Free Online Image Tools</title>
+    <title>RelahConvert Preview</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,900;1,9..144,900&family=DM+Sans:wght@400;500;600&display=swap">
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      html, body { min-height: 100vh; }
+      html, body { min-height: 100vh; font-family: 'DM Sans', sans-serif; background: #EEF1F8; overflow-x: hidden; }
+      a { text-decoration: none; color: inherit; }
 
-      body {
-        font-family: 'DM Sans', sans-serif;
-        display: flex;
-        flex-direction: column;
-        /* White center fading to blue-grey at edges — exactly like iLoveIMG */
-        background:
-          radial-gradient(ellipse 80% 60% at 15% 20%, rgba(180,190,255,0.35) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 50% at 90% 15%, rgba(190,185,255,0.3) 0%, transparent 55%),
-          radial-gradient(ellipse 70% 80% at 50% 50%, #ffffff 0%, #EEF1F8 60%, #E4E8F5 100%);
+      /* ══ PHOTO BLOCKS ══ */
+      .bg-canvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
       }
 
-      /* ── HEADER ── */
+      .photo-block {
+        position: absolute;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(80,100,180,0.13), 0 1px 4px rgba(0,0,0,0.07);
+        overflow: hidden;
+        opacity: 0.75;
+      }
+      .photo-block .img-area {
+        width: 100%;
+        height: 76%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--c1), var(--c2));
+      }
+      .photo-block .img-area svg { width: 52%; height: 52%; opacity: 0.55; }
+      .photo-block .caption-bar { height: 24%; background: #fff; }
+
+      /* LEFT SIDE */
+      .photo-block:nth-child(1) { width:105px; height:122px; top:8%;  left:30px; transform:rotate(-7deg); --c1:#a8d8ea; --c2:#6fa8d0; }
+      .photo-block:nth-child(2) { width:82px;  height:96px;  top:22%; left:90px; transform:rotate(5deg);  --c1:#ffd3a5; --c2:#fd9853; }
+      .photo-block:nth-child(3) { width:92px;  height:108px; top:46%; left:28px; transform:rotate(-4deg); --c1:#c3b1e1; --c2:#9b84d4; }
+      .photo-block:nth-child(4) { width:76px;  height:90px;  top:65%; left:85px; transform:rotate(7deg);  --c1:#a8e6cf; --c2:#56c596; }
+      .photo-block:nth-child(5) { width:98px;  height:114px; top:80%; left:32px; transform:rotate(-5deg); --c1:#ffc8c8; --c2:#ff8a8a; }
+
+      /* RIGHT SIDE */
+      .photo-block:nth-child(6) { width:100px; height:118px; top:7%;  right:32px; transform:rotate(6deg);  --c1:#ffeaa7; --c2:#fdcb6e; }
+      .photo-block:nth-child(7) { width:78px;  height:92px;  top:22%; right:88px; transform:rotate(-8deg); --c1:#a8d8ea; --c2:#6fb3d3; }
+      .photo-block:nth-child(8) { width:90px;  height:106px; top:47%; right:30px; transform:rotate(5deg);  --c1:#d4a5c9; --c2:#b56bab; }
+      .photo-block:nth-child(9) { width:74px;  height:88px;  top:66%; right:86px; transform:rotate(-6deg); --c1:#a8e6cf; --c2:#3dc78e; }
+      .photo-block:nth-child(10){ width:96px;  height:112px; top:81%; right:30px; transform:rotate(7deg);  --c1:#ffd3a5; --c2:#fd8c3c; }
+
+      /* Fade — less aggressive so blocks show */
+      .bg-fade {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        background: radial-gradient(ellipse 55% 70% at 50% 40%,
+          rgba(238,241,248,0) 10%,
+          rgba(238,241,248,0.55) 50%,
+          rgba(238,241,248,0.88) 72%
+        );
+      }
+
+      /* ══ HEADER ══ */
       #site-header {
         background: #fff;
-        border-bottom: 1px solid #E8E0D5;
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        border-bottom: 1px solid #E0E4EF;
+        position: sticky; top: 0; z-index: 200;
         box-shadow: 0 1px 6px rgba(0,0,0,0.05);
       }
       .header-inner {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 24px;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
+        max-width: 1100px; margin: 0 auto; padding: 0 24px;
+        height: 64px; display: flex; align-items: center;
+        justify-content: space-between; gap: 24px;
       }
       .logo {
-        font-family: 'Fraunces', serif;
-        font-size: 24px;
-        color: #2C1810;
+        font-family: 'Fraunces', serif; font-size: 24px;
+        letter-spacing: -0.02em; flex-shrink: 0;
+        display: flex; align-items: center; gap: 7px; line-height: 1;
         text-decoration: none;
-        letter-spacing: -0.02em;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        line-height: 1;
       }
-      .logo .relah   { font-weight: 400; color: #2C1810; }
+      .logo .relah   { font-weight: 300; font-style: normal; color: #2C1810; }
       .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
 
-      .desktop-nav { display: flex; align-items: center; gap: 0; }
+      .desktop-nav { display: flex; align-items: center; }
       .nav-link {
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #5A4A3A;
+        padding: 8px 14px; font-size: 12px; font-weight: 600;
+        letter-spacing: 0.05em; text-transform: uppercase;
+        color: #5A4A3A; transition: color 0.15s; white-space: nowrap;
         text-decoration: none;
-        transition: color 0.15s;
-        white-space: nowrap;
       }
       .nav-link:hover { color: #C84B31; }
       .more-btn {
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #5A4A3A;
-        background: none;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
+        padding: 8px 14px; font-size: 12px; font-weight: 600;
+        letter-spacing: 0.05em; text-transform: uppercase;
+        color: #5A4A3A; background: none; border: none; cursor: pointer;
+        display: flex; align-items: center; gap: 5px;
         font-family: 'DM Sans', sans-serif;
-        transition: color 0.15s;
-        white-space: nowrap;
       }
-      .more-btn:hover { color: #C84B31; }
-      .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
-      .more-btn.open .arrow { transform: rotate(180deg); }
-      .hamburger {
-        display: none;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 6px;
-        flex-direction: column;
-        gap: 5px;
-      }
-      .hamburger span { display: block; width: 22px; height: 2px; background: #2C1810; border-radius: 2px; }
 
-      /* ── DROPDOWN ── */
-      #dropdown-menu {
-        display: none;
-        position: fixed;
-        top: 64px; left: 0; right: 0;
-        background: #fff;
-        border-bottom: 1px solid #E8E0D5;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-        z-index: 99;
-        max-height: calc(100vh - 64px);
-        overflow-y: auto;
-      }
-      #dropdown-menu.open { display: block; }
-      .dropdown-inner {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 16px 24px;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 8px;
-      }
-      .dropdown-inner a {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #2C1810;
-        text-decoration: none;
-        transition: all 0.15s;
-      }
-      .dropdown-inner a:hover { background: #F5F0E8; color: #C84B31; }
-
-      /* ── HERO ── */
+      /* ══ HERO ══ */
       .hero {
-        text-align: center;
-        padding: 56px 16px 40px;
-        max-width: 700px;
-        margin: 0 auto;
-        position: relative;
-        z-index: 1;
+        text-align: center; padding: 60px 16px 44px;
+        max-width: 700px; margin: 0 auto;
+        position: relative; z-index: 2;
+      }
+      .hero-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #FDE8E3; color: #C84B31; font-size: 12px;
+        font-weight: 600; padding: 6px 14px; border-radius: 20px;
+        margin-bottom: 22px; letter-spacing: 0.04em;
       }
       .hero h1 {
         font-family: 'Fraunces', serif;
-        font-size: clamp(32px, 6vw, 52px);
-        font-weight: 900;
-        color: #2C1810;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
+        font-size: clamp(32px, 6vw, 52px); font-weight: 900;
+        color: #2C1810; line-height: 1.1; letter-spacing: -0.02em;
         margin-bottom: 14px;
       }
       .hero h1 em { font-style: italic; color: #C84B31; }
       .hero p { font-size: 15px; color: #7A6A5A; line-height: 1.6; }
-      .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #FDE8E3;
-        color: #C84B31;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 6px 14px;
-        border-radius: 20px;
-        margin-bottom: 20px;
-        letter-spacing: 0.04em;
-      }
 
-      /* ── TOOLS SECTION ── */
+      /* ══ TOOLS ══ */
       .tools-section {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 40px 24px 60px;
-        flex: 1;
-        width: 100%;
-        position: relative;
-        z-index: 1;
+        max-width: 1100px; margin: 0 auto;
+        padding: 32px 24px 60px;
+        position: relative; z-index: 2;
       }
       .tools-grid {
         display: grid;
@@ -185,14 +135,10 @@
         gap: 14px;
       }
       .tool-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 20px;
-        text-decoration: none;
+        background: #fff; border-radius: 14px; padding: 20px;
         border: 1.5px solid transparent;
         box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        transition: all 0.2s;
-        display: block;
+        transition: all 0.2s; display: block; text-decoration: none;
       }
       .tool-card:hover {
         border-color: #C84B31;
@@ -200,79 +146,53 @@
         transform: translateY(-2px);
       }
       .tool-card .icon {
-        width: 44px; height: 44px;
-        border-radius: 10px;
-        background: #FDE8E3;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        margin-bottom: 12px;
+        width: 44px; height: 44px; border-radius: 10px;
+        background: #FDE8E3; display: flex; align-items: center;
+        justify-content: center; font-size: 20px; margin-bottom: 12px;
       }
       .tool-card h2 {
-        font-family: 'Fraunces', serif;
-        font-size: 15px;
-        font-weight: 700;
-        color: #2C1810;
-        margin-bottom: 6px;
-        letter-spacing: -0.01em;
+        font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700;
+        color: #2C1810; margin-bottom: 6px; letter-spacing: -0.01em;
       }
       .tool-card p { font-size: 12px; color: #7A6A5A; line-height: 1.5; }
 
-      /* ── FOOTER ── */
-      #site-footer {
-        background: #2C1810;
-        color: #C8B8A8;
-        font-family: 'DM Sans', sans-serif;
-        margin-top: auto;
-        position: relative;
-        z-index: 1;
+      /* ══ FOOTER ══ */
+      footer {
+        background: #2C1810; color: #9A8A7A;
+        padding: 32px 24px; position: relative; z-index: 2;
       }
-      .footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px 32px; }
-      .footer-top {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        padding-bottom: 40px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
+      .footer-inner {
+        max-width: 1100px; margin: 0 auto;
+        display: flex; justify-content: space-between;
+        align-items: center; flex-wrap: wrap; gap: 16px;
       }
-      .footer-col h4 {
-        font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
-        text-transform: uppercase; color: #F5F0E8; margin: 0 0 16px;
+      .footer-logo {
+        font-family: 'Fraunces', serif; font-size: 20px; font-style: italic;
+        font-weight: 900; color: #C84B31;
       }
-      .footer-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-      .footer-col ul li a { font-size: 13px; color: #9A8A7A; text-decoration: none; transition: color 0.15s; }
-      .footer-col ul li a:hover { color: #F5F0E8; }
-      .footer-bottom {
-        display: flex; align-items: center; justify-content: space-between;
-        padding-top: 24px; gap: 16px; flex-wrap: wrap;
-      }
-      .footer-copy { font-size: 12px; color: #6A5A4A; }
-      .footer-lang { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6A5A4A; }
-      .lang-select {
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-        color: #C8B8A8; font-size: 12px; font-family: 'DM Sans', sans-serif;
-        padding: 5px 10px; border-radius: 6px; cursor: pointer; outline: none;
-      }
-      .lang-select:focus { border-color: #C84B31; }
-      .lang-select option { background: #2C1810; color: #C8B8A8; }
+      footer p { font-size: 12px; color: #6A5A4A; }
 
-      @media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
       @media (max-width: 768px) {
-        .desktop-nav { display: none; }
-        .hamburger { display: flex; }
-        .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .tool-card { padding: 14px; }
-        .tool-card .icon { width: 36px; height: 36px; font-size: 16px; margin-bottom: 8px; }
-        .tool-card h2 { font-size: 13px; }
-        .tool-card p { display: none; }
-        .hero { padding: 36px 16px 28px; }
-        .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; }
-        .footer-bottom { flex-direction: column; align-items: flex-start; }
+        .tools-grid { grid-template-columns: repeat(2, 1fr); }
+        .photo-block { opacity: 0.4; }
       }
     </style>
   </head>
   <body>
+
+    <div class="bg-canvas">
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 30 L15 15 L25 22 L35 10 L60 30Z" fill="rgba(255,255,255,0.7)"/><circle cx="48" cy="12" r="7" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 32 L20 18 L30 25 L42 12 L60 32Z" fill="rgba(255,255,255,0.7)"/><circle cx="45" cy="10" r="6" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 28 L18 16 L28 22 L40 8 L60 28Z" fill="rgba(255,255,255,0.7)"/><circle cx="50" cy="11" r="8" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 30 L12 14 L24 20 L38 9 L60 30Z" fill="rgba(255,255,255,0.7)"/><circle cx="46" cy="12" r="7" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 32 L16 17 L26 23 L36 11 L60 32Z" fill="rgba(255,255,255,0.7)"/><circle cx="49" cy="10" r="6" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 29 L14 15 L27 21 L39 8 L60 29Z" fill="rgba(255,255,255,0.7)"/><circle cx="47" cy="11" r="7" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 31 L17 16 L29 24 L41 10 L60 31Z" fill="rgba(255,255,255,0.7)"/><circle cx="48" cy="13" r="6" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 30 L13 14 L25 20 L37 9 L60 30Z" fill="rgba(255,255,255,0.7)"/><circle cx="50" cy="12" r="8" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 28 L19 15 L31 22 L43 10 L60 28Z" fill="rgba(255,255,255,0.7)"/><circle cx="44" cy="11" r="7" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+      <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 31 L15 16 L28 23 L40 11 L60 31Z" fill="rgba(255,255,255,0.7)"/><circle cx="46" cy="10" r="6" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
+    </div>
+    <div class="bg-fade"></div>
 
     <header id="site-header">
       <div class="header-inner">
@@ -283,130 +203,42 @@
           </svg>
           <span><span class="relah">relah</span><span class="convert">convert</span></span>
         </a>
-        <nav class="desktop-nav" id="desktopNav"></nav>
-        <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
+        <nav class="desktop-nav">
+          <a href="#" class="nav-link">Compress Image</a>
+          <a href="#" class="nav-link">Resize Image</a>
+          <a href="#" class="nav-link">JPG to PNG</a>
+          <a href="#" class="nav-link">JPG to PDF</a>
+          <button class="more-btn">More Tools ▼</button>
+        </nav>
       </div>
     </header>
 
-    <div id="dropdown-menu">
-      <div class="dropdown-inner" id="dropdownInner"></div>
-    </div>
-
     <section class="hero">
-      <div class="hero-badge" id="heroBadge"></div>
-      <h1 id="heroTitle"></h1>
-      <p id="heroDesc"></p>
+      <div class="hero-badge">✦ Free · No Upload · Browser Only</div>
+      <h1>Every image tool<br>you need, <em>free</em></h1>
+      <p>Convert, compress, resize and export images instantly. Your files never leave your device.</p>
     </section>
 
     <section class="tools-section">
-      <div class="tools-grid" id="toolsGrid"></div>
+      <div class="tools-grid">
+        <a href="#" class="tool-card"><div class="icon">📦</div><h2>Compress Image</h2><p>Reduce file size of JPG, PNG and WebP images while maintaining quality.</p></a>
+        <a href="#" class="tool-card"><div class="icon">↔️</div><h2>Resize Image</h2><p>Resize JPG and PNG images by pixels or percentage instantly.</p></a>
+        <a href="#" class="tool-card"><div class="icon">🖼️</div><h2>JPG to PNG</h2><p>Convert JPG images to PNG format free. No upload required.</p></a>
+        <a href="#" class="tool-card"><div class="icon">🖼️</div><h2>PNG to JPG</h2><p>Convert PNG images to JPG format free. No upload required.</p></a>
+        <a href="#" class="tool-card"><div class="icon">🔄</div><h2>JPG to WebP</h2><p>Convert JPG images to WebP for smaller file sizes on the web.</p></a>
+        <a href="#" class="tool-card"><div class="icon">🔄</div><h2>WebP to JPG</h2><p>Convert WebP images back to JPG format instantly.</p></a>
+        <a href="#" class="tool-card"><div class="icon">🔄</div><h2>PNG to WebP</h2><p>Convert PNG images to WebP format free. No upload required.</p></a>
+        <a href="#" class="tool-card"><div class="icon">🔄</div><h2>WebP to PNG</h2><p>Convert WebP images to PNG format free. No upload required.</p></a>
+        <a href="#" class="tool-card"><div class="icon">📄</div><h2>JPG to PDF</h2><p>Convert one or multiple JPG images to a PDF document instantly.</p></a>
+        <a href="#" class="tool-card"><div class="icon">📄</div><h2>PNG to PDF</h2><p>Convert one or multiple PNG images to a PDF document instantly.</p></a>
+      </div>
     </section>
 
-    <footer id="site-footer">
+    <footer>
       <div class="footer-inner">
-        <div class="footer-top">
-          <div class="footer-col">
-            <h4 id="footerCompany"></h4>
-            <ul>
-              <li><a href="/about" id="footerAbout"></a></li>
-              <li><a href="/contact" id="footerContact"></a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4 id="footerLegal"></h4>
-            <ul>
-              <li><a href="/privacy-policy" id="footerPrivacy"></a></li>
-              <li><a href="/terms-and-conditions" id="footerTerms"></a></li>
-              <li><a href="/cookies" id="footerCookies"></a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p class="footer-copy" id="footerCopy"></p>
-          <div class="footer-lang">
-            <span>🌐</span>
-            <select class="lang-select" id="langSelect"></select>
-          </div>
-        </div>
+        <span class="footer-logo">relahconvert</span>
+        <p>© 2025 RelahConvert. Free image tools, no upload required.</p>
       </div>
     </footer>
-
-    <script type="module">
-      import { getLang, setLang, getT, supportedLangs, langLabels } from '/src/core/i18n.js'
-
-      const t = getT()
-      const currentLang = getLang()
-
-      const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
-      const icons = {
-        'jpg-to-png': '🖼️', 'png-to-jpg': '🖼️', 'jpg-to-webp': '🔄',
-        'webp-to-jpg': '🔄', 'png-to-webp': '🔄', 'webp-to-png': '🔄',
-        'compress': '📦', 'resize': '↔️', 'jpg-to-pdf': '📄', 'png-to-pdf': '📄',
-      }
-      const allSlugs = ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','compress','resize','jpg-to-pdf','png-to-pdf']
-
-      document.getElementById('desktopNav').innerHTML =
-        mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
-        `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
-
-      document.getElementById('dropdownInner').innerHTML =
-        allSlugs.map(slug => `<a href="/${slug}">${icons[slug] || '🔧'} ${t.nav_short[slug]}</a>`).join('')
-
-      document.getElementById('heroBadge').textContent = t.hero_badge
-      document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
-      document.getElementById('heroDesc').innerHTML = t.hero_desc
-
-      const cardData = [
-        { href: '/compress',    icon: '📦', title: t.nav_short['compress'],    desc: t.card_compress_desc },
-        { href: '/resize',      icon: '↔️', title: t.nav_short['resize'],      desc: t.card_resize_desc },
-        { href: '/jpg-to-png',  icon: '🖼️', title: t.nav_short['jpg-to-png'],  desc: t.card_jpg_png_desc },
-        { href: '/png-to-jpg',  icon: '🖼️', title: t.nav_short['png-to-jpg'],  desc: t.card_png_jpg_desc },
-        { href: '/jpg-to-webp', icon: '🔄', title: t.nav_short['jpg-to-webp'], desc: t.card_jpg_webp_desc },
-        { href: '/webp-to-jpg', icon: '🔄', title: t.nav_short['webp-to-jpg'], desc: t.card_webp_jpg_desc },
-        { href: '/png-to-webp', icon: '🔄', title: t.nav_short['png-to-webp'], desc: t.card_png_webp_desc },
-        { href: '/webp-to-png', icon: '🔄', title: t.nav_short['webp-to-png'], desc: t.card_webp_png_desc },
-        { href: '/jpg-to-pdf',  icon: '📄', title: t.nav_short['jpg-to-pdf'],  desc: t.card_jpg_pdf_desc },
-        { href: '/png-to-pdf',  icon: '📄', title: t.nav_short['png-to-pdf'],  desc: t.card_png_pdf_desc },
-      ]
-      document.getElementById('toolsGrid').innerHTML = cardData.map(c => `
-        <a href="${c.href}" class="tool-card">
-          <div class="icon">${c.icon}</div>
-          <h2>${c.title}</h2>
-          <p>${c.desc}</p>
-        </a>`).join('')
-
-      document.getElementById('footerCompany').textContent = t.footer_company
-      document.getElementById('footerAbout').textContent   = t.footer_about
-      document.getElementById('footerContact').textContent = t.footer_contact
-      document.getElementById('footerLegal').textContent   = t.footer_legal
-      document.getElementById('footerPrivacy').textContent = t.footer_privacy
-      document.getElementById('footerTerms').textContent   = t.footer_terms
-      document.getElementById('footerCookies').textContent = t.footer_cookies
-      document.getElementById('footerCopy').textContent    = t.footer_copy
-
-      const langSelect = document.getElementById('langSelect')
-      langSelect.innerHTML = supportedLangs.map(l =>
-        `<option value="${l}" ${l === currentLang ? 'selected' : ''}>${langLabels[l]}</option>`
-      ).join('')
-      langSelect.addEventListener('change', () => { setLang(langSelect.value); window.location.reload() })
-
-      const moreBtn      = document.getElementById('moreBtn')
-      const hamburgerBtn = document.getElementById('hamburgerBtn')
-      const dropdown     = document.getElementById('dropdown-menu')
-      function toggleDropdown(e) {
-        e.stopPropagation()
-        dropdown.classList.toggle('open')
-        if (moreBtn) moreBtn.classList.toggle('open', dropdown.classList.contains('open'))
-      }
-      if (moreBtn) moreBtn.addEventListener('click', toggleDropdown)
-      hamburgerBtn.addEventListener('click', toggleDropdown)
-      document.addEventListener('click', () => {
-        dropdown.classList.remove('open')
-        if (moreBtn) moreBtn.classList.remove('open')
-      })
-      dropdown.addEventListener('click', e => e.stopPropagation())
-    </script>
   </body>
 </html>
