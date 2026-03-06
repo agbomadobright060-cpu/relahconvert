@@ -2,12 +2,12 @@ import { injectHeader } from './core/header.js'
 import { formatSize, fileKey, totalBytes, sanitizeBaseName, LIMITS } from './core/utils.js'
 import { getT } from './core/i18n.js'
 import { jsPDF } from 'jspdf'
+import exifr from 'exifr'
 
 export function initImageToPdf({ slug: _slug } = {}) {
   const bg = '#F2F2F2'
   const t = getT()
 
-  // Detect which PDF tool we're on
   const isPng = (_slug || window.location.pathname).includes('png-to-pdf')
   const inputMime = isPng ? 'image/png' : 'image/jpeg'
   const inputLabel = isPng ? 'PNG' : 'JPG'
@@ -37,7 +37,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
       .mode-btn { flex:1; padding:10px; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; background:transparent; color:#9A8A7A; }
       .mode-btn.active { background:#C84B31; color:#fff; }
       .mode-btn:not(.active):hover { background:#F0E8DF; color:#2C1810; }
-      /* ── Page settings panel ── */
       .settings-panel { background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:12px; }
       .settings-label { font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; }
       .settings-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -47,7 +46,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
       .seg-btn { flex:1; padding:6px 4px; border:none; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; background:transparent; color:#9A8A7A; transition:all 0.15s; white-space:nowrap; }
       .seg-btn.active { background:#C84B31; color:#fff; box-shadow:0 1px 4px rgba(200,75,49,0.25); }
       .seg-btn:not(.active):hover { background:#EDE5DA; color:#2C1810; }
-      /* ── SEO ── */
       .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
       .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
       .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -74,83 +72,39 @@ export function initImageToPdf({ slug: _slug } = {}) {
   // PAGE SETTINGS STATE
   // ─────────────────────────────────────────────
   const pageSettings = {
-    orientation: 'portrait',   // 'portrait' | 'landscape'
-    size: 'fit',               // 'fit' | 'a4' | 'letter'
-    margin: 'none',            // 'none' | 'small' | 'big'
+    orientation: 'portrait',
+    size: 'fit',
+    margin: 'none',
   }
 
-  // Margin in mm
   const MARGIN_MM = { none: 0, small: 8, big: 20 }
-
-  // Fixed page dimensions in mm (portrait; swap for landscape)
-  const PAGE_DIMS_MM = {
-    fit:    null,          // computed from image
-    a4:     [210, 297],
-    letter: [215.9, 279.4],
-  }
+  const PAGE_DIMS_MM = { fit: null, a4: [210, 297], letter: [215.9, 279.4] }
 
   // ─────────────────────────────────────────────
-  // EXIF ROTATION READER
-  // Returns rotation angle: 0 | 90 | 180 | 270
+  // EXIF ROTATION via exifr (handles all phones)
   // ─────────────────────────────────────────────
-  function getExifRotation(arrayBuffer) {
+  async function getRotationDeg(file) {
     try {
-      const view = new DataView(arrayBuffer)
-      // Must be JPEG (SOI marker 0xFFD8)
-      if (view.byteLength < 4 || view.getUint16(0) !== 0xFFD8) return 0
-
-      let offset = 2
-      while (offset + 4 <= view.byteLength) {
-        if (view.getUint8(offset) !== 0xFF) break
-        const marker = view.getUint8(offset + 1)
-        const segLen = view.getUint16(offset + 2)
-
-        // APP1 (0xE1) — may contain EXIF
-        if (marker === 0xE1 && segLen > 6) {
-          // Check for "Exif\0\0" header at offset+4
-          const exifMagic = view.getUint32(offset + 4)
-          if (exifMagic === 0x45786966) { // "Exif"
-            const tiffBase = offset + 10
-            if (tiffBase + 8 > view.byteLength) break
-            const byteOrder = view.getUint16(tiffBase)
-            const le = byteOrder === 0x4949  // little-endian ('II')
-            const r16 = (o) => le ? view.getUint16(o, true) : view.getUint16(o, false)
-            const r32 = (o) => le ? view.getUint32(o, true) : view.getUint32(o, false)
-
-            const ifdOffset = tiffBase + r32(tiffBase + 4)
-            if (ifdOffset + 2 > view.byteLength) break
-            const numEntries = r16(ifdOffset)
-
-            for (let i = 0; i < numEntries; i++) {
-              const entryBase = ifdOffset + 2 + i * 12
-              if (entryBase + 12 > view.byteLength) break
-              if (r16(entryBase) === 0x0112) { // Orientation tag
-                const val = r16(entryBase + 8)
-                return { 1: 0, 3: 180, 6: 90, 8: 270 }[val] || 0
-              }
-            }
-          }
-        }
-        offset += 2 + segLen
-      }
-    } catch (_) { /* non-JPEG or unreadable — ignore */ }
-    return 0
+      const result = await exifr.rotation(file)
+      return result?.deg ?? 0
+    } catch (_) {
+      return 0
+    }
   }
 
   // ─────────────────────────────────────────────
   // DRAW IMAGE ONTO CANVAS WITH ROTATION
-  // Returns the corrected { dataURL, naturalW, naturalH }
   // ─────────────────────────────────────────────
-  function drawRotatedToCanvas(imgEl, rotation) {
+  function drawRotatedToCanvas(imgEl, deg) {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
     const w = imgEl.naturalWidth, h = imgEl.naturalHeight
-    const swapped = rotation === 90 || rotation === 270
+    const swapped = deg === 90 || deg === 270
     canvas.width  = swapped ? h : w
     canvas.height = swapped ? w : h
     ctx.save()
     ctx.translate(canvas.width / 2, canvas.height / 2)
-    ctx.rotate((rotation * Math.PI) / 180)
+    ctx.rotate((deg * Math.PI) / 180)
     ctx.drawImage(imgEl, -w / 2, -h / 2)
     ctx.restore()
     return {
@@ -161,61 +115,42 @@ export function initImageToPdf({ slug: _slug } = {}) {
   }
 
   // ─────────────────────────────────────────────
-  // LOAD IMAGE FILE → { imgEl, rotation, corrected }
+  // LOAD + EXIF-CORRECT IMAGE
   // ─────────────────────────────────────────────
-  function loadAndCorrectImage(file) {
+  async function loadAndCorrectImage(file) {
+    const deg = await getRotationDeg(file)
     return new Promise((resolve, reject) => {
-      // Step 1: read ArrayBuffer for EXIF
-      const abReader = new FileReader()
-      abReader.onerror = () => reject(new Error('File read failed'))
-      abReader.onload = (abEvent) => {
-        const rotation = getExifRotation(abEvent.target.result)
-
-        // Step 2: load as dataURL for drawing
-        const urlReader = new FileReader()
-        urlReader.onerror = () => reject(new Error('File read failed'))
-        urlReader.onload = (urlEvent) => {
-          const imgEl = new Image()
-          imgEl.onerror = () => reject(new Error('Image load failed'))
-          imgEl.onload = () => {
-            const corrected = drawRotatedToCanvas(imgEl, rotation)
-            resolve(corrected)
-          }
-          imgEl.src = urlEvent.target.result
-        }
-        urlReader.readAsDataURL(file)
+      const reader = new FileReader()
+      reader.onerror = () => reject(new Error('File read failed'))
+      reader.onload = (e) => {
+        const imgEl = new Image()
+        imgEl.onerror = () => reject(new Error('Image load failed'))
+        imgEl.onload = () => resolve(drawRotatedToCanvas(imgEl, deg))
+        imgEl.src = e.target.result
       }
-      abReader.readAsArrayBuffer(file)
+      reader.readAsDataURL(file)
     })
   }
 
   // ─────────────────────────────────────────────
   // PDF BLOB BUILDER
-  // Applies page settings (orientation, size, margin)
   // ─────────────────────────────────────────────
   async function imageFilesToPdfBlob(files, onProgress) {
     const marginMm = MARGIN_MM[pageSettings.margin]
     const fmt = isPng ? 'PNG' : 'JPEG'
 
-    // Pre-load + EXIF-correct all images
     const corrected = []
     for (let i = 0; i < files.length; i++) {
       corrected.push(await loadAndCorrectImage(files[i]))
       onProgress?.(i + 1, files.length)
     }
 
-    // Build PDF
-    // We'll configure each page individually via addPage([w, h], orient)
     let doc = null
-
     for (let i = 0; i < corrected.length; i++) {
-      const { dataURL, w: imgPx, h: imgPx2 } = corrected[i]
-      const imgW = imgPx, imgH = imgPx2
+      const { dataURL, w: imgW, h: imgH } = corrected[i]
 
-      // ── Resolve page size ──
       let pgWmm, pgHmm
       if (pageSettings.size === 'fit') {
-        // Convert pixels → mm at 96 dpi (1 px = 0.2646 mm)
         const PX_TO_MM = 25.4 / 96
         pgWmm = imgW * PX_TO_MM
         pgHmm = imgH * PX_TO_MM
@@ -223,13 +158,11 @@ export function initImageToPdf({ slug: _slug } = {}) {
         ;[pgWmm, pgHmm] = PAGE_DIMS_MM[pageSettings.size]
       }
 
-      // ── Apply orientation ──
       const wantsLandscape = pageSettings.orientation === 'landscape'
       if ((wantsLandscape && pgHmm > pgWmm) || (!wantsLandscape && pgWmm > pgHmm)) {
         ;[pgWmm, pgHmm] = [pgHmm, pgWmm]
       }
 
-      // ── Init or add page ──
       const jsPdfOrient = pgWmm >= pgHmm ? 'l' : 'p'
       if (!doc) {
         doc = new jsPDF({ orientation: jsPdfOrient, unit: 'mm', format: [pgWmm, pgHmm], compress: true })
@@ -237,10 +170,9 @@ export function initImageToPdf({ slug: _slug } = {}) {
         doc.addPage([pgWmm, pgHmm], jsPdfOrient)
       }
 
-      // ── Place image with margin (fit-inside, centred) ──
       const usableW = pgWmm - marginMm * 2
       const usableH = pgHmm - marginMm * 2
-      const imgAr   = imgW / imgH
+      const imgAr = imgW / imgH
       let drawW = usableW, drawH = usableW / imgAr
       if (drawH > usableH) { drawH = usableH; drawW = usableH * imgAr }
       const x = marginMm + (usableW - drawW) / 2
@@ -252,7 +184,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
   }
 
   // ─────────────────────────────────────────────
-  // SEO CONTENT (unchanged from original)
+  // SEO
   // ─────────────────────────────────────────────
   const seoPdf = {
     en: {
@@ -420,7 +352,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
     `
   }
 
-  // Translated title and description per language
   const pdfTitles = {
     en: { jpg: 'JPG to PDF', png: 'PNG to PDF' },
     fr: { jpg: 'JPG en PDF', png: 'PNG en PDF' },
@@ -442,7 +373,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
   const _titleText = (pdfTitles[_lang] || pdfTitles['en'])[_key]
   const toolDesc = (pdfDescs[_lang] || pdfDescs['en'])[_key]
 
-  // Build title HTML — last word in italic red
   const titleWords = _titleText.split(' ')
   const titleHTML = titleWords.slice(0, -1).join(' ') + ` <em style="font-style:italic; color:#C84B31;">${titleWords[titleWords.length - 1]}</em>`
 
@@ -455,7 +385,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
         <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${titleHTML}</h1>
         <p style="font-size:13px; color:#7A6A5A; margin:0;">${toolDesc}</p>
       </div>
-
       <div id="uploadArea" style="margin-bottom:16px;">
         <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
           <span style="font-size:18px;">+</span> ${t.select_images}
@@ -463,15 +392,11 @@ export function initImageToPdf({ slug: _slug } = {}) {
         <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${t.drop_hint}</span>
       </div>
       <input type="file" id="fileInput" multiple accept="${inputMime === 'image/jpeg' ? 'image/jpeg' : 'image/png'}" style="display:none;" />
-
       <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
       <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
 
-      <!-- ── PDF OPTIONS ── -->
       <div class="settings-panel">
         <div class="settings-label">${t.pdf_options}</div>
-
-        <!-- Mode: one-per / all-in-one -->
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_mode_label ?? 'Pages'}</div>
           <div class="seg-group">
@@ -479,8 +404,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
             <button class="seg-btn" id="modeAll">${t.pdf_mode_all}</button>
           </div>
         </div>
-
-        <!-- Orientation -->
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_orientation ?? 'Orientation'}</div>
           <div class="seg-group" id="orientGroup">
@@ -488,8 +411,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
             <button class="seg-btn" data-val="landscape">${t.pdf_landscape ?? 'Landscape'}</button>
           </div>
         </div>
-
-        <!-- Page size -->
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_size ?? 'Page size'}</div>
           <div class="seg-group" id="sizeGroup">
@@ -498,8 +419,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
             <button class="seg-btn" data-val="letter">${t.pdf_size_letter ?? 'Letter'}</button>
           </div>
         </div>
-
-        <!-- Margin -->
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_margin ?? 'Margin'}</div>
           <div class="seg-group" id="marginGroup">
@@ -518,9 +437,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
 
   injectHeader()
 
-  // ─────────────────────────────────────────────
-  // ELEMENT REFS
-  // ─────────────────────────────────────────────
   const fileInput    = document.getElementById('fileInput')
   const convertBtn   = document.getElementById('convertBtn')
   const downloadArea = document.getElementById('downloadArea')
@@ -531,9 +447,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
 
   let selectedFiles = [], pdfMode = 'one', downloadUrls = []
 
-  // ─────────────────────────────────────────────
-  // SETTINGS SEGMENT GROUPS
-  // ─────────────────────────────────────────────
   function wireSegGroup(groupId, settingsKey) {
     document.getElementById(groupId).addEventListener('click', (e) => {
       const btn = e.target.closest('.seg-btn')
@@ -547,9 +460,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
   wireSegGroup('sizeGroup',   'size')
   wireSegGroup('marginGroup', 'margin')
 
-  // ─────────────────────────────────────────────
-  // BUTTON STATES
-  // ─────────────────────────────────────────────
   function setDisabled()   { convertBtn.disabled = true;  convertBtn.textContent = t.pdf_btn; convertBtn.style.background = '#C4B8A8'; convertBtn.style.cursor = 'not-allowed'; convertBtn.style.opacity = '0.7' }
   function setIdle()       { convertBtn.disabled = false; convertBtn.textContent = t.pdf_btn; convertBtn.style.background = '#C84B31'; convertBtn.style.cursor = 'pointer';     convertBtn.style.opacity = '1'   }
   function setConverting() { convertBtn.disabled = true;  convertBtn.textContent = t.pdf_btn_loading; convertBtn.style.background = '#9A8A7A'; convertBtn.style.cursor = 'not-allowed'; convertBtn.style.opacity = '1' }
@@ -557,15 +467,9 @@ export function initImageToPdf({ slug: _slug } = {}) {
   function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 4000) }
   function cleanupUrls()    { downloadUrls.forEach(u => URL.revokeObjectURL(u)); downloadUrls = [] }
 
-  // ─────────────────────────────────────────────
-  // PDF MODE TOGGLE
-  // ─────────────────────────────────────────────
   modeOne.addEventListener('click', () => { pdfMode = 'one'; modeOne.classList.add('active'); modeAll.classList.remove('active') })
   modeAll.addEventListener('click', () => { pdfMode = 'all'; modeAll.classList.add('active'); modeOne.classList.remove('active') })
 
-  // ─────────────────────────────────────────────
-  // PREVIEW RENDER
-  // ─────────────────────────────────────────────
   function renderPreviews() {
     if (!selectedFiles.length) { previewGrid.style.display = 'none'; previewGrid.innerHTML = ''; return }
     previewGrid.style.display = 'grid'
@@ -586,9 +490,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
     })
   }
 
-  // ─────────────────────────────────────────────
-  // FILE VALIDATION
-  // ─────────────────────────────────────────────
   function validateAndAdd(incoming) {
     const valid  = incoming.filter(f => f.type === inputMime && f.size <= LIMITS.MAX_PER_FILE_BYTES)
     const wrong  = incoming.filter(f => f.type !== inputMime)
@@ -610,15 +511,11 @@ export function initImageToPdf({ slug: _slug } = {}) {
   document.addEventListener('dragover', e => e.preventDefault())
   document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
-  // ─────────────────────────────────────────────
-  // CONVERT
-  // ─────────────────────────────────────────────
   convertBtn.addEventListener('click', async () => {
     if (!selectedFiles.length) return
     setConverting(); cleanupUrls(); downloadArea.innerHTML = ''; downloadArea.style.display = 'none'
     try {
       const links = []
-
       if (pdfMode === 'one') {
         for (let i = 0; i < selectedFiles.length; i++) {
           convertBtn.textContent = `${t.pdf_btn_loading} ${i + 1}/${selectedFiles.length}...`
@@ -628,15 +525,12 @@ export function initImageToPdf({ slug: _slug } = {}) {
           links.push({ url, name: `${base}.pdf`, size: blob.size })
         }
       } else {
-        let done = 0
         const blob = await imageFilesToPdfBlob(selectedFiles, (cur, total) => {
-          done = cur
           convertBtn.textContent = `${t.pdf_btn_loading} ${cur}/${total}...`
         })
         const url = URL.createObjectURL(blob); downloadUrls.push(url)
         links.push({ url, name: 'images.pdf', size: blob.size })
       }
-
       downloadArea.innerHTML = links.map(l =>
         `<a href="${l.url}" download="${l.name}" style="display:block; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;">${t.download} ${l.name} (${formatSize(l.size)})</a>`
       ).join('')
