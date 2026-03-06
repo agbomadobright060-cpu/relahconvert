@@ -81,12 +81,14 @@ export function initImageToPdf({ slug: _slug } = {}) {
   const PAGE_DIMS_MM = { fit: null, a4: [210, 297], letter: [215.9, 279.4] }
 
   // ─────────────────────────────────────────────
-  // EXIF ROTATION via exifr (handles all phones)
+  // EXIF ROTATION
+  // Uses exifr.parse with explicit Orientation tag —
+  // more reliable than exifr.rotation() for iPhones
   // ─────────────────────────────────────────────
   async function getRotationDeg(file) {
     try {
-      const result = await exifr.rotation(file)
-      return result?.deg ?? 0
+      const tags = await exifr.parse(file, ['Orientation'])
+      return { 1: 0, 3: 180, 6: 90, 8: 270 }[tags?.Orientation] ?? 0
     } catch (_) {
       return 0
     }
@@ -116,6 +118,9 @@ export function initImageToPdf({ slug: _slug } = {}) {
 
   // ─────────────────────────────────────────────
   // LOAD + EXIF-CORRECT IMAGE
+  // Detects if browser already auto-corrected the
+  // rotation (Chrome/Safari do this for iPhones)
+  // and avoids double-rotating in that case.
   // ─────────────────────────────────────────────
   async function loadAndCorrectImage(file) {
     const deg = await getRotationDeg(file)
@@ -125,7 +130,14 @@ export function initImageToPdf({ slug: _slug } = {}) {
       reader.onload = (e) => {
         const imgEl = new Image()
         imgEl.onerror = () => reject(new Error('Image load failed'))
-        imgEl.onload = () => resolve(drawRotatedToCanvas(imgEl, deg))
+        imgEl.onload = () => {
+          // If the EXIF says image is rotated 90/270 but the browser already
+          // corrected it, naturalWidth < naturalHeight (portrait). In that
+          // case the browser did the work — don't rotate again.
+          const browserAlreadyCorrected =
+            (deg === 90 || deg === 270) && imgEl.naturalWidth < imgEl.naturalHeight
+          resolve(drawRotatedToCanvas(imgEl, browserAlreadyCorrected ? 0 : deg))
+        }
         imgEl.src = e.target.result
       }
       reader.readAsDataURL(file)
