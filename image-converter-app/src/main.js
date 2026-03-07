@@ -10,8 +10,8 @@ const t = getT()
 const slug = currentTool ? currentTool.slug : ''
 
 const nextStepsMap = {
-  'image/png':  [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/png-to-pdf', label:t.next_to_pdf }],
-  'image/jpeg': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/jpg-to-pdf', label:t.next_to_pdf }],
+  'image/png':  [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize }],
+  'image/jpeg': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize }],
   'image/webp': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize }],
 }
 
@@ -59,24 +59,20 @@ if (document.head) {
   if (t.seo && t.seo[slug]) {
     const metaDesc = document.createElement('meta')
     metaDesc.name = 'description'
-    // Use English meta desc always for SEO
     const enSeo = { 'jpg-to-png':'Convert JPG to PNG free without uploading to a server. Browser-based JPG to PNG converter — your files never leave your device.','png-to-jpg':'Convert PNG to JPG free without uploading to a server. Browser-based PNG to JPG converter — your files never leave your device.','jpg-to-webp':'Convert JPG to WebP free without uploading to a server. Browser-based JPG to WebP converter — your files never leave your device.','webp-to-jpg':'Convert WebP to JPG free without uploading to a server. Browser-based WebP to JPG converter — your files never leave your device.','png-to-webp':'Convert PNG to WebP free without uploading to a server. Browser-based PNG to WebP converter — your files never leave your device.','webp-to-png':'Convert WebP to PNG free without uploading to a server. Browser-based WebP to PNG converter — your files never leave your device.' }
     metaDesc.content = enSeo[slug] || ''
     document.head.appendChild(metaDesc)
   }
 }
 
-// Get translated title parts
 function buildTitleHTML() {
   if (!currentTool) return 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'
   const translatedTitle = t.tool_title && t.tool_title[slug]
   if (translatedTitle) {
-    // Split at last word for em
     const words = translatedTitle.split(' ')
     const last = words.pop()
     return words.join(' ') + ' <em style="font-style:italic; color:#C84B31;">' + last + '</em>'
   }
-  // Fallback to original
   const parts = currentTool.title.split(' ')
   const last = parts.pop()
   return parts.join(' ') + ' <em style="font-style:italic; color:#C84B31;">' + last + '</em>'
@@ -85,7 +81,6 @@ function buildTitleHTML() {
 const titleHTML = buildTitleHTML()
 const descText = (t.tool_desc && t.tool_desc[slug]) || (currentTool ? currentTool.description : 'Convert images instantly. Files never leave your device.')
 
-// Related links (also convert) - always use translated nav_short labels
 const relatedLinksMap = {
   'jpg-to-png':  [{ href:'/webp-to-png', slug:'webp-to-png' }],
   'png-to-jpg':  [{ href:'/webp-to-jpg', slug:'webp-to-jpg' }],
