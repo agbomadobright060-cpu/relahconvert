@@ -30,22 +30,33 @@ function canvasToGifBlob(canvas) {
   const width = canvas.width
   const height = canvas.height
   const ctx = canvas.getContext('2d')
-  const imageData = ctx.getImageData(0, 0, width, height)
-  const data = imageData.data
 
-  // Convert RGBA to RGB for gifenc
-  const rgb = new Uint8Array(width * height * 3)
-  for (let i = 0; i < width * height; i++) {
-    rgb[i * 3 + 0] = data[i * 4 + 0]
-    rgb[i * 3 + 1] = data[i * 4 + 1]
-    rgb[i * 3 + 2] = data[i * 4 + 2]
+  // Fill white background before reading pixels (avoids transparent pixel issues)
+  const tmpCanvas = document.createElement('canvas')
+  tmpCanvas.width = width
+  tmpCanvas.height = height
+  const tmpCtx = tmpCanvas.getContext('2d')
+  tmpCtx.fillStyle = '#ffffff'
+  tmpCtx.fillRect(0, 0, width, height)
+  tmpCtx.drawImage(canvas, 0, 0)
+
+  const imageData = tmpCtx.getImageData(0, 0, width, height)
+  const rgba = imageData.data // Uint8ClampedArray, length = width * height * 4
+
+  // gifenc needs a Uint8Array of format [r,g,b, r,g,b, ...]
+  const pixelCount = width * height
+  const rgb = new Uint8Array(pixelCount * 3)
+  for (let i = 0; i < pixelCount; i++) {
+    rgb[i * 3 + 0] = rgba[i * 4 + 0]
+    rgb[i * 3 + 1] = rgba[i * 4 + 1]
+    rgb[i * 3 + 2] = rgba[i * 4 + 2]
   }
 
-  const palette = quantize(rgb, 256)
-  const index = applyPalette(rgb, palette)
+  const palette = quantize(rgb, 256, { format: 'rgb444' })
+  const index = applyPalette(rgb, palette, 'rgb444')
 
   const gif = GIFEncoder()
-  gif.writeFrame(index, width, height, { palette })
+  gif.writeFrame(index, width, height, { palette, delay: 0 })
   gif.finish()
 
   return new Blob([gif.bytes()], { type: 'image/gif' })
