@@ -1,5 +1,6 @@
 import JSZip from 'jszip'
 import { mimeToExt, mimeToLabel, sanitizeBaseName, uniqueName } from './utils.js'
+import { GIFEncoder, quantize, applyPalette } from 'gifenc'
 
 export function fileToImage(file) {
   return new Promise((resolve, reject) => {
@@ -24,49 +25,30 @@ export function canvasToBlob(canvas, mime, quality) {
   })
 }
 
-// ── ICO encoder ──────────────────────────────────────────────────────────────
-// Generates a valid .ico binary containing one 32x32 PNG image inside.
-async function canvasToIcoBlob(sourceCanvas) {
-  const SIZE = 32
-
-  // Draw source onto a 32x32 canvas
-  const canvas = document.createElement('canvas')
-  canvas.width = SIZE
-  canvas.height = SIZE
+// ── GIF encoder ──────────────────────────────────────────────────────────────
+function canvasToGifBlob(canvas) {
+  const width = canvas.width
+  const height = canvas.height
   const ctx = canvas.getContext('2d')
-  ctx.drawImage(sourceCanvas, 0, 0, SIZE, SIZE)
+  const imageData = ctx.getImageData(0, 0, width, height)
+  const data = imageData.data
 
-  // Get PNG blob of the 32x32 image
-  const pngBlob = await canvasToBlob(canvas, 'image/png', 1)
-  const pngBuffer = await pngBlob.arrayBuffer()
-  const pngBytes = new Uint8Array(pngBuffer)
+  // Convert RGBA to RGB for gifenc
+  const rgb = new Uint8Array(width * height * 3)
+  for (let i = 0; i < width * height; i++) {
+    rgb[i * 3 + 0] = data[i * 4 + 0]
+    rgb[i * 3 + 1] = data[i * 4 + 1]
+    rgb[i * 3 + 2] = data[i * 4 + 2]
+  }
 
-  // Build ICO file:
-  // ICONDIR (6 bytes) + ICONDIRENTRY (16 bytes) + PNG data
-  const icoSize = 6 + 16 + pngBytes.length
-  const buffer = new ArrayBuffer(icoSize)
-  const view = new DataView(buffer)
+  const palette = quantize(rgb, 256)
+  const index = applyPalette(rgb, palette)
 
-  // ICONDIR header
-  view.setUint16(0, 0, true)       // Reserved (must be 0)
-  view.setUint16(2, 1, true)       // Type: 1 = ICO
-  view.setUint16(4, 1, true)       // Number of images: 1
+  const gif = GIFEncoder()
+  gif.writeFrame(index, width, height, { palette })
+  gif.finish()
 
-  // ICONDIRENTRY
-  view.setUint8(6, SIZE)           // Width
-  view.setUint8(7, SIZE)           // Height
-  view.setUint8(8, 0)              // Color count (0 = more than 256)
-  view.setUint8(9, 0)              // Reserved
-  view.setUint16(10, 1, true)      // Color planes
-  view.setUint16(12, 32, true)     // Bits per pixel
-  view.setUint32(14, pngBytes.length, true) // Size of image data
-  view.setUint32(18, 22, true)     // Offset of image data (6 + 16 = 22)
-
-  // Copy PNG bytes into buffer
-  const icoBytes = new Uint8Array(buffer)
-  icoBytes.set(pngBytes, 22)
-
-  return new Blob([buffer], { type: 'image/x-icon' })
+  return new Blob([gif.bytes()], { type: 'image/gif' })
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -83,14 +65,14 @@ export async function convertFile(file, mime, quality) {
   ctx.drawImage(img, 0, 0)
 
   let blob
-  if (mime === 'image/x-icon') {
-    blob = await canvasToIcoBlob(canvas)
+  if (mime === 'image/gif') {
+    blob = canvasToGifBlob(canvas)
   } else {
     blob = await canvasToBlob(canvas, mime, quality)
   }
 
-  const ext = mime === 'image/x-icon' ? 'ico' : mimeToExt(mime)
-  const fmtLabel = mime === 'image/x-icon' ? 'ico' : mimeToLabel(mime).toLowerCase()
+  const ext = mime === 'image/gif' ? 'gif' : mimeToExt(mime)
+  const fmtLabel = mime === 'image/gif' ? 'gif' : mimeToLabel(mime).toLowerCase()
   const base = sanitizeBaseName(file.name)
   const filename = `${base}-converted-${fmtLabel}.${ext}`
 
@@ -100,8 +82,8 @@ export async function convertFile(file, mime, quality) {
 export async function convertFilesToZip(files, mime, quality, onProgress) {
   const zip = new JSZip()
   const usedNames = new Set()
-  const ext = mime === 'image/x-icon' ? 'ico' : mimeToExt(mime)
-  const fmtLabel = mime === 'image/x-icon' ? 'ico' : mimeToLabel(mime).toLowerCase()
+  const ext = mime === 'image/gif' ? 'gif' : mimeToExt(mime)
+  const fmtLabel = mime === 'image/gif' ? 'gif' : mimeToLabel(mime).toLowerCase()
   const convertedBlobs = []
 
   let totalOriginal = 0
@@ -125,8 +107,8 @@ export async function convertFilesToZip(files, mime, quality, onProgress) {
     ctx.drawImage(img, 0, 0)
 
     let blob
-    if (mime === 'image/x-icon') {
-      blob = await canvasToIcoBlob(canvas)
+    if (mime === 'image/gif') {
+      blob = canvasToGifBlob(canvas)
     } else {
       blob = await canvasToBlob(canvas, mime, quality)
     }

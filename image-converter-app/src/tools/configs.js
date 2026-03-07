@@ -76,12 +76,26 @@ export const tools = {
     outputFormat: 'image/jpeg',
     slug: 'gif-to-jpg'
   },
+  'gif-to-png': {
+    title: 'GIF to PNG Converter',
+    description: 'Convert GIF images to PNG format free. No upload required.',
+    inputFormats: ['image/gif'],
+    outputFormat: 'image/png',
+    slug: 'gif-to-png'
+  },
   'bmp-to-jpg': {
     title: 'BMP to JPG Converter',
     description: 'Convert BMP images to JPG format free. No upload required.',
     inputFormats: ['image/bmp'],
     outputFormat: 'image/jpeg',
     slug: 'bmp-to-jpg'
+  },
+  'bmp-to-png': {
+    title: 'BMP to PNG Converter',
+    description: 'Convert BMP images to PNG format free. No upload required.',
+    inputFormats: ['image/bmp'],
+    outputFormat: 'image/png',
+    slug: 'bmp-to-png'
   },
   'tiff-to-jpg': {
     title: 'TIFF to JPG Converter',
@@ -90,18 +104,18 @@ export const tools = {
     outputFormat: 'image/jpeg',
     slug: 'tiff-to-jpg'
   },
-  'png-to-ico': {
-    title: 'PNG to ICO Converter',
-    description: 'Convert PNG images to ICO format free. No upload required.',
-    inputFormats: ['image/png'],
-    outputFormat: 'image/x-icon',
-    slug: 'png-to-ico'
-  },
-  'jpg-to-ico': {
-    title: 'JPG to ICO Converter',
-    description: 'Convert JPG images to ICO format free. No upload required.',
+  'jpg-to-gif': {
+    title: 'JPG to GIF Converter',
+    description: 'Convert JPG images to GIF format free. No upload required.',
     inputFormats: ['image/jpeg'],
-    outputFormat: 'image/x-icon',
-    slug: 'jpg-to-ico'
+    outputFormat: 'image/gif',
+    slug: 'jpg-to-gif'
+  },
+  'png-to-gif': {
+    title: 'PNG to GIF Converter',
+    description: 'Convert PNG images to GIF format free. No upload required.',
+    inputFormats: ['image/png'],
+    outputFormat: 'image/gif',
+    slug: 'png-to-gif'
   },
 }
