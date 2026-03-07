@@ -179,18 +179,6 @@
 
       const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
 
-      const icons = {
-        'jpg-to-png':  '🖼️', 'png-to-jpg':  '🖼️',
-        'jpg-to-webp': '🔄', 'webp-to-jpg': '🔄',
-        'png-to-webp': '🔄', 'webp-to-png': '🔄',
-        'compress':    '📦', 'resize':       '↔️',
-        'jpg-to-pdf':  '📄', 'png-to-pdf':  '📄',
-        'gif-to-jpg':  '🎞️', 'gif-to-png':  '🎞️',
-        'bmp-to-jpg':  '🖼️', 'bmp-to-png':  '🖼️',
-        'tiff-to-jpg': '🖼️',
-        'jpg-to-gif':  '🎞️', 'png-to-gif':  '🎞️',
-      }
-
       const allSlugs = [
         'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
         'compress','resize','jpg-to-pdf','png-to-pdf',
@@ -201,9 +189,6 @@
       document.getElementById('desktopNav').innerHTML =
         mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
         `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
-
-      document.getElementById('dropdownInner').innerHTML =
-        allSlugs.map(slug => `<a href="/${slug}">${icons[slug] || '🔧'} ${t.nav_short[slug] || slug}</a>`).join('')
 
       document.getElementById('heroBadge').textContent = t.hero_badge
       document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
@@ -229,6 +214,17 @@
         'jpg-to-gif': { bg: '#FFFBEB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#F59E0B" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#D97706">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#D97706"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">GIF</text><path d="M18 20h4" stroke="#D97706" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'png-to-gif': { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="6" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">PNG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">GIF</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
       }
+
+      // Populate dropdown with SVG icons
+      document.getElementById('dropdownInner').innerHTML =
+        allSlugs.map(slug => {
+          const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
+          const svgSmall = ic.svg.replace('viewBox="0 0 40 40"', 'viewBox="0 0 40 40" width="18" height="18"')
+          return `<a href="/${slug}">
+            <span style="width:24px;height:24px;border-radius:6px;background:${ic.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${svgSmall}</span>
+            ${t.nav_short[slug] || slug}
+          </a>`
+        }).join('')
 
       const cardData = [
         { href: '/compress',    title: t.nav_short['compress'],    desc: t.card_compress_desc },
