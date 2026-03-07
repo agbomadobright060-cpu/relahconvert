@@ -16,6 +16,11 @@ export default defineConfig({
         resize: resolve(__dirname, 'resize.html'),
         'jpg-to-pdf': resolve(__dirname, 'jpg-to-pdf.html'),
         'png-to-pdf': resolve(__dirname, 'png-to-pdf.html'),
+        'gif-to-jpg': resolve(__dirname, 'gif-to-jpg.html'),
+        'bmp-to-jpg': resolve(__dirname, 'bmp-to-jpg.html'),
+        'tiff-to-jpg': resolve(__dirname, 'tiff-to-jpg.html'),
+        'png-to-ico': resolve(__dirname, 'png-to-ico.html'),
+        'jpg-to-ico': resolve(__dirname, 'jpg-to-ico.html'),
       }
     }
   }

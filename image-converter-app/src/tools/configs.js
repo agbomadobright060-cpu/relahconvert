@@ -68,5 +68,40 @@ export const tools = {
     inputFormats: ['image/png'],
     outputFormat: 'application/pdf',
     slug: 'png-to-pdf'
-  }
+  },
+  'gif-to-jpg': {
+    title: 'GIF to JPG Converter',
+    description: 'Convert GIF images to JPG format free. No upload required.',
+    inputFormats: ['image/gif'],
+    outputFormat: 'image/jpeg',
+    slug: 'gif-to-jpg'
+  },
+  'bmp-to-jpg': {
+    title: 'BMP to JPG Converter',
+    description: 'Convert BMP images to JPG format free. No upload required.',
+    inputFormats: ['image/bmp'],
+    outputFormat: 'image/jpeg',
+    slug: 'bmp-to-jpg'
+  },
+  'tiff-to-jpg': {
+    title: 'TIFF to JPG Converter',
+    description: 'Convert TIFF images to JPG format free. No upload required.',
+    inputFormats: ['image/tiff'],
+    outputFormat: 'image/jpeg',
+    slug: 'tiff-to-jpg'
+  },
+  'png-to-ico': {
+    title: 'PNG to ICO Converter',
+    description: 'Convert PNG images to ICO format free. No upload required.',
+    inputFormats: ['image/png'],
+    outputFormat: 'image/x-icon',
+    slug: 'png-to-ico'
+  },
+  'jpg-to-ico': {
+    title: 'JPG to ICO Converter',
+    description: 'Convert JPG images to ICO format free. No upload required.',
+    inputFormats: ['image/jpeg'],
+    outputFormat: 'image/x-icon',
+    slug: 'jpg-to-ico'
+  },
 }
