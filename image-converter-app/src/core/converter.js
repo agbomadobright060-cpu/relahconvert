@@ -26,37 +26,40 @@ export function canvasToBlob(canvas, mime, quality) {
 }
 
 // ── GIF encoder ──────────────────────────────────────────────────────────────
-function canvasToGifBlob(canvas) {
-  const width = canvas.width
-  const height = canvas.height
-  const ctx = canvas.getContext('2d')
+// GIF is a low-quality format — cap at 800px to keep memory manageable
+const GIF_MAX_SIZE = 800
 
-  // Fill white background before reading pixels (avoids transparent pixel issues)
+function canvasToGifBlob(sourceCanvas) {
+  let width = sourceCanvas.width
+  let height = sourceCanvas.height
+
+  // Scale down if too large
+  if (width > GIF_MAX_SIZE || height > GIF_MAX_SIZE) {
+    if (width > height) {
+      height = Math.round((height / width) * GIF_MAX_SIZE)
+      width = GIF_MAX_SIZE
+    } else {
+      width = Math.round((width / height) * GIF_MAX_SIZE)
+      height = GIF_MAX_SIZE
+    }
+  }
+
   const tmpCanvas = document.createElement('canvas')
   tmpCanvas.width = width
   tmpCanvas.height = height
   const tmpCtx = tmpCanvas.getContext('2d')
   tmpCtx.fillStyle = '#ffffff'
   tmpCtx.fillRect(0, 0, width, height)
-  tmpCtx.drawImage(canvas, 0, 0)
+  tmpCtx.drawImage(sourceCanvas, 0, 0, width, height)
 
   const imageData = tmpCtx.getImageData(0, 0, width, height)
-  const rgba = imageData.data // Uint8ClampedArray, length = width * height * 4
+  const data = new Uint8Array(imageData.data.buffer)
 
-  // gifenc needs a Uint8Array of format [r,g,b, r,g,b, ...]
-  const pixelCount = width * height
-  const rgb = new Uint8Array(pixelCount * 3)
-  for (let i = 0; i < pixelCount; i++) {
-    rgb[i * 3 + 0] = rgba[i * 4 + 0]
-    rgb[i * 3 + 1] = rgba[i * 4 + 1]
-    rgb[i * 3 + 2] = rgba[i * 4 + 2]
-  }
-
-  const palette = quantize(rgb, 256, { format: 'rgb444' })
-  const index = applyPalette(rgb, palette, 'rgb444')
+  const palette = quantize(data, 256)
+  const index = applyPalette(data, palette)
 
   const gif = GIFEncoder()
-  gif.writeFrame(index, width, height, { palette, delay: 0 })
+  gif.writeFrame(index, width, height, { palette })
   gif.finish()
 
   return new Blob([gif.bytes()], { type: 'image/gif' })
