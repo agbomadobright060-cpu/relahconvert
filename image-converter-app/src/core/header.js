@@ -251,11 +251,7 @@ export function injectHeader() {
   const badges = document.createElement('div')
   badges.id = 'feature-badges'
   badges.innerHTML = `
-    <span class="badge">✦ No Upload — Files Stay on Your Device</span>
-    <span class="sep">|</span>
-    <span class="badge">✦ Batch Processing — Up to 25 Files</span>
-    <span class="sep">|</span>
-    <span class="badge">✦ 100% Free — No Account Needed</span>
+    <span class="badge">✦ Batch Processing — Up to 25 Files at Once</span>
   `
 
   const currentLang = getLang()
