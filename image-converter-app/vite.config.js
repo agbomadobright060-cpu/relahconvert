@@ -23,6 +23,11 @@ export default defineConfig({
         'tiff-to-jpg': resolve(__dirname, 'tiff-to-jpg.html'),
         'jpg-to-gif':  resolve(__dirname, 'jpg-to-gif.html'),
         'png-to-gif':  resolve(__dirname, 'png-to-gif.html'),
+        'crop':        resolve(__dirname, 'crop.html'),
+        'rotate':      resolve(__dirname, 'rotate.html'),
+        'flip':        resolve(__dirname, 'flip.html'),
+        'grayscale':   resolve(__dirname, 'grayscale.html'),
+        'watermark':   resolve(__dirname, 'watermark.html'),
       }
     }
   }

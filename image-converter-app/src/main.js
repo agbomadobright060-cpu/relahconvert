@@ -10,9 +10,9 @@ const t = getT()
 const slug = currentTool ? currentTool.slug : ''
 
 const nextStepsMap = {
-  'image/png':  [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize }],
-  'image/jpeg': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize }],
-  'image/webp': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize }],
+  'image/png':  [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/crop', label:'Crop' },{ href:'/rotate', label:'Rotate' },{ href:'/flip', label:'Flip' },{ href:'/grayscale', label:'Grayscale' },{ href:'/watermark', label:'Watermark' }],
+  'image/jpeg': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/crop', label:'Crop' },{ href:'/rotate', label:'Rotate' },{ href:'/flip', label:'Flip' },{ href:'/grayscale', label:'Grayscale' },{ href:'/watermark', label:'Watermark' }],
+  'image/webp': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/crop', label:'Crop' },{ href:'/rotate', label:'Rotate' },{ href:'/flip', label:'Flip' },{ href:'/grayscale', label:'Grayscale' },{ href:'/watermark', label:'Watermark' }],
 }
 
 if (document.head) {

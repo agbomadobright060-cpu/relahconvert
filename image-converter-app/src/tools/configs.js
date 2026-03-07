@@ -118,4 +118,39 @@ export const tools = {
     outputFormat: 'image/gif',
     slug: 'png-to-gif'
   },
+  'crop': {
+    title: 'Crop Image',
+    description: 'Crop any image free. Drag to select area. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'crop'
+  },
+  'rotate': {
+    title: 'Rotate Image',
+    description: 'Rotate any image free. 90°, 180°, 270°. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'rotate'
+  },
+  'flip': {
+    title: 'Flip Image',
+    description: 'Flip any image horizontally or vertically free. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'flip'
+  },
+  'grayscale': {
+    title: 'Convert to Grayscale',
+    description: 'Convert any image to grayscale free. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'grayscale'
+  },
+  'watermark': {
+    title: 'Add Watermark',
+    description: 'Add text watermark to any image free. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'watermark'
+  },
 }
