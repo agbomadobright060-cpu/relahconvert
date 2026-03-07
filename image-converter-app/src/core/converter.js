@@ -2,6 +2,7 @@ import JSZip from 'jszip'
 import { mimeToExt, mimeToLabel, sanitizeBaseName, uniqueName } from './utils.js'
 import { GIFEncoder, quantize, applyPalette } from 'gifenc'
 import * as UTIF from 'utif'
+import { jsPDF } from 'jspdf'
 
 // ── TIFF decoder ──────────────────────────────────────────────────────────────
 // Browsers can't decode TIFF natively. UTIF decodes it to raw RGBA, then we
@@ -107,6 +108,20 @@ function canvasToGifBlob(sourceCanvas) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── PDF encoder ──────────────────────────────────────────────────────────────
+// canvas.toBlob() doesn't support application/pdf — use jsPDF instead
+function canvasToPdfBlob(canvas) {
+  const imgData = canvas.toDataURL('image/jpeg', 0.92)
+  const w = canvas.width
+  const h = canvas.height
+  // Set PDF page size to match image dimensions (in px → pt: 1px = 0.75pt)
+  const orientation = w > h ? 'landscape' : 'portrait'
+  const pdf = new jsPDF({ orientation, unit: 'px', format: [w, h] })
+  pdf.addImage(imgData, 'JPEG', 0, 0, w, h)
+  return pdf.output('blob')
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function convertFile(file, mime, quality) {
   const img = await fileToImage(file)
   const canvas = document.createElement('canvas')
@@ -122,12 +137,14 @@ export async function convertFile(file, mime, quality) {
   let blob
   if (mime === 'image/gif') {
     blob = canvasToGifBlob(canvas)
+  } else if (mime === 'application/pdf') {
+    blob = canvasToPdfBlob(canvas)
   } else {
     blob = await canvasToBlob(canvas, mime, quality)
   }
 
-  const ext = mime === 'image/gif' ? 'gif' : mimeToExt(mime)
-  const fmtLabel = mime === 'image/gif' ? 'gif' : mimeToLabel(mime).toLowerCase()
+  const ext = mime === 'image/gif' ? 'gif' : mime === 'application/pdf' ? 'pdf' : mimeToExt(mime)
+  const fmtLabel = mime === 'image/gif' ? 'gif' : mime === 'application/pdf' ? 'pdf' : mimeToLabel(mime).toLowerCase()
   const base = sanitizeBaseName(file.name)
   const filename = `${base}-converted-${fmtLabel}.${ext}`
 
@@ -137,8 +154,8 @@ export async function convertFile(file, mime, quality) {
 export async function convertFilesToZip(files, mime, quality, onProgress) {
   const zip = new JSZip()
   const usedNames = new Set()
-  const ext = mime === 'image/gif' ? 'gif' : mimeToExt(mime)
-  const fmtLabel = mime === 'image/gif' ? 'gif' : mimeToLabel(mime).toLowerCase()
+  const ext = mime === 'image/gif' ? 'gif' : mime === 'application/pdf' ? 'pdf' : mimeToExt(mime)
+  const fmtLabel = mime === 'image/gif' ? 'gif' : mime === 'application/pdf' ? 'pdf' : mimeToLabel(mime).toLowerCase()
   const convertedBlobs = []
 
   let totalOriginal = 0
@@ -164,6 +181,8 @@ export async function convertFilesToZip(files, mime, quality, onProgress) {
     let blob
     if (mime === 'image/gif') {
       blob = canvasToGifBlob(canvas)
+    } else if (mime === 'application/pdf') {
+      blob = canvasToPdfBlob(canvas)
     } else {
       blob = await canvasToBlob(canvas, mime, quality)
     }
