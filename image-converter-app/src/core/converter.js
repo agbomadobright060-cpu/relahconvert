@@ -24,6 +24,52 @@ export function canvasToBlob(canvas, mime, quality) {
   })
 }
 
+// ── ICO encoder ──────────────────────────────────────────────────────────────
+// Generates a valid .ico binary containing one 32x32 PNG image inside.
+async function canvasToIcoBlob(sourceCanvas) {
+  const SIZE = 32
+
+  // Draw source onto a 32x32 canvas
+  const canvas = document.createElement('canvas')
+  canvas.width = SIZE
+  canvas.height = SIZE
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(sourceCanvas, 0, 0, SIZE, SIZE)
+
+  // Get PNG blob of the 32x32 image
+  const pngBlob = await canvasToBlob(canvas, 'image/png', 1)
+  const pngBuffer = await pngBlob.arrayBuffer()
+  const pngBytes = new Uint8Array(pngBuffer)
+
+  // Build ICO file:
+  // ICONDIR (6 bytes) + ICONDIRENTRY (16 bytes) + PNG data
+  const icoSize = 6 + 16 + pngBytes.length
+  const buffer = new ArrayBuffer(icoSize)
+  const view = new DataView(buffer)
+
+  // ICONDIR header
+  view.setUint16(0, 0, true)       // Reserved (must be 0)
+  view.setUint16(2, 1, true)       // Type: 1 = ICO
+  view.setUint16(4, 1, true)       // Number of images: 1
+
+  // ICONDIRENTRY
+  view.setUint8(6, SIZE)           // Width
+  view.setUint8(7, SIZE)           // Height
+  view.setUint8(8, 0)              // Color count (0 = more than 256)
+  view.setUint8(9, 0)              // Reserved
+  view.setUint16(10, 1, true)      // Color planes
+  view.setUint16(12, 32, true)     // Bits per pixel
+  view.setUint32(14, pngBytes.length, true) // Size of image data
+  view.setUint32(18, 22, true)     // Offset of image data (6 + 16 = 22)
+
+  // Copy PNG bytes into buffer
+  const icoBytes = new Uint8Array(buffer)
+  icoBytes.set(pngBytes, 22)
+
+  return new Blob([buffer], { type: 'image/x-icon' })
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function convertFile(file, mime, quality) {
   const img = await fileToImage(file)
   const canvas = document.createElement('canvas')
@@ -36,9 +82,15 @@ export async function convertFile(file, mime, quality) {
   }
   ctx.drawImage(img, 0, 0)
 
-  const blob = await canvasToBlob(canvas, mime, quality)
-  const ext = mimeToExt(mime)
-  const fmtLabel = mimeToLabel(mime).toLowerCase()
+  let blob
+  if (mime === 'image/x-icon') {
+    blob = await canvasToIcoBlob(canvas)
+  } else {
+    blob = await canvasToBlob(canvas, mime, quality)
+  }
+
+  const ext = mime === 'image/x-icon' ? 'ico' : mimeToExt(mime)
+  const fmtLabel = mime === 'image/x-icon' ? 'ico' : mimeToLabel(mime).toLowerCase()
   const base = sanitizeBaseName(file.name)
   const filename = `${base}-converted-${fmtLabel}.${ext}`
 
@@ -48,8 +100,8 @@ export async function convertFile(file, mime, quality) {
 export async function convertFilesToZip(files, mime, quality, onProgress) {
   const zip = new JSZip()
   const usedNames = new Set()
-  const ext = mimeToExt(mime)
-  const fmtLabel = mimeToLabel(mime).toLowerCase()
+  const ext = mime === 'image/x-icon' ? 'ico' : mimeToExt(mime)
+  const fmtLabel = mime === 'image/x-icon' ? 'ico' : mimeToLabel(mime).toLowerCase()
   const convertedBlobs = []
 
   let totalOriginal = 0
@@ -72,7 +124,13 @@ export async function convertFilesToZip(files, mime, quality, onProgress) {
     }
     ctx.drawImage(img, 0, 0)
 
-    const blob = await canvasToBlob(canvas, mime, quality)
+    let blob
+    if (mime === 'image/x-icon') {
+      blob = await canvasToIcoBlob(canvas)
+    } else {
+      blob = await canvasToBlob(canvas, mime, quality)
+    }
+
     totalNew += blob.size
 
     const base = sanitizeBaseName(file.name)
