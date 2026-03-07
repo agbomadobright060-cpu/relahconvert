@@ -1,8 +1,49 @@
 import JSZip from 'jszip'
 import { mimeToExt, mimeToLabel, sanitizeBaseName, uniqueName } from './utils.js'
 import { GIFEncoder, quantize, applyPalette } from 'gifenc'
+import * as UTIF from 'utif'
+
+// ── TIFF decoder ──────────────────────────────────────────────────────────────
+// Browsers can't decode TIFF natively. UTIF decodes it to raw RGBA, then we
+// paint it onto a canvas so the rest of the pipeline works normally.
+function tiffFileToImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('File read failed'))
+    reader.onload = (e) => {
+      try {
+        const buffer = e.target.result
+        const ifds = UTIF.decode(buffer)
+        if (!ifds || ifds.length === 0) throw new Error('No TIFF pages found')
+        UTIF.decodeImage(buffer, ifds[0])
+        const ifd = ifds[0]
+        const rgba = UTIF.toRGBA8(ifd)
+        const width = ifd.width
+        const height = ifd.height
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        const imageData = ctx.createImageData(width, height)
+        imageData.data.set(rgba)
+        ctx.putImageData(imageData, 0, 0)
+        // Return a fake img-like object with the canvas as source
+        // We return the canvas directly — convertFile checks for this
+        resolve(canvas)
+      } catch (err) {
+        reject(new Error('TIFF decode failed: ' + err.message))
+      }
+    }
+    reader.readAsArrayBuffer(file)
+  })
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function fileToImage(file) {
+  // Route TIFF files through the UTIF decoder
+  if (file.type === 'image/tiff' || file.name.toLowerCase().match(/\.tiff?$/)) {
+    return tiffFileToImage(file)
+  }
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('File read failed'))
