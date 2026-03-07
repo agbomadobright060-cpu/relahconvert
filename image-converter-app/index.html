@@ -60,7 +60,8 @@
       .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
       .tool-card { background: #fff; border-radius: 14px; padding: 20px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; display: block; }
       .tool-card:hover { border-color: #C84B31; box-shadow: 0 4px 16px rgba(200,75,49,0.12); transform: translateY(-2px); }
-      .tool-card .icon { width: 44px; height: 44px; border-radius: 10px; background: #FDE8E3; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+      .tool-card .icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; overflow: hidden; flex-shrink: 0; }
+      .tool-card .icon svg { width: 36px; height: 36px; }
       .tool-card h2 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: #2C1810; margin-bottom: 6px; letter-spacing: -0.01em; }
       .tool-card p { font-size: 12px; color: #7A6A5A; line-height: 1.5; }
 
@@ -84,7 +85,8 @@
         .hamburger { display: flex; }
         .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .tool-card { padding: 14px; }
-        .tool-card .icon { width: 36px; height: 36px; font-size: 16px; margin-bottom: 8px; }
+        .tool-card .icon { width: 36px; height: 36px; margin-bottom: 8px; }
+        .tool-card .icon svg { width: 28px; height: 28px; }
         .tool-card h2 { font-size: 13px; }
         .tool-card p { display: none; }
         .hero { padding: 36px 16px 28px; }
@@ -207,32 +209,56 @@
       document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
       document.getElementById('heroDesc').innerHTML = t.hero_desc
 
+      // Colored SVG icons — distinct color + graphic per tool
+      const svgIcons = {
+        'compress':   { bg: '#E8F4FB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="#3B9ECC" opacity="0.2"/><path d="M20 12v8M20 20l-4 4M20 20l4 4" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 28h14" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round"/><path d="M16 14h-4v-4M24 14h4v-4" stroke="#3B9ECC" stroke-width="2" stroke-linecap="round"/></svg>` },
+        'resize':     { bg: '#FEF3E6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="12" width="24" height="16" rx="3" fill="#F59E0B" opacity="0.2"/><rect x="12" y="16" width="16" height="8" rx="2" fill="#F59E0B" opacity="0.3"/><path d="M10 20h6M30 20h-6M13 17l-3 3 3 3M27 17l3 3-3 3" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'jpg-to-png': { bg: '#F0FDF4', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#22C55E" opacity="0.3"/><text x="6.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#16A34A">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#16A34A"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'png-to-jpg': { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#FB923C" opacity="0.3"/><text x="6" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#EA580C">PNG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#EA580C"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'jpg-to-webp':{ bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#8B5CF6" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#7C3AED">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#7C3AED"/><text x="21.5" y="25" font-family="Arial" font-size="5.8" font-weight="800" fill="#fff">WebP</text><path d="M18 20h4" stroke="#7C3AED" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'webp-to-jpg':{ bg: '#FDF2F8', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#EC4899" opacity="0.3"/><text x="5" y="21" font-family="Arial" font-size="5.8" font-weight="800" fill="#DB2777">WebP</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#DB2777"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#DB2777" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#DB2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'png-to-webp':{ bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="6" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">PNG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="21.5" y="25" font-family="Arial" font-size="5.8" font-weight="800" fill="#fff">WebP</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'webp-to-png':{ bg: '#EFF6FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#3B82F6" opacity="0.3"/><text x="5" y="21" font-family="Arial" font-size="5.8" font-weight="800" fill="#2563EB">WebP</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#2563EB"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'jpg-to-pdf': { bg: '#FEF2F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#EF4444" opacity="0.2" stroke="#EF4444" stroke-width="2"/><path d="M24 6v7h7" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/><text x="12" y="28" font-family="Arial" font-size="7.5" font-weight="800" fill="#EF4444">PDF</text></svg>` },
+        'png-to-pdf': { bg: '#FFF1F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="2"/><path d="M24 6v7h7" stroke="#F43F5E" stroke-width="2" stroke-linecap="round"/><text x="12" y="28" font-family="Arial" font-size="7.5" font-weight="800" fill="#F43F5E">PDF</text></svg>` },
+        'gif-to-jpg': { bg: '#FFFBEB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#F59E0B" opacity="0.3"/><text x="6.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#D97706">GIF</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#D97706"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#D97706" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'gif-to-png': { bg: '#F0FDF4', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#22C55E" opacity="0.3"/><text x="6.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#16A34A">GIF</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#16A34A"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'bmp-to-jpg': { bg: '#EFF6FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#3B82F6" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#2563EB">BMP</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#2563EB"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'bmp-to-png': { bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#8B5CF6" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#7C3AED">BMP</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#7C3AED"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#7C3AED" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'tiff-to-jpg':{ bg: '#FDF4FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#D946EF" opacity="0.3"/><text x="5" y="21" font-family="Arial" font-size="6" font-weight="800" fill="#C026D3">TIFF</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#C026D3"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#C026D3" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#C026D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'jpg-to-gif': { bg: '#FFFBEB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#F59E0B" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#D97706">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#D97706"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">GIF</text><path d="M18 20h4" stroke="#D97706" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'png-to-gif': { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="6" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">PNG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">GIF</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+      }
+
       const cardData = [
-        { href: '/compress',    icon: '📦', title: t.nav_short['compress'],    desc: t.card_compress_desc },
-        { href: '/resize',      icon: '↔️', title: t.nav_short['resize'],      desc: t.card_resize_desc },
-        { href: '/jpg-to-png',  icon: '🖼️', title: t.nav_short['jpg-to-png'],  desc: t.card_jpg_png_desc },
-        { href: '/png-to-jpg',  icon: '🖼️', title: t.nav_short['png-to-jpg'],  desc: t.card_png_jpg_desc },
-        { href: '/jpg-to-webp', icon: '🔄', title: t.nav_short['jpg-to-webp'], desc: t.card_jpg_webp_desc },
-        { href: '/webp-to-jpg', icon: '🔄', title: t.nav_short['webp-to-jpg'], desc: t.card_webp_jpg_desc },
-        { href: '/png-to-webp', icon: '🔄', title: t.nav_short['png-to-webp'], desc: t.card_png_webp_desc },
-        { href: '/webp-to-png', icon: '🔄', title: t.nav_short['webp-to-png'], desc: t.card_webp_png_desc },
-        { href: '/jpg-to-pdf',  icon: '📄', title: t.nav_short['jpg-to-pdf'],  desc: t.card_jpg_pdf_desc },
-        { href: '/png-to-pdf',  icon: '📄', title: t.nav_short['png-to-pdf'],  desc: t.card_png_pdf_desc },
-        { href: '/gif-to-jpg',  icon: '🎞️', title: t.nav_short['gif-to-jpg']  || 'GIF to JPG',  desc: 'Convert GIF to JPG free. No upload required.' },
-        { href: '/gif-to-png',  icon: '🎞️', title: t.nav_short['gif-to-png']  || 'GIF to PNG',  desc: 'Convert GIF to PNG free. No upload required.' },
-        { href: '/bmp-to-jpg',  icon: '🖼️', title: t.nav_short['bmp-to-jpg']  || 'BMP to JPG',  desc: 'Convert BMP to JPG free. No upload required.' },
-        { href: '/bmp-to-png',  icon: '🖼️', title: t.nav_short['bmp-to-png']  || 'BMP to PNG',  desc: 'Convert BMP to PNG free. No upload required.' },
-        { href: '/tiff-to-jpg', icon: '🖼️', title: t.nav_short['tiff-to-jpg'] || 'TIFF to JPG', desc: 'Convert TIFF to JPG free. No upload required.' },
-        { href: '/jpg-to-gif',  icon: '🎞️', title: t.nav_short['jpg-to-gif']  || 'JPG to GIF',  desc: 'Convert JPG to GIF free. No upload required.' },
-        { href: '/png-to-gif',  icon: '🎞️', title: t.nav_short['png-to-gif']  || 'PNG to GIF',  desc: 'Convert PNG to GIF free. No upload required.' },
+        { href: '/compress',    title: t.nav_short['compress'],    desc: t.card_compress_desc },
+        { href: '/resize',      title: t.nav_short['resize'],      desc: t.card_resize_desc },
+        { href: '/jpg-to-png',  title: t.nav_short['jpg-to-png'],  desc: t.card_jpg_png_desc },
+        { href: '/png-to-jpg',  title: t.nav_short['png-to-jpg'],  desc: t.card_png_jpg_desc },
+        { href: '/jpg-to-webp', title: t.nav_short['jpg-to-webp'], desc: t.card_jpg_webp_desc },
+        { href: '/webp-to-jpg', title: t.nav_short['webp-to-jpg'], desc: t.card_webp_jpg_desc },
+        { href: '/png-to-webp', title: t.nav_short['png-to-webp'], desc: t.card_png_webp_desc },
+        { href: '/webp-to-png', title: t.nav_short['webp-to-png'], desc: t.card_webp_png_desc },
+        { href: '/jpg-to-pdf',  title: t.nav_short['jpg-to-pdf'],  desc: t.card_jpg_pdf_desc },
+        { href: '/png-to-pdf',  title: t.nav_short['png-to-pdf'],  desc: t.card_png_pdf_desc },
+        { href: '/gif-to-jpg',  title: t.nav_short['gif-to-jpg']  || 'GIF to JPG',  desc: 'Convert GIF to JPG free. No upload required.' },
+        { href: '/gif-to-png',  title: t.nav_short['gif-to-png']  || 'GIF to PNG',  desc: 'Convert GIF to PNG free. No upload required.' },
+        { href: '/bmp-to-jpg',  title: t.nav_short['bmp-to-jpg']  || 'BMP to JPG',  desc: 'Convert BMP to JPG free. No upload required.' },
+        { href: '/bmp-to-png',  title: t.nav_short['bmp-to-png']  || 'BMP to PNG',  desc: 'Convert BMP to PNG free. No upload required.' },
+        { href: '/tiff-to-jpg', title: t.nav_short['tiff-to-jpg'] || 'TIFF to JPG', desc: 'Convert TIFF to JPG free. No upload required.' },
+        { href: '/jpg-to-gif',  title: t.nav_short['jpg-to-gif']  || 'JPG to GIF',  desc: 'Convert JPG to GIF free. No upload required.' },
+        { href: '/png-to-gif',  title: t.nav_short['png-to-gif']  || 'PNG to GIF',  desc: 'Convert PNG to GIF free. No upload required.' },
       ]
 
-      document.getElementById('toolsGrid').innerHTML = cardData.map(c => `
-        <a href="${c.href}" class="tool-card">
-          <div class="icon">${c.icon}</div>
+      document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
+        const slug = c.href.replace('/', '')
+        const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '' }
+        return `<a href="${c.href}" class="tool-card">
+          <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
           <h2>${c.title}</h2>
           <p>${c.desc}</p>
-        </a>`).join('')
+        </a>`
+      }).join('')
 
       document.getElementById('footerCompany').textContent = t.footer_company
       document.getElementById('footerAbout').textContent   = t.footer_about
