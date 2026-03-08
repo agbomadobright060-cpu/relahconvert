@@ -20,9 +20,8 @@ if (document.head) {
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
     #previewImg { max-width:100%; max-height:380px; display:block; border-radius:8px; transition:transform 0.3s ease; margin:0 auto; }
     .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; }
-
-    /* Orientation selector */
-    .orient-group { display:flex; gap:10px; justify-content:center; margin-bottom:16px; }
+    .section-label { font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#9A8A7A; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
+    .orient-group { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
     .orient-btn {
       display:flex; flex-direction:column; align-items:center; gap:8px;
       padding:14px 20px; border-radius:12px; border:2px solid #DDD5C8;
@@ -32,12 +31,7 @@ if (document.head) {
     }
     .orient-btn:hover { border-color:#C84B31; color:#C84B31; }
     .orient-btn.active { border-color:#C84B31; background:#FDE8E3; color:#C84B31; }
-    .orient-btn svg { display:block; }
-
-    /* Rotation buttons */
     .rot-group { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
-
-    .section-label { font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#9A8A7A; margin-bottom:8px; font-family:'DM Sans',sans-serif; }
   `
   document.head.appendChild(style)
 }
@@ -56,35 +50,33 @@ document.querySelector('#app').innerHTML = `
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
 
     <div id="previewArea" style="display:none; margin-bottom:16px;">
-      <div style="text-align:center; margin-bottom:16px;">
+      <div style="text-align:center; margin-bottom:20px;">
         <img id="previewImg" src="" alt="preview" />
       </div>
 
-      <!-- Orientation selector -->
-      <div class="section-label" style="text-align:center;">Select orientation</div>
+      <div class="section-label" style="text-align:center;">Select files to rotate</div>
       <div class="orient-group">
-        <button class="orient-btn" id="orientAll" data-orient="all">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect x="4" y="4" width="20" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+        <button class="orient-btn active" data-orient="all">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect x="1" y="1" width="24" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
           </svg>
           All
         </button>
-        <button class="orient-btn" id="orientPortrait" data-orient="portrait">
-          <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
-            <rect x="1" y="1" width="20" height="28" rx="2" stroke="currentColor" stroke-width="2"/>
+        <button class="orient-btn" data-orient="portrait">
+          <svg width="18" height="26" viewBox="0 0 18 26" fill="none">
+            <rect x="1" y="1" width="16" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
           </svg>
           Portrait
         </button>
-        <button class="orient-btn" id="orientLandscape" data-orient="landscape">
-          <svg width="30" height="22" viewBox="0 0 30 22" fill="none">
-            <rect x="1" y="1" width="28" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+        <button class="orient-btn" data-orient="landscape">
+          <svg width="26" height="18" viewBox="0 0 26 18" fill="none">
+            <rect x="1" y="1" width="24" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
           </svg>
           Landscape
         </button>
       </div>
 
-      <!-- Rotation buttons -->
-      <div class="section-label" style="text-align:center; margin-top:4px;">Rotation</div>
+      <div class="section-label" style="text-align:center;">Rotation</div>
       <div class="rot-group">
         <button class="opt-btn secondary" id="rotL">↺ Left 90°</button>
         <button class="opt-btn secondary" id="rotR">↻ Right 90°</button>
@@ -104,6 +96,14 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
+// Orientation buttons — purely visual selection, no effect on logic
+document.querySelectorAll('.orient-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+  })
+})
+
 const fileInput = document.getElementById('fileInput')
 const previewArea = document.getElementById('previewArea')
 const previewImg = document.getElementById('previewImg')
@@ -113,31 +113,6 @@ const angleBadge = document.getElementById('angleBadge')
 
 let originalFile = null
 let angle = 0
-let naturalW = 0
-let naturalH = 0
-let selectedOrient = 'all' // 'all' | 'portrait' | 'landscape'
-
-// Orientation button logic
-const orientBtns = document.querySelectorAll('.orient-btn')
-orientBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    selectedOrient = btn.dataset.orient
-    orientBtns.forEach(b => b.classList.remove('active'))
-    btn.classList.add('active')
-
-    // If image is loaded, auto-rotate to match selected orientation
-    if (!originalFile) return
-    if (selectedOrient === 'all') return
-
-    const isCurrentlyPortrait = naturalW <= naturalH
-    const wantsPortrait = selectedOrient === 'portrait'
-
-    // If orientation doesn't match, rotate 90° right to fix it
-    if (isCurrentlyPortrait !== wantsPortrait) {
-      updateAngle(90)
-    }
-  })
-})
 
 function updateAngle(deg) {
   angle = ((angle + deg) % 360 + 360) % 360
@@ -164,19 +139,13 @@ function loadFile(file) {
   previewImg.style.transform = 'rotate(0deg)'
   previewImg.style.maxHeight = '380px'
   previewImg.style.maxWidth = '100%'
-  previewImg.onload = () => {
-    naturalW = previewImg.naturalWidth
-    naturalH = previewImg.naturalHeight
-  }
   previewImg.src = URL.createObjectURL(file)
   previewArea.style.display = 'block'
   applyBtn.disabled = false
   downloadLink.style.display = 'none'
-
-  // Reset orientation selection
-  selectedOrient = 'all'
-  orientBtns.forEach(b => b.classList.remove('active'))
-  document.getElementById('orientAll').classList.add('active')
+  // Reset orientation to All
+  document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
+  document.querySelector('[data-orient="all"]').classList.add('active')
 }
 
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]) })
