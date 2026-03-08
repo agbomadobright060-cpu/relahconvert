@@ -20,10 +20,24 @@ if (document.head) {
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
     #previewImg { max-width:100%; max-height:380px; display:block; border-radius:8px; transition:transform 0.3s ease; margin:0 auto; }
     .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; }
-    .orientation-badge { display:inline-flex; align-items:center; gap:5px; font-weight:600; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; transition:all 0.2s; }
-    .orientation-badge.portrait  { background:#EFF6FF; color:#2563EB; }
-    .orientation-badge.landscape { background:#F0FDF4; color:#16A34A; }
-    .orientation-badge.square    { background:#F5F3FF; color:#7C3AED; }
+
+    /* Orientation selector */
+    .orient-group { display:flex; gap:10px; justify-content:center; margin-bottom:16px; }
+    .orient-btn {
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      padding:14px 20px; border-radius:12px; border:2px solid #DDD5C8;
+      background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif;
+      font-size:13px; font-weight:600; color:#5A4A3A; transition:all 0.18s;
+      min-width:90px;
+    }
+    .orient-btn:hover { border-color:#C84B31; color:#C84B31; }
+    .orient-btn.active { border-color:#C84B31; background:#FDE8E3; color:#C84B31; }
+    .orient-btn svg { display:block; }
+
+    /* Rotation buttons */
+    .rot-group { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
+
+    .section-label { font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#9A8A7A; margin-bottom:8px; font-family:'DM Sans',sans-serif; }
   `
   document.head.appendChild(style)
 }
@@ -40,22 +54,49 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop image anywhere</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+
     <div id="previewArea" style="display:none; margin-bottom:16px;">
-      <div style="text-align:center; margin-bottom:12px;">
+      <div style="text-align:center; margin-bottom:16px;">
         <img id="previewImg" src="" alt="preview" />
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px;">
-        <button class="opt-btn secondary" id="rotL">↺ Rotate Left 90°</button>
-        <button class="opt-btn secondary" id="rotR">↻ Rotate Right 90°</button>
-        <button class="opt-btn secondary" id="rot180">↕ Rotate 180°</button>
+
+      <!-- Orientation selector -->
+      <div class="section-label" style="text-align:center;">Select orientation</div>
+      <div class="orient-group">
+        <button class="orient-btn" id="orientAll" data-orient="all">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="4" y="4" width="20" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          All
+        </button>
+        <button class="orient-btn" id="orientPortrait" data-orient="portrait">
+          <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
+            <rect x="1" y="1" width="20" height="28" rx="2" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          Portrait
+        </button>
+        <button class="orient-btn" id="orientLandscape" data-orient="landscape">
+          <svg width="30" height="22" viewBox="0 0 30 22" fill="none">
+            <rect x="1" y="1" width="28" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          Landscape
+        </button>
       </div>
-      <div style="text-align:center; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:4px;">
-        <span style="font-size:13px; color:#9A8A7A; font-family:'DM Sans',sans-serif;">Rotation:</span>
+
+      <!-- Rotation buttons -->
+      <div class="section-label" style="text-align:center; margin-top:4px;">Rotation</div>
+      <div class="rot-group">
+        <button class="opt-btn secondary" id="rotL">↺ Left 90°</button>
+        <button class="opt-btn secondary" id="rotR">↻ Right 90°</button>
+        <button class="opt-btn secondary" id="rot180">↕ 180°</button>
+      </div>
+
+      <div style="text-align:center;">
+        <span style="font-size:13px; color:#9A8A7A;">Current rotation:</span>
         <span class="angle-badge" id="angleBadge">0°</span>
-        <span style="font-size:13px; color:#9A8A7A; font-family:'DM Sans',sans-serif; margin-left:8px;">Orientation:</span>
-        <span class="orientation-badge portrait" id="orientationBadge">↕ Portrait</span>
       </div>
     </div>
+
     <button class="opt-btn" id="applyBtn" disabled style="width:100%; margin-bottom:10px;">Apply & Download</button>
     <a class="download-btn" id="downloadLink">Download Rotated Image</a>
   </div>
@@ -69,30 +110,34 @@ const previewImg = document.getElementById('previewImg')
 const applyBtn = document.getElementById('applyBtn')
 const downloadLink = document.getElementById('downloadLink')
 const angleBadge = document.getElementById('angleBadge')
-const orientationBadge = document.getElementById('orientationBadge')
 
 let originalFile = null
 let angle = 0
 let naturalW = 0
 let naturalH = 0
+let selectedOrient = 'all' // 'all' | 'portrait' | 'landscape'
 
-function updateOrientationBadge() {
-  // At 90 or 270 degrees width and height effectively swap
-  const isRotated90 = angle === 90 || angle === 270
-  const effectiveW = isRotated90 ? naturalH : naturalW
-  const effectiveH = isRotated90 ? naturalW : naturalH
+// Orientation button logic
+const orientBtns = document.querySelectorAll('.orient-btn')
+orientBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedOrient = btn.dataset.orient
+    orientBtns.forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
 
-  if (effectiveW === effectiveH) {
-    orientationBadge.className = 'orientation-badge square'
-    orientationBadge.textContent = '⊡ Square'
-  } else if (effectiveW > effectiveH) {
-    orientationBadge.className = 'orientation-badge landscape'
-    orientationBadge.textContent = '↔ Landscape'
-  } else {
-    orientationBadge.className = 'orientation-badge portrait'
-    orientationBadge.textContent = '↕ Portrait'
-  }
-}
+    // If image is loaded, auto-rotate to match selected orientation
+    if (!originalFile) return
+    if (selectedOrient === 'all') return
+
+    const isCurrentlyPortrait = naturalW <= naturalH
+    const wantsPortrait = selectedOrient === 'portrait'
+
+    // If orientation doesn't match, rotate 90° right to fix it
+    if (isCurrentlyPortrait !== wantsPortrait) {
+      updateAngle(90)
+    }
+  })
+})
 
 function updateAngle(deg) {
   angle = ((angle + deg) % 360 + 360) % 360
@@ -105,7 +150,6 @@ function updateAngle(deg) {
     previewImg.style.maxHeight = '380px'
     previewImg.style.maxWidth = '100%'
   }
-  updateOrientationBadge()
 }
 
 document.getElementById('rotL').addEventListener('click', () => updateAngle(-90))
@@ -123,12 +167,16 @@ function loadFile(file) {
   previewImg.onload = () => {
     naturalW = previewImg.naturalWidth
     naturalH = previewImg.naturalHeight
-    updateOrientationBadge()
   }
   previewImg.src = URL.createObjectURL(file)
   previewArea.style.display = 'block'
   applyBtn.disabled = false
   downloadLink.style.display = 'none'
+
+  // Reset orientation selection
+  selectedOrient = 'all'
+  orientBtns.forEach(b => b.classList.remove('active'))
+  document.getElementById('orientAll').classList.add('active')
 }
 
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]) })
