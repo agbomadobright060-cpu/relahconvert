@@ -164,14 +164,11 @@ document.querySelector('#app').innerHTML = `
       <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     </div>
 
-    <div class="tool-layout">
+    <div class="tool-layout" id="toolLayout" style="display:none;">
 
       <!-- Left: image preview -->
       <div class="image-col" id="imageCol">
-        <div class="empty-state" id="emptyState">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="36" height="36" rx="6" stroke="#C4B8A8" stroke-width="2"/><circle cx="17" cy="18" r="4" stroke="#C4B8A8" stroke-width="2"/><path d="M6 32l10-10 8 8 6-6 12 10" stroke="#C4B8A8" stroke-width="2" stroke-linecap="round"/></svg>
-          <p>Upload an image to get started</p>
-        </div>
+
         <div id="imgWrapper" style="display:none;">
           <img id="previewImg" src="" alt="preview" draggable="false" />
           <div id="rotateHandle">
@@ -238,7 +235,6 @@ document.querySelectorAll('.orient-btn').forEach(btn => {
 })
 
 const fileInput    = document.getElementById('fileInput')
-const emptyState   = document.getElementById('emptyState')
 const imgWrapper   = document.getElementById('imgWrapper')
 const previewImg   = document.getElementById('previewImg')
 const rotateHandle = document.getElementById('rotateHandle')
@@ -326,10 +322,10 @@ function loadFile(file) {
   originalFile = file
   setAngle(0)
   previewImg.src = URL.createObjectURL(file)
-  emptyState.style.display = 'none'
-  imgWrapper.style.display = 'inline-block'
+  imgWrapper.style.display = 'flex'
   applyBtn.disabled = false
   downloadLink.style.display = 'none'
+  document.getElementById('toolLayout').style.display = 'grid'
   document.getElementById('controlsCol').style.display = 'block'
   document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
   document.querySelector('[data-orient="all"]').classList.add('active')
