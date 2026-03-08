@@ -18,7 +18,6 @@ if (document.head) {
     .download-btn { display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px; margin-top:12px; }
     .download-btn:hover { background:#1a0f09; }
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
-    #previewImg { max-width:100%; max-height:380px; display:block; border-radius:8px; transition:transform 0.3s ease; margin:0 auto; }
     .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; }
     .section-label { font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#9A8A7A; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
     .orient-group { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
@@ -32,6 +31,54 @@ if (document.head) {
     .orient-btn:hover { border-color:#C84B31; color:#C84B31; }
     .orient-btn.active { border-color:#C84B31; background:#FDE8E3; color:#C84B31; }
     .rot-group { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
+
+    /* Image wrapper with rotate handle */
+    #imgWrapper {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto 8px;
+      cursor: default;
+    }
+    #previewImg {
+      display: block;
+      max-width: 100%;
+      max-height: 340px;
+      border-radius: 8px;
+      user-select: none;
+      pointer-events: none;
+    }
+    #rotateHandle {
+      position: absolute;
+      bottom: -36px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 28px;
+      background: #fff;
+      border: 2px solid #C84B31;
+      border-radius: 50%;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(200,75,49,0.25);
+      transition: background 0.15s, transform 0.15s;
+      z-index: 10;
+    }
+    #rotateHandle:hover { background: #FDE8E3; transform: translateX(-50%) scale(1.15); }
+    #rotateHandle.dragging { cursor: grabbing; background: #FDE8E3; }
+    #handleLine {
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 30px;
+      background: #C84B31;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    #previewCenter { text-align: center; padding-bottom: 44px; margin-bottom: 16px; }
   `
   document.head.appendChild(style)
 }
@@ -50,8 +97,19 @@ document.querySelector('#app').innerHTML = `
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
 
     <div id="previewArea" style="display:none; margin-bottom:16px;">
-      <div style="text-align:center; margin-bottom:20px;">
-        <img id="previewImg" src="" alt="preview" />
+
+      <!-- Image with drag handle -->
+      <div id="previewCenter">
+        <div id="imgWrapper">
+          <img id="previewImg" src="" alt="preview" draggable="false" />
+          <div id="handleLine"></div>
+          <div id="rotateHandle" title="Drag to rotate">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C84B31" stroke-width="2.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 11-9-9"/>
+              <polyline points="21 3 21 9 15 9"/>
+            </svg>
+          </div>
+        </div>
       </div>
 
       <div class="section-label" style="text-align:center;">Select files to rotate</div>
@@ -96,7 +154,7 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-// Orientation buttons — purely visual selection, no effect on logic
+// Orientation buttons — visual only
 document.querySelectorAll('.orient-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
@@ -104,46 +162,105 @@ document.querySelectorAll('.orient-btn').forEach(btn => {
   })
 })
 
-const fileInput = document.getElementById('fileInput')
-const previewArea = document.getElementById('previewArea')
-const previewImg = document.getElementById('previewImg')
-const applyBtn = document.getElementById('applyBtn')
-const downloadLink = document.getElementById('downloadLink')
-const angleBadge = document.getElementById('angleBadge')
+const fileInput     = document.getElementById('fileInput')
+const previewArea   = document.getElementById('previewArea')
+const previewImg    = document.getElementById('previewImg')
+const imgWrapper    = document.getElementById('imgWrapper')
+const rotateHandle  = document.getElementById('rotateHandle')
+const applyBtn      = document.getElementById('applyBtn')
+const downloadLink  = document.getElementById('downloadLink')
+const angleBadge    = document.getElementById('angleBadge')
 
 let originalFile = null
 let angle = 0
 
-function updateAngle(deg) {
-  angle = ((angle + deg) % 360 + 360) % 360
-  angleBadge.textContent = angle + '°'
-  previewImg.style.transform = `rotate(${angle}deg)`
-  if (angle === 90 || angle === 270) {
-    previewImg.style.maxHeight = '300px'
-    previewImg.style.maxWidth = '300px'
-  } else {
-    previewImg.style.maxHeight = '380px'
-    previewImg.style.maxWidth = '100%'
-  }
+function setAngle(deg) {
+  angle = ((deg % 360) + 360) % 360
+  angleBadge.textContent = Math.round(angle) + '°'
+  imgWrapper.style.transform = `rotate(${angle}deg)`
 }
 
-document.getElementById('rotL').addEventListener('click', () => updateAngle(-90))
-document.getElementById('rotR').addEventListener('click', () => updateAngle(90))
-document.getElementById('rot180').addEventListener('click', () => updateAngle(180))
+function snapAngle(deg) {
+  // Snap to nearest 90° if within 8°
+  const snapped = Math.round(deg / 90) * 90
+  return Math.abs(deg - snapped) < 8 ? snapped : deg
+}
+
+// Quick rotate buttons
+document.getElementById('rotL').addEventListener('click', () => setAngle(angle - 90))
+document.getElementById('rotR').addEventListener('click', () => setAngle(angle + 90))
+document.getElementById('rot180').addEventListener('click', () => setAngle(angle + 180))
+
+// Drag-to-rotate handle
+let isDragging = false
+let startAngle = 0
+let startMouseAngle = 0
+
+function getMouseAngle(e) {
+  const rect = imgWrapper.getBoundingClientRect()
+  const cx = rect.left + rect.width / 2
+  const cy = rect.top + rect.height / 2
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY
+  return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI)
+}
+
+rotateHandle.addEventListener('mousedown', e => {
+  e.preventDefault()
+  isDragging = true
+  startAngle = angle
+  startMouseAngle = getMouseAngle(e)
+  rotateHandle.classList.add('dragging')
+  document.body.style.userSelect = 'none'
+})
+
+rotateHandle.addEventListener('touchstart', e => {
+  e.preventDefault()
+  isDragging = true
+  startAngle = angle
+  startMouseAngle = getMouseAngle(e)
+  rotateHandle.classList.add('dragging')
+}, { passive: false })
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return
+  const currentMouseAngle = getMouseAngle(e)
+  let delta = currentMouseAngle - startMouseAngle
+  let newAngle = snapAngle(startAngle + delta)
+  setAngle(newAngle)
+})
+
+document.addEventListener('touchmove', e => {
+  if (!isDragging) return
+  e.preventDefault()
+  const currentMouseAngle = getMouseAngle(e)
+  let delta = currentMouseAngle - startMouseAngle
+  let newAngle = snapAngle(startAngle + delta)
+  setAngle(newAngle)
+}, { passive: false })
+
+document.addEventListener('mouseup', () => {
+  if (!isDragging) return
+  isDragging = false
+  rotateHandle.classList.remove('dragging')
+  document.body.style.userSelect = ''
+})
+
+document.addEventListener('touchend', () => {
+  if (!isDragging) return
+  isDragging = false
+  rotateHandle.classList.remove('dragging')
+})
 
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   originalFile = file
-  angle = 0
-  angleBadge.textContent = '0°'
-  previewImg.style.transform = 'rotate(0deg)'
-  previewImg.style.maxHeight = '380px'
-  previewImg.style.maxWidth = '100%'
+  setAngle(0)
+  imgWrapper.style.transform = 'rotate(0deg)'
   previewImg.src = URL.createObjectURL(file)
   previewArea.style.display = 'block'
   applyBtn.disabled = false
   downloadLink.style.display = 'none'
-  // Reset orientation to All
   document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
   document.querySelector('[data-orient="all"]').classList.add('active')
 }
@@ -176,7 +293,7 @@ applyBtn.addEventListener('click', () => {
   canvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
     downloadLink.href = url
-    downloadLink.download = `rotated-${angle}deg.${ext}`
+    downloadLink.download = `rotated-${Math.round(angle)}deg.${ext}`
     downloadLink.textContent = `Download Rotated Image (${Math.round(blob.size / 1024)} KB)`
     downloadLink.style.display = 'block'
   }, mime, 0.92)
