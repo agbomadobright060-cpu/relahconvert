@@ -26,20 +26,17 @@ if (document.head) {
     .download-btn{display:none;width:100%;box-sizing:border-box;text-align:center;padding:13px;border-radius:10px;background:#2C1810;text-decoration:none;color:#F5F0E8;font-family:'Fraunces',serif;font-weight:700;font-size:15px;margin-bottom:10px;}
     .download-btn:hover{background:#1a0f09;}
     .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
-
-    .slider-wrap{position:relative;width:100%;max-width:700px;max-height:420px;overflow:hidden;border-radius:12px;background:#fff;border:1.5px solid #E8E0D5;margin-bottom:16px;user-select:none;cursor:ew-resize;}
-    .slider-wrap canvas{display:block;width:100%;height:100%;object-fit:contain;}
+    .slider-wrap{position:relative;width:100%;overflow:hidden;border-radius:12px;background:#e8e8e8;border:1.5px solid #E8E0D5;margin-bottom:16px;user-select:none;cursor:ew-resize;}
+    .slider-wrap canvas{display:block;width:100%;height:auto;}
     .divider-line{position:absolute;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,0.3);transform:translateX(-50%);z-index:10;pointer-events:none;}
     .divider-handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;}
     .divider-handle svg{display:block;}
     .side-label{position:absolute;top:12px;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,0.45);color:#fff;letter-spacing:0.06em;text-transform:uppercase;pointer-events:none;}
     .label-before{left:14px;}
     .label-after{right:14px;}
-
     .progress-wrap{background:#E8E0D5;border-radius:8px;height:6px;margin-bottom:10px;overflow:hidden;display:none;}
     .progress-bar{height:100%;background:#C84B31;border-radius:8px;width:0%;transition:width 0.3s;}
     .status-text{font-size:13px;color:#7A6A5A;text-align:center;margin-bottom:10px;font-family:'DM Sans',sans-serif;min-height:18px;}
-
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
     .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -69,7 +66,6 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
-
     <div id="sliderWrap" class="slider-wrap" style="display:none;">
       <canvas id="sliderCanvas"></canvas>
       <div class="divider-line" id="dividerLine">
@@ -82,10 +78,8 @@ document.querySelector('#app').innerHTML = `
       <span class="side-label label-before">Before</span>
       <span class="side-label label-after">After</span>
     </div>
-
     <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
     <div class="status-text" id="statusText"></div>
-
     <button class="opt-btn" id="removeBtn" disabled>Remove Background</button>
     <a class="download-btn" id="downloadLink">${dlBtn}</a>
   </div>
@@ -105,17 +99,12 @@ const statusText   = document.getElementById('statusText')
 
 let originalImg = null
 let resultImg   = null
+let resultCanvas = null   // offscreen canvas holding result pixels
 let sliderPct   = 0.5
 let dragging    = false
 let loadedFile  = null
 
-// ── Constrain canvas size: max 700×420 display, keep aspect ratio ─────────────
-function getCanvasDims(W, H) {
-  const maxW = 700, maxH = 420
-  const scale = Math.min(maxW / W, maxH / H, 1)
-  return { dispW: Math.round(W * scale), dispH: Math.round(H * scale) }
-}
-
+// ── Checker pattern ───────────────────────────────────────────────────────────
 function drawChecker(ctx, x, y, w, h, size = 14) {
   for (let row = 0; row * size < h; row++) {
     for (let col = 0; col * size < w; col++) {
@@ -125,43 +114,42 @@ function drawChecker(ctx, x, y, w, h, size = 14) {
   }
 }
 
+// ── Render split — canvas pixel size = natural image size, CSS scales it down ─
 function renderSplit() {
   if (!originalImg) return
   const W = originalImg.naturalWidth
   const H = originalImg.naturalHeight
-  const { dispW, dispH } = getCanvasDims(W, H)
 
-  // Set canvas pixel dimensions to display size (avoids scaling mismatch)
-  sliderCanvas.width  = dispW
-  sliderCanvas.height = dispH
-  sliderCanvas.style.width  = dispW + 'px'
-  sliderCanvas.style.height = dispH + 'px'
-  sliderWrap.style.height   = dispH + 'px'
+  if (sliderCanvas.width !== W || sliderCanvas.height !== H) {
+    sliderCanvas.width  = W
+    sliderCanvas.height = H
+  }
 
   const ctx = sliderCanvas.getContext('2d')
-  const splitX = Math.round(dispW * sliderPct)
+  const splitX = Math.round(W * sliderPct)
 
-  // Left: original
-  ctx.drawImage(originalImg, 0, 0, dispW, dispH)
+  // Left side: original photo
+  ctx.drawImage(originalImg, 0, 0, W, H)
 
-  // Right: checker + result (or just checker if still processing)
+  // Right side: clip, draw checker, then result on top
   ctx.save()
   ctx.beginPath()
-  ctx.rect(splitX, 0, dispW - splitX, dispH)
+  ctx.rect(splitX, 0, W - splitX, H)
   ctx.clip()
-  drawChecker(ctx, 0, 0, dispW, dispH)
-  if (resultImg) ctx.drawImage(resultImg, 0, 0, dispW, dispH)
+  drawChecker(ctx, splitX, 0, W - splitX, H)
+  if (resultCanvas) {
+    ctx.drawImage(resultCanvas, 0, 0, W, H)
+  }
   ctx.restore()
 
   dividerLine.style.left = (sliderPct * 100) + '%'
 }
 
-// ── Drag — use getBoundingClientRect for accurate pointer position ────────────
+// ── Slider drag ───────────────────────────────────────────────────────────────
 function getPct(clientX) {
   const rect = sliderWrap.getBoundingClientRect()
   return Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width))
 }
-
 sliderWrap.addEventListener('mousedown', e => { dragging = true; sliderPct = getPct(e.clientX); renderSplit() })
 document.addEventListener('mousemove', e => { if (!dragging) return; sliderPct = getPct(e.clientX); renderSplit() })
 document.addEventListener('mouseup', () => { dragging = false })
@@ -169,21 +157,28 @@ sliderWrap.addEventListener('touchstart', e => { dragging = true; sliderPct = ge
 document.addEventListener('touchmove', e => { if (!dragging) return; sliderPct = getPct(e.touches[0].clientX); renderSplit() }, { passive: true })
 document.addEventListener('touchend', () => { dragging = false })
 
-// ── Load file ─────────────────────────────────────────────────────────────────
+// ── Load file — slider works immediately on load ──────────────────────────────
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   loadedFile = file
   resultImg = null
+  resultCanvas = null
   sliderPct = 0.5
   downloadLink.style.display = 'none'
-  statusText.textContent = ''
+  statusText.textContent = 'Image loaded. Hit "Remove Background" when ready.'
   progressWrap.style.display = 'none'
 
   const img = new Image()
   img.onload = () => {
     originalImg = img
+
+    // Cap display size via CSS max-width only — canvas stays native resolution
+    sliderCanvas.style.maxWidth  = '100%'
+    sliderCanvas.style.maxHeight = '420px'
+    sliderCanvas.style.objectFit = 'contain'
+
     sliderWrap.style.display = 'block'
-    renderSplit()
+    renderSplit()   // shows original left + checker right immediately
     removeBtn.disabled = false
   }
   img.src = URL.createObjectURL(file)
@@ -203,16 +198,16 @@ removeBtn.addEventListener('click', async () => {
   statusText.textContent = 'Loading AI model…'
 
   try {
-    const { removeBackground } = await import("@imgly/background-removal")
+    const { removeBackground } = await import('@imgly/background-removal')
 
     progressBar.style.width = '35%'
     statusText.textContent = 'Removing background…'
 
     const blob = await removeBackground(loadedFile, {
+      model: 'small',   // faster
       progress: (key, current, total) => {
         if (total > 0) {
-          const pct = 35 + Math.round((current / total) * 55)
-          progressBar.style.width = pct + '%'
+          progressBar.style.width = (35 + Math.round((current / total) * 55)) + '%'
         }
       },
     })
@@ -220,18 +215,26 @@ removeBtn.addEventListener('click', async () => {
     progressBar.style.width = '100%'
     statusText.textContent = 'Done! Drag the slider to compare.'
 
+    // Draw result into an offscreen canvas at native resolution
     const url = URL.createObjectURL(blob)
     const img = new Image()
     img.onload = () => {
-      resultImg = img
+      const W = originalImg.naturalWidth
+      const H = originalImg.naturalHeight
+      const offscreen = document.createElement('canvas')
+      offscreen.width  = W
+      offscreen.height = H
+      offscreen.getContext('2d').drawImage(img, 0, 0, W, H)
+      resultCanvas = offscreen
+
       sliderPct = 0.5
       renderSplit()
-      downloadLink.href = url
+
+      downloadLink.href     = url
       downloadLink.download = loadedFile.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
       downloadLink.textContent = `${dlBtn} PNG (${Math.round(blob.size / 1024)} KB)`
       downloadLink.style.display = 'block'
       removeBtn.disabled = false
-      // Scroll download into view
       downloadLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
     img.src = url
