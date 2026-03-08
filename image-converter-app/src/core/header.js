@@ -141,27 +141,6 @@ export function injectHeader() {
     }
     #dropdown-menu a:hover { background: #F5F0E8; color: #C84B31; }
     #dropdown-menu a.active { background: #FDE8E3; color: #C84B31; }
-    #feature-badges {
-      background: #FDF6F4;
-      border-bottom: 1px solid #F5E6E0;
-      padding: 7px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      font-family: 'DM Sans', sans-serif;
-    }
-    #feature-badges span.badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      color: #C84B31;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-    }
-    #feature-badges span.sep { color: #DDD5C8; }
     @media (max-width: 768px) {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
@@ -171,8 +150,6 @@ export function injectHeader() {
         gap: 6px;
       }
       #dropdown-menu a { font-size: 12px; padding: 10px; }
-      #feature-badges { gap: 10px; padding: 6px 16px; }
-      #feature-badges span.sep { display: none; }
     }
     #site-footer {
       background: #F2F2F2;
@@ -248,12 +225,6 @@ export function injectHeader() {
     </div>
   `
 
-  const badges = document.createElement('div')
-  badges.id = 'feature-badges'
-  badges.innerHTML = `
-    <span class="badge">✦ Batch Processing — Up to 25 Files at Once</span>
-  `
-
   const currentLang = getLang()
   const footer = document.createElement('footer')
   footer.id = 'site-footer'
@@ -269,9 +240,6 @@ export function injectHeader() {
 
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
-  if (currentPath && currentPath !== '') {
-    document.body.insertBefore(badges, dropdown.nextSibling)
-  }
   document.body.appendChild(footer)
 
   const langSelect = footer.querySelector('#langSelect')
