@@ -140,17 +140,45 @@ export const tools = {
     slug: 'flip'
   },
   'grayscale': {
-    title: 'Convert to Grayscale',
-    description: 'Convert any image to grayscale free. No upload required.',
+    title: 'Black & White',
+    description: 'Convert any image to black and white free. No upload required.',
     inputFormats: [],
     outputFormat: null,
     slug: 'grayscale'
   },
   'watermark': {
     title: 'Add Watermark',
-    description: 'Add text watermark to any image free. No upload required.',
+    description: 'Add text or logo watermark to any image free. No upload required.',
     inputFormats: [],
     outputFormat: null,
     slug: 'watermark'
+  },
+  'remove-background': {
+    title: 'Remove Background',
+    description: 'Remove image background free. AI-powered, runs in your browser.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'remove-background'
+  },
+  'heic-to-jpg': {
+    title: 'HEIC to JPG Converter',
+    description: 'Convert iPhone HEIC photos to JPG free. No upload required.',
+    inputFormats: ['image/heic', 'image/heif'],
+    outputFormat: 'image/jpeg',
+    slug: 'heic-to-jpg'
+  },
+  'image-to-ico': {
+    title: 'Image to ICO',
+    description: 'Convert any image to ICO favicon free. No upload required.',
+    inputFormats: [],
+    outputFormat: 'image/x-icon',
+    slug: 'image-to-ico'
+  },
+  'jpg-to-svg': {
+    title: 'JPG to SVG Converter',
+    description: 'Convert JPG or PNG to SVG free. No upload required.',
+    inputFormats: ['image/jpeg', 'image/png'],
+    outputFormat: 'image/svg+xml',
+    slug: 'jpg-to-svg'
   },
 }
