@@ -19,13 +19,18 @@ if (document.head) {
     .preview-wrap { position:relative; display:inline-block; max-width:100%; }
     .preview-wrap img { max-width:100%; max-height:400px; display:block; border-radius:8px; }
     #cropBox { position:absolute; border:2px solid #C84B31; background:rgba(200,75,49,0.08); cursor:move; box-sizing:border-box; }
-    #cropBox::after { content:''; position:absolute; inset:0; }
     .crop-handle { position:absolute; width:10px; height:10px; background:#C84B31; border-radius:2px; }
     .crop-handle.nw { top:-5px; left:-5px; cursor:nw-resize; }
     .crop-handle.ne { top:-5px; right:-5px; cursor:ne-resize; }
     .crop-handle.sw { bottom:-5px; left:-5px; cursor:sw-resize; }
     .crop-handle.se { bottom:-5px; right:-5px; cursor:se-resize; }
-    .info-text { font-size:12px; color:#9A8A7A; font-family:'DM Sans',sans-serif; margin-top:8px; }
+    .crop-options { background:#fff; border-radius:12px; padding:16px; margin-top:14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .crop-options-title { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; font-family:'DM Sans',sans-serif; }
+    .crop-inputs-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .crop-input-group { display:flex; flex-direction:column; gap:4px; }
+    .crop-input-label { font-size:11px; font-weight:600; color:#5A4A3A; font-family:'DM Sans',sans-serif; }
+    .crop-input { padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none; width:100%; box-sizing:border-box; }
+    .crop-input:focus { border-color:#C84B31; box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
   `
   document.head.appendChild(style)
 }
@@ -35,7 +40,7 @@ document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">Crop <em style="font-style:italic; color:#C84B31;">Image</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Crop any image free. Drag to select area. Files never leave your device.</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">Crop any image free. Drag to select area or enter exact pixels. Files never leave your device.</p>
     </div>
     <div style="margin-bottom:16px;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> Select Image</label>
@@ -52,7 +57,27 @@ document.querySelector('#app').innerHTML = `
           <div class="crop-handle se" data-dir="se"></div>
         </div>
       </div>
-      <p class="info-text" id="cropInfo">Drag the box to adjust crop area</p>
+      <div class="crop-options">
+        <div class="crop-options-title">Crop Options</div>
+        <div class="crop-inputs-grid">
+          <div class="crop-input-group">
+            <label class="crop-input-label">Width (px)</label>
+            <input class="crop-input" type="number" id="inputW" min="1" />
+          </div>
+          <div class="crop-input-group">
+            <label class="crop-input-label">Height (px)</label>
+            <input class="crop-input" type="number" id="inputH" min="1" />
+          </div>
+          <div class="crop-input-group">
+            <label class="crop-input-label">Position X (px)</label>
+            <input class="crop-input" type="number" id="inputX" min="0" />
+          </div>
+          <div class="crop-input-group">
+            <label class="crop-input-label">Position Y (px)</label>
+            <input class="crop-input" type="number" id="inputY" min="0" />
+          </div>
+        </div>
+      </div>
     </div>
     <button class="opt-btn" id="cropBtn" disabled>Crop Image</button>
     <a class="download-btn" id="downloadLink">Download Cropped Image</a>
@@ -61,37 +86,44 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput = document.getElementById('fileInput')
-const previewArea = document.getElementById('previewArea')
-const previewImg = document.getElementById('previewImg')
-const previewWrap = document.getElementById('previewWrap')
-const cropBox = document.getElementById('cropBox')
-const cropBtn = document.getElementById('cropBtn')
+const fileInput    = document.getElementById('fileInput')
+const previewArea  = document.getElementById('previewArea')
+const previewImg   = document.getElementById('previewImg')
+const cropBox      = document.getElementById('cropBox')
+const cropBtn      = document.getElementById('cropBtn')
 const downloadLink = document.getElementById('downloadLink')
-const cropInfo = document.getElementById('cropInfo')
+const inputW       = document.getElementById('inputW')
+const inputH       = document.getElementById('inputH')
+const inputX       = document.getElementById('inputX')
+const inputY       = document.getElementById('inputY')
 
 let originalFile = null
 let imgNaturalW = 0, imgNaturalH = 0
 let displayW = 0, displayH = 0
-
-// Crop box state (in display px)
 let box = { x: 0, y: 0, w: 0, h: 0 }
-let dragState = null // { type: 'move'|'nw'|'ne'|'sw'|'se', startX, startY, startBox }
+let dragState = null
+let updatingFromInputs = false
+let updatingFromDrag = false
 
 function clamp(val, min, max) { return Math.max(min, Math.min(max, val)) }
+function toDisplay(val, scale) { return val / scale }
+function toNatural(val, scale) { return Math.round(val * scale) }
 
 function applyBox() {
-  cropBox.style.left = box.x + 'px'
-  cropBox.style.top = box.y + 'px'
-  cropBox.style.width = box.w + 'px'
+  cropBox.style.left   = box.x + 'px'
+  cropBox.style.top    = box.y + 'px'
+  cropBox.style.width  = box.w + 'px'
   cropBox.style.height = box.h + 'px'
   const scaleX = imgNaturalW / displayW
   const scaleY = imgNaturalH / displayH
-  const rx = Math.round(box.x * scaleX)
-  const ry = Math.round(box.y * scaleY)
-  const rw = Math.round(box.w * scaleX)
-  const rh = Math.round(box.h * scaleY)
-  cropInfo.textContent = `Crop area: ${rw} × ${rh} px`
+  if (!updatingFromInputs) {
+    updatingFromDrag = true
+    inputW.value = toNatural(box.w, scaleX)
+    inputH.value = toNatural(box.h, scaleY)
+    inputX.value = toNatural(box.x, scaleX)
+    inputY.value = toNatural(box.y, scaleY)
+    updatingFromDrag = false
+  }
 }
 
 function initBox() {
@@ -100,11 +132,40 @@ function initBox() {
   applyBox()
 }
 
+function onInputChange() {
+  if (updatingFromDrag) return
+  updatingFromInputs = true
+  const scaleX = imgNaturalW / displayW
+  const scaleY = imgNaturalH / displayH
+  let nX = clamp(parseInt(inputX.value) || 0, 0, imgNaturalW - 1)
+  let nY = clamp(parseInt(inputY.value) || 0, 0, imgNaturalH - 1)
+  let nW = clamp(parseInt(inputW.value) || 1, 1, imgNaturalW - nX)
+  let nH = clamp(parseInt(inputH.value) || 1, 1, imgNaturalH - nY)
+  box.x = toDisplay(nX, scaleX)
+  box.y = toDisplay(nY, scaleY)
+  box.w = toDisplay(nW, scaleX)
+  box.h = toDisplay(nH, scaleY)
+  cropBox.style.left   = box.x + 'px'
+  cropBox.style.top    = box.y + 'px'
+  cropBox.style.width  = box.w + 'px'
+  cropBox.style.height = box.h + 'px'
+  updatingFromInputs = false
+}
+
+inputW.addEventListener('input', onInputChange)
+inputH.addEventListener('input', onInputChange)
+inputX.addEventListener('input', onInputChange)
+inputY.addEventListener('input', onInputChange)
+
 previewImg.onload = () => {
   displayW = previewImg.offsetWidth
   displayH = previewImg.offsetHeight
   imgNaturalW = previewImg.naturalWidth
   imgNaturalH = previewImg.naturalHeight
+  inputW.max = imgNaturalW
+  inputH.max = imgNaturalH
+  inputX.max = imgNaturalW - 1
+  inputY.max = imgNaturalH - 1
   initBox()
   cropBtn.disabled = false
 }
@@ -112,8 +173,7 @@ previewImg.onload = () => {
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   originalFile = file
-  const url = URL.createObjectURL(file)
-  previewImg.src = url
+  previewImg.src = URL.createObjectURL(file)
   previewArea.style.display = 'block'
   downloadLink.style.display = 'none'
   cropBtn.disabled = false
@@ -123,7 +183,6 @@ fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fi
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]) })
 
-// Drag logic
 cropBox.addEventListener('mousedown', e => {
   const dir = e.target.dataset.dir
   dragState = { type: dir || 'move', startX: e.clientX, startY: e.clientY, startBox: { ...box } }
@@ -135,8 +194,7 @@ document.addEventListener('mousemove', e => {
   const dx = e.clientX - dragState.startX
   const dy = e.clientY - dragState.startY
   const sb = dragState.startBox
-  const MIN = 20
-
+  const MIN = 10
   if (dragState.type === 'move') {
     box.x = clamp(sb.x + dx, 0, displayW - box.w)
     box.y = clamp(sb.y + dy, 0, displayH - box.h)
@@ -145,28 +203,23 @@ document.addEventListener('mousemove', e => {
     box.h = clamp(sb.h + dy, MIN, displayH - box.y)
   } else if (dragState.type === 'sw') {
     const newW = clamp(sb.w - dx, MIN, sb.x + sb.w)
-    box.x = sb.x + sb.w - newW
-    box.w = newW
+    box.x = sb.x + sb.w - newW; box.w = newW
     box.h = clamp(sb.h + dy, MIN, displayH - box.y)
   } else if (dragState.type === 'ne') {
     box.w = clamp(sb.w + dx, MIN, displayW - box.x)
     const newH = clamp(sb.h - dy, MIN, sb.y + sb.h)
-    box.y = sb.y + sb.h - newH
-    box.h = newH
+    box.y = sb.y + sb.h - newH; box.h = newH
   } else if (dragState.type === 'nw') {
     const newW = clamp(sb.w - dx, MIN, sb.x + sb.w)
-    box.x = sb.x + sb.w - newW
-    box.w = newW
+    box.x = sb.x + sb.w - newW; box.w = newW
     const newH = clamp(sb.h - dy, MIN, sb.y + sb.h)
-    box.y = sb.y + sb.h - newH
-    box.h = newH
+    box.y = sb.y + sb.h - newH; box.h = newH
   }
   applyBox()
 })
 
 document.addEventListener('mouseup', () => { dragState = null })
 
-// Touch support
 cropBox.addEventListener('touchstart', e => {
   const dir = e.target.dataset.dir
   const touch = e.touches[0]
@@ -180,7 +233,7 @@ document.addEventListener('touchmove', e => {
   const dx = touch.clientX - dragState.startX
   const dy = touch.clientY - dragState.startY
   const sb = dragState.startBox
-  const MIN = 20
+  const MIN = 10
   if (dragState.type === 'move') {
     box.x = clamp(sb.x + dx, 0, displayW - box.w)
     box.y = clamp(sb.y + dy, 0, displayH - box.h)
@@ -202,15 +255,12 @@ cropBtn.addEventListener('click', () => {
   const sy = Math.round(box.y * scaleY)
   const sw = Math.round(box.w * scaleX)
   const sh = Math.round(box.h * scaleY)
-
   const canvas = document.createElement('canvas')
-  canvas.width = sw
-  canvas.height = sh
+  canvas.width = sw; canvas.height = sh
   const ctx = canvas.getContext('2d')
   ctx.drawImage(previewImg, sx, sy, sw, sh, 0, 0, sw, sh)
-
   const mime = originalFile.type === 'image/png' ? 'image/png' : 'image/jpeg'
-  const ext = mime === 'image/png' ? 'png' : 'jpg'
+  const ext  = mime === 'image/png' ? 'png' : 'jpg'
   canvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
     downloadLink.href = url
