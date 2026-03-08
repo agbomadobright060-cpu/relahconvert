@@ -4,6 +4,22 @@ import { getT } from '../core/i18n.js'
 const t = getT()
 const bg = '#F2F2F2'
 
+// ── i18n UI strings (with fallbacks) ────────────────────────────────────────
+const toolName  = (t.nav_short && t.nav_short['crop']) || 'Crop Image'
+const seo       = t.seo && t.seo['crop']
+const descText  = seo ? seo.h2a : 'Crop any image free. Files never leave your device.'
+const selectLbl = t.select_images || 'Select Image'
+const dropHint  = t.drop_hint || 'or drop image anywhere'
+const faqTitle  = t.seo_faq_title || 'Frequently Asked Questions'
+const alsoTry   = t.seo_also_try || 'Also Try'
+
+// Crop-specific labels — i18n fallback by language via resize keys where available
+const lblWidth   = t.resize_width  || 'Width (px)'
+const lblHeight  = t.resize_height || 'Height (px)'
+const lblX       = 'Position X (px)'
+const lblY       = 'Position Y (px)'
+// ─────────────────────────────────────────────────────────────────────────────
+
 if (document.head) {
   document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
   const style = document.createElement('style')
@@ -48,16 +64,22 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = 'Crop Image Free | No Upload — RelahConvert'
+document.title = `${toolName} Free | No Upload — RelahConvert`
+
+// Split toolName into two parts for styled H1: e.g. "Crop" + "Image"
+const parts = toolName.split(' ')
+const h1Main = parts[0]
+const h1Em   = parts.slice(1).join(' ')
+
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">Crop <em style="font-style:italic; color:#C84B31;">Image</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Crop any image free. Drag to select area or enter exact pixels. Files never leave your device.</p>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em></h1>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;">
-      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> Select Image</label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop image anywhere</span>
+      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
+      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     <div id="previewArea" style="display:none; margin-bottom:16px;">
@@ -71,39 +93,38 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
       <div class="crop-options">
-        <div class="crop-options-title">Crop Options</div>
+        <div class="crop-options-title">${toolName}</div>
         <div class="crop-inputs-grid">
           <div class="crop-input-group">
-            <label class="crop-input-label">Width (px)</label>
+            <label class="crop-input-label">${lblWidth}</label>
             <input class="crop-input" type="number" id="inputW" min="1" />
           </div>
           <div class="crop-input-group">
-            <label class="crop-input-label">Height (px)</label>
+            <label class="crop-input-label">${lblHeight}</label>
             <input class="crop-input" type="number" id="inputH" min="1" />
           </div>
           <div class="crop-input-group">
-            <label class="crop-input-label">Position X (px)</label>
+            <label class="crop-input-label">${lblX}</label>
             <input class="crop-input" type="number" id="inputX" min="0" />
           </div>
           <div class="crop-input-group">
-            <label class="crop-input-label">Position Y (px)</label>
+            <label class="crop-input-label">${lblY}</label>
             <input class="crop-input" type="number" id="inputY" min="0" />
           </div>
         </div>
       </div>
     </div>
-    <button class="opt-btn" id="cropBtn" disabled>Crop Image</button>
-    <a class="download-btn" id="downloadLink">Download Cropped Image</a>
+    <button class="opt-btn" id="cropBtn" disabled>${toolName}</button>
+    <a class="download-btn" id="downloadLink">${t.download || 'Download'}</a>
   </div>
 `
 
 injectHeader()
 
 // ── SEO Section ──────────────────────────────────────────────────────────────
-const seo = t.seo && t.seo['crop']
 if (seo) {
   const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
-  const faqsHtml = seo.faqs.map(f => `
+  const faqsHtml  = seo.faqs.map(f => `
     <div class="seo-faq">
       <p class="seo-faq-q">${f.q}</p>
       <p class="seo-faq-a">${f.a}</p>
@@ -119,9 +140,9 @@ if (seo) {
     ${seo.body}
     <h3>${seo.h3why}</h3>
     <p>${seo.why}</p>
-    <h3>Frequently Asked Questions</h3>
+    <h3>${faqTitle}</h3>
     ${faqsHtml}
-    <h3>More Free Image Tools</h3>
+    <h3>${alsoTry}</h3>
     <div class="seo-links">${linksHtml}</div>
   `
   document.querySelector('#app').appendChild(seoDiv)
@@ -307,7 +328,7 @@ cropBtn.addEventListener('click', () => {
     const url = URL.createObjectURL(blob)
     downloadLink.href = url
     downloadLink.download = `cropped-image.${ext}`
-    downloadLink.textContent = `Download Cropped Image (${Math.round(blob.size / 1024)} KB)`
+    downloadLink.textContent = `${t.download || 'Download'} (${Math.round(blob.size / 1024)} KB)`
     downloadLink.style.display = 'block'
   }, mime, 0.92)
 })
