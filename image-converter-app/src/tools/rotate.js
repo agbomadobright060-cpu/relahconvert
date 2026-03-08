@@ -19,7 +19,11 @@ if (document.head) {
     .download-btn:hover { background:#1a0f09; }
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
     #previewImg { max-width:100%; max-height:380px; display:block; border-radius:8px; transition:transform 0.3s ease; margin:0 auto; }
-    .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:12px; }
+    .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; }
+    .orientation-badge { display:inline-flex; align-items:center; gap:5px; font-weight:600; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; transition:all 0.2s; }
+    .orientation-badge.portrait  { background:#EFF6FF; color:#2563EB; }
+    .orientation-badge.landscape { background:#F0FDF4; color:#16A34A; }
+    .orientation-badge.square    { background:#F5F3FF; color:#7C3AED; }
   `
   document.head.appendChild(style)
 }
@@ -40,14 +44,16 @@ document.querySelector('#app').innerHTML = `
       <div style="text-align:center; margin-bottom:12px;">
         <img id="previewImg" src="" alt="preview" />
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px;">
         <button class="opt-btn secondary" id="rotL">↺ Rotate Left 90°</button>
         <button class="opt-btn secondary" id="rotR">↻ Rotate Right 90°</button>
         <button class="opt-btn secondary" id="rot180">↕ Rotate 180°</button>
       </div>
-      <div style="text-align:center;">
-        <span style="font-size:13px; color:#9A8A7A; font-family:'DM Sans',sans-serif;">Current rotation:</span>
+      <div style="text-align:center; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:4px;">
+        <span style="font-size:13px; color:#9A8A7A; font-family:'DM Sans',sans-serif;">Rotation:</span>
         <span class="angle-badge" id="angleBadge">0°</span>
+        <span style="font-size:13px; color:#9A8A7A; font-family:'DM Sans',sans-serif; margin-left:8px;">Orientation:</span>
+        <span class="orientation-badge portrait" id="orientationBadge">↕ Portrait</span>
       </div>
     </div>
     <button class="opt-btn" id="applyBtn" disabled style="width:100%; margin-bottom:10px;">Apply & Download</button>
@@ -63,15 +69,35 @@ const previewImg = document.getElementById('previewImg')
 const applyBtn = document.getElementById('applyBtn')
 const downloadLink = document.getElementById('downloadLink')
 const angleBadge = document.getElementById('angleBadge')
+const orientationBadge = document.getElementById('orientationBadge')
 
 let originalFile = null
 let angle = 0
+let naturalW = 0
+let naturalH = 0
+
+function updateOrientationBadge() {
+  // At 90 or 270 degrees width and height effectively swap
+  const isRotated90 = angle === 90 || angle === 270
+  const effectiveW = isRotated90 ? naturalH : naturalW
+  const effectiveH = isRotated90 ? naturalW : naturalH
+
+  if (effectiveW === effectiveH) {
+    orientationBadge.className = 'orientation-badge square'
+    orientationBadge.textContent = '⊡ Square'
+  } else if (effectiveW > effectiveH) {
+    orientationBadge.className = 'orientation-badge landscape'
+    orientationBadge.textContent = '↔ Landscape'
+  } else {
+    orientationBadge.className = 'orientation-badge portrait'
+    orientationBadge.textContent = '↕ Portrait'
+  }
+}
 
 function updateAngle(deg) {
   angle = ((angle + deg) % 360 + 360) % 360
   angleBadge.textContent = angle + '°'
   previewImg.style.transform = `rotate(${angle}deg)`
-  // Adjust container height for 90/270
   if (angle === 90 || angle === 270) {
     previewImg.style.maxHeight = '300px'
     previewImg.style.maxWidth = '300px'
@@ -79,6 +105,7 @@ function updateAngle(deg) {
     previewImg.style.maxHeight = '380px'
     previewImg.style.maxWidth = '100%'
   }
+  updateOrientationBadge()
 }
 
 document.getElementById('rotL').addEventListener('click', () => updateAngle(-90))
@@ -93,6 +120,11 @@ function loadFile(file) {
   previewImg.style.transform = 'rotate(0deg)'
   previewImg.style.maxHeight = '380px'
   previewImg.style.maxWidth = '100%'
+  previewImg.onload = () => {
+    naturalW = previewImg.naturalWidth
+    naturalH = previewImg.naturalHeight
+    updateOrientationBadge()
+  }
   previewImg.src = URL.createObjectURL(file)
   previewArea.style.display = 'block'
   applyBtn.disabled = false
