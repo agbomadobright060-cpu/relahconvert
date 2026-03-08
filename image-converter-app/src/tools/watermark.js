@@ -11,49 +11,63 @@ if (document.head) {
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
 
-    .opt-btn { width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:10px; }
+    .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:8px; }
     .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
     .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
-    .download-btn { display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px; }
-    .download-btn:hover { background:#1a0f09; }
+    .opt-btn.dark { background:#2C1810; }
+    .opt-btn.dark:hover { background:#1a0f09; }
+    .opt-btn.secondary { background:#fff; color:#2C1810; border:1.5px solid #DDD5C8; }
+    .opt-btn.secondary:hover { border-color:#C84B31; color:#C84B31; transform:translateY(-1px); }
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
-    .upload-label.secondary { background:#fff; color:#2C1810; border:1.5px solid #DDD5C8; }
-    .upload-label.secondary:hover { border-color:#C84B31; color:#C84B31; }
 
-    /* Two column layout */
     .tool-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start; }
-    .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
-    #previewCanvas { max-width:100%; max-height:440px; border-radius:6px; display:block; margin:0 auto; cursor:move; }
-    .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:20px; font-family:'DM Sans',sans-serif; }
-    .controls-col h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:0 0 16px; }
+    .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:16px; gap:10px; }
+    #previewCanvas { max-width:100%; max-height:420px; border-radius:6px; display:block; cursor:move; }
 
-    /* Tabs */
-    .tab-row { display:flex; gap:0; margin-bottom:16px; border-radius:10px; overflow:hidden; border:1.5px solid #DDD5C8; }
-    .tab-btn { flex:1; padding:10px; border:none; background:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; color:#5A4A3A; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:6px; }
-    .tab-btn:first-child { border-right:1.5px solid #DDD5C8; }
-    .tab-btn.active { background:#FDE8E3; color:#C84B31; }
-    .tab-btn:hover:not(.active) { background:#F5F0E8; }
+    .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:16px; font-family:'DM Sans',sans-serif; max-height:85vh; overflow-y:auto; }
+    .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:#2C1810; margin:0 0 12px; }
 
-    /* Controls */
-    .ctrl-row { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
-    .ctrl-label { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.06em; font-family:'DM Sans',sans-serif; margin-bottom:6px; }
-    .ctrl-input { width:100%; padding:8px 12px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:#fff; color:#2C1810; outline:none; box-sizing:border-box; }
+    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:6px; font-family:'DM Sans',sans-serif; }
+    .divider { height:1px; background:#F0EAE3; margin:12px 0; }
+    .ctrl-input { width:100%; padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:#fff; color:#2C1810; outline:none; box-sizing:border-box; }
     .ctrl-input:focus { border-color:#C84B31; }
-    input[type=range] { width:100%; accent-color:#C84B31; margin:4px 0; }
-    .range-row { display:flex; align-items:center; gap:8px; }
+    input[type=range] { width:100%; accent-color:#C84B31; margin:3px 0; }
+    .range-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
     .range-val { font-size:12px; color:#9A8A7A; min-width:36px; text-align:right; font-family:'DM Sans',sans-serif; }
 
-    /* Draggable watermark canvas */
+    /* Watermark layer cards */
+    .wm-list { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+    .wm-card { border:1.5px solid #E8E0D5; border-radius:10px; overflow:hidden; }
+    .wm-card.selected { border-color:#C84B31; }
+    .wm-card-header { display:flex; align-items:center; gap:8px; padding:8px 10px; background:#F9F6F2; cursor:pointer; }
+    .wm-card-header:hover { background:#F5F0E8; }
+    .wm-type-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; font-family:'DM Sans',sans-serif; }
+    .wm-type-badge.text { background:#EFF6FF; color:#2563EB; }
+    .wm-type-badge.image { background:#F0FDF4; color:#16A34A; }
+    .wm-card-title { flex:1; font-size:12px; font-weight:600; color:#2C1810; font-family:'DM Sans',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wm-delete { background:none; border:none; cursor:pointer; color:#C4B8A8; font-size:14px; padding:2px 4px; line-height:1; }
+    .wm-delete:hover { color:#C84B31; }
+    .wm-card-body { padding:10px; display:none; }
+    .wm-card-body.open { display:block; }
 
-    .divider { height:1px; background:#F0EAE3; margin:14px 0; }
-    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:8px; font-family:'DM Sans',sans-serif; }
+    /* Add buttons row */
+    .add-row { display:flex; gap:8px; margin-bottom:12px; }
+    .add-btn { flex:1; padding:8px; border:1.5px dashed #DDD5C8; border-radius:8px; background:#fff; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:#5A4A3A; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.15s; }
+    .add-btn:hover { border-color:#C84B31; color:#C84B31; background:#FDE8E3; }
 
-    /* Watermark image preview */
-    #wmImgPreview { width:100%; height:70px; object-fit:contain; border-radius:6px; border:1.5px solid #E8E0D5; display:none; margin-bottom:10px; background:#F5F0E8; }
+    /* Color swatches */
+    .swatches { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+    .swatch { width:20px; height:20px; border-radius:50%; border:2px solid #E8E0D5; cursor:pointer; transition:transform 0.15s; flex-shrink:0; }
+    .swatch:hover { transform:scale(1.2); }
 
-    /* Empty state */
-    .empty-state { text-align:center; color:#C4B8A8; font-family:'DM Sans',sans-serif; font-size:13px; }
-    .empty-state svg { margin-bottom:10px; opacity:0.4; }
+    /* Batch file chips */
+    .file-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .file-chip { display:flex; align-items:center; gap:5px; background:#F5F0E8; border-radius:20px; padding:4px 10px; font-size:11px; font-family:'DM Sans',sans-serif; color:#5A4A3A; }
+    .file-chip button { background:none; border:none; cursor:pointer; color:#9A8A7A; font-size:12px; line-height:1; padding:0; }
+    .file-chip button:hover { color:#C84B31; }
+
+    /* Hint */
+    .drag-hint { display:flex; align-items:center; gap:6px; background:#F5F0E8; border-radius:8px; padding:8px 10px; font-size:11px; color:#7A6A5A; font-family:'DM Sans',sans-serif; }
 
     @media (max-width:700px) {
       .tool-layout { grid-template-columns:1fr; }
@@ -68,96 +82,48 @@ document.querySelector('#app').innerHTML = `
   <div style="max-width:1000px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">Add <em style="font-style:italic; color:#C84B31;">Watermark</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0 0 16px;">Add text or image watermark free. Files never leave your device.</p>
-      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> Select Image</label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop image anywhere</span>
-      <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+      <p style="font-size:13px; color:#7A6A5A; margin:0 0 14px;">Add text or image watermarks free. Files never leave your device.</p>
+      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> Select Images</label>
+      <span style="font-size:12px; color:#9A8A7A; margin-left:10px;">up to 25 images</span>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
     </div>
 
     <div class="tool-layout" id="toolLayout" style="display:none;">
 
-      <!-- Left: live preview -->
+      <!-- Left: preview -->
       <div class="image-col">
+        <div class="file-chips" id="fileChips"></div>
         <canvas id="previewCanvas"></canvas>
+        <div class="drag-hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3"/><path d="M2 12h20M12 2v20"/></svg>
+          Click a watermark layer then drag it on the preview to reposition
+        </div>
       </div>
 
       <!-- Right: controls -->
       <div class="controls-col">
-        <h3>Watermark Options</h3>
+        <h3>Watermark Layers</h3>
 
-        <!-- Tabs: Text / Image -->
-        <div class="tab-row">
-          <button class="tab-btn active" id="tabText">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
-            Add Text
+        <div class="add-row">
+          <button class="add-btn" id="addTextBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+            + Add Text
           </button>
-          <button class="tab-btn" id="tabImage">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            Add Image
-          </button>
-        </div>
-
-        <!-- Text panel -->
-        <div id="panelText">
-          <div class="section-label">Watermark Text</div>
-          <input class="ctrl-input" type="text" id="wmText" value="© Your Brand" placeholder="Enter watermark text" style="margin-bottom:12px;" />
-
-          <div class="ctrl-label">Color</div>
-          <div class="ctrl-row" style="margin-bottom:12px;">
-            <input type="color" id="wmColor" value="#ffffff" style="width:44px; height:36px; border:1.5px solid #DDD5C8; border-radius:8px; cursor:pointer; padding:2px; flex-shrink:0;" />
-            <div style="flex:1;">
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                ${['#ffffff','#000000','#C84B31','#2563EB','#16A34A','#F59E0B'].map(c =>
-                  `<div class="color-swatch" data-color="${c}" style="width:22px;height:22px;border-radius:50%;background:${c};border:2px solid #E8E0D5;cursor:pointer;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></div>`
-                ).join('')}
-              </div>
-            </div>
-          </div>
-
-          <div class="ctrl-label">Font Size</div>
-          <div class="range-row" style="margin-bottom:12px;">
-            <input type="range" id="wmSize" min="10" max="120" value="36" />
-            <span class="range-val" id="sizeVal">36px</span>
-          </div>
-        </div>
-
-        <!-- Image panel -->
-        <div id="panelImage" style="display:none;">
-          <div class="section-label">Watermark Image (logo, stamp)</div>
-          <img id="wmImgPreview" src="" alt="watermark" />
-          <label class="upload-label secondary" for="wmImgInput" style="margin-bottom:12px; justify-content:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-            Upload Logo / Image
+          <label class="add-btn" for="addImgInput">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            + Add Logo
           </label>
-          <input type="file" id="wmImgInput" accept="image/*" style="display:none;" />
-
-          <div class="ctrl-label">Size</div>
-          <div class="range-row" style="margin-bottom:12px;">
-            <input type="range" id="wmImgSize" min="5" max="80" value="25" />
-            <span class="range-val" id="imgSizeVal">25%</span>
-          </div>
+          <input type="file" id="addImgInput" accept="image/*" style="display:none;" />
         </div>
+
+        <div class="wm-list" id="wmList"></div>
 
         <div class="divider"></div>
-
-        <!-- Opacity (shared) -->
-        <div class="ctrl-label">Opacity</div>
-        <div class="range-row" style="margin-bottom:14px;">
-          <input type="range" id="wmOpacity" min="5" max="100" value="60" />
-          <span class="range-val" id="opacityVal">60%</span>
+        <button class="opt-btn" id="applyBtn" disabled>Apply & Download</button>
+        <div id="zipWrap" style="display:none; margin-top:4px;">
+          <a id="zipBtn" class="opt-btn dark" style="display:block; text-align:center; text-decoration:none;">⬇ Download All as ZIP</a>
+          <p id="zipNote" style="font-size:11px; color:#9A8A7A; text-align:center; margin:4px 0 0; font-family:'DM Sans',sans-serif;"></p>
         </div>
-
-        <div class="divider"></div>
-
-        <!-- Position hint -->
-        <div class="section-label">Position</div>
-        <div style="display:flex; align-items:center; gap:8px; background:#F5F0E8; border-radius:8px; padding:10px 12px; margin-bottom:16px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A8A7A" stroke-width="2" stroke-linecap="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 12v.01"/><path d="M2 12h20M12 2v20"/></svg>
-          <span style="font-size:12px; color:#7A6A5A; font-family:'DM Sans',sans-serif;">Drag the watermark on the preview to reposition it</span>
-        </div>
-
-        <button class="opt-btn" id="applyBtn">Apply & Download</button>
-        <a class="download-btn" id="downloadLink">Download Watermarked Image</a>
       </div>
     </div>
   </div>
@@ -165,233 +131,431 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput     = document.getElementById('fileInput')
-const toolLayout    = document.getElementById('toolLayout')
-const previewCanvas = document.getElementById('previewCanvas')
-const applyBtn      = document.getElementById('applyBtn')
-const downloadLink  = document.getElementById('downloadLink')
-const wmText        = document.getElementById('wmText')
-const wmColor       = document.getElementById('wmColor')
-const wmOpacity     = document.getElementById('wmOpacity')
-const wmSize        = document.getElementById('wmSize')
-const wmImgSize     = document.getElementById('wmImgSize')
-const opacityVal    = document.getElementById('opacityVal')
-const sizeVal       = document.getElementById('sizeVal')
-const imgSizeVal    = document.getElementById('imgSizeVal')
-const wmImgInput    = document.getElementById('wmImgInput')
-const wmImgPreview  = document.getElementById('wmImgPreview')
-const panelText     = document.getElementById('panelText')
-const panelImage    = document.getElementById('panelImage')
-const tabText       = document.getElementById('tabText')
-const tabImage      = document.getElementById('tabImage')
-
-let originalImg  = null
-let originalFile = null
-let watermarkImg = null
-let activeTab    = 'text'
-// Watermark position as fraction of canvas (0-1)
-let wmPosX = 0.5
-let wmPosY = 0.5
-let isDraggingWm = false
+// ── State ──────────────────────────────────────────────
+let baseFiles   = []       // { file, img }
+let activeFileIdx = 0
+let watermarks  = []       // { id, type, text, color, fontSize, imgEl, imgSizePct, opacity, posX, posY }
+let selectedWmId = null
+let isDragging  = false
 let dragOffsetX = 0
 let dragOffsetY = 0
+let wmIdCounter = 0
 
-// Tab switching
-tabText.addEventListener('click', () => {
-  activeTab = 'text'
-  tabText.classList.add('active'); tabImage.classList.remove('active')
-  panelText.style.display = 'block'; panelImage.style.display = 'none'
-  renderPreview()
-})
-tabImage.addEventListener('click', () => {
-  activeTab = 'image'
-  tabImage.classList.add('active'); tabText.classList.remove('active')
-  panelImage.style.display = 'block'; panelText.style.display = 'none'
-  renderPreview()
-})
+const fileInput    = document.getElementById('fileInput')
+const toolLayout   = document.getElementById('toolLayout')
+const previewCanvas= document.getElementById('previewCanvas')
+const fileChips    = document.getElementById('fileChips')
+const wmList       = document.getElementById('wmList')
+const applyBtn     = document.getElementById('applyBtn')
+const addTextBtn   = document.getElementById('addTextBtn')
+const addImgInput  = document.getElementById('addImgInput')
 
-// Color swatches
-document.querySelectorAll('.color-swatch').forEach(swatch => {
-  swatch.addEventListener('click', () => {
-    wmColor.value = swatch.dataset.color
-    renderPreview()
-  })
-})
+// ── Helpers ─────────────────────────────────────────────
+function newId() { return ++wmIdCounter }
 
-// Position set by dragging on canvas
-
-// Live update listeners
-wmText.addEventListener('input', renderPreview)
-wmColor.addEventListener('input', renderPreview)
-wmOpacity.addEventListener('input', () => { opacityVal.textContent = wmOpacity.value + '%'; renderPreview() })
-wmSize.addEventListener('input', () => { sizeVal.textContent = wmSize.value + 'px'; renderPreview() })
-wmImgSize.addEventListener('input', () => { imgSizeVal.textContent = wmImgSize.value + '%'; renderPreview() })
-
-// Watermark image upload
-wmImgInput.addEventListener('change', () => {
-  const file = wmImgInput.files[0]
-  if (!file) return
-  const img = new Image()
-  img.onload = () => {
-    watermarkImg = img
-    wmImgPreview.src = img.src
-    wmImgPreview.style.display = 'block'
-    renderPreview()
-  }
-  img.src = URL.createObjectURL(file)
-})
-
-function getWmDimensions(cw, ch, scale) {
-  if (activeTab === 'text') {
-    const fontSize = Math.round(parseInt(wmSize.value) * scale)
+function getWmRect(wm, cw, ch) {
+  if (wm.type === 'text') {
     const ctx = previewCanvas.getContext('2d')
-    ctx.font = `bold ${fontSize}px 'DM Sans', Arial, sans-serif`
-    return { w: ctx.measureText(wmText.value || '© Watermark').width, h: fontSize }
-  } else if (watermarkImg) {
-    const pct = parseInt(wmImgSize.value) / 100
-    const ww = Math.round(cw * pct)
-    return { w: ww, h: Math.round(ww * (watermarkImg.naturalHeight / watermarkImg.naturalWidth)) }
+    const scale = cw / (baseFiles[activeFileIdx]?.img.naturalWidth || cw)
+    const fs = Math.round(wm.fontSize * scale)
+    ctx.font = `bold ${fs}px 'DM Sans', Arial, sans-serif`
+    const tw = ctx.measureText(wm.text || '© Watermark').width
+    return { x: wm.posX * cw - tw / 2, y: wm.posY * ch - fs / 2, w: tw, h: fs }
+  } else if (wm.imgEl) {
+    const ww = cw * (wm.imgSizePct / 100)
+    const wh = ww * (wm.imgEl.naturalHeight / wm.imgEl.naturalWidth)
+    return { x: wm.posX * cw - ww / 2, y: wm.posY * ch - wh / 2, w: ww, h: wh }
   }
-  return { w: 0, h: 0 }
-}
-
-function drawWatermark(ctx, cw, ch, scale = 1) {
-  const opacity = parseInt(wmOpacity.value) / 100
-  ctx.save()
-  ctx.globalAlpha = opacity
-
-  const { w, h } = getWmDimensions(cw, ch, scale)
-  const x = wmPosX * cw - w / 2
-  const y = wmPosY * ch - h / 2
-
-  if (activeTab === 'text') {
-    const fontSize = Math.round(parseInt(wmSize.value) * scale)
-    ctx.font = `bold ${fontSize}px 'DM Sans', Arial, sans-serif`
-    ctx.fillStyle = wmColor.value
-    ctx.shadowColor = 'rgba(0,0,0,0.35)'
-    ctx.shadowBlur = Math.round(4 * scale)
-    ctx.fillText(wmText.value || '© Watermark', x, y + h)
-  } else if (activeTab === 'image' && watermarkImg) {
-    ctx.drawImage(watermarkImg, x, y, w, h)
-  }
-
-  ctx.restore()
+  return { x: 0, y: 0, w: 0, h: 0 }
 }
 
 function renderPreview() {
-  if (!originalImg) return
-  const maxW = 580
-  const scale = Math.min(1, maxW / originalImg.naturalWidth)
-  const w = Math.round(originalImg.naturalWidth * scale)
-  const h = Math.round(originalImg.naturalHeight * scale)
-  previewCanvas.width = w
-  previewCanvas.height = h
+  const entry = baseFiles[activeFileIdx]
+  if (!entry) return
+  const img = entry.img
+  const maxW = 560
+  const scale = Math.min(1, maxW / img.naturalWidth)
+  const cw = Math.round(img.naturalWidth * scale)
+  const ch = Math.round(img.naturalHeight * scale)
+  previewCanvas.width = cw
+  previewCanvas.height = ch
   const ctx = previewCanvas.getContext('2d')
-  ctx.drawImage(originalImg, 0, 0, w, h)
-  drawWatermark(ctx, w, h, scale)
+  ctx.drawImage(img, 0, 0, cw, ch)
+
+  watermarks.forEach(wm => {
+    ctx.save()
+    ctx.globalAlpha = wm.opacity / 100
+    const { x, y, w, h } = getWmRect(wm, cw, ch)
+    if (wm.type === 'text') {
+      const fs = Math.round(wm.fontSize * scale)
+      ctx.font = `bold ${fs}px 'DM Sans', Arial, sans-serif`
+      ctx.fillStyle = wm.color
+      ctx.shadowColor = 'rgba(0,0,0,0.35)'
+      ctx.shadowBlur = Math.round(4 * scale)
+      ctx.fillText(wm.text || '© Watermark', x, y + h)
+    } else if (wm.imgEl) {
+      ctx.drawImage(wm.imgEl, x, y, w, h)
+    }
+    // Draw selection outline
+    if (wm.id === selectedWmId) {
+      ctx.globalAlpha = 1
+      ctx.strokeStyle = '#C84B31'
+      ctx.lineWidth = 2
+      ctx.setLineDash([5, 3])
+      ctx.strokeRect(x - 4, y - 4, w + 8, h + 8)
+    }
+    ctx.restore()
+  })
 }
 
-// Drag watermark on canvas
-previewCanvas.addEventListener('mousedown', e => {
-  if (!originalImg) return
+function drawWatermarkFull(ctx, cw, ch, wm) {
+  ctx.save()
+  ctx.globalAlpha = wm.opacity / 100
+  if (wm.type === 'text') {
+    ctx.font = `bold ${wm.fontSize}px 'DM Sans', Arial, sans-serif`
+    ctx.fillStyle = wm.color
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'
+    ctx.shadowBlur = 4
+    const tw = ctx.measureText(wm.text || '© Watermark').width
+    const th = wm.fontSize
+    ctx.fillText(wm.text || '© Watermark', wm.posX * cw - tw / 2, wm.posY * ch - th / 2 + th)
+  } else if (wm.imgEl) {
+    const ww = cw * (wm.imgSizePct / 100)
+    const wh = ww * (wm.imgEl.naturalHeight / wm.imgEl.naturalWidth)
+    ctx.drawImage(wm.imgEl, wm.posX * cw - ww / 2, wm.posY * ch - wh / 2, ww, wh)
+  }
+  ctx.restore()
+}
+
+// ── Watermark layer UI ──────────────────────────────────
+function renderWmList() {
+  wmList.innerHTML = ''
+  watermarks.forEach(wm => {
+    const card = document.createElement('div')
+    card.className = 'wm-card' + (wm.id === selectedWmId ? ' selected' : '')
+    card.dataset.id = wm.id
+
+    const previewThumb = wm.type === 'image' && wm.imgEl
+      ? `<img src="${wm.imgEl.src}" style="width:20px;height:20px;object-fit:contain;border-radius:3px;border:1px solid #E8E0D5;">`
+      : ''
+
+    card.innerHTML = `
+      <div class="wm-card-header">
+        <span class="wm-type-badge ${wm.type}">${wm.type === 'text' ? 'T' : '⬛'}</span>
+        ${previewThumb}
+        <span class="wm-card-title">${wm.type === 'text' ? (wm.text || '© Watermark') : (wm.imgEl?.src.split('/').pop() || 'Logo')}</span>
+        <button class="wm-delete" data-id="${wm.id}">✕</button>
+      </div>
+      <div class="wm-card-body ${wm.id === selectedWmId ? 'open' : ''}">
+        ${wm.type === 'text' ? `
+          <div class="section-label" style="margin-top:4px;">Text</div>
+          <input class="ctrl-input wm-text" data-id="${wm.id}" value="${wm.text}" placeholder="Watermark text" style="margin-bottom:8px;" />
+          <div class="section-label">Color</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <input type="color" class="wm-color" data-id="${wm.id}" value="${wm.color}" style="width:36px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;padding:2px;" />
+            <div class="swatches">
+              ${['#ffffff','#000000','#C84B31','#2563EB','#16A34A','#F59E0B'].map(c =>
+                `<div class="swatch color-swatch" data-id="${wm.id}" data-color="${c}" style="background:${c};"></div>`
+              ).join('')}
+            </div>
+          </div>
+          <div class="section-label">Font Size</div>
+          <div class="range-row">
+            <input type="range" class="wm-size" data-id="${wm.id}" min="10" max="120" value="${wm.fontSize}" />
+            <span class="range-val wm-size-val" data-id="${wm.id}">${wm.fontSize}px</span>
+          </div>
+        ` : `
+          <div class="section-label" style="margin-top:4px;">Logo Size</div>
+          <div class="range-row">
+            <input type="range" class="wm-imgsize" data-id="${wm.id}" min="5" max="80" value="${wm.imgSizePct}" />
+            <span class="range-val wm-imgsize-val" data-id="${wm.id}">${wm.imgSizePct}%</span>
+          </div>
+        `}
+        <div class="section-label">Opacity</div>
+        <div class="range-row">
+          <input type="range" class="wm-opacity" data-id="${wm.id}" min="5" max="100" value="${wm.opacity}" />
+          <span class="range-val wm-opacity-val" data-id="${wm.id}">${wm.opacity}%</span>
+        </div>
+      </div>
+    `
+    wmList.appendChild(card)
+  })
+
+  // Events
+  wmList.querySelectorAll('.wm-card-header').forEach(h => {
+    h.addEventListener('click', e => {
+      if (e.target.classList.contains('wm-delete')) return
+      const id = parseInt(h.closest('.wm-card').dataset.id)
+      selectedWmId = selectedWmId === id ? null : id
+      renderWmList()
+      renderPreview()
+    })
+  })
+  wmList.querySelectorAll('.wm-delete').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      const id = parseInt(btn.dataset.id)
+      watermarks = watermarks.filter(w => w.id !== id)
+      if (selectedWmId === id) selectedWmId = null
+      renderWmList()
+      renderPreview()
+    })
+  })
+  wmList.querySelectorAll('.wm-text').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const wm = watermarks.find(w => w.id === parseInt(inp.dataset.id))
+      if (wm) { wm.text = inp.value; renderPreview(); h3Title(wm) }
+    })
+  })
+  wmList.querySelectorAll('.wm-color').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const wm = watermarks.find(w => w.id === parseInt(inp.dataset.id))
+      if (wm) { wm.color = inp.value; renderPreview() }
+    })
+  })
+  wmList.querySelectorAll('.color-swatch').forEach(s => {
+    s.addEventListener('click', () => {
+      const wm = watermarks.find(w => w.id === parseInt(s.dataset.id))
+      if (wm) {
+        wm.color = s.dataset.color
+        const colorInput = wmList.querySelector(`.wm-color[data-id="${wm.id}"]`)
+        if (colorInput) colorInput.value = wm.color
+        renderPreview()
+      }
+    })
+  })
+  wmList.querySelectorAll('.wm-size').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const wm = watermarks.find(w => w.id === parseInt(inp.dataset.id))
+      if (wm) {
+        wm.fontSize = parseInt(inp.value)
+        const val = wmList.querySelector(`.wm-size-val[data-id="${wm.id}"]`)
+        if (val) val.textContent = wm.fontSize + 'px'
+        renderPreview()
+      }
+    })
+  })
+  wmList.querySelectorAll('.wm-imgsize').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const wm = watermarks.find(w => w.id === parseInt(inp.dataset.id))
+      if (wm) {
+        wm.imgSizePct = parseInt(inp.value)
+        const val = wmList.querySelector(`.wm-imgsize-val[data-id="${wm.id}"]`)
+        if (val) val.textContent = wm.imgSizePct + '%'
+        renderPreview()
+      }
+    })
+  })
+  wmList.querySelectorAll('.wm-opacity').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const wm = watermarks.find(w => w.id === parseInt(inp.dataset.id))
+      if (wm) {
+        wm.opacity = parseInt(inp.value)
+        const val = wmList.querySelector(`.wm-opacity-val[data-id="${wm.id}"]`)
+        if (val) val.textContent = wm.opacity + '%'
+        renderPreview()
+      }
+    })
+  })
+}
+
+function h3Title(wm) {
+  const title = wmList.querySelector(`.wm-card[data-id="${wm.id}"] .wm-card-title`)
+  if (title) title.textContent = wm.text || '© Watermark'
+}
+
+// ── Add watermark actions ───────────────────────────────
+addTextBtn.addEventListener('click', () => {
+  const wm = { id: newId(), type: 'text', text: '© Your Brand', color: '#ffffff', fontSize: 36, opacity: 60, posX: 0.5, posY: 0.5 }
+  watermarks.push(wm)
+  selectedWmId = wm.id
+  renderWmList()
+  renderPreview()
+})
+
+addImgInput.addEventListener('change', () => {
+  const file = addImgInput.files[0]
+  if (!file) return
+  const img = new Image()
+  img.onload = () => {
+    const wm = { id: newId(), type: 'image', imgEl: img, imgSizePct: 25, opacity: 70, posX: 0.5, posY: 0.5 }
+    watermarks.push(wm)
+    selectedWmId = wm.id
+    renderWmList()
+    renderPreview()
+  }
+  img.src = URL.createObjectURL(file)
+  addImgInput.value = ''
+})
+
+// ── Canvas drag ─────────────────────────────────────────
+function getCanvasPos(e) {
   const rect = previewCanvas.getBoundingClientRect()
   const scaleX = previewCanvas.width / rect.width
   const scaleY = previewCanvas.height / rect.height
-  const mx = (e.clientX - rect.left) * scaleX
-  const my = (e.clientY - rect.top) * scaleY
-  const { w, h } = getWmDimensions(previewCanvas.width, previewCanvas.height, previewCanvas.width / originalImg.naturalWidth)
-  const wx = wmPosX * previewCanvas.width - w / 2
-  const wy = wmPosY * previewCanvas.height - h / 2
-  // Check if click is near watermark
-  if (mx >= wx - 10 && mx <= wx + w + 10 && my >= wy - 10 && my <= wy + h + 10) {
-    isDraggingWm = true
-    dragOffsetX = mx - (wmPosX * previewCanvas.width)
-    dragOffsetY = my - (wmPosY * previewCanvas.height)
-    previewCanvas.style.cursor = 'grabbing'
-  }
+  const cx = e.touches ? e.touches[0].clientX : e.clientX
+  const cy = e.touches ? e.touches[0].clientY : e.clientY
+  return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY }
+}
+
+previewCanvas.addEventListener('mousedown', e => {
+  if (!selectedWmId) return
+  const { x, y } = getCanvasPos(e)
+  const wm = watermarks.find(w => w.id === selectedWmId)
+  if (!wm) return
+  isDragging = true
+  dragOffsetX = x - wm.posX * previewCanvas.width
+  dragOffsetY = y - wm.posY * previewCanvas.height
+  previewCanvas.style.cursor = 'grabbing'
 })
 
 previewCanvas.addEventListener('mousemove', e => {
-  if (!isDraggingWm || !originalImg) return
-  const rect = previewCanvas.getBoundingClientRect()
-  const scaleX = previewCanvas.width / rect.width
-  const scaleY = previewCanvas.height / rect.height
-  const mx = (e.clientX - rect.left) * scaleX
-  const my = (e.clientY - rect.top) * scaleY
-  wmPosX = Math.max(0, Math.min(1, (mx - dragOffsetX) / previewCanvas.width))
-  wmPosY = Math.max(0, Math.min(1, (my - dragOffsetY) / previewCanvas.height))
+  if (!isDragging || !selectedWmId) return
+  const { x, y } = getCanvasPos(e)
+  const wm = watermarks.find(w => w.id === selectedWmId)
+  if (!wm) return
+  wm.posX = Math.max(0, Math.min(1, (x - dragOffsetX) / previewCanvas.width))
+  wm.posY = Math.max(0, Math.min(1, (y - dragOffsetY) / previewCanvas.height))
   renderPreview()
 })
 
 document.addEventListener('mouseup', () => {
-  if (isDraggingWm) {
-    isDraggingWm = false
-    previewCanvas.style.cursor = 'move'
-  }
+  if (isDragging) { isDragging = false; previewCanvas.style.cursor = 'move' }
 })
 
-// Touch support
 previewCanvas.addEventListener('touchstart', e => {
-  if (!originalImg) return
+  if (!selectedWmId) return
   e.preventDefault()
-  const rect = previewCanvas.getBoundingClientRect()
-  const scaleX = previewCanvas.width / rect.width
-  const scaleY = previewCanvas.height / rect.height
-  const mx = (e.touches[0].clientX - rect.left) * scaleX
-  const my = (e.touches[0].clientY - rect.top) * scaleY
-  isDraggingWm = true
-  dragOffsetX = mx - (wmPosX * previewCanvas.width)
-  dragOffsetY = my - (wmPosY * previewCanvas.height)
+  const { x, y } = getCanvasPos(e)
+  const wm = watermarks.find(w => w.id === selectedWmId)
+  if (!wm) return
+  isDragging = true
+  dragOffsetX = x - wm.posX * previewCanvas.width
+  dragOffsetY = y - wm.posY * previewCanvas.height
 }, { passive: false })
 
 previewCanvas.addEventListener('touchmove', e => {
-  if (!isDraggingWm) return
+  if (!isDragging || !selectedWmId) return
   e.preventDefault()
-  const rect = previewCanvas.getBoundingClientRect()
-  const scaleX = previewCanvas.width / rect.width
-  const scaleY = previewCanvas.height / rect.height
-  const mx = (e.touches[0].clientX - rect.left) * scaleX
-  const my = (e.touches[0].clientY - rect.top) * scaleY
-  wmPosX = Math.max(0, Math.min(1, (mx - dragOffsetX) / previewCanvas.width))
-  wmPosY = Math.max(0, Math.min(1, (my - dragOffsetY) / previewCanvas.height))
+  const { x, y } = getCanvasPos(e)
+  const wm = watermarks.find(w => w.id === selectedWmId)
+  if (!wm) return
+  wm.posX = Math.max(0, Math.min(1, (x - dragOffsetX) / previewCanvas.width))
+  wm.posY = Math.max(0, Math.min(1, (y - dragOffsetY) / previewCanvas.height))
   renderPreview()
 }, { passive: false })
 
-previewCanvas.addEventListener('touchend', () => { isDraggingWm = false })
+previewCanvas.addEventListener('touchend', () => { isDragging = false })
 
-function loadFile(file) {
-  if (!file || !file.type.startsWith('image/')) return
-  originalFile = file
-  const img = new Image()
-  img.onload = () => {
-    originalImg = img
-    toolLayout.style.display = 'grid'
-    downloadLink.style.display = 'none'
-    renderPreview()
-  }
-  img.src = URL.createObjectURL(file)
+// ── File chips ──────────────────────────────────────────
+function renderFileChips() {
+  fileChips.innerHTML = ''
+  if (baseFiles.length <= 1) return
+  baseFiles.forEach((entry, idx) => {
+    const chip = document.createElement('div')
+    chip.className = 'file-chip'
+    chip.style.border = idx === activeFileIdx ? '1.5px solid #C84B31' : '1.5px solid transparent'
+    chip.innerHTML = `<span style="cursor:pointer;">${entry.file.name.replace(/\.[^.]+$/, '').slice(0, 12)}</span><button data-idx="${idx}">✕</button>`
+    chip.querySelector('span').addEventListener('click', () => { activeFileIdx = idx; renderFileChips(); renderPreview() })
+    chip.querySelector('button').addEventListener('click', () => {
+      baseFiles.splice(idx, 1)
+      if (activeFileIdx >= baseFiles.length) activeFileIdx = baseFiles.length - 1
+      renderFileChips(); renderPreview()
+      if (baseFiles.length === 0) toolLayout.style.display = 'none'
+    })
+    fileChips.appendChild(chip)
+  })
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]) })
+// ── Load base images ────────────────────────────────────
+function loadFiles(files) {
+  const toAdd = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 25 - baseFiles.length)
+  let loaded = 0
+  toAdd.forEach(file => {
+    const img = new Image()
+    img.onload = () => {
+      baseFiles.push({ file, img })
+      loaded++
+      if (loaded === toAdd.length) {
+        toolLayout.style.display = 'grid'
+        applyBtn.disabled = false
+        renderFileChips()
+        renderPreview()
+      }
+    }
+    img.src = URL.createObjectURL(file)
+  })
+}
+
+fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFiles(fileInput.files) })
 document.addEventListener('dragover', e => e.preventDefault())
-document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]) })
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) loadFiles(e.dataTransfer.files) })
 
-applyBtn.addEventListener('click', () => {
-  if (!originalImg) return
-  const canvas = document.createElement('canvas')
-  canvas.width = originalImg.naturalWidth
-  canvas.height = originalImg.naturalHeight
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(originalImg, 0, 0)
-  drawWatermark(ctx, canvas.width, canvas.height, 1)
+// ── Apply & Download ────────────────────────────────────
+applyBtn.addEventListener('click', async () => {
+  if (baseFiles.length === 0 || watermarks.length === 0) return
+  applyBtn.disabled = true
+  applyBtn.textContent = 'Processing...'
+  document.getElementById('zipWrap').style.display = 'none'
 
-  const mime = originalFile.type === 'image/png' ? 'image/png' : 'image/jpeg'
-  const ext = mime === 'image/png' ? 'png' : 'jpg'
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob)
-    downloadLink.href = url
-    downloadLink.download = `watermarked.${ext}`
-    downloadLink.textContent = `Download Watermarked Image (${Math.round(blob.size / 1024)} KB)`
-    downloadLink.style.display = 'block'
-  }, mime, 0.92)
+  if (!window.JSZip) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script')
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+      s.onload = res; s.onerror = rej
+      document.head.appendChild(s)
+    })
+  }
+
+  if (baseFiles.length === 1) {
+    // Single file — direct download
+    const entry = baseFiles[0]
+    const canvas = document.createElement('canvas')
+    canvas.width = entry.img.naturalWidth
+    canvas.height = entry.img.naturalHeight
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(entry.img, 0, 0)
+    watermarks.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
+    const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+    const ext = mime === 'image/png' ? 'png' : 'jpg'
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = `watermarked.${ext}`; a.click()
+      applyBtn.disabled = false
+      applyBtn.textContent = 'Apply & Download'
+    }, mime, 0.92)
+    return
+  }
+
+  // Batch — ZIP
+  const zip = new window.JSZip()
+  let done = 0
+  baseFiles.forEach(entry => {
+    const canvas = document.createElement('canvas')
+    canvas.width = entry.img.naturalWidth
+    canvas.height = entry.img.naturalHeight
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(entry.img, 0, 0)
+    watermarks.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
+    const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+    const ext = mime === 'image/png' ? 'png' : 'jpg'
+    const base = entry.file.name.replace(/\.[^.]+$/, '')
+    canvas.toBlob(blob => {
+      zip.file(`watermarked-${base}.${ext}`, blob)
+      done++
+      if (done === baseFiles.length) {
+        zip.generateAsync({ type: 'blob' }).then(zipBlob => {
+          const url = URL.createObjectURL(zipBlob)
+          const zipBtn = document.getElementById('zipBtn')
+          zipBtn.href = url
+          zipBtn.download = 'watermarked-images.zip'
+          document.getElementById('zipNote').textContent = `${baseFiles.length} images — ${Math.round(zipBlob.size / 1024)} KB`
+          document.getElementById('zipWrap').style.display = 'block'
+          applyBtn.disabled = false
+          applyBtn.textContent = 'Apply & Download'
+        })
+      }
+    }, mime, 0.92)
+  })
 })
