@@ -31,6 +31,19 @@ if (document.head) {
     .crop-input-label { font-size:11px; font-weight:600; color:#5A4A3A; font-family:'DM Sans',sans-serif; }
     .crop-input { padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none; width:100%; box-sizing:border-box; }
     .crop-input:focus { border-color:#C84B31; box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
+    .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:22px; font-weight:800; color:#2C1810; margin:40px 0 16px; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
+    .seo-section ol { padding-left:20px; margin:0 0 16px; }
+    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.7; margin-bottom:8px; }
+    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.7; margin:0 0 16px; }
+    .seo-faq { border-top:1px solid #E8E0D5; padding:14px 0; }
+    .seo-faq:last-child { border-bottom:1px solid #E8E0D5; }
+    .seo-faq-q { font-size:14px; font-weight:700; color:#2C1810; margin:0 0 6px; font-family:'DM Sans',sans-serif; }
+    .seo-faq-a { font-size:13px; color:#5A4A3A; margin:0; line-height:1.6; }
+    .seo-links { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+    .seo-link { padding:9px 16px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .seo-link:hover { border-color:#C84B31; color:#C84B31; }
   `
   document.head.appendChild(style)
 }
@@ -85,6 +98,35 @@ document.querySelector('#app').innerHTML = `
 `
 
 injectHeader()
+
+// ── SEO Section ──────────────────────────────────────────────────────────────
+const seo = t.seo && t.seo['crop']
+if (seo) {
+  const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
+  const faqsHtml = seo.faqs.map(f => `
+    <div class="seo-faq">
+      <p class="seo-faq-q">${f.q}</p>
+      <p class="seo-faq-a">${f.a}</p>
+    </div>`).join('')
+  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
+
+  const seoDiv = document.createElement('div')
+  seoDiv.className = 'seo-section'
+  seoDiv.innerHTML = `
+    <h2>${seo.h2a}</h2>
+    <ol>${stepsHtml}</ol>
+    <h2>${seo.h2b}</h2>
+    ${seo.body}
+    <h3>${seo.h3why}</h3>
+    <p>${seo.why}</p>
+    <h3>Frequently Asked Questions</h3>
+    ${faqsHtml}
+    <h3>More Free Image Tools</h3>
+    <div class="seo-links">${linksHtml}</div>
+  `
+  document.querySelector('#app').appendChild(seoDiv)
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const fileInput    = document.getElementById('fileInput')
 const previewArea  = document.getElementById('previewArea')
