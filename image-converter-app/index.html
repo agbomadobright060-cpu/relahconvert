@@ -11,7 +11,6 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body { min-height: 100vh; }
       body { font-family: 'DM Sans', sans-serif; display: flex; flex-direction: column; background: #EEF1F8; overflow-x: hidden; }
-
       .bg-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
       .photo-block { position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(80,100,180,0.13), 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; opacity: 0.75; }
       .photo-block .img-area { width: 100%; height: 76%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--c1), var(--c2)); }
@@ -28,7 +27,6 @@
       .photo-block:nth-child(9)  { width:74px;  height:88px;  top:63%; right:50px;  transform:rotate(-6deg); --c1:#a8e6cf; --c2:#3dc78e; }
       .photo-block:nth-child(10) { width:96px;  height:112px; top:79%; right:-16px; transform:rotate(7deg);  --c1:#ffd3a5; --c2:#fd8c3c; }
       .bg-fade { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(ellipse 50% 65% at 50% 40%, rgba(238,241,248,0) 5%, rgba(238,241,248,0.45) 45%, rgba(238,241,248,0.80) 68%); }
-
       #site-header { background: #fff; border-bottom: 1px solid #E8E0D5; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
       .header-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
       .logo { font-family: 'Fraunces', serif; font-size: 24px; color: #2C1810; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; align-items: center; gap: 7px; line-height: 1; }
@@ -43,19 +41,16 @@
       .more-btn.open .arrow { transform: rotate(180deg); }
       .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; flex-direction: column; gap: 5px; }
       .hamburger span { display: block; width: 22px; height: 2px; background: #2C1810; border-radius: 2px; }
-
       #dropdown-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: #fff; border-bottom: 1px solid #E8E0D5; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 99; max-height: calc(100vh - 64px); overflow-y: auto; }
       #dropdown-menu.open { display: block; }
       .dropdown-inner { max-width: 1100px; margin: 0 auto; padding: 16px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
       .dropdown-inner a { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #2C1810; text-decoration: none; transition: all 0.15s; }
       .dropdown-inner a:hover { background: #F5F0E8; color: #C84B31; }
-
       .hero { text-align: center; padding: 56px 16px 40px; max-width: 700px; margin: 0 auto; position: relative; z-index: 2; }
       .hero h1 { font-family: 'Fraunces', serif; font-size: clamp(32px, 6vw, 52px); font-weight: 900; color: #2C1810; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 14px; }
       .hero h1 em { font-style: italic; color: #C84B31; }
       .hero p { font-size: 15px; color: #7A6A5A; line-height: 1.6; }
       .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: #FDE8E3; color: #C84B31; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; letter-spacing: 0.04em; }
-
       .tools-section { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; flex: 1; width: 100%; position: relative; z-index: 2; }
       .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
       .tool-card { background: #fff; border-radius: 14px; padding: 20px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; display: block; }
@@ -64,7 +59,6 @@
       .tool-card .icon svg { width: 36px; height: 36px; }
       .tool-card h2 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: #2C1810; margin-bottom: 6px; letter-spacing: -0.01em; }
       .tool-card p { font-size: 12px; color: #7A6A5A; line-height: 1.5; }
-
       #site-footer { background: #2C1810; color: #C8B8A8; font-family: 'DM Sans', sans-serif; margin-top: auto; position: relative; z-index: 2; }
       .footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px 32px; }
       .footer-top { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -78,7 +72,6 @@
       .lang-select { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #C8B8A8; font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 5px 10px; border-radius: 6px; cursor: pointer; outline: none; }
       .lang-select:focus { border-color: #C84B31; }
       .lang-select option { background: #2C1810; color: #C8B8A8; }
-
       @media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
@@ -97,7 +90,6 @@
     </style>
   </head>
   <body>
-
     <div class="bg-canvas">
       <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 30 L15 15 L25 22 L35 10 L60 30Z" fill="rgba(255,255,255,0.7)"/><circle cx="48" cy="12" r="7" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
       <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 32 L20 18 L30 25 L42 12 L60 32Z" fill="rgba(255,255,255,0.7)"/><circle cx="45" cy="10" r="6" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
@@ -111,7 +103,6 @@
       <div class="photo-block"><div class="img-area"><svg viewBox="0 0 60 40" fill="none"><path d="M0 31 L15 16 L28 23 L40 11 L60 31Z" fill="rgba(255,255,255,0.7)"/><circle cx="46" cy="10" r="6" fill="rgba(255,255,255,0.6)"/></svg></div><div class="caption-bar"></div></div>
     </div>
     <div class="bg-fade"></div>
-
     <header id="site-header">
       <div class="header-inner">
         <a href="/" class="logo">
@@ -127,21 +118,17 @@
         </button>
       </div>
     </header>
-
     <div id="dropdown-menu">
       <div class="dropdown-inner" id="dropdownInner"></div>
     </div>
-
     <section class="hero">
       <div class="hero-badge" id="heroBadge"></div>
       <h1 id="heroTitle"></h1>
       <p id="heroDesc"></p>
     </section>
-
     <section class="tools-section">
       <div class="tools-grid" id="toolsGrid"></div>
     </section>
-
     <footer id="site-footer">
       <div class="footer-inner">
         <div class="footer-top">
@@ -170,32 +157,25 @@
         </div>
       </div>
     </footer>
-
     <script type="module">
       import { getLang, setLang, getT, supportedLangs, langLabels } from '/src/core/i18n.js'
-
       const t = getT()
       const currentLang = getLang()
-
       const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
-
       const allSlugs = [
         'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
         'compress','resize','jpg-to-pdf','png-to-pdf',
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif',
-        'crop','rotate','flip','grayscale','watermark'
+        'crop','rotate','flip','grayscale','watermark',
+        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg'
       ]
-
       document.getElementById('desktopNav').innerHTML =
         mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
         `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
-
       document.getElementById('heroBadge').textContent = t.hero_badge
       document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
       document.getElementById('heroDesc').innerHTML = t.hero_desc
-
-      // Colored SVG icons — distinct color + graphic per tool
       const svgIcons = {
         'compress':   { bg: '#E8F4FB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="#3B9ECC" opacity="0.2"/><path d="M20 12v8M20 20l-4 4M20 20l4 4" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 28h14" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round"/><path d="M16 14h-4v-4M24 14h4v-4" stroke="#3B9ECC" stroke-width="2" stroke-linecap="round"/></svg>` },
         'resize':     { bg: '#FEF3E6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="12" width="24" height="16" rx="3" fill="#F59E0B" opacity="0.2"/><rect x="12" y="16" width="16" height="8" rx="2" fill="#F59E0B" opacity="0.3"/><path d="M10 20h6M30 20h-6M13 17l-3 3 3 3M27 17l3 3-3 3" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
@@ -219,9 +199,11 @@
         'flip':      { bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M20 8v24" stroke="#7C3AED" stroke-width="2" stroke-dasharray="3 2"/><path d="M8 14h10v12H8z" rx="2" fill="#7C3AED" opacity="0.25" stroke="#7C3AED" stroke-width="1.5"/><path d="M22 14h10v12H22z" rx="2" fill="#7C3AED" opacity="0.5" stroke="#7C3AED" stroke-width="1.5"/></svg>` },
         'grayscale': { bg: '#F3F4F6', svg: `<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="12" fill="url(#gs)" stroke="#6B7280" stroke-width="1.5"/><defs><linearGradient id="gs" x1="8" y1="20" x2="32" y2="20"><stop offset="0%" stop-color="#6B7280"/><stop offset="50%" stop-color="#D1D5DB"/><stop offset="100%" stop-color="#F3F4F6"/></linearGradient></defs><path d="M20 8v24M8 20h24" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/></svg>` },
         'watermark': { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="8" width="28" height="24" rx="3" fill="#059669" opacity="0.15" stroke="#059669" stroke-width="1.5"/><text x="9" y="23" font-family="Arial" font-size="7" font-weight="800" fill="#059669" opacity="0.5">© mark</text><path d="M6 28h28" stroke="#059669" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/></svg>` },
+        'remove-background': { bg: '#F0F9FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="6" width="28" height="28" rx="4" fill="#0EA5E9" opacity="0.15" stroke="#0EA5E9" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="20" cy="18" r="5" fill="#0EA5E9" opacity="0.5"/><path d="M10 30c0-4 4.5-7 10-7s10 3 10 7" fill="#0EA5E9" opacity="0.3"/><path d="M6 6l28 28" stroke="#0EA5E9" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/></svg>` },
+        'heic-to-jpg': { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#F97316" opacity="0.3"/><text x="4" y="21" font-family="Arial" font-size="5.5" font-weight="800" fill="#EA580C">HEIC</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#EA580C"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'image-to-ico': { bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="#7C3AED" opacity="0.15" stroke="#7C3AED" stroke-width="1.5"/><rect x="13" y="13" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.5"/><rect x="21" y="13" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.3"/><rect x="13" y="21" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.3"/><rect x="21" y="21" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.6"/></svg>` },
+        'jpg-to-svg':  { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">SVG</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
       }
-
-      // Populate dropdown with SVG icons
       document.getElementById('dropdownInner').innerHTML =
         allSlugs.map(slug => {
           const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
@@ -231,7 +213,6 @@
             ${t.nav_short[slug] || slug}
           </a>`
         }).join('')
-
       const cardData = [
         { href: '/compress',    title: t.nav_short['compress'],    desc: t.card_compress_desc },
         { href: '/resize',      title: t.nav_short['resize'],      desc: t.card_resize_desc },
@@ -255,8 +236,11 @@
         { href: '/flip',       title: 'Flip Image',              desc: 'Flip any image horizontally or vertically free. No upload required.' },
         { href: '/grayscale',  title: 'Convert to Grayscale',    desc: 'Remove color from any image instantly. No upload required.' },
         { href: '/watermark',  title: 'Add Watermark',           desc: 'Add text watermark to any image free. No upload required.' },
+        { href: '/remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: 'Remove image background instantly. AI-powered. No upload required.' },
+        { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']       || 'HEIC to JPG',       desc: 'Convert iPhone HEIC photos to JPG free. Batch supported. No upload.' },
+        { href: '/image-to-ico',      title: t.nav_short['image-to-ico']      || 'Image to ICO',      desc: 'Convert any image to ICO favicon. Multi-size. No upload required.' },
+        { href: '/jpg-to-svg',        title: t.nav_short['jpg-to-svg']        || 'JPG to SVG',        desc: 'Wrap any image in SVG format free. No upload required.' },
       ]
-
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
         const slug = c.href.replace('/', '')
         const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '' }
@@ -266,7 +250,6 @@
           <p>${c.desc}</p>
         </a>`
       }).join('')
-
       document.getElementById('footerCompany').textContent = t.footer_company
       document.getElementById('footerAbout').textContent   = t.footer_about
       document.getElementById('footerContact').textContent = t.footer_contact
@@ -275,13 +258,11 @@
       document.getElementById('footerTerms').textContent   = t.footer_terms
       document.getElementById('footerCookies').textContent = t.footer_cookies
       document.getElementById('footerCopy').textContent    = t.footer_copy
-
       const langSelect = document.getElementById('langSelect')
       langSelect.innerHTML = supportedLangs.map(l =>
         `<option value="${l}" ${l === currentLang ? 'selected' : ''}>${langLabels[l]}</option>`
       ).join('')
       langSelect.addEventListener('change', () => { setLang(langSelect.value); window.location.reload() })
-
       const moreBtn      = document.getElementById('moreBtn')
       const hamburgerBtn = document.getElementById('hamburgerBtn')
       const dropdown     = document.getElementById('dropdown-menu')
