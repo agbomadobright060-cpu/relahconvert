@@ -1,4 +1,5 @@
 import { injectHeader } from '../core/header.js'
+// JSZip loaded dynamically
 import { getT } from '../core/i18n.js'
 
 const t = getT()
@@ -58,7 +59,10 @@ document.querySelector('#app').innerHTML = `
     <div id="fileGrid"></div>
 
     <button class="opt-btn" id="applyBtn" disabled>Convert All to Grayscale & Download</button>
-    <div id="downloadList"></div>
+    <div id="zipWrap" style="display:none; margin-top:10px;">
+      <a id="zipBtn" class="opt-btn" style="display:block; text-align:center; text-decoration:none; background:#2C1810; color:#F5F0E8;">⬇ Download All as ZIP</a>
+      <p id="zipNote" style="font-size:12px; color:#9A8A7A; text-align:center; margin:8px 0 0; font-family:'DM Sans',sans-serif;"></p>
+    </div>
   </div>
 `
 
@@ -67,7 +71,6 @@ injectHeader()
 const fileInput   = document.getElementById('fileInput')
 const fileGrid    = document.getElementById('fileGrid')
 const applyBtn    = document.getElementById('applyBtn')
-const downloadList= document.getElementById('downloadList')
 const countBadge  = document.getElementById('countBadge')
 
 let files = [] // { file, originalUrl, grayCanvas }
@@ -164,14 +167,26 @@ fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFil
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) loadFiles(e.dataTransfer.files) })
 
-applyBtn.addEventListener('click', () => {
+applyBtn.addEventListener('click', async () => {
   if (files.length === 0) return
-  downloadList.innerHTML = ''
   applyBtn.disabled = true
   applyBtn.textContent = 'Processing...'
+  document.getElementById('zipWrap').style.display = 'none'
 
+  // Load JSZip dynamically
+  if (!window.JSZip) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script')
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+      s.onload = res; s.onerror = rej
+      document.head.appendChild(s)
+    })
+  }
+
+  const zip = new window.JSZip()
   let done = 0
-  files.forEach((item, idx) => {
+
+  files.forEach((item) => {
     const img = new Image()
     img.onload = () => {
       const canvas = applyGrayscale(img)
@@ -179,20 +194,22 @@ applyBtn.addEventListener('click', () => {
       const ext = mime === 'image/png' ? 'png' : 'jpg'
       const baseName = item.file.name.replace(/\.[^.]+$/, '')
       canvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob)
-        const dlItem = document.createElement('div')
-        dlItem.className = 'dl-item'
-        dlItem.innerHTML = `
-          <span class="dl-name">grayscale-${baseName}.${ext}</span>
-          <a href="${url}" download="grayscale-${baseName}.${ext}">Download (${Math.round(blob.size / 1024)} KB)</a>
-        `
-        downloadList.appendChild(dlItem)
+        zip.file(`grayscale-${baseName}.${ext}`, blob)
         done++
         if (done === files.length) {
-          applyBtn.disabled = false
-          applyBtn.textContent = files.length > 1
-            ? `Convert All ${files.length} Images to Grayscale & Download`
-            : 'Convert to Grayscale & Download'
+          zip.generateAsync({ type: 'blob' }).then(zipBlob => {
+            const url = URL.createObjectURL(zipBlob)
+            const zipBtn = document.getElementById('zipBtn')
+            zipBtn.href = url
+            zipBtn.download = 'grayscale-images.zip'
+            const totalKB = Math.round(zipBlob.size / 1024)
+            document.getElementById('zipNote').textContent = `${files.length} image${files.length > 1 ? 's' : ''} — ${totalKB} KB total`
+            document.getElementById('zipWrap').style.display = 'block'
+            applyBtn.disabled = false
+            applyBtn.textContent = files.length > 1
+              ? `Convert All ${files.length} Images to Grayscale & Download`
+              : 'Convert to Grayscale & Download'
+          })
         }
       }, mime, 0.92)
     }
