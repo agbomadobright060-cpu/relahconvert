@@ -32,17 +32,17 @@ if (document.head) {
     .crop-input { padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none; width:100%; box-sizing:border-box; }
     .crop-input:focus { border-color:#C84B31; box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-    .seo-section h2 { font-family:'Fraunces',serif; font-size:22px; font-weight:800; color:#2C1810; margin:40px 0 16px; }
-    .seo-section h3 { font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
-    .seo-section ol { padding-left:20px; margin:0 0 16px; }
-    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.7; margin-bottom:8px; }
-    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.7; margin:0 0 16px; }
-    .seo-faq { border-top:1px solid #E8E0D5; padding:14px 0; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
+    .seo-section ol { padding-left:20px; margin:0 0 12px; }
+    .seo-section ol li { font-size:13px; color:#5A4A3A; line-height:1.6; margin-bottom:6px; }
+    .seo-section p { font-size:13px; color:#5A4A3A; line-height:1.6; margin:0 0 12px; }
+    .seo-faq { border-top:1px solid #E8E0D5; padding:10px 0; }
     .seo-faq:last-child { border-bottom:1px solid #E8E0D5; }
-    .seo-faq-q { font-size:14px; font-weight:700; color:#2C1810; margin:0 0 6px; font-family:'DM Sans',sans-serif; }
+    .seo-faq-q { font-size:13px; font-weight:700; color:#2C1810; margin:0 0 4px; font-family:'DM Sans',sans-serif; }
     .seo-faq-a { font-size:13px; color:#5A4A3A; margin:0; line-height:1.6; }
-    .seo-links { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
-    .seo-link { padding:9px 16px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .seo-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    .seo-link { padding:7px 14px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
     .seo-link:hover { border-color:#C84B31; color:#C84B31; }
   `
   document.head.appendChild(style)
