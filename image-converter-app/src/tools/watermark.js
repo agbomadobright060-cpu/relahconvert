@@ -23,7 +23,7 @@ if (document.head) {
     /* Two column layout */
     .tool-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start; }
     .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
-    #previewCanvas { max-width:100%; max-height:440px; border-radius:6px; display:block; margin:0 auto; }
+    #previewCanvas { max-width:100%; max-height:440px; border-radius:6px; display:block; margin:0 auto; cursor:move; }
     .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:20px; font-family:'DM Sans',sans-serif; }
     .controls-col h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:0 0 16px; }
 
@@ -43,10 +43,7 @@ if (document.head) {
     .range-row { display:flex; align-items:center; gap:8px; }
     .range-val { font-size:12px; color:#9A8A7A; min-width:36px; text-align:right; font-family:'DM Sans',sans-serif; }
 
-    /* Position grid */
-    .pos-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
-    .pos-btn { padding:7px 4px; border:1.5px solid #DDD5C8; border-radius:7px; font-size:11px; font-weight:600; color:#5A4A3A; background:#fff; cursor:pointer; text-align:center; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .pos-btn:hover, .pos-btn.active { border-color:#C84B31; color:#C84B31; background:#FDE8E3; }
+    /* Draggable watermark canvas */
 
     .divider { height:1px; background:#F0EAE3; margin:14px 0; }
     .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:8px; font-family:'DM Sans',sans-serif; }
@@ -152,18 +149,11 @@ document.querySelector('#app').innerHTML = `
 
         <div class="divider"></div>
 
-        <!-- Position -->
+        <!-- Position hint -->
         <div class="section-label">Position</div>
-        <div class="pos-grid" style="margin-bottom:16px;">
-          <button class="pos-btn" data-pos="top-left">↖ Top Left</button>
-          <button class="pos-btn" data-pos="top-center">↑ Top</button>
-          <button class="pos-btn" data-pos="top-right">↗ Top Right</button>
-          <button class="pos-btn" data-pos="middle-left">← Left</button>
-          <button class="pos-btn active" data-pos="center">⊙ Center</button>
-          <button class="pos-btn" data-pos="middle-right">→ Right</button>
-          <button class="pos-btn" data-pos="bottom-left">↙ Bot Left</button>
-          <button class="pos-btn" data-pos="bottom-center">↓ Bottom</button>
-          <button class="pos-btn" data-pos="bottom-right">↘ Bot Right</button>
+        <div style="display:flex; align-items:center; gap:8px; background:#F5F0E8; border-radius:8px; padding:10px 12px; margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A8A7A" stroke-width="2" stroke-linecap="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 12v.01"/><path d="M2 12h20M12 2v20"/></svg>
+          <span style="font-size:12px; color:#7A6A5A; font-family:'DM Sans',sans-serif;">Drag the watermark on the preview to reposition it</span>
         </div>
 
         <button class="opt-btn" id="applyBtn">Apply & Download</button>
@@ -198,8 +188,13 @@ const tabImage      = document.getElementById('tabImage')
 let originalImg  = null
 let originalFile = null
 let watermarkImg = null
-let selectedPos  = 'center'
 let activeTab    = 'text'
+// Watermark position as fraction of canvas (0-1)
+let wmPosX = 0.5
+let wmPosY = 0.5
+let isDraggingWm = false
+let dragOffsetX = 0
+let dragOffsetY = 0
 
 // Tab switching
 tabText.addEventListener('click', () => {
@@ -223,15 +218,7 @@ document.querySelectorAll('.color-swatch').forEach(swatch => {
   })
 })
 
-// Position buttons
-document.querySelectorAll('.pos-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'))
-    btn.classList.add('active')
-    selectedPos = btn.dataset.pos
-    renderPreview()
-  })
-})
+// Position set by dragging on canvas
 
 // Live update listeners
 wmText.addEventListener('input', renderPreview)
@@ -254,44 +241,38 @@ wmImgInput.addEventListener('change', () => {
   img.src = URL.createObjectURL(file)
 })
 
-function getPos(pos, cw, ch, ew, eh, padding) {
-  const map = {
-    'top-left':      { x: padding,            y: padding },
-    'top-center':    { x: cw/2 - ew/2,        y: padding },
-    'top-right':     { x: cw - padding - ew,  y: padding },
-    'middle-left':   { x: padding,            y: ch/2 - eh/2 },
-    'center':        { x: cw/2 - ew/2,        y: ch/2 - eh/2 },
-    'middle-right':  { x: cw - padding - ew,  y: ch/2 - eh/2 },
-    'bottom-left':   { x: padding,            y: ch - padding - eh },
-    'bottom-center': { x: cw/2 - ew/2,        y: ch - padding - eh },
-    'bottom-right':  { x: cw - padding - ew,  y: ch - padding - eh },
+function getWmDimensions(cw, ch, scale) {
+  if (activeTab === 'text') {
+    const fontSize = Math.round(parseInt(wmSize.value) * scale)
+    const ctx = previewCanvas.getContext('2d')
+    ctx.font = `bold ${fontSize}px 'DM Sans', Arial, sans-serif`
+    return { w: ctx.measureText(wmText.value || '© Watermark').width, h: fontSize }
+  } else if (watermarkImg) {
+    const pct = parseInt(wmImgSize.value) / 100
+    const ww = Math.round(cw * pct)
+    return { w: ww, h: Math.round(ww * (watermarkImg.naturalHeight / watermarkImg.naturalWidth)) }
   }
-  return map[pos] || map['center']
+  return { w: 0, h: 0 }
 }
 
 function drawWatermark(ctx, cw, ch, scale = 1) {
   const opacity = parseInt(wmOpacity.value) / 100
-  const padding = Math.round(20 * scale)
   ctx.save()
   ctx.globalAlpha = opacity
 
+  const { w, h } = getWmDimensions(cw, ch, scale)
+  const x = wmPosX * cw - w / 2
+  const y = wmPosY * ch - h / 2
+
   if (activeTab === 'text') {
-    const text = wmText.value || '© Watermark'
     const fontSize = Math.round(parseInt(wmSize.value) * scale)
     ctx.font = `bold ${fontSize}px 'DM Sans', Arial, sans-serif`
     ctx.fillStyle = wmColor.value
     ctx.shadowColor = 'rgba(0,0,0,0.35)'
     ctx.shadowBlur = Math.round(4 * scale)
-    const tw = ctx.measureText(text).width
-    const th = fontSize
-    const { x, y } = getPos(selectedPos, cw, ch, tw, th, padding)
-    ctx.fillText(text, x, y + th) // offset y by th since fillText baseline is bottom
+    ctx.fillText(wmText.value || '© Watermark', x, y + h)
   } else if (activeTab === 'image' && watermarkImg) {
-    const pct = parseInt(wmImgSize.value) / 100
-    const ww = Math.round(cw * pct)
-    const wh = Math.round(ww * (watermarkImg.naturalHeight / watermarkImg.naturalWidth))
-    const { x, y } = getPos(selectedPos, cw, ch, ww, wh, padding)
-    ctx.drawImage(watermarkImg, x, y, ww, wh)
+    ctx.drawImage(watermarkImg, x, y, w, h)
   }
 
   ctx.restore()
@@ -309,6 +290,74 @@ function renderPreview() {
   ctx.drawImage(originalImg, 0, 0, w, h)
   drawWatermark(ctx, w, h, scale)
 }
+
+// Drag watermark on canvas
+previewCanvas.addEventListener('mousedown', e => {
+  if (!originalImg) return
+  const rect = previewCanvas.getBoundingClientRect()
+  const scaleX = previewCanvas.width / rect.width
+  const scaleY = previewCanvas.height / rect.height
+  const mx = (e.clientX - rect.left) * scaleX
+  const my = (e.clientY - rect.top) * scaleY
+  const { w, h } = getWmDimensions(previewCanvas.width, previewCanvas.height, previewCanvas.width / originalImg.naturalWidth)
+  const wx = wmPosX * previewCanvas.width - w / 2
+  const wy = wmPosY * previewCanvas.height - h / 2
+  // Check if click is near watermark
+  if (mx >= wx - 10 && mx <= wx + w + 10 && my >= wy - 10 && my <= wy + h + 10) {
+    isDraggingWm = true
+    dragOffsetX = mx - (wmPosX * previewCanvas.width)
+    dragOffsetY = my - (wmPosY * previewCanvas.height)
+    previewCanvas.style.cursor = 'grabbing'
+  }
+})
+
+previewCanvas.addEventListener('mousemove', e => {
+  if (!isDraggingWm || !originalImg) return
+  const rect = previewCanvas.getBoundingClientRect()
+  const scaleX = previewCanvas.width / rect.width
+  const scaleY = previewCanvas.height / rect.height
+  const mx = (e.clientX - rect.left) * scaleX
+  const my = (e.clientY - rect.top) * scaleY
+  wmPosX = Math.max(0, Math.min(1, (mx - dragOffsetX) / previewCanvas.width))
+  wmPosY = Math.max(0, Math.min(1, (my - dragOffsetY) / previewCanvas.height))
+  renderPreview()
+})
+
+document.addEventListener('mouseup', () => {
+  if (isDraggingWm) {
+    isDraggingWm = false
+    previewCanvas.style.cursor = 'move'
+  }
+})
+
+// Touch support
+previewCanvas.addEventListener('touchstart', e => {
+  if (!originalImg) return
+  e.preventDefault()
+  const rect = previewCanvas.getBoundingClientRect()
+  const scaleX = previewCanvas.width / rect.width
+  const scaleY = previewCanvas.height / rect.height
+  const mx = (e.touches[0].clientX - rect.left) * scaleX
+  const my = (e.touches[0].clientY - rect.top) * scaleY
+  isDraggingWm = true
+  dragOffsetX = mx - (wmPosX * previewCanvas.width)
+  dragOffsetY = my - (wmPosY * previewCanvas.height)
+}, { passive: false })
+
+previewCanvas.addEventListener('touchmove', e => {
+  if (!isDraggingWm) return
+  e.preventDefault()
+  const rect = previewCanvas.getBoundingClientRect()
+  const scaleX = previewCanvas.width / rect.width
+  const scaleY = previewCanvas.height / rect.height
+  const mx = (e.touches[0].clientX - rect.left) * scaleX
+  const my = (e.touches[0].clientY - rect.top) * scaleY
+  wmPosX = Math.max(0, Math.min(1, (mx - dragOffsetX) / previewCanvas.width))
+  wmPosY = Math.max(0, Math.min(1, (my - dragOffsetY) / previewCanvas.height))
+  renderPreview()
+}, { passive: false })
+
+previewCanvas.addEventListener('touchend', () => { isDraggingWm = false })
 
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
