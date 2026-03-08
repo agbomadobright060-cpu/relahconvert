@@ -6,7 +6,7 @@ const bg = '#F2F2F2'
 const toolName  = (t.nav_short && t.nav_short['remove-background']) || 'Remove Background'
 const seoData   = t.seo && t.seo['remove-background']
 const descText  = seoData ? seoData.h2a : 'Remove image background free. AI-powered, runs entirely in your browser.'
-const selectLbl = t.select_images || 'Select Image'
+const selectLbl = t.select_images || 'Select Images'
 const dropHint  = t.drop_hint || 'or drop image anywhere'
 const dlBtn     = t.download || 'Download PNG'
 const parts     = toolName.split(' ')
@@ -74,7 +74,7 @@ document.querySelector('#app').innerHTML = `
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:#9A8A7A;">${dropHint}</span>
     </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
 
     <div id="previewBox">
       <canvas id="previewCanvas"></canvas>
