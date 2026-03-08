@@ -203,7 +203,7 @@ removeBtn.addEventListener('click', async () => {
   statusText.textContent = 'Loading AI model…'
 
   try {
-    const { removeBackground } = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/background-removal.mjs')
+    const { removeBackground } = await import("@imgly/background-removal")
 
     progressBar.style.width = '35%'
     statusText.textContent = 'Removing background…'
@@ -215,7 +215,6 @@ removeBtn.addEventListener('click', async () => {
           progressBar.style.width = pct + '%'
         }
       },
-      publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/',
     })
 
     progressBar.style.width = '100%'
