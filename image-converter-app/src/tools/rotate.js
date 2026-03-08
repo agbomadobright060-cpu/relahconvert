@@ -10,6 +10,7 @@ if (document.head) {
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
+
     .opt-btn { padding:11px 24px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; }
     .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
     .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
@@ -18,40 +19,61 @@ if (document.head) {
     .download-btn { display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px; margin-top:12px; }
     .download-btn:hover { background:#1a0f09; }
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
-    .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:8px; }
-    .section-label { font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#9A8A7A; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
-    .orient-group { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
-    .orient-btn {
-      display:flex; flex-direction:column; align-items:center; gap:8px;
-      padding:14px 20px; border-radius:12px; border:2px solid #DDD5C8;
-      background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif;
-      font-size:13px; font-weight:600; color:#5A4A3A; transition:all 0.18s;
-      min-width:90px;
-    }
-    .orient-btn:hover { border-color:#C84B31; color:#C84B31; }
-    .orient-btn.active { border-color:#C84B31; background:#FDE8E3; color:#C84B31; }
-    .rot-group { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
+    .angle-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; }
+    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
 
-    /* Image wrapper with rotate handle */
+    /* Two column layout */
+    .tool-layout {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* Left: image area */
+    .image-col {
+      background: #fff;
+      border-radius: 14px;
+      border: 1.5px solid #E8E0D5;
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 24px;
+      position: relative;
+    }
+    .image-col .empty-state {
+      text-align: center;
+      color: #C4B8A8;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+    }
+    .image-col .empty-state svg { margin-bottom: 10px; opacity: 0.4; }
+
     #imgWrapper {
       position: relative;
-      display: inline-block;
-      margin: 0 auto 8px;
-      cursor: default;
+      width: 280px;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
     #previewImg {
       display: block;
-      max-width: 100%;
-      max-height: 340px;
-      border-radius: 8px;
+      max-width: 260px;
+      max-height: 260px;
+      object-fit: contain;
+      border-radius: 6px;
       user-select: none;
       pointer-events: none;
+      transition: transform 0.3s ease;
     }
     #rotateHandle {
       position: absolute;
-      bottom: -36px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: -14px;
+      right: -14px;
       width: 28px;
       height: 28px;
       background: #fff;
@@ -61,49 +83,98 @@ if (document.head) {
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(200,75,49,0.25);
-      transition: background 0.15s, transform 0.15s;
+      box-shadow: 0 2px 8px rgba(200,75,49,0.3);
       z-index: 10;
+      transition: background 0.15s;
     }
-    #rotateHandle:hover { background: #FDE8E3; transform: translateX(-50%) scale(1.15); }
+    #rotateHandle:hover { background: #FDE8E3; }
     #rotateHandle.dragging { cursor: grabbing; background: #FDE8E3; }
-    #handleLine {
+    #rotateHandle::after {
+      content: 'Drag to rotate';
       position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 30px;
-      background: #C84B31;
-      opacity: 0.4;
+      top: -28px;
+      right: 0;
+      background: #2C1810;
+      color: #fff;
+      font-size: 10px;
+      font-family: 'DM Sans', sans-serif;
+      padding: 3px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
       pointer-events: none;
+      transition: opacity 0.2s;
     }
-    #previewCenter { text-align: center; padding-bottom: 44px; margin-bottom: 16px; }
+    #rotateHandle:hover::after { opacity: 1; }
+
+    /* Right: controls panel */
+    .controls-col {
+      background: #fff;
+      border-radius: 14px;
+      border: 1.5px solid #E8E0D5;
+      padding: 20px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .controls-col h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #2C1810;
+      margin: 0 0 18px;
+    }
+
+    .orient-group { display:flex; gap:8px; justify-content:center; margin-bottom:18px; }
+    .orient-btn {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      padding:10px 12px; border-radius:10px; border:2px solid #DDD5C8;
+      background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif;
+      font-size:12px; font-weight:600; color:#5A4A3A; transition:all 0.18s;
+      flex:1;
+    }
+    .orient-btn:hover { border-color:#C84B31; color:#C84B31; }
+    .orient-btn.active { border-color:#C84B31; background:#FDE8E3; color:#C84B31; }
+
+    .rot-group { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+    .rot-group .opt-btn { width:100%; text-align:center; padding:10px; font-size:13px; }
+
+    .divider { height:1px; background:#F0EAE3; margin:16px 0; }
+
+    /* Mobile: stack columns */
+    @media (max-width: 700px) {
+      .tool-layout { grid-template-columns: 1fr; }
+      .image-col { min-height: 260px; }
+      .rot-group { flex-direction: row; flex-wrap: wrap; }
+      .rot-group .opt-btn { width: auto; flex: 1; }
+      #imgWrapper { width: 220px; height: 220px; }
+      #previewImg { max-width: 200px; max-height: 200px; }
+    }
   `
   document.head.appendChild(style)
 }
 
 document.title = 'Rotate Image Free | No Upload — RelahConvert'
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
+  <div style="max-width:1000px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
+
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">Rotate <em style="font-style:italic; color:#C84B31;">Image</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">Rotate any image free. Files never leave your device.</p>
-    </div>
-    <div style="margin-bottom:16px;">
+      <p style="font-size:13px; color:#7A6A5A; margin:0 0 16px;">Rotate any image free. Files never leave your device.</p>
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> Select Image</label>
       <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">or drop image anywhere</span>
+      <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none;" />
 
-    <div id="previewArea" style="display:none; margin-bottom:16px;">
+    <div class="tool-layout">
 
-      <!-- Image with drag handle -->
-      <div id="previewCenter">
-        <div id="imgWrapper">
+      <!-- Left: image preview -->
+      <div class="image-col" id="imageCol">
+        <div class="empty-state" id="emptyState">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="36" height="36" rx="6" stroke="#C4B8A8" stroke-width="2"/><circle cx="17" cy="18" r="4" stroke="#C4B8A8" stroke-width="2"/><path d="M6 32l10-10 8 8 6-6 12 10" stroke="#C4B8A8" stroke-width="2" stroke-linecap="round"/></svg>
+          <p>Upload an image to get started</p>
+        </div>
+        <div id="imgWrapper" style="display:none;">
           <img id="previewImg" src="" alt="preview" draggable="false" />
-          <div id="handleLine"></div>
-          <div id="rotateHandle" title="Drag to rotate">
+          <div id="rotateHandle">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C84B31" stroke-width="2.5" stroke-linecap="round">
               <path d="M21 12a9 9 0 11-9-9"/>
               <polyline points="21 3 21 9 15 9"/>
@@ -112,43 +183,47 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
 
-      <div class="section-label" style="text-align:center;">Select files to rotate</div>
-      <div class="orient-group">
-        <button class="orient-btn active" data-orient="all">
-          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-            <rect x="1" y="1" width="24" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
-          </svg>
-          All
-        </button>
-        <button class="orient-btn" data-orient="portrait">
-          <svg width="18" height="26" viewBox="0 0 18 26" fill="none">
-            <rect x="1" y="1" width="16" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
-          </svg>
-          Portrait
-        </button>
-        <button class="orient-btn" data-orient="landscape">
-          <svg width="26" height="18" viewBox="0 0 26 18" fill="none">
-            <rect x="1" y="1" width="24" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
-          </svg>
-          Landscape
-        </button>
+      <!-- Right: controls -->
+      <div class="controls-col">
+        <h3>Rotate Image</h3>
+
+        <div class="section-label">Select files to rotate</div>
+        <div class="orient-group">
+          <button class="orient-btn active" data-orient="all">
+            <svg width="20" height="20" viewBox="0 0 26 26" fill="none"><rect x="1" y="1" width="24" height="24" rx="3" stroke="currentColor" stroke-width="2"/></svg>
+            All
+          </button>
+          <button class="orient-btn" data-orient="portrait">
+            <svg width="14" height="20" viewBox="0 0 18 26" fill="none"><rect x="1" y="1" width="16" height="24" rx="3" stroke="currentColor" stroke-width="2"/></svg>
+            Portrait
+          </button>
+          <button class="orient-btn" data-orient="landscape">
+            <svg width="20" height="14" viewBox="0 0 26 18" fill="none"><rect x="1" y="1" width="24" height="16" rx="3" stroke="currentColor" stroke-width="2"/></svg>
+            Landscape
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-label">Rotation</div>
+        <div class="rot-group">
+          <button class="opt-btn secondary" id="rotL">↺ Rotate Left 90°</button>
+          <button class="opt-btn secondary" id="rotR">↻ Rotate Right 90°</button>
+          <button class="opt-btn secondary" id="rot180">↕ Rotate 180°</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+          <span style="font-size:13px; color:#9A8A7A;">Current rotation</span>
+          <span class="angle-badge" id="angleBadge">0°</span>
+        </div>
+
+        <button class="opt-btn" id="applyBtn" disabled style="width:100%; margin-bottom:10px;">Apply & Download</button>
+        <a class="download-btn" id="downloadLink">Download Rotated Image</a>
       </div>
 
-      <div class="section-label" style="text-align:center;">Rotation</div>
-      <div class="rot-group">
-        <button class="opt-btn secondary" id="rotL">↺ Left 90°</button>
-        <button class="opt-btn secondary" id="rotR">↻ Right 90°</button>
-        <button class="opt-btn secondary" id="rot180">↕ 180°</button>
-      </div>
-
-      <div style="text-align:center;">
-        <span style="font-size:13px; color:#9A8A7A;">Current rotation:</span>
-        <span class="angle-badge" id="angleBadge">0°</span>
-      </div>
     </div>
-
-    <button class="opt-btn" id="applyBtn" disabled style="width:100%; margin-bottom:10px;">Apply & Download</button>
-    <a class="download-btn" id="downloadLink">Download Rotated Image</a>
   </div>
 `
 
@@ -162,14 +237,14 @@ document.querySelectorAll('.orient-btn').forEach(btn => {
   })
 })
 
-const fileInput     = document.getElementById('fileInput')
-const previewArea   = document.getElementById('previewArea')
-const previewImg    = document.getElementById('previewImg')
-const imgWrapper    = document.getElementById('imgWrapper')
-const rotateHandle  = document.getElementById('rotateHandle')
-const applyBtn      = document.getElementById('applyBtn')
-const downloadLink  = document.getElementById('downloadLink')
-const angleBadge    = document.getElementById('angleBadge')
+const fileInput    = document.getElementById('fileInput')
+const emptyState   = document.getElementById('emptyState')
+const imgWrapper   = document.getElementById('imgWrapper')
+const previewImg   = document.getElementById('previewImg')
+const rotateHandle = document.getElementById('rotateHandle')
+const applyBtn     = document.getElementById('applyBtn')
+const downloadLink = document.getElementById('downloadLink')
+const angleBadge   = document.getElementById('angleBadge')
 
 let originalFile = null
 let angle = 0
@@ -177,21 +252,19 @@ let angle = 0
 function setAngle(deg) {
   angle = ((deg % 360) + 360) % 360
   angleBadge.textContent = Math.round(angle) + '°'
-  imgWrapper.style.transform = `rotate(${angle}deg)`
+  previewImg.style.transform = `rotate(${angle}deg)`
 }
 
 function snapAngle(deg) {
-  // Snap to nearest 90° if within 8°
   const snapped = Math.round(deg / 90) * 90
   return Math.abs(deg - snapped) < 8 ? snapped : deg
 }
 
-// Quick rotate buttons
 document.getElementById('rotL').addEventListener('click', () => setAngle(angle - 90))
 document.getElementById('rotR').addEventListener('click', () => setAngle(angle + 90))
 document.getElementById('rot180').addEventListener('click', () => setAngle(angle + 180))
 
-// Drag-to-rotate handle
+// Drag-to-rotate
 let isDragging = false
 let startAngle = 0
 let startMouseAngle = 0
@@ -224,19 +297,15 @@ rotateHandle.addEventListener('touchstart', e => {
 
 document.addEventListener('mousemove', e => {
   if (!isDragging) return
-  const currentMouseAngle = getMouseAngle(e)
-  let delta = currentMouseAngle - startMouseAngle
-  let newAngle = snapAngle(startAngle + delta)
-  setAngle(newAngle)
+  const delta = getMouseAngle(e) - startMouseAngle
+  setAngle(snapAngle(startAngle + delta))
 })
 
 document.addEventListener('touchmove', e => {
   if (!isDragging) return
   e.preventDefault()
-  const currentMouseAngle = getMouseAngle(e)
-  let delta = currentMouseAngle - startMouseAngle
-  let newAngle = snapAngle(startAngle + delta)
-  setAngle(newAngle)
+  const delta = getMouseAngle(e) - startMouseAngle
+  setAngle(snapAngle(startAngle + delta))
 }, { passive: false })
 
 document.addEventListener('mouseup', () => {
@@ -256,9 +325,9 @@ function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   originalFile = file
   setAngle(0)
-  imgWrapper.style.transform = 'rotate(0deg)'
   previewImg.src = URL.createObjectURL(file)
-  previewArea.style.display = 'block'
+  emptyState.style.display = 'none'
+  imgWrapper.style.display = 'inline-block'
   applyBtn.disabled = false
   downloadLink.style.display = 'none'
   document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
