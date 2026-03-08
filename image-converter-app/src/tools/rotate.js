@@ -35,7 +35,7 @@ if (document.head) {
       background: #fff;
       border-radius: 14px;
       border: 1.5px solid #E8E0D5;
-      min-height: 420px;
+      min-height: 320px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -184,7 +184,7 @@ document.querySelector('#app').innerHTML = `
       </div>
 
       <!-- Right: controls -->
-      <div class="controls-col">
+      <div class="controls-col" id="controlsCol" style="display:none;">
         <h3>Rotate Image</h3>
 
         <div class="section-label">Select files to rotate</div>
@@ -330,6 +330,7 @@ function loadFile(file) {
   imgWrapper.style.display = 'inline-block'
   applyBtn.disabled = false
   downloadLink.style.display = 'none'
+  document.getElementById('controlsCol').style.display = 'block'
   document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('active'))
   document.querySelector('[data-orient="all"]').classList.add('active')
 }
