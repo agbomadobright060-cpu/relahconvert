@@ -63,6 +63,9 @@ style.textContent = `
   .zip-btn:hover{background:#1a0f09;}
   .new-btn{display:none;width:100%;padding:11px;border:1.5px solid #C84B31;border-radius:10px;background:transparent;color:#C84B31;font-size:14px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;margin-bottom:16px;transition:all 0.15s;}
   .new-btn:hover{background:#C84B31;color:#fff;}
+  .remove-all-btn{width:100%;padding:12px;border-radius:10px;background:#7C3AED;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;margin-bottom:10px;border:none;transition:background 0.15s;}
+  .remove-all-btn:hover{background:#6D28D9;}
+  .remove-all-btn:disabled{background:#C4B8A8;cursor:not-allowed;}
   .status-text{font-size:13px;color:#7A6A5A;text-align:center;margin-bottom:10px;font-family:'DM Sans',sans-serif;min-height:18px;}
 
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
@@ -113,6 +116,7 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div class="status-text" id="statusText"></div>
     <button class="dl-btn" id="dlBtn">${dlBtn}</button>
+    <button class="remove-all-btn" id="removeAllBtn" style="display:none;">⚡ Remove All Backgrounds</button>
     <button class="zip-btn" id="zipBtn">${dlZipBtn}</button>
     <button class="new-btn" id="newBtn">+ Add more images</button>
   </div>
@@ -132,6 +136,7 @@ const sliderValEl  = document.getElementById('sliderVal')
 const statusText   = document.getElementById('statusText')
 const dlBtnEl      = document.getElementById('dlBtn')
 const zipBtn       = document.getElementById('zipBtn')
+const removeAllBtn = document.getElementById('removeAllBtn')
 const newBtn       = document.getElementById('newBtn')
 const navRow       = document.getElementById('navRow')
 const prevBtn      = document.getElementById('prevBtn')
@@ -393,6 +398,7 @@ function addFiles(newFiles) {
 
   thumbStrip.classList.add('on')
   navRow.classList.add('on')
+  if (entries.length > 1) removeAllBtn.style.display = 'block'
 
   // Navigate to first new file and start processing it
   currentIdx = startIdx
@@ -443,6 +449,25 @@ zipBtn.addEventListener('click', async () => {
   } catch(err) { alert('ZIP failed: ' + err.message) }
   zipBtn.textContent = dlZipBtn
   zipBtn.disabled = false
+})
+
+removeAllBtn.addEventListener('click', async () => {
+  const pending = entries.filter(e => !e.maskData && !e.processing)
+  if (!pending.length) return
+  removeAllBtn.disabled = true
+  removeAllBtn.textContent = `Processing 0 of ${entries.length}…`
+  let doneCount = entries.filter(e => e.maskData).length
+  for (const entry of pending) {
+    doneCount++
+    removeAllBtn.textContent = `Processing ${doneCount} of ${entries.length}…`
+    // Navigate to it so user can see progress
+    currentIdx = entries.indexOf(entry)
+    renderCurrent()
+    await startProcessing(entry)
+  }
+  removeAllBtn.textContent = `✓ All ${entries.length} done`
+  removeAllBtn.disabled = false
+  zipBtn.style.display = 'block'
 })
 
 ;(function injectSEO() {
