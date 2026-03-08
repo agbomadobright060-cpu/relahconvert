@@ -27,22 +27,19 @@ if (document.head) {
     .download-btn:hover{background:#1a0f09;}
     .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
 
-    /* Split slider */
-    .slider-wrap{position:relative;width:100%;max-width:700px;overflow:hidden;border-radius:12px;background:#fff;border:1.5px solid #E8E0D5;margin-bottom:16px;user-select:none;}
-    .slider-wrap canvas{display:block;width:100%;height:auto;}
-    .divider-line{position:absolute;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,0.3);cursor:ew-resize;transform:translateX(-50%);z-index:10;}
-    .divider-handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:ew-resize;}
+    .slider-wrap{position:relative;width:100%;max-width:700px;max-height:420px;overflow:hidden;border-radius:12px;background:#fff;border:1.5px solid #E8E0D5;margin-bottom:16px;user-select:none;cursor:ew-resize;}
+    .slider-wrap canvas{display:block;width:100%;height:100%;object-fit:contain;}
+    .divider-line{position:absolute;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,0.3);transform:translateX(-50%);z-index:10;pointer-events:none;}
+    .divider-handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;}
     .divider-handle svg{display:block;}
     .side-label{position:absolute;top:12px;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,0.45);color:#fff;letter-spacing:0.06em;text-transform:uppercase;pointer-events:none;}
     .label-before{left:14px;}
     .label-after{right:14px;}
 
-    /* Progress */
     .progress-wrap{background:#E8E0D5;border-radius:8px;height:6px;margin-bottom:10px;overflow:hidden;display:none;}
     .progress-bar{height:100%;background:#C84B31;border-radius:8px;width:0%;transition:width 0.3s;}
     .status-text{font-size:13px;color:#7A6A5A;text-align:center;margin-bottom:10px;font-family:'DM Sans',sans-serif;min-height:18px;}
 
-    /* SEO */
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
     .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -62,7 +59,7 @@ if (document.head) {
 
 document.title = `${toolName} Free | No Upload — RelahConvert`
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
+  <div style="max-width:700px;margin:32px auto;padding:0 16px 24px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:#C84B31;">${h1Em}</em></h1>
       <p style="font-size:13px;color:#7A6A5A;margin:0;">${descText}</p>
@@ -112,7 +109,13 @@ let sliderPct   = 0.5
 let dragging    = false
 let loadedFile  = null
 
-// ── Checker pattern background for transparent side ──────────────────────────
+// ── Constrain canvas size: max 700×420 display, keep aspect ratio ─────────────
+function getCanvasDims(W, H) {
+  const maxW = 700, maxH = 420
+  const scale = Math.min(maxW / W, maxH / H, 1)
+  return { dispW: Math.round(W * scale), dispH: Math.round(H * scale) }
+}
+
 function drawChecker(ctx, x, y, w, h, size = 14) {
   for (let row = 0; row * size < h; row++) {
     for (let col = 0; col * size < w; col++) {
@@ -122,50 +125,48 @@ function drawChecker(ctx, x, y, w, h, size = 14) {
   }
 }
 
-// ── Render split canvas ───────────────────────────────────────────────────────
 function renderSplit() {
   if (!originalImg) return
   const W = originalImg.naturalWidth
   const H = originalImg.naturalHeight
-  sliderCanvas.width  = W
-  sliderCanvas.height = H
+  const { dispW, dispH } = getCanvasDims(W, H)
+
+  // Set canvas pixel dimensions to display size (avoids scaling mismatch)
+  sliderCanvas.width  = dispW
+  sliderCanvas.height = dispH
+  sliderCanvas.style.width  = dispW + 'px'
+  sliderCanvas.style.height = dispH + 'px'
+  sliderWrap.style.height   = dispH + 'px'
+
   const ctx = sliderCanvas.getContext('2d')
-  const splitX = Math.round(W * sliderPct)
+  const splitX = Math.round(dispW * sliderPct)
 
   // Left: original
-  ctx.drawImage(originalImg, 0, 0, W, H)
+  ctx.drawImage(originalImg, 0, 0, dispW, dispH)
 
-  // Right: checker + result
+  // Right: checker + result (or just checker if still processing)
   ctx.save()
   ctx.beginPath()
-  ctx.rect(splitX, 0, W - splitX, H)
+  ctx.rect(splitX, 0, dispW - splitX, dispH)
   ctx.clip()
-  drawChecker(ctx, splitX, 0, W - splitX, H)
-  if (resultImg) ctx.drawImage(resultImg, 0, 0, W, H)
+  drawChecker(ctx, 0, 0, dispW, dispH)
+  if (resultImg) ctx.drawImage(resultImg, 0, 0, dispW, dispH)
   ctx.restore()
 
-  // Divider position in CSS %
   dividerLine.style.left = (sliderPct * 100) + '%'
 }
 
-// ── Drag slider ───────────────────────────────────────────────────────────────
-function getSliderPct(clientX) {
+// ── Drag — use getBoundingClientRect for accurate pointer position ────────────
+function getPct(clientX) {
   const rect = sliderWrap.getBoundingClientRect()
   return Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width))
 }
-dividerLine.addEventListener('mousedown', () => { dragging = true })
-document.addEventListener('mousemove', e => {
-  if (!dragging) return
-  sliderPct = getSliderPct(e.clientX)
-  renderSplit()
-})
+
+sliderWrap.addEventListener('mousedown', e => { dragging = true; sliderPct = getPct(e.clientX); renderSplit() })
+document.addEventListener('mousemove', e => { if (!dragging) return; sliderPct = getPct(e.clientX); renderSplit() })
 document.addEventListener('mouseup', () => { dragging = false })
-dividerLine.addEventListener('touchstart', e => { dragging = true; e.preventDefault() }, { passive: false })
-document.addEventListener('touchmove', e => {
-  if (!dragging) return
-  sliderPct = getSliderPct(e.touches[0].clientX)
-  renderSplit()
-}, { passive: true })
+sliderWrap.addEventListener('touchstart', e => { dragging = true; sliderPct = getPct(e.touches[0].clientX); renderSplit(); e.preventDefault() }, { passive: false })
+document.addEventListener('touchmove', e => { if (!dragging) return; sliderPct = getPct(e.touches[0].clientX); renderSplit() }, { passive: true })
 document.addEventListener('touchend', () => { dragging = false })
 
 // ── Load file ─────────────────────────────────────────────────────────────────
@@ -220,19 +221,19 @@ removeBtn.addEventListener('click', async () => {
     progressBar.style.width = '100%'
     statusText.textContent = 'Done! Drag the slider to compare.'
 
-    // Load result into image for rendering
     const url = URL.createObjectURL(blob)
     const img = new Image()
     img.onload = () => {
       resultImg = img
       sliderPct = 0.5
       renderSplit()
-      // Download link
       downloadLink.href = url
       downloadLink.download = loadedFile.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
       downloadLink.textContent = `${dlBtn} PNG (${Math.round(blob.size / 1024)} KB)`
       downloadLink.style.display = 'block'
       removeBtn.disabled = false
+      // Scroll download into view
+      downloadLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
     img.src = url
 
@@ -244,7 +245,7 @@ removeBtn.addEventListener('click', async () => {
   }
 })
 
-// ── SEO Section ───────────────────────────────────────────────────────────────
+// ── SEO ───────────────────────────────────────────────────────────────────────
 ;(function injectSEO() {
   const seo = t.seo && t.seo['remove-background']
   if (!seo) return
