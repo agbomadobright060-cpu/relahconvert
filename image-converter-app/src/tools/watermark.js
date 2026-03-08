@@ -2,6 +2,16 @@ import { injectHeader } from '../core/header.js'
 import { getT } from '../core/i18n.js'
 
 const t = getT()
+const toolName  = (t.nav_short && t.nav_short['watermark']) || 'Watermark Image'
+const seoData   = t.seo && t.seo['watermark']
+const descText  = seoData ? seoData.h2a : 'Add text or image watermarks free. Files never leave your device.'
+const selectLbl = t.select_images || 'Select Images'
+const dlBtn     = t.download || 'Download'
+const dlZipBtn  = t.download_zip || 'Download ZIP'
+const parts     = toolName.split(' ')
+const h1Main    = parts[0]
+const h1Em      = parts.slice(1).join(' ')
+
 const bg = '#F2F2F2'
 
 if (document.head) {
@@ -77,13 +87,13 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = 'Add Watermark to Image Free | No Upload — RelahConvert'
+document.title = `${toolName} Free | No Upload — RelahConvert`
 document.querySelector('#app').innerHTML = `
   <div style="max-width:1000px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">Add <em style="font-style:italic; color:#C84B31;">Watermark</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0 0 14px;">Add text or image watermarks free. Files never leave your device.</p>
-      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> Select Images</label>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em></h1>
+      <p style="font-size:13px; color:#7A6A5A; margin:0 0 14px;">${descText}</p>
+      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px; color:#9A8A7A; margin-left:10px;">up to 25 images</span>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
     </div>
@@ -119,9 +129,9 @@ document.querySelector('#app').innerHTML = `
         <div class="wm-list" id="wmList"></div>
 
         <div class="divider"></div>
-        <button class="opt-btn" id="applyBtn" disabled>Apply & Download</button>
+        <button class="opt-btn" id="applyBtn" disabled>${dlBtn}</button>
         <div id="zipWrap" style="display:none; margin-top:4px;">
-          <a id="zipBtn" class="opt-btn dark" style="display:block; text-align:center; text-decoration:none;">⬇ Download All as ZIP</a>
+          <a id="zipBtn" class="opt-btn dark" style="display:block; text-align:center; text-decoration:none;">⬇ ${dlZipBtn}</a>
           <p id="zipNote" style="font-size:11px; color:#9A8A7A; text-align:center; margin:4px 0 0; font-family:'DM Sans',sans-serif;"></p>
         </div>
       </div>
@@ -559,3 +569,37 @@ applyBtn.addEventListener('click', async () => {
     }, mime, 0.92)
   })
 })
+
+// ── SEO Section ──────────────────────────────────────────────────────────────
+;(function injectSEO() {
+  // t already defined at top of file
+  const seo = t.seo && t.seo['watermark']
+  if (!seo) return
+  const faqTitle = (t.seo_faq_title) || 'Frequently Asked Questions'
+  const alsoTry  = (t.seo_also_try)  || 'Also Try'
+  const style = document.createElement('style')
+  style.textContent = `
+    .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+    .seo-section ol{padding-left:20px;margin:0 0 12px;}
+    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
+    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
+    .seo-faq{border-top:1px solid #E8E0D5;padding:10px 0;}
+    .seo-faq:last-child{border-bottom:1px solid #E8E0D5;}
+    .seo-faq-q{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif;}
+    .seo-faq-a{font-size:13px;color:#5A4A3A;margin:0;line-height:1.6;}
+    .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .seo-link:hover{border-color:#C84B31;color:#C84B31;}
+  `
+  document.head.appendChild(style)
+  const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
+  const faqsHtml  = seo.faqs.map(f => `<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')
+  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
+  const div = document.createElement('div')
+  div.className = 'seo-section'
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${stepsHtml}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${faqsHtml}<h3>${alsoTry}</h3><div class="seo-links">${linksHtml}</div>`
+  document.querySelector('#app').appendChild(div)
+})()
+// ─────────────────────────────────────────────────────────────────────────────
