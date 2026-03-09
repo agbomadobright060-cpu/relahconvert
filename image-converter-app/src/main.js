@@ -250,9 +250,8 @@ function validateAndAdd(incoming) {
   const tooBig = valid.filter(f => f.size > LIMITS.MAX_PER_FILE_BYTES)
   if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
   const filtered = valid.filter(f => f.size <= LIMITS.MAX_PER_FILE_BYTES)
-  const map = new Map(selectedFiles.map(f => [fileKey(f), f]))
-  for (const f of filtered) map.set(fileKey(f), f)
-  let merged = Array.from(map.values())
+  // Allow duplicates — just append, no deduplication
+  let merged = [...selectedFiles, ...filtered]
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
   selectedFiles = merged
@@ -260,7 +259,13 @@ function validateAndAdd(incoming) {
   if (selectedFiles.length) setIdleEnabled(); else setDisabled()
 }
 
-fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])) })
+// ── FIXED: reset input after each selection so same file can be re-selected ──
+fileInput.addEventListener('change', () => {
+  validateAndAdd(Array.from(fileInput.files || []))
+  fileInput.value = ''
+})
+// ─────────────────────────────────────────────────────────────────────────────
+
 document.addEventListener('dragover', (e) => e.preventDefault())
 document.addEventListener('drop', (e) => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
 
