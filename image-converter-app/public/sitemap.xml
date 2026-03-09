@@ -5,6 +5,8 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Utilities -->
   <url>
     <loc>https://relahconvert.com/compress</loc>
     <changefreq>monthly</changefreq>
@@ -15,13 +17,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <!-- JPG Converters -->
   <url>
     <loc>https://relahconvert.com/jpg-to-png</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://relahconvert.com/png-to-jpg</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -31,7 +30,24 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://relahconvert.com/webp-to-jpg</loc>
+    <loc>https://relahconvert.com/jpg-to-pdf</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/jpg-to-gif</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/jpg-to-svg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- PNG Converters -->
+  <url>
+    <loc>https://relahconvert.com/png-to-jpg</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -41,20 +57,104 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://relahconvert.com/webp-to-png</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://relahconvert.com/jpg-to-pdf</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://relahconvert.com/png-to-pdf</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://relahconvert.com/png-to-gif</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- WebP Converters -->
+  <url>
+    <loc>https://relahconvert.com/webp-to-jpg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/webp-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- GIF Converters -->
+  <url>
+    <loc>https://relahconvert.com/gif-to-jpg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/gif-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- BMP Converters -->
+  <url>
+    <loc>https://relahconvert.com/bmp-to-jpg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/bmp-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- TIFF Converters -->
+  <url>
+    <loc>https://relahconvert.com/tiff-to-jpg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Optimization Tools -->
+  <url>
+    <loc>https://relahconvert.com/crop</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/rotate</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/flip</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/grayscale</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/watermark</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- New Tools -->
+  <url>
+    <loc>https://relahconvert.com/remove-background</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/heic-to-jpg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://relahconvert.com/image-to-ico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Static Pages -->
   <url>
     <loc>https://relahconvert.com/about</loc>
     <changefreq>yearly</changefreq>
