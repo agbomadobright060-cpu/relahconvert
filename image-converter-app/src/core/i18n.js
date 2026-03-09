@@ -335,7 +335,7 @@ const translations = {
         h2a:'How to Convert an Image to Black and White Without Uploading',
         steps:['<strong>Select your images</strong> — click "Select Images" or drag and drop up to 25 images onto the page.','<strong>Preview before and after</strong> — each image shows the original alongside the black and white version.','<strong>Download your images</strong> — single image downloads directly; multiple images download as a ZIP.'],
         h2b:"The Best Free Black and White Image Converter That Doesn't Upload Your Files",
-        body:'<p>RelahConvert converts images to black and white entirely inside your browser. Batch convert up to 25 images at once with a side-by-side before and after preview. No upload required. Supports JPG, PNG, WebP, GIF and BMP.</p>',
+        body:'<p>RelahConvert converts images to grayscale (black and white) entirely inside your browser. Batch convert up to 25 images at once with a side-by-side before and after preview. No upload required. Supports JPG, PNG, WebP, GIF and BMP.</p>',
         h3why:'Why Convert an Image to Black and White?',
         why:'Black and white images create a timeless, high-contrast aesthetic — ideal for portraits, artistic edits, document scanning, and removing distracting color from graphics.',
         faqs:[

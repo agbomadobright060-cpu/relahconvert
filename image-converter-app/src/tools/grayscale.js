@@ -5,7 +5,7 @@ import { getT } from '../core/i18n.js'
 const t = getT()
 const toolName  = (t.nav_short && t.nav_short['grayscale']) || 'Black & White'
 const seoData   = t.seo && t.seo['grayscale']
-const descText  = seoData ? seoData.h2a : 'Remove color from any image instantly. Files never leave your device.'
+const descText  = seoData ? seoData.h2a : 'Convert image to grayscale (black & white) free. Files never leave your device.'
 const selectLbl = t.select_images || 'Select Images'
 const dropHint  = t.drop_hint || 'or drop images anywhere'
 const dlBtn     = t.download || 'Download'
@@ -54,7 +54,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | No Upload — RelahConvert`
+document.title = `${toolName} / Grayscale Free | No Upload — RelahConvert`
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
