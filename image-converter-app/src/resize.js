@@ -1,5 +1,5 @@
 import JSZip from 'jszip'
-import { formatSize, fileKey, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
+import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
 import { injectHeader } from './core/header.js'
 import { getT } from './core/i18n.js'
 
@@ -61,89 +61,57 @@ if (document.head) {
 const seoResize = {
   en: {
     h2a: 'How to Resize Images Without Uploading',
-    steps: ['<strong>Select your images</strong> — click "Select Images" or drag and drop JPG or PNG files onto the page.', '<strong>Set your dimensions</strong> — enter pixel dimensions or choose a percentage. Enable aspect ratio lock to scale proportionally.', '<strong>Click Resize and download</strong> — your resized image is ready instantly. No upload, no waiting.'],
+    steps: ['<strong>Select your images</strong> — click "Select Images" or drag and drop JPG or PNG files onto the page.','<strong>Set your dimensions</strong> — enter pixel dimensions or choose a percentage. Enable aspect ratio lock to scale proportionally.','<strong>Click Resize and download</strong> — your resized image is ready instantly. No upload, no waiting.'],
     h2b: "The Best Free Image Resizer That Doesn't Upload Your Files",
     body: `<p>Uploading images just to resize them is slow and exposes your files to third-party servers. RelahConvert resizes images entirely in your browser — no upload, no server, no privacy risk. Whether you need exact pixel dimensions or a quick percentage resize, the entire process happens locally on your device in seconds.</p>`,
-    h3why: 'Why Resize Images?',
-    why: 'Images that are too large slow down websites, fail platform upload requirements, and take too long to share. Resizing ensures your images load fast and meet the specs of every platform.',
-    faqs: [
-      { q: 'How do I resize an image without losing quality?', a: 'Reducing dimensions generally preserves quality well. Avoid enlarging beyond original size. Use aspect ratio lock to prevent distortion.' },
-      { q: 'Can I resize an image to exact pixels without uploading?', a: 'Yes — enter your exact target width and height in pixels. Enable aspect ratio lock to scale proportionally from a single dimension.' },
-      { q: 'Can I resize by percentage instead of pixels?', a: 'Yes — switch to "By Percentage" and enter your desired scale, or use the quick presets for 25%, 50%, or 75% smaller.' },
-      { q: 'What formats are supported?', a: 'JPG and PNG images are fully supported. The output format matches your input.' },
-      { q: 'Do you store my images?', a: 'Never. All processing happens locally in your browser. Your images are not uploaded to any server.' },
-    ],
-    links: [{ href: '/compress', label: 'Compress Image' }, { href: '/png-to-jpg', label: 'PNG to JPG' }, { href: '/jpg-to-webp', label: 'JPG to WebP' }, { href: '/jpg-to-png', label: 'JPG to PNG' }],
+    h3why: 'Why Resize Images?', why: 'Images that are too large slow down websites, fail platform upload requirements, and take too long to share. Resizing ensures your images load fast and meet the specs of every platform.',
+    faqs: [{ q: 'How do I resize an image without losing quality?', a: 'Reducing dimensions generally preserves quality well. Avoid enlarging beyond original size. Use aspect ratio lock to prevent distortion.' },{ q: 'Can I resize an image to exact pixels without uploading?', a: 'Yes — enter your exact target width and height in pixels. Enable aspect ratio lock to scale proportionally from a single dimension.' },{ q: 'Can I resize by percentage instead of pixels?', a: 'Yes — switch to "By Percentage" and enter your desired scale, or use the quick presets for 25%, 50%, or 75% smaller.' },{ q: 'What formats are supported?', a: 'JPG and PNG images are fully supported. The output format matches your input.' },{ q: 'Do you store my images?', a: 'Never. All processing happens locally in your browser. Your images are not uploaded to any server.' }],
+    links: [{ href: '/compress', label: 'Compress Image' },{ href: '/png-to-jpg', label: 'PNG to JPG' },{ href: '/jpg-to-webp', label: 'JPG to WebP' },{ href: '/jpg-to-png', label: 'JPG to PNG' }],
   },
   fr: {
     h2a: 'Comment redimensionner des images sans télécharger',
-    steps: ['<strong>Sélectionnez vos images</strong> — cliquez ou déposez des fichiers JPG ou PNG.', '<strong>Définissez vos dimensions</strong> — entrez des dimensions en pixels ou choisissez un pourcentage.', '<strong>Cliquez sur Redimensionner</strong> — votre image est prête instantanément.'],
+    steps: ['<strong>Sélectionnez vos images</strong> — cliquez ou déposez des fichiers JPG ou PNG.','<strong>Définissez vos dimensions</strong> — entrez des dimensions en pixels ou choisissez un pourcentage.','<strong>Cliquez sur Redimensionner</strong> — votre image est prête instantanément.'],
     h2b: "Le meilleur redimensionneur d'images gratuit sans téléchargement",
     body: `<p>RelahConvert redimensionne les images entièrement dans votre navigateur — sans téléchargement, sans serveur, sans risque pour la vie privée.</p>`,
-    h3why: 'Pourquoi redimensionner les images ?',
-    why: 'Les images trop grandes ralentissent les sites web et ne répondent pas aux exigences des plateformes. Redimensionner garantit que vos images se chargent rapidement.',
-    faqs: [
-      { q: 'Comment redimensionner une image sans perdre en qualité ?', a: 'Réduire les dimensions préserve généralement bien la qualité. Utilisez le verrouillage du rapport pour éviter la distorsion.' },
-      { q: 'Puis-je redimensionner en pourcentage ?', a: 'Oui — passez à "En pourcentage" et entrez votre échelle souhaitée.' },
-      { q: 'Stockez-vous mes images ?', a: 'Jamais. Tout le traitement se fait localement dans votre navigateur.' },
-    ],
-    links: [{ href: '/compress', label: 'Compresser' }, { href: '/png-to-jpg', label: 'PNG en JPG' }, { href: '/jpg-to-webp', label: 'JPG en WebP' }, { href: '/jpg-to-png', label: 'JPG en PNG' }],
+    h3why: 'Pourquoi redimensionner les images ?', why: 'Les images trop grandes ralentissent les sites web et ne répondent pas aux exigences des plateformes. Redimensionner garantit que vos images se chargent rapidement.',
+    faqs: [{ q: 'Comment redimensionner une image sans perdre en qualité ?', a: 'Réduire les dimensions préserve généralement bien la qualité. Utilisez le verrouillage du rapport pour éviter la distorsion.' },{ q: 'Puis-je redimensionner en pourcentage ?', a: 'Oui — passez à "En pourcentage" et entrez votre échelle souhaitée.' },{ q: 'Stockez-vous mes images ?', a: 'Jamais. Tout le traitement se fait localement dans votre navigateur.' }],
+    links: [{ href: '/compress', label: 'Compresser' },{ href: '/png-to-jpg', label: 'PNG en JPG' },{ href: '/jpg-to-webp', label: 'JPG en WebP' },{ href: '/jpg-to-png', label: 'JPG en PNG' }],
   },
   es: {
     h2a: 'Cómo redimensionar imágenes sin subir archivos',
-    steps: ['<strong>Selecciona tus imágenes</strong> — haz clic o arrastra archivos JPG o PNG.', '<strong>Establece tus dimensiones</strong> — ingresa dimensiones en píxeles o elige un porcentaje.', '<strong>Haz clic en Redimensionar</strong> — tu imagen estará lista al instante.'],
+    steps: ['<strong>Selecciona tus imágenes</strong> — haz clic o arrastra archivos JPG o PNG.','<strong>Establece tus dimensiones</strong> — ingresa dimensiones en píxeles o elige un porcentaje.','<strong>Haz clic en Redimensionar</strong> — tu imagen estará lista al instante.'],
     h2b: 'El mejor redimensionador de imágenes gratuito sin subida',
     body: `<p>RelahConvert redimensiona imágenes completamente en tu navegador — sin subida, sin servidor, sin riesgo de privacidad.</p>`,
-    h3why: '¿Por qué redimensionar imágenes?',
-    why: 'Las imágenes demasiado grandes ralentizan los sitios web y no cumplen los requisitos de las plataformas. Redimensionar garantiza que tus imágenes carguen rápido.',
-    faqs: [
-      { q: '¿Cómo redimensiono una imagen sin perder calidad?', a: 'Reducir las dimensiones generalmente preserva bien la calidad. Usa el bloqueo de proporción para evitar distorsiones.' },
-      { q: '¿Puedo redimensionar por porcentaje?', a: 'Sí — cambia a "En porcentaje" e ingresa la escala deseada.' },
-      { q: '¿Almacenan mis imágenes?', a: 'Nunca. Todo el procesamiento ocurre localmente en tu navegador.' },
-    ],
-    links: [{ href: '/compress', label: 'Comprimir' }, { href: '/png-to-jpg', label: 'PNG a JPG' }, { href: '/jpg-to-webp', label: 'JPG a WebP' }, { href: '/jpg-to-png', label: 'JPG a PNG' }],
+    h3why: '¿Por qué redimensionar imágenes?', why: 'Las imágenes demasiado grandes ralentizan los sitios web y no cumplen los requisitos de las plataformas. Redimensionar garantiza que tus imágenes carguen rápido.',
+    faqs: [{ q: '¿Cómo redimensiono una imagen sin perder calidad?', a: 'Reducir las dimensiones generalmente preserva bien la calidad. Usa el bloqueo de proporción para evitar distorsiones.' },{ q: '¿Puedo redimensionar por porcentaje?', a: 'Sí — cambia a "En porcentaje" e ingresa la escala deseada.' },{ q: '¿Almacenan mis imágenes?', a: 'Nunca. Todo el procesamiento ocurre localmente en tu navegador.' }],
+    links: [{ href: '/compress', label: 'Comprimir' },{ href: '/png-to-jpg', label: 'PNG a JPG' },{ href: '/jpg-to-webp', label: 'JPG a WebP' },{ href: '/jpg-to-png', label: 'JPG a PNG' }],
   },
   pt: {
     h2a: 'Como redimensionar imagens sem fazer upload',
-    steps: ['<strong>Selecione suas imagens</strong> — clique ou arraste arquivos JPG ou PNG.', '<strong>Defina suas dimensões</strong> — insira dimensões em pixels ou escolha uma porcentagem.', '<strong>Clique em Redimensionar</strong> — sua imagem estará pronta instantaneamente.'],
+    steps: ['<strong>Selecione suas imagens</strong> — clique ou arraste arquivos JPG ou PNG.','<strong>Defina suas dimensões</strong> — insira dimensões em pixels ou escolha uma porcentagem.','<strong>Clique em Redimensionar</strong> — sua imagem estará pronta instantaneamente.'],
     h2b: 'O melhor redimensionador de imagens gratuito sem upload',
     body: `<p>RelahConvert redimensiona imagens completamente no seu navegador — sem upload, sem servidor, sem risco de privacidade.</p>`,
-    h3why: 'Por que redimensionar imagens?',
-    why: 'Imagens muito grandes tornam os sites lentos e não atendem aos requisitos das plataformas. Redimensionar garante que suas imagens carreguem rapidamente.',
-    faqs: [
-      { q: 'Como redimensiono uma imagem sem perder qualidade?', a: 'Reduzir as dimensões geralmente preserva bem a qualidade. Use o bloqueio de proporção para evitar distorções.' },
-      { q: 'Posso redimensionar por porcentagem?', a: 'Sim — mude para "Em porcentagem" e insira a escala desejada.' },
-      { q: 'Vocês armazenam minhas imagens?', a: 'Nunca. Todo o processamento ocorre localmente no seu navegador.' },
-    ],
-    links: [{ href: '/compress', label: 'Comprimir' }, { href: '/png-to-jpg', label: 'PNG para JPG' }, { href: '/jpg-to-webp', label: 'JPG para WebP' }, { href: '/jpg-to-png', label: 'JPG para PNG' }],
+    h3why: 'Por que redimensionar imagens?', why: 'Imagens muito grandes tornam os sites lentos e não atendem aos requisitos das plataformas. Redimensionar garante que suas imagens carreguem rapidamente.',
+    faqs: [{ q: 'Como redimensiono uma imagem sem perder qualidade?', a: 'Reduzir as dimensões geralmente preserva bem a qualidade. Use o bloqueio de proporção para evitar distorções.' },{ q: 'Posso redimensionar por porcentagem?', a: 'Sim — mude para "Em porcentagem" e insira a escala desejada.' },{ q: 'Vocês armazenam minhas imagens?', a: 'Nunca. Todo o processamento ocorre localmente no seu navegador.' }],
+    links: [{ href: '/compress', label: 'Comprimir' },{ href: '/png-to-jpg', label: 'PNG para JPG' },{ href: '/jpg-to-webp', label: 'JPG para WebP' },{ href: '/jpg-to-png', label: 'JPG para PNG' }],
   },
   de: {
     h2a: 'So ändern Sie die Bildgröße ohne Upload',
-    steps: ['<strong>Wählen Sie Ihre Bilder aus</strong> — klicken oder ziehen Sie JPG- oder PNG-Dateien.', '<strong>Legen Sie Ihre Abmessungen fest</strong> — geben Sie Pixelabmessungen ein oder wählen Sie einen Prozentsatz.', '<strong>Klicken Sie auf Skalieren</strong> — Ihr Bild ist sofort fertig.'],
+    steps: ['<strong>Wählen Sie Ihre Bilder aus</strong> — klicken oder ziehen Sie JPG- oder PNG-Dateien.','<strong>Legen Sie Ihre Abmessungen fest</strong> — geben Sie Pixelabmessungen ein oder wählen Sie einen Prozentsatz.','<strong>Klicken Sie auf Skalieren</strong> — Ihr Bild ist sofort fertig.'],
     h2b: 'Der beste kostenlose Bildskalierer ohne Upload',
     body: `<p>RelahConvert skaliert Bilder vollständig in Ihrem Browser — kein Upload, kein Server, kein Datenschutzrisiko.</p>`,
-    h3why: 'Warum Bilder skalieren?',
-    why: 'Zu große Bilder verlangsamen Websites und erfüllen keine Plattformanforderungen. Das Skalieren stellt sicher, dass Ihre Bilder schnell laden.',
-    faqs: [
-      { q: 'Wie skaliere ich ein Bild ohne Qualitätsverlust?', a: 'Das Reduzieren von Abmessungen erhält die Qualität im Allgemeinen gut. Verwenden Sie die Seitenverhältnissperre, um Verzerrungen zu vermeiden.' },
-      { q: 'Kann ich in Prozent statt in Pixeln skalieren?', a: 'Ja — wechseln Sie zu "In Prozent" und geben Sie Ihre gewünschte Skala ein.' },
-      { q: 'Speichern Sie meine Bilder?', a: 'Niemals. Die gesamte Verarbeitung erfolgt lokal in Ihrem Browser.' },
-    ],
-    links: [{ href: '/compress', label: 'Komprimieren' }, { href: '/png-to-jpg', label: 'PNG zu JPG' }, { href: '/jpg-to-webp', label: 'JPG zu WebP' }, { href: '/jpg-to-png', label: 'JPG zu PNG' }],
+    h3why: 'Warum Bilder skalieren?', why: 'Zu große Bilder verlangsamen Websites und erfüllen keine Plattformanforderungen. Das Skalieren stellt sicher, dass Ihre Bilder schnell laden.',
+    faqs: [{ q: 'Wie skaliere ich ein Bild ohne Qualitätsverlust?', a: 'Das Reduzieren von Abmessungen erhält die Qualität im Allgemeinen gut. Verwenden Sie die Seitenverhältnissperre, um Verzerrungen zu vermeiden.' },{ q: 'Kann ich in Prozent statt in Pixeln skalieren?', a: 'Ja — wechseln Sie zu "In Prozent" und geben Sie Ihre gewünschte Skala ein.' },{ q: 'Speichern Sie meine Bilder?', a: 'Niemals. Die gesamte Verarbeitung erfolgt lokal in Ihrem Browser.' }],
+    links: [{ href: '/compress', label: 'Komprimieren' },{ href: '/png-to-jpg', label: 'PNG zu JPG' },{ href: '/jpg-to-webp', label: 'JPG zu WebP' },{ href: '/jpg-to-png', label: 'JPG zu PNG' }],
   },
   ar: {
     h2a: 'كيفية تغيير حجم الصور بدون رفع',
-    steps: ['<strong>اختر صورك</strong> — انقر أو اسحب ملفات JPG أو PNG.', '<strong>حدد أبعادك</strong> — أدخل أبعاد البكسل أو اختر نسبة مئوية.', '<strong>انقر على تغيير الحجم</strong> — صورتك جاهزة فوراً.'],
+    steps: ['<strong>اختر صورك</strong> — انقر أو اسحب ملفات JPG أو PNG.','<strong>حدد أبعادك</strong> — أدخل أبعاد البكسل أو اختر نسبة مئوية.','<strong>انقر على تغيير الحجم</strong> — صورتك جاهزة فوراً.'],
     h2b: 'أفضل أداة مجانية لتغيير حجم الصور بدون رفع',
     body: `<p>RelahConvert يغير حجم الصور بالكامل في متصفحك — بدون رفع، بدون خادم، بدون مخاطر على الخصوصية.</p>`,
-    h3why: 'لماذا تغيير حجم الصور؟',
-    why: 'الصور الكبيرة جداً تبطئ المواقع ولا تستوفي متطلبات المنصات. تغيير الحجم يضمن تحميل صورك بسرعة.',
-    faqs: [
-      { q: 'كيف أغير حجم صورة بدون فقدان الجودة؟', a: 'تقليل الأبعاد يحافظ عادة على الجودة جيداً. استخدم قفل نسبة العرض لتجنب التشويه.' },
-      { q: 'هل يمكنني التغيير بالنسبة المئوية؟', a: 'نعم — انتقل إلى "بالنسبة المئوية" وأدخل المقياس المطلوب.' },
-      { q: 'هل تحتفظون بصوري؟', a: 'أبداً. تتم جميع المعالجة محلياً في متصفحك.' },
-    ],
-    links: [{ href: '/compress', label: 'ضغط' }, { href: '/png-to-jpg', label: 'PNG إلى JPG' }, { href: '/jpg-to-webp', label: 'JPG إلى WebP' }, { href: '/jpg-to-png', label: 'JPG إلى PNG' }],
+    h3why: 'لماذا تغيير حجم الصور؟', why: 'الصور الكبيرة جداً تبطئ المواقع ولا تستوفي متطلبات المنصات. تغيير الحجم يضمن تحميل صورك بسرعة.',
+    faqs: [{ q: 'كيف أغير حجم صورة بدون فقدان الجودة؟', a: 'تقليل الأبعاد يحافظ عادة على الجودة جيداً. استخدم قفل نسبة العرض لتجنب التشويه.' },{ q: 'هل يمكنني التغيير بالنسبة المئوية؟', a: 'نعم — انتقل إلى "بالنسبة المئوية" وأدخل المقياس المطلوب.' },{ q: 'هل تحتفظون بصوري؟', a: 'أبداً. تتم جميع المعالجة محلياً في متصفحك.' }],
+    links: [{ href: '/compress', label: 'ضغط' },{ href: '/png-to-jpg', label: 'PNG إلى JPG' },{ href: '/jpg-to-webp', label: 'JPG إلى WebP' },{ href: '/jpg-to-png', label: 'JPG إلى PNG' }],
   },
 }
 
@@ -151,23 +119,7 @@ function getLang() { return localStorage.getItem('rc_lang') || 'en' }
 function buildSeoSection() {
   const lang = getLang()
   const seo = seoResize[lang] || seoResize['en']
-  return `
-    <hr class="seo-divider" />
-    <div class="seo-section">
-      <h2>${seo.h2a}</h2>
-      <ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol>
-      <h2>${seo.h2b}</h2>
-      ${seo.body}
-      <h3>${seo.h3why}</h3>
-      <p>${seo.why}</p>
-      <h3>${t.seo_faq_title}</h3>
-      ${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}
-      <h3>${t.seo_also_try}</h3>
-      <div class="internal-links">
-        ${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
-      </div>
-    </div>
-  `
+  return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}</div></div>`
 }
 
 document.querySelector('#app').innerHTML = `
@@ -318,9 +270,8 @@ function validateAndAdd(incoming) {
   const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/png') && f.size > LIMITS.MAX_PER_FILE_BYTES)
   if (wrongFormat.length) showWarning(`${t.warn_only_jpg_png} ${wrongFormat.length} ${t.warn_wrong_format}`)
   if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
-  const map = new Map()
-  for (const f of [...selectedFiles, ...valid]) map.set(fileKey(f), f)
-  let merged = Array.from(map.values())
+  // Allow duplicates — just append, no deduplication
+  let merged = [...selectedFiles, ...valid]
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
   selectedFiles = merged; cleanupOldUrl(); downloadLink.style.display = 'none'; nextSteps.style.display = 'none'
