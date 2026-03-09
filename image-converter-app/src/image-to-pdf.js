@@ -1,5 +1,5 @@
 import { injectHeader } from './core/header.js'
-import { formatSize, fileKey, totalBytes, sanitizeBaseName, LIMITS } from './core/utils.js'
+import { formatSize, totalBytes, sanitizeBaseName, LIMITS } from './core/utils.js'
 import { getT } from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
@@ -68,35 +68,17 @@ export function initImageToPdf({ slug: _slug } = {}) {
     document.head.appendChild(metaDesc)
   }
 
-  // ─────────────────────────────────────────────
-  // PAGE SETTINGS STATE
-  // ─────────────────────────────────────────────
-  const pageSettings = {
-    orientation: 'portrait',
-    size: 'fit',
-    margin: 'none',
-  }
-
+  const pageSettings = { orientation: 'portrait', size: 'fit', margin: 'none' }
   const MARGIN_MM = { none: 0, small: 8, big: 20 }
   const PAGE_DIMS_MM = { fit: null, a4: [210, 297], letter: [215.9, 279.4] }
 
-  // ─────────────────────────────────────────────
-  // EXIF ROTATION
-  // Uses exifr.parse with explicit Orientation tag —
-  // more reliable than exifr.rotation() for iPhones
-  // ─────────────────────────────────────────────
   async function getRotationDeg(file) {
     try {
       const tags = await exifr.parse(file, ['Orientation'])
       return { 1: 0, 3: 180, 6: 90, 8: 270 }[tags?.Orientation] ?? 0
-    } catch (_) {
-      return 0
-    }
+    } catch (_) { return 0 }
   }
 
-  // ─────────────────────────────────────────────
-  // DRAW IMAGE ONTO CANVAS WITH ROTATION
-  // ─────────────────────────────────────────────
   function drawRotatedToCanvas(imgEl, deg) {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -109,19 +91,9 @@ export function initImageToPdf({ slug: _slug } = {}) {
     ctx.rotate((deg * Math.PI) / 180)
     ctx.drawImage(imgEl, -w / 2, -h / 2)
     ctx.restore()
-    return {
-      dataURL: canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.92),
-      w: canvas.width,
-      h: canvas.height,
-    }
+    return { dataURL: canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.92), w: canvas.width, h: canvas.height }
   }
 
-  // ─────────────────────────────────────────────
-  // LOAD + EXIF-CORRECT IMAGE
-  // Detects if browser already auto-corrected the
-  // rotation (Chrome/Safari do this for iPhones)
-  // and avoids double-rotating in that case.
-  // ─────────────────────────────────────────────
   async function loadAndCorrectImage(file) {
     const deg = await getRotationDeg(file)
     return new Promise((resolve, reject) => {
@@ -131,11 +103,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
         const imgEl = new Image()
         imgEl.onerror = () => reject(new Error('Image load failed'))
         imgEl.onload = () => {
-          // If the EXIF says image is rotated 90/270 but the browser already
-          // corrected it, naturalWidth < naturalHeight (portrait). In that
-          // case the browser did the work — don't rotate again.
-          const browserAlreadyCorrected =
-            (deg === 90 || deg === 270) && imgEl.naturalWidth < imgEl.naturalHeight
+          const browserAlreadyCorrected = (deg === 90 || deg === 270) && imgEl.naturalWidth < imgEl.naturalHeight
           resolve(drawRotatedToCanvas(imgEl, browserAlreadyCorrected ? 0 : deg))
         }
         imgEl.src = e.target.result
@@ -144,199 +112,82 @@ export function initImageToPdf({ slug: _slug } = {}) {
     })
   }
 
-  // ─────────────────────────────────────────────
-  // PDF BLOB BUILDER
-  // ─────────────────────────────────────────────
   async function imageFilesToPdfBlob(files, onProgress) {
     const marginMm = MARGIN_MM[pageSettings.margin]
     const fmt = isPng ? 'PNG' : 'JPEG'
-
     const corrected = []
     for (let i = 0; i < files.length; i++) {
       corrected.push(await loadAndCorrectImage(files[i]))
       onProgress?.(i + 1, files.length)
     }
-
     let doc = null
     for (let i = 0; i < corrected.length; i++) {
       const { dataURL, w: imgW, h: imgH } = corrected[i]
-
       let pgWmm, pgHmm
       if (pageSettings.size === 'fit') {
         const PX_TO_MM = 25.4 / 96
-        pgWmm = imgW * PX_TO_MM
-        pgHmm = imgH * PX_TO_MM
+        pgWmm = imgW * PX_TO_MM; pgHmm = imgH * PX_TO_MM
       } else {
         ;[pgWmm, pgHmm] = PAGE_DIMS_MM[pageSettings.size]
       }
-
       const wantsLandscape = pageSettings.orientation === 'landscape'
-      if ((wantsLandscape && pgHmm > pgWmm) || (!wantsLandscape && pgWmm > pgHmm)) {
-        ;[pgWmm, pgHmm] = [pgHmm, pgWmm]
-      }
-
+      if ((wantsLandscape && pgHmm > pgWmm) || (!wantsLandscape && pgWmm > pgHmm)) { ;[pgWmm, pgHmm] = [pgHmm, pgWmm] }
       const jsPdfOrient = pgWmm >= pgHmm ? 'l' : 'p'
       if (!doc) {
         doc = new jsPDF({ orientation: jsPdfOrient, unit: 'mm', format: [pgWmm, pgHmm], compress: true })
       } else {
         doc.addPage([pgWmm, pgHmm], jsPdfOrient)
       }
-
-      const usableW = pgWmm - marginMm * 2
-      const usableH = pgHmm - marginMm * 2
+      const usableW = pgWmm - marginMm * 2, usableH = pgHmm - marginMm * 2
       const imgAr = imgW / imgH
       let drawW = usableW, drawH = usableW / imgAr
       if (drawH > usableH) { drawH = usableH; drawW = usableH * imgAr }
-      const x = marginMm + (usableW - drawW) / 2
-      const y = marginMm + (usableH - drawH) / 2
+      const x = marginMm + (usableW - drawW) / 2, y = marginMm + (usableH - drawH) / 2
       doc.addImage(dataURL, fmt, x, y, drawW, drawH, '', 'FAST')
     }
-
     return doc ? doc.output('blob') : null
   }
 
-  // ─────────────────────────────────────────────
-  // SEO
-  // ─────────────────────────────────────────────
   const seoPdf = {
     en: {
       'jpg-to-pdf': {
         h2a: 'How to Convert JPG to PDF Without Uploading',
-        steps: [
-          '<strong>Select your JPG images</strong> — click "Select Images" or drag and drop JPG files onto the page.',
-          '<strong>Choose PDF mode</strong> — one PDF per image, or all images combined into one PDF.',
-          '<strong>Click Convert and download</strong> — your PDF is ready instantly. No upload, no waiting.',
-        ],
+        steps: ['<strong>Select your JPG images</strong> — click "Select Images" or drag and drop JPG files onto the page.','<strong>Choose PDF mode</strong> — one PDF per image, or all images combined into one PDF.','<strong>Click Convert and download</strong> — your PDF is ready instantly. No upload, no waiting.'],
         h2b: "The Best Free JPG to PDF Converter That Doesn't Upload Your Files",
         body: `<p>Most JPG to PDF converters upload your images to a remote server before generating the PDF. RelahConvert converts JPG to PDF entirely inside your browser. Your files never leave your device at any point.</p><p>Whether you need to combine several photos into a single PDF document, create a PDF from a scanned receipt, or convert product images for a report — this tool handles it privately and instantly.</p>`,
-        h3why: 'Why Convert JPG to PDF?',
-        why: 'PDF is the universal document format — accepted everywhere, preserving image quality exactly, and easy to share or print. Converting JPG images to PDF makes them easier to email, upload to document portals, and archive.',
-        faqs: [
-          { q: 'How do I convert JPG to PDF without uploading?', a: 'Select your JPG files in RelahConvert, choose your PDF mode, and click Convert. The entire process runs locally in your browser — nothing is uploaded.' },
-          { q: 'Can I combine multiple JPG images into one PDF?', a: 'Yes — select multiple images and choose "All images in one PDF". Each image becomes a page in the document.' },
-          { q: 'Is there a limit to how many images I can convert?', a: 'You can convert multiple images at once. Processing happens locally so there is no server-imposed limit.' },
-          { q: 'Do you store my images?', a: 'Never. All processing happens locally in your browser. Your images are not uploaded to any server.' },
-        ],
-        links: [{ href: '/jpg-to-png', label: 'JPG to PNG' }, { href: '/jpg-to-webp', label: 'JPG to WebP' }, { href: '/compress', label: 'Compress Image' }, { href: '/resize', label: 'Resize Image' }],
+        h3why: 'Why Convert JPG to PDF?', why: 'PDF is the universal document format — accepted everywhere, preserving image quality exactly, and easy to share or print.',
+        faqs: [{ q: 'How do I convert JPG to PDF without uploading?', a: 'Select your JPG files in RelahConvert, choose your PDF mode, and click Convert. The entire process runs locally in your browser — nothing is uploaded.' },{ q: 'Can I combine multiple JPG images into one PDF?', a: 'Yes — select multiple images and choose "All images in one PDF". Each image becomes a page in the document.' },{ q: 'Is there a limit to how many images I can convert?', a: 'You can convert multiple images at once. Processing happens locally so there is no server-imposed limit.' },{ q: 'Do you store my images?', a: 'Never. All processing happens locally in your browser. Your images are not uploaded to any server.' }],
+        links: [{ href: '/jpg-to-png', label: 'JPG to PNG' },{ href: '/jpg-to-webp', label: 'JPG to WebP' },{ href: '/compress', label: 'Compress Image' },{ href: '/resize', label: 'Resize Image' }],
       },
       'png-to-pdf': {
         h2a: 'How to Convert PNG to PDF Without Uploading',
-        steps: [
-          '<strong>Select your PNG images</strong> — click "Select Images" or drag and drop PNG files onto the page.',
-          '<strong>Choose PDF mode</strong> — one PDF per image, or all images combined into one PDF.',
-          '<strong>Click Convert and download</strong> — your PDF is ready instantly. No upload, no waiting.',
-        ],
+        steps: ['<strong>Select your PNG images</strong> — click "Select Images" or drag and drop PNG files onto the page.','<strong>Choose PDF mode</strong> — one PDF per image, or all images combined into one PDF.','<strong>Click Convert and download</strong> — your PDF is ready instantly. No upload, no waiting.'],
         h2b: "The Best Free PNG to PDF Converter That Doesn't Upload Your Files",
         body: `<p>Most PNG to PDF converters upload your images to a remote server before generating the PDF. RelahConvert converts PNG to PDF entirely inside your browser. Your files never leave your device.</p><p>Perfect for converting screenshots, graphics, UI exports, and design assets into PDF documents.</p>`,
-        h3why: 'Why Convert PNG to PDF?',
-        why: 'PDF is universally accepted for sharing and archiving. Converting PNG images to PDF makes them easier to email, submit to document portals, and print — while preserving quality exactly.',
-        faqs: [
-          { q: 'How do I convert PNG to PDF without uploading?', a: 'Select your PNG files in RelahConvert, choose your PDF mode, and click Convert. Everything runs locally in your browser.' },
-          { q: 'Can I combine multiple PNG images into one PDF?', a: 'Yes — select multiple images and choose "All images in one PDF". Each image becomes a page.' },
-          { q: 'Do you store my images?', a: 'Never. All processing happens locally in your browser. Your images are not uploaded to any server.' },
-        ],
-        links: [{ href: '/png-to-jpg', label: 'PNG to JPG' }, { href: '/png-to-webp', label: 'PNG to WebP' }, { href: '/compress', label: 'Compress Image' }, { href: '/resize', label: 'Resize Image' }],
+        h3why: 'Why Convert PNG to PDF?', why: 'PDF is universally accepted for sharing and archiving. Converting PNG images to PDF makes them easier to email, submit to document portals, and print.',
+        faqs: [{ q: 'How do I convert PNG to PDF without uploading?', a: 'Select your PNG files in RelahConvert, choose your PDF mode, and click Convert. Everything runs locally in your browser.' },{ q: 'Can I combine multiple PNG images into one PDF?', a: 'Yes — select multiple images and choose "All images in one PDF". Each image becomes a page.' },{ q: 'Do you store my images?', a: 'Never. All processing happens locally in your browser. Your images are not uploaded to any server.' }],
+        links: [{ href: '/png-to-jpg', label: 'PNG to JPG' },{ href: '/png-to-webp', label: 'PNG to WebP' },{ href: '/compress', label: 'Compress Image' },{ href: '/resize', label: 'Resize Image' }],
       },
     },
     fr: {
-      'jpg-to-pdf': {
-        h2a: 'Comment convertir JPG en PDF sans télécharger',
-        steps: ['<strong>Sélectionnez vos images JPG</strong>.', '<strong>Choisissez le mode PDF</strong> — un PDF par image ou toutes les images en un seul PDF.', '<strong>Cliquez sur Convertir</strong> — votre PDF est prêt instantanément.'],
-        h2b: 'Le meilleur convertisseur JPG en PDF gratuit sans téléchargement',
-        body: '<p>RelahConvert convertit JPG en PDF entièrement dans votre navigateur. Vos fichiers ne quittent jamais votre appareil.</p>',
-        h3why: 'Pourquoi convertir JPG en PDF ?', why: 'Le PDF est le format de document universel — accepté partout et facile à partager.',
-        faqs: [{ q: 'Puis-je combiner plusieurs images JPG en un seul PDF ?', a: 'Oui — sélectionnez plusieurs images et choisissez "Toutes les images en un PDF".' }, { q: 'Stockez-vous mes images ?', a: 'Jamais. Tout le traitement se fait localement.' }],
-        links: [{ href: '/jpg-to-png', label: 'JPG en PNG' }, { href: '/jpg-to-webp', label: 'JPG en WebP' }, { href: '/compress', label: 'Compresser' }, { href: '/resize', label: 'Redimensionner' }],
-      },
-      'png-to-pdf': {
-        h2a: 'Comment convertir PNG en PDF sans télécharger',
-        steps: ['<strong>Sélectionnez vos images PNG</strong>.', '<strong>Choisissez le mode PDF</strong>.', '<strong>Cliquez sur Convertir</strong> — votre PDF est prêt instantanément.'],
-        h2b: 'Le meilleur convertisseur PNG en PDF gratuit sans téléchargement',
-        body: '<p>RelahConvert convertit PNG en PDF entièrement dans votre navigateur. Vos fichiers ne quittent jamais votre appareil.</p>',
-        h3why: 'Pourquoi convertir PNG en PDF ?', why: "Le PDF est universellement accepté pour le partage et l'archivage.",
-        faqs: [{ q: 'Puis-je combiner plusieurs images PNG en un seul PDF ?', a: 'Oui — sélectionnez plusieurs images et choisissez "Toutes les images en un PDF".' }, { q: 'Stockez-vous mes images ?', a: 'Jamais. Tout le traitement se fait localement.' }],
-        links: [{ href: '/png-to-jpg', label: 'PNG en JPG' }, { href: '/png-to-webp', label: 'PNG en WebP' }, { href: '/compress', label: 'Compresser' }, { href: '/resize', label: 'Redimensionner' }],
-      },
+      'jpg-to-pdf': { h2a: 'Comment convertir JPG en PDF sans télécharger', steps: ['<strong>Sélectionnez vos images JPG</strong>.','<strong>Choisissez le mode PDF</strong> — un PDF par image ou toutes les images en un seul PDF.','<strong>Cliquez sur Convertir</strong> — votre PDF est prêt instantanément.'], h2b: 'Le meilleur convertisseur JPG en PDF gratuit sans téléchargement', body: '<p>RelahConvert convertit JPG en PDF entièrement dans votre navigateur. Vos fichiers ne quittent jamais votre appareil.</p>', h3why: 'Pourquoi convertir JPG en PDF ?', why: 'Le PDF est le format de document universel — accepté partout et facile à partager.', faqs: [{ q: 'Puis-je combiner plusieurs images JPG en un seul PDF ?', a: 'Oui — sélectionnez plusieurs images et choisissez "Toutes les images en un PDF".' },{ q: 'Stockez-vous mes images ?', a: 'Jamais. Tout le traitement se fait localement.' }], links: [{ href: '/jpg-to-png', label: 'JPG en PNG' },{ href: '/jpg-to-webp', label: 'JPG en WebP' },{ href: '/compress', label: 'Compresser' },{ href: '/resize', label: 'Redimensionner' }] },
+      'png-to-pdf': { h2a: 'Comment convertir PNG en PDF sans télécharger', steps: ['<strong>Sélectionnez vos images PNG</strong>.','<strong>Choisissez le mode PDF</strong>.','<strong>Cliquez sur Convertir</strong> — votre PDF est prêt instantanément.'], h2b: 'Le meilleur convertisseur PNG en PDF gratuit sans téléchargement', body: '<p>RelahConvert convertit PNG en PDF entièrement dans votre navigateur. Vos fichiers ne quittent jamais votre appareil.</p>', h3why: 'Pourquoi convertir PNG en PDF ?', why: "Le PDF est universellement accepté pour le partage et l'archivage.", faqs: [{ q: 'Puis-je combiner plusieurs images PNG en un seul PDF ?', a: 'Oui — sélectionnez plusieurs images et choisissez "Toutes les images en un PDF".' },{ q: 'Stockez-vous mes images ?', a: 'Jamais. Tout le traitement se fait localement.' }], links: [{ href: '/png-to-jpg', label: 'PNG en JPG' },{ href: '/png-to-webp', label: 'PNG en WebP' },{ href: '/compress', label: 'Compresser' },{ href: '/resize', label: 'Redimensionner' }] },
     },
     es: {
-      'jpg-to-pdf': {
-        h2a: 'Cómo convertir JPG a PDF sin subir archivos',
-        steps: ['<strong>Selecciona tus imágenes JPG</strong>.', '<strong>Elige el modo PDF</strong> — un PDF por imagen o todas las imágenes en un PDF.', '<strong>Haz clic en Convertir</strong> — tu PDF está listo al instante.'],
-        h2b: 'El mejor convertidor gratuito de JPG a PDF sin subida',
-        body: '<p>RelahConvert convierte JPG a PDF completamente en tu navegador. Tus archivos nunca salen de tu dispositivo.</p>',
-        h3why: '¿Por qué convertir JPG a PDF?', why: 'PDF es el formato de documento universal — aceptado en todas partes y fácil de compartir.',
-        faqs: [{ q: '¿Puedo combinar varias imágenes JPG en un PDF?', a: 'Sí — selecciona varias imágenes y elige "Todas las imágenes en un PDF".' }, { q: '¿Almacenan mis imágenes?', a: 'Nunca. Todo el procesamiento ocurre localmente.' }],
-        links: [{ href: '/jpg-to-png', label: 'JPG a PNG' }, { href: '/jpg-to-webp', label: 'JPG a WebP' }, { href: '/compress', label: 'Comprimir' }, { href: '/resize', label: 'Redimensionar' }],
-      },
-      'png-to-pdf': {
-        h2a: 'Cómo convertir PNG a PDF sin subir archivos',
-        steps: ['<strong>Selecciona tus imágenes PNG</strong>.', '<strong>Elige el modo PDF</strong>.', '<strong>Haz clic en Convertir</strong> — tu PDF está listo al instante.'],
-        h2b: 'El mejor convertidor gratuito de PNG a PDF sin subida',
-        body: '<p>RelahConvert convierte PNG a PDF completamente en tu navegador. Tus archivos nunca salen de tu dispositivo.</p>',
-        h3why: '¿Por qué convertir PNG a PDF?', why: 'PDF es universalmente aceptado para compartir y archivar.',
-        faqs: [{ q: '¿Puedo combinar varias imágenes PNG en un PDF?', a: 'Sí — selecciona varias imágenes y elige "Todas las imágenes en un PDF".' }, { q: '¿Almacenan mis imágenes?', a: 'Nunca. Todo el procesamiento ocurre localmente.' }],
-        links: [{ href: '/png-to-jpg', label: 'PNG a JPG' }, { href: '/png-to-webp', label: 'PNG a WebP' }, { href: '/compress', label: 'Comprimir' }, { href: '/resize', label: 'Redimensionar' }],
-      },
+      'jpg-to-pdf': { h2a: 'Cómo convertir JPG a PDF sin subir archivos', steps: ['<strong>Selecciona tus imágenes JPG</strong>.','<strong>Elige el modo PDF</strong>.','<strong>Haz clic en Convertir</strong> — tu PDF está listo al instante.'], h2b: 'El mejor convertidor gratuito de JPG a PDF sin subida', body: '<p>RelahConvert convierte JPG a PDF completamente en tu navegador. Tus archivos nunca salen de tu dispositivo.</p>', h3why: '¿Por qué convertir JPG a PDF?', why: 'PDF es el formato de documento universal — aceptado en todas partes y fácil de compartir.', faqs: [{ q: '¿Puedo combinar varias imágenes JPG en un PDF?', a: 'Sí — selecciona varias imágenes y elige "Todas las imágenes en un PDF".' },{ q: '¿Almacenan mis imágenes?', a: 'Nunca. Todo el procesamiento ocurre localmente.' }], links: [{ href: '/jpg-to-png', label: 'JPG a PNG' },{ href: '/jpg-to-webp', label: 'JPG a WebP' },{ href: '/compress', label: 'Comprimir' },{ href: '/resize', label: 'Redimensionar' }] },
+      'png-to-pdf': { h2a: 'Cómo convertir PNG a PDF sin subir archivos', steps: ['<strong>Selecciona tus imágenes PNG</strong>.','<strong>Elige el modo PDF</strong>.','<strong>Haz clic en Convertir</strong> — tu PDF está listo al instante.'], h2b: 'El mejor convertidor gratuito de PNG a PDF sin subida', body: '<p>RelahConvert convierte PNG a PDF completamente en tu navegador. Tus archivos nunca salen de tu dispositivo.</p>', h3why: '¿Por qué convertir PNG a PDF?', why: 'PDF es universalmente aceptado para compartir y archivar.', faqs: [{ q: '¿Puedo combinar varias imágenes PNG en un PDF?', a: 'Sí — selecciona varias imágenes y elige "Todas las imágenes en un PDF".' },{ q: '¿Almacenan mis imágenes?', a: 'Nunca. Todo el procesamiento ocurre localmente.' }], links: [{ href: '/png-to-jpg', label: 'PNG a JPG' },{ href: '/png-to-webp', label: 'PNG a WebP' },{ href: '/compress', label: 'Comprimir' },{ href: '/resize', label: 'Redimensionar' }] },
     },
     pt: {
-      'jpg-to-pdf': {
-        h2a: 'Como converter JPG para PDF sem fazer upload',
-        steps: ['<strong>Selecione suas imagens JPG</strong>.', '<strong>Escolha o modo PDF</strong>.', '<strong>Clique em Converter</strong> — seu PDF está pronto instantaneamente.'],
-        h2b: 'O melhor conversor gratuito de JPG para PDF sem upload',
-        body: '<p>RelahConvert converte JPG para PDF completamente no seu navegador. Seus arquivos nunca saem do seu dispositivo.</p>',
-        h3why: 'Por que converter JPG para PDF?', why: 'PDF é o formato de documento universal — aceito em todos os lugares e fácil de compartilhar.',
-        faqs: [{ q: 'Posso combinar várias imagens JPG em um PDF?', a: 'Sim — selecione várias imagens e escolha "Todas as imagens em um PDF".' }, { q: 'Vocês armazenam minhas imagens?', a: 'Nunca. Todo o processamento ocorre localmente.' }],
-        links: [{ href: '/jpg-to-png', label: 'JPG para PNG' }, { href: '/jpg-to-webp', label: 'JPG para WebP' }, { href: '/compress', label: 'Comprimir' }, { href: '/resize', label: 'Redimensionar' }],
-      },
-      'png-to-pdf': {
-        h2a: 'Como converter PNG para PDF sem fazer upload',
-        steps: ['<strong>Selecione suas imagens PNG</strong>.', '<strong>Escolha o modo PDF</strong>.', '<strong>Clique em Converter</strong> — seu PDF está pronto instantaneamente.'],
-        h2b: 'O melhor conversor gratuito de PNG para PDF sem upload',
-        body: '<p>RelahConvert converte PNG para PDF completamente no seu navegador. Seus arquivos nunca saem do seu dispositivo.</p>',
-        h3why: 'Por que converter PNG para PDF?', why: 'PDF é universalmente aceito para compartilhamento e arquivamento.',
-        faqs: [{ q: 'Posso combinar várias imagens PNG em um PDF?', a: 'Sim — selecione várias imagens e escolha "Todas as imagens em um PDF".' }, { q: 'Vocês armazenam minhas imagens?', a: 'Nunca. Todo o processamento ocorre localmente.' }],
-        links: [{ href: '/png-to-jpg', label: 'PNG para JPG' }, { href: '/png-to-webp', label: 'PNG para WebP' }, { href: '/compress', label: 'Comprimir' }, { href: '/resize', label: 'Redimensionar' }],
-      },
+      'jpg-to-pdf': { h2a: 'Como converter JPG para PDF sem fazer upload', steps: ['<strong>Selecione suas imagens JPG</strong>.','<strong>Escolha o modo PDF</strong>.','<strong>Clique em Converter</strong> — seu PDF está pronto instantaneamente.'], h2b: 'O melhor conversor gratuito de JPG para PDF sem upload', body: '<p>RelahConvert converte JPG para PDF completamente no seu navegador. Seus arquivos nunca saem do seu dispositivo.</p>', h3why: 'Por que converter JPG para PDF?', why: 'PDF é o formato de documento universal — aceito em todos os lugares e fácil de compartilhar.', faqs: [{ q: 'Posso combinar várias imagens JPG em um PDF?', a: 'Sim — selecione várias imagens e escolha "Todas as imagens em um PDF".' },{ q: 'Vocês armazenam minhas imagens?', a: 'Nunca. Todo o processamento ocorre localmente.' }], links: [{ href: '/jpg-to-png', label: 'JPG para PNG' },{ href: '/jpg-to-webp', label: 'JPG para WebP' },{ href: '/compress', label: 'Comprimir' },{ href: '/resize', label: 'Redimensionar' }] },
+      'png-to-pdf': { h2a: 'Como converter PNG para PDF sem fazer upload', steps: ['<strong>Selecione suas imagens PNG</strong>.','<strong>Escolha o modo PDF</strong>.','<strong>Clique em Converter</strong> — seu PDF está pronto instantaneamente.'], h2b: 'O melhor conversor gratuito de PNG para PDF sem upload', body: '<p>RelahConvert converte PNG para PDF completamente no seu navegador. Seus arquivos nunca saem do seu dispositivo.</p>', h3why: 'Por que converter PNG para PDF?', why: 'PDF é universalmente aceito para compartilhamento e arquivamento.', faqs: [{ q: 'Posso combinar várias imagens PNG em um PDF?', a: 'Sim — selecione várias imagens e escolha "Todas as imagens em um PDF".' },{ q: 'Vocês armazenam minhas imagens?', a: 'Nunca. Todo o processamento ocorre localmente.' }], links: [{ href: '/png-to-jpg', label: 'PNG para JPG' },{ href: '/png-to-webp', label: 'PNG para WebP' },{ href: '/compress', label: 'Comprimir' },{ href: '/resize', label: 'Redimensionar' }] },
     },
     de: {
-      'jpg-to-pdf': {
-        h2a: 'So konvertieren Sie JPG in PDF ohne Upload',
-        steps: ['<strong>Wählen Sie Ihre JPG-Bilder aus</strong>.', '<strong>Wählen Sie den PDF-Modus</strong>.', '<strong>Klicken Sie auf Konvertieren</strong> — Ihr PDF ist sofort fertig.'],
-        h2b: 'Der beste kostenlose JPG zu PDF Konverter ohne Upload',
-        body: '<p>RelahConvert konvertiert JPG zu PDF vollständig in Ihrem Browser. Ihre Dateien verlassen nie Ihr Gerät.</p>',
-        h3why: 'Warum JPG in PDF konvertieren?', why: 'PDF ist das universelle Dokumentformat — überall akzeptiert und leicht zu teilen.',
-        faqs: [{ q: 'Kann ich mehrere JPG-Bilder in einem PDF zusammenführen?', a: 'Ja — wählen Sie mehrere Bilder und klicken Sie auf "Alle Bilder in einem PDF".' }, { q: 'Speichern Sie meine Bilder?', a: 'Niemals. Die gesamte Verarbeitung erfolgt lokal.' }],
-        links: [{ href: '/jpg-to-png', label: 'JPG zu PNG' }, { href: '/jpg-to-webp', label: 'JPG zu WebP' }, { href: '/compress', label: 'Komprimieren' }, { href: '/resize', label: 'Skalieren' }],
-      },
-      'png-to-pdf': {
-        h2a: 'So konvertieren Sie PNG in PDF ohne Upload',
-        steps: ['<strong>Wählen Sie Ihre PNG-Bilder aus</strong>.', '<strong>Wählen Sie den PDF-Modus</strong>.', '<strong>Klicken Sie auf Konvertieren</strong> — Ihr PDF ist sofort fertig.'],
-        h2b: 'Der beste kostenlose PNG zu PDF Konverter ohne Upload',
-        body: '<p>RelahConvert konvertiert PNG zu PDF vollständig in Ihrem Browser. Ihre Dateien verlassen nie Ihr Gerät.</p>',
-        h3why: 'Warum PNG in PDF konvertieren?', why: 'PDF ist universell für das Teilen und Archivieren akzeptiert.',
-        faqs: [{ q: 'Kann ich mehrere PNG-Bilder in einem PDF zusammenführen?', a: 'Ja — wählen Sie mehrere Bilder und klicken Sie auf "Alle Bilder in einem PDF".' }, { q: 'Speichern Sie meine Bilder?', a: 'Niemals. Die gesamte Verarbeitung erfolgt lokal.' }],
-        links: [{ href: '/png-to-jpg', label: 'PNG zu JPG' }, { href: '/png-to-webp', label: 'PNG zu WebP' }, { href: '/compress', label: 'Komprimieren' }, { href: '/resize', label: 'Skalieren' }],
-      },
+      'jpg-to-pdf': { h2a: 'So konvertieren Sie JPG in PDF ohne Upload', steps: ['<strong>Wählen Sie Ihre JPG-Bilder aus</strong>.','<strong>Wählen Sie den PDF-Modus</strong>.','<strong>Klicken Sie auf Konvertieren</strong> — Ihr PDF ist sofort fertig.'], h2b: 'Der beste kostenlose JPG zu PDF Konverter ohne Upload', body: '<p>RelahConvert konvertiert JPG zu PDF vollständig in Ihrem Browser. Ihre Dateien verlassen nie Ihr Gerät.</p>', h3why: 'Warum JPG in PDF konvertieren?', why: 'PDF ist das universelle Dokumentformat — überall akzeptiert und leicht zu teilen.', faqs: [{ q: 'Kann ich mehrere JPG-Bilder in einem PDF zusammenführen?', a: 'Ja — wählen Sie mehrere Bilder und klicken Sie auf "Alle Bilder in einem PDF".' },{ q: 'Speichern Sie meine Bilder?', a: 'Niemals. Die gesamte Verarbeitung erfolgt lokal.' }], links: [{ href: '/jpg-to-png', label: 'JPG zu PNG' },{ href: '/jpg-to-webp', label: 'JPG zu WebP' },{ href: '/compress', label: 'Komprimieren' },{ href: '/resize', label: 'Skalieren' }] },
+      'png-to-pdf': { h2a: 'So konvertieren Sie PNG in PDF ohne Upload', steps: ['<strong>Wählen Sie Ihre PNG-Bilder aus</strong>.','<strong>Wählen Sie den PDF-Modus</strong>.','<strong>Klicken Sie auf Konvertieren</strong> — Ihr PDF ist sofort fertig.'], h2b: 'Der beste kostenlose PNG zu PDF Konverter ohne Upload', body: '<p>RelahConvert konvertiert PNG zu PDF vollständig in Ihrem Browser. Ihre Dateien verlassen nie Ihr Gerät.</p>', h3why: 'Warum PNG in PDF konvertieren?', why: 'PDF ist universell für das Teilen und Archivieren akzeptiert.', faqs: [{ q: 'Kann ich mehrere PNG-Bilder in einem PDF zusammenführen?', a: 'Ja — wählen Sie mehrere Bilder und klicken Sie auf "Alle Bilder in einem PDF".' },{ q: 'Speichern Sie meine Bilder?', a: 'Niemals. Die gesamte Verarbeitung erfolgt lokal.' }], links: [{ href: '/png-to-jpg', label: 'PNG zu JPG' },{ href: '/png-to-webp', label: 'PNG zu WebP' },{ href: '/compress', label: 'Komprimieren' },{ href: '/resize', label: 'Skalieren' }] },
     },
     ar: {
-      'jpg-to-pdf': {
-        h2a: 'كيفية تحويل JPG إلى PDF بدون رفع',
-        steps: ['<strong>اختر صور JPG</strong>.', '<strong>اختر وضع PDF</strong>.', '<strong>انقر على تحويل</strong> — ملف PDF جاهز فوراً.'],
-        h2b: 'أفضل محوّل مجاني JPG إلى PDF بدون رفع',
-        body: '<p>RelahConvert يحوّل JPG إلى PDF بالكامل في متصفحك. ملفاتك لا تغادر جهازك أبداً.</p>',
-        h3why: 'لماذا تحويل JPG إلى PDF؟', why: 'PDF هو تنسيق المستند العالمي — مقبول في كل مكان وسهل المشاركة.',
-        faqs: [{ q: 'هل يمكنني دمج عدة صور JPG في PDF واحد؟', a: 'نعم — اختر عدة صور واختر "جميع الصور في PDF واحد".' }, { q: 'هل تحتفظون بصوري؟', a: 'أبداً. تتم جميع المعالجة محلياً.' }],
-        links: [{ href: '/jpg-to-png', label: 'JPG إلى PNG' }, { href: '/jpg-to-webp', label: 'JPG إلى WebP' }, { href: '/compress', label: 'ضغط' }, { href: '/resize', label: 'تغيير الحجم' }],
-      },
-      'png-to-pdf': {
-        h2a: 'كيفية تحويل PNG إلى PDF بدون رفع',
-        steps: ['<strong>اختر صور PNG</strong>.', '<strong>اختر وضع PDF</strong>.', '<strong>انقر على تحويل</strong> — ملف PDF جاهز فوراً.'],
-        h2b: 'أفضل محوّل مجاني PNG إلى PDF بدون رفع',
-        body: '<p>RelahConvert يحوّل PNG إلى PDF بالكامل في متصفحك. ملفاتك لا تغادر جهازك أبداً.</p>',
-        h3why: 'لماذا تحويل PNG إلى PDF؟', why: 'PDF مقبول عالمياً للمشاركة والأرشفة.',
-        faqs: [{ q: 'هل يمكنني دمج عدة صور PNG في PDF واحد؟', a: 'نعم — اختر عدة صور واختر "جميع الصور في PDF واحد".' }, { q: 'هل تحتفظون بصوري؟', a: 'أبداً. تتم جميع المعالجة محلياً.' }],
-        links: [{ href: '/png-to-jpg', label: 'PNG إلى JPG' }, { href: '/png-to-webp', label: 'PNG إلى WebP' }, { href: '/compress', label: 'ضغط' }, { href: '/resize', label: 'تغيير الحجم' }],
-      },
+      'jpg-to-pdf': { h2a: 'كيفية تحويل JPG إلى PDF بدون رفع', steps: ['<strong>اختر صور JPG</strong>.','<strong>اختر وضع PDF</strong>.','<strong>انقر على تحويل</strong> — ملف PDF جاهز فوراً.'], h2b: 'أفضل محوّل مجاني JPG إلى PDF بدون رفع', body: '<p>RelahConvert يحوّل JPG إلى PDF بالكامل في متصفحك. ملفاتك لا تغادر جهازك أبداً.</p>', h3why: 'لماذا تحويل JPG إلى PDF؟', why: 'PDF هو تنسيق المستند العالمي — مقبول في كل مكان وسهل المشاركة.', faqs: [{ q: 'هل يمكنني دمج عدة صور JPG في PDF واحد؟', a: 'نعم — اختر عدة صور واختر "جميع الصور في PDF واحد".' },{ q: 'هل تحتفظون بصوري؟', a: 'أبداً. تتم جميع المعالجة محلياً.' }], links: [{ href: '/jpg-to-png', label: 'JPG إلى PNG' },{ href: '/jpg-to-webp', label: 'JPG إلى WebP' },{ href: '/compress', label: 'ضغط' },{ href: '/resize', label: 'تغيير الحجم' }] },
+      'png-to-pdf': { h2a: 'كيفية تحويل PNG إلى PDF بدون رفع', steps: ['<strong>اختر صور PNG</strong>.','<strong>اختر وضع PDF</strong>.','<strong>انقر على تحويل</strong> — ملف PDF جاهز فوراً.'], h2b: 'أفضل محوّل مجاني PNG إلى PDF بدون رفع', body: '<p>RelahConvert يحوّل PNG إلى PDF بالكامل في متصفحك. ملفاتك لا تغادر جهازك أبداً.</p>', h3why: 'لماذا تحويل PNG إلى PDF؟', why: 'PDF مقبول عالمياً للمشاركة والأرشفة.', faqs: [{ q: 'هل يمكنني دمج عدة صور PNG في PDF واحد؟', a: 'نعم — اختر عدة صور واختر "جميع الصور في PDF واحد".' },{ q: 'هل تحتفظون بصوري؟', a: 'أبداً. تتم جميع المعالجة محلياً.' }], links: [{ href: '/png-to-jpg', label: 'PNG إلى JPG' },{ href: '/png-to-webp', label: 'PNG إلى WebP' },{ href: '/compress', label: 'ضغط' },{ href: '/resize', label: 'تغيير الحجم' }] },
     },
   }
 
@@ -345,52 +196,18 @@ export function initImageToPdf({ slug: _slug } = {}) {
     const lang = getLang()
     const langSeo = seoPdf[lang] || seoPdf['en']
     const seo = langSeo[slug] || seoPdf['en'][slug]
-    return `
-      <hr class="seo-divider" />
-      <div class="seo-section">
-        <h2>${seo.h2a}</h2>
-        <ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol>
-        <h2>${seo.h2b}</h2>
-        ${seo.body}
-        <h3>${seo.h3why}</h3>
-        <p>${seo.why}</p>
-        <h3>${t.seo_faq_title}</h3>
-        ${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}
-        <h3>${t.seo_also_try}</h3>
-        <div class="internal-links">
-          ${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
-        </div>
-      </div>
-    `
+    return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}</div></div>`
   }
 
-  const pdfTitles = {
-    en: { jpg: 'JPG to PDF', png: 'PNG to PDF' },
-    fr: { jpg: 'JPG en PDF', png: 'PNG en PDF' },
-    es: { jpg: 'JPG a PDF', png: 'PNG a PDF' },
-    pt: { jpg: 'JPG para PDF', png: 'PNG para PDF' },
-    de: { jpg: 'JPG zu PDF', png: 'PNG zu PDF' },
-    ar: { jpg: 'JPG إلى PDF', png: 'PNG إلى PDF' },
-  }
-  const pdfDescs = {
-    en: { jpg: 'Convert JPG images to PDF. Files never leave your device.', png: 'Convert PNG images to PDF. Files never leave your device.' },
-    fr: { jpg: 'Convertissez des images JPG en PDF. Vos fichiers ne quittent jamais votre appareil.', png: 'Convertissez des images PNG en PDF. Vos fichiers ne quittent jamais votre appareil.' },
-    es: { jpg: 'Convierte imágenes JPG a PDF. Los archivos nunca salen de tu dispositivo.', png: 'Convierte imágenes PNG a PDF. Los archivos nunca salen de tu dispositivo.' },
-    pt: { jpg: 'Converta imagens JPG para PDF. Os arquivos nunca saem do seu dispositivo.', png: 'Converta imagens PNG para PDF. Os arquivos nunca saem do seu dispositivo.' },
-    de: { jpg: 'Konvertieren Sie JPG-Bilder in PDF. Ihre Dateien verlassen nie Ihr Gerät.', png: 'Konvertieren Sie PNG-Bilder in PDF. Ihre Dateien verlassen nie Ihr Gerät.' },
-    ar: { jpg: 'حوّل صور JPG إلى PDF. ملفاتك لا تغادر جهازك أبداً.', png: 'حوّل صور PNG إلى PDF. ملفاتك لا تغادر جهازك أبداً.' },
-  }
+  const pdfTitles = { en: { jpg: 'JPG to PDF', png: 'PNG to PDF' }, fr: { jpg: 'JPG en PDF', png: 'PNG en PDF' }, es: { jpg: 'JPG a PDF', png: 'PNG a PDF' }, pt: { jpg: 'JPG para PDF', png: 'PNG para PDF' }, de: { jpg: 'JPG zu PDF', png: 'PNG zu PDF' }, ar: { jpg: 'JPG إلى PDF', png: 'PNG إلى PDF' } }
+  const pdfDescs = { en: { jpg: 'Convert JPG images to PDF. Files never leave your device.', png: 'Convert PNG images to PDF. Files never leave your device.' }, fr: { jpg: 'Convertissez des images JPG en PDF. Vos fichiers ne quittent jamais votre appareil.', png: 'Convertissez des images PNG en PDF. Vos fichiers ne quittent jamais votre appareil.' }, es: { jpg: 'Convierte imágenes JPG a PDF. Los archivos nunca salen de tu dispositivo.', png: 'Convierte imágenes PNG a PDF. Los archivos nunca salen de tu dispositivo.' }, pt: { jpg: 'Converta imagens JPG para PDF. Os arquivos nunca saem do seu dispositivo.', png: 'Converta imagens PNG para PDF. Os arquivos nunca saem do seu dispositivo.' }, de: { jpg: 'Konvertieren Sie JPG-Bilder in PDF. Ihre Dateien verlassen nie Ihr Gerät.', png: 'Konvertieren Sie PNG-Bilder in PDF. Ihre Dateien verlassen nie Ihr Gerät.' }, ar: { jpg: 'حوّل صور JPG إلى PDF. ملفاتك لا تغادر جهازك أبداً.', png: 'حوّل صور PNG إلى PDF. ملفاتك لا تغادر جهازك أبداً.' } }
   const _lang = getLang()
   const _key = isPng ? 'png' : 'jpg'
   const _titleText = (pdfTitles[_lang] || pdfTitles['en'])[_key]
   const toolDesc = (pdfDescs[_lang] || pdfDescs['en'])[_key]
-
   const titleWords = _titleText.split(' ')
   const titleHTML = titleWords.slice(0, -1).join(' ') + ` <em style="font-style:italic; color:#C84B31;">${titleWords[titleWords.length - 1]}</em>`
 
-  // ─────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────
   document.querySelector('#app').innerHTML = `
     <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
       <div style="margin-bottom:20px;">
@@ -406,41 +223,25 @@ export function initImageToPdf({ slug: _slug } = {}) {
       <input type="file" id="fileInput" multiple accept="${inputMime === 'image/jpeg' ? 'image/jpeg' : 'image/png'}" style="display:none;" />
       <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
       <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
-
       <div class="settings-panel">
         <div class="settings-label">${t.pdf_options}</div>
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_mode_label ?? 'Pages'}</div>
-          <div class="seg-group">
-            <button class="seg-btn active" id="modeOne">${t.pdf_mode_one}</button>
-            <button class="seg-btn" id="modeAll">${t.pdf_mode_all}</button>
-          </div>
+          <div class="seg-group"><button class="seg-btn active" id="modeOne">${t.pdf_mode_one}</button><button class="seg-btn" id="modeAll">${t.pdf_mode_all}</button></div>
         </div>
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_orientation ?? 'Orientation'}</div>
-          <div class="seg-group" id="orientGroup">
-            <button class="seg-btn active" data-val="portrait">${t.pdf_portrait ?? 'Portrait'}</button>
-            <button class="seg-btn" data-val="landscape">${t.pdf_landscape ?? 'Landscape'}</button>
-          </div>
+          <div class="seg-group" id="orientGroup"><button class="seg-btn active" data-val="portrait">${t.pdf_portrait ?? 'Portrait'}</button><button class="seg-btn" data-val="landscape">${t.pdf_landscape ?? 'Landscape'}</button></div>
         </div>
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_size ?? 'Page size'}</div>
-          <div class="seg-group" id="sizeGroup">
-            <button class="seg-btn active" data-val="fit">${t.pdf_size_fit ?? 'Fit'}</button>
-            <button class="seg-btn" data-val="a4">A4</button>
-            <button class="seg-btn" data-val="letter">${t.pdf_size_letter ?? 'Letter'}</button>
-          </div>
+          <div class="seg-group" id="sizeGroup"><button class="seg-btn active" data-val="fit">${t.pdf_size_fit ?? 'Fit'}</button><button class="seg-btn" data-val="a4">A4</button><button class="seg-btn" data-val="letter">${t.pdf_size_letter ?? 'Letter'}</button></div>
         </div>
         <div class="settings-row">
           <div class="settings-row-label" style="font-size:11px; color:#9A8A7A;">${t.pdf_margin ?? 'Margin'}</div>
-          <div class="seg-group" id="marginGroup">
-            <button class="seg-btn active" data-val="none">${t.pdf_margin_none ?? 'None'}</button>
-            <button class="seg-btn" data-val="small">${t.pdf_margin_small ?? 'Small'}</button>
-            <button class="seg-btn" data-val="big">${t.pdf_margin_big ?? 'Big'}</button>
-          </div>
+          <div class="seg-group" id="marginGroup"><button class="seg-btn active" data-val="none">${t.pdf_margin_none ?? 'None'}</button><button class="seg-btn" data-val="small">${t.pdf_margin_small ?? 'Small'}</button><button class="seg-btn" data-val="big">${t.pdf_margin_big ?? 'Big'}</button></div>
         </div>
       </div>
-
       <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.pdf_btn}</button>
       <div id="downloadArea" style="display:none; flex-direction:column; gap:8px;"></div>
     </div>
@@ -508,9 +309,8 @@ export function initImageToPdf({ slug: _slug } = {}) {
     const tooBig = incoming.filter(f => f.type === inputMime && f.size > LIMITS.MAX_PER_FILE_BYTES)
     if (wrong.length)  showWarning(`${t.warn_wrong_fmt_tool} ${inputLabel} ${t.warn_files} ${wrong.length} ${t.warn_wrong_format}`)
     if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
-    const map = new Map()
-    for (const f of [...selectedFiles, ...valid]) map.set(fileKey(f), f)
-    let merged = Array.from(map.values())
+    // Allow duplicates — just append, no deduplication
+    let merged = [...selectedFiles, ...valid]
     if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
     while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
     selectedFiles = merged
@@ -519,6 +319,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
     if (selectedFiles.length) setIdle(); else setDisabled()
   }
 
+  // ── FIXED: reset input so same file can be re-selected ──
   fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])); fileInput.value = '' })
   document.addEventListener('dragover', e => e.preventDefault())
   document.addEventListener('drop', e => { e.preventDefault(); validateAndAdd(Array.from(e.dataTransfer.files || [])) })
