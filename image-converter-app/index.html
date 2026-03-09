@@ -213,33 +213,40 @@
             ${t.nav_short[slug] || slug}
           </a>`
         }).join('')
+      // Helper: get translated desc — uses card_*_desc if exists, else seo block h2a, else fallback
+      function cardDesc(slug, fallback) {
+        const key = 'card_' + slug.replace(/-/g,'_') + '_desc'
+        if (t[key]) return t[key]
+        if (t.seo && t.seo[slug] && t.seo[slug].h2a) return t.seo[slug].h2a
+        return fallback
+      }
       const cardData = [
-        { href: '/compress',    title: t.nav_short['compress'],    desc: t.card_compress_desc },
-        { href: '/resize',      title: t.nav_short['resize'],      desc: t.card_resize_desc },
-        { href: '/jpg-to-png',  title: t.nav_short['jpg-to-png'],  desc: t.card_jpg_png_desc },
-        { href: '/png-to-jpg',  title: t.nav_short['png-to-jpg'],  desc: t.card_png_jpg_desc },
-        { href: '/jpg-to-webp', title: t.nav_short['jpg-to-webp'], desc: t.card_jpg_webp_desc },
-        { href: '/webp-to-jpg', title: t.nav_short['webp-to-jpg'], desc: t.card_webp_jpg_desc },
-        { href: '/png-to-webp', title: t.nav_short['png-to-webp'], desc: t.card_png_webp_desc },
-        { href: '/webp-to-png', title: t.nav_short['webp-to-png'], desc: t.card_webp_png_desc },
-        { href: '/jpg-to-pdf',  title: t.nav_short['jpg-to-pdf'],  desc: t.card_jpg_pdf_desc },
-        { href: '/png-to-pdf',  title: t.nav_short['png-to-pdf'],  desc: t.card_png_pdf_desc },
-        { href: '/gif-to-jpg',  title: t.nav_short['gif-to-jpg']  || 'GIF to JPG',  desc: 'Convert GIF to JPG free. No upload required.' },
-        { href: '/gif-to-png',  title: t.nav_short['gif-to-png']  || 'GIF to PNG',  desc: 'Convert GIF to PNG free. No upload required.' },
-        { href: '/bmp-to-jpg',  title: t.nav_short['bmp-to-jpg']  || 'BMP to JPG',  desc: 'Convert BMP to JPG free. No upload required.' },
-        { href: '/bmp-to-png',  title: t.nav_short['bmp-to-png']  || 'BMP to PNG',  desc: 'Convert BMP to PNG free. No upload required.' },
-        { href: '/tiff-to-jpg', title: t.nav_short['tiff-to-jpg'] || 'TIFF to JPG', desc: 'Convert TIFF to JPG free. No upload required.' },
-        { href: '/jpg-to-gif',  title: t.nav_short['jpg-to-gif']  || 'JPG to GIF',  desc: 'Convert JPG to GIF free. No upload required.' },
-        { href: '/png-to-gif',  title: t.nav_short['png-to-gif']  || 'PNG to GIF',  desc: 'Convert PNG to GIF free. No upload required.' },
-        { href: '/crop',       title: 'Crop Image',              desc: 'Crop any image free. Drag to select area. No upload required.' },
-        { href: '/rotate',     title: 'Rotate Image',            desc: 'Rotate any image 90°, 180° or 270° free. No upload required.' },
-        { href: '/flip',       title: 'Flip Image',              desc: 'Flip any image horizontally or vertically free. No upload required.' },
-        { href: '/grayscale',  title: 'Convert to Grayscale',    desc: 'Remove color from any image instantly. No upload required.' },
-        { href: '/watermark',  title: 'Add Watermark',           desc: 'Add text watermark to any image free. No upload required.' },
-        { href: '/remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: 'Remove image background instantly. AI-powered. No upload required.' },
-        { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']       || 'HEIC to JPG',       desc: 'Convert iPhone HEIC photos to JPG free. Batch supported. No upload.' },
-        { href: '/image-to-ico',      title: t.nav_short['image-to-ico']      || 'Image to ICO',      desc: 'Convert any image to ICO favicon. Multi-size. No upload required.' },
-        { href: '/jpg-to-svg',        title: t.nav_short['jpg-to-svg']        || 'JPG to SVG',        desc: 'Wrap any image in SVG format free. No upload required.' },
+        { href: '/compress',          title: t.nav_short['compress'],                       desc: cardDesc('compress',          'Reduce image file size free.') },
+        { href: '/resize',            title: t.nav_short['resize'],                         desc: cardDesc('resize',            'Resize images free.') },
+        { href: '/jpg-to-png',        title: t.nav_short['jpg-to-png'],                     desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.') },
+        { href: '/png-to-jpg',        title: t.nav_short['png-to-jpg'],                     desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.') },
+        { href: '/jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                    desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.') },
+        { href: '/webp-to-jpg',       title: t.nav_short['webp-to-jpg'],                    desc: cardDesc('webp_to_jpg',       'Convert WebP to JPG free.') },
+        { href: '/png-to-webp',       title: t.nav_short['png-to-webp'],                    desc: cardDesc('png_to_webp',       'Convert PNG to WebP free.') },
+        { href: '/webp-to-png',       title: t.nav_short['webp-to-png'],                    desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.') },
+        { href: '/jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                     desc: cardDesc('jpg_to_pdf',        'Convert JPG to PDF free.') },
+        { href: '/png-to-pdf',        title: t.nav_short['png-to-pdf'],                     desc: cardDesc('png_to_pdf',        'Convert PNG to PDF free.') },
+        { href: '/gif-to-jpg',        title: t.nav_short['gif-to-jpg']  || 'GIF to JPG',   desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.') },
+        { href: '/gif-to-png',        title: t.nav_short['gif-to-png']  || 'GIF to PNG',   desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.') },
+        { href: '/bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']  || 'BMP to JPG',   desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.') },
+        { href: '/bmp-to-png',        title: t.nav_short['bmp-to-png']  || 'BMP to PNG',   desc: cardDesc('bmp-to-png',        'Convert BMP to PNG free.') },
+        { href: '/tiff-to-jpg',       title: t.nav_short['tiff-to-jpg'] || 'TIFF to JPG',  desc: cardDesc('tiff-to-jpg',       'Convert TIFF to JPG free.') },
+        { href: '/jpg-to-gif',        title: t.nav_short['jpg-to-gif']  || 'JPG to GIF',   desc: cardDesc('jpg-to-gif',        'Convert JPG to GIF free.') },
+        { href: '/png-to-gif',        title: t.nav_short['png-to-gif']  || 'PNG to GIF',   desc: cardDesc('png-to-gif',        'Convert PNG to GIF free.') },
+        { href: '/crop',              title: t.nav_short['crop']        || 'Crop Image',    desc: cardDesc('crop',              'Crop any image free.') },
+        { href: '/rotate',            title: t.nav_short['rotate']      || 'Rotate Image',  desc: cardDesc('rotate',            'Rotate any image free.') },
+        { href: '/flip',              title: t.nav_short['flip']        || 'Flip Image',    desc: cardDesc('flip',              'Flip any image free.') },
+        { href: '/grayscale',         title: t.nav_short['grayscale']   || 'Grayscale',     desc: cardDesc('grayscale',         'Convert image to black & white free.') },
+        { href: '/watermark',         title: t.nav_short['watermark']   || 'Add Watermark', desc: cardDesc('watermark',         'Add watermark to any image free.') },
+        { href: '/remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: cardDesc('remove-background', 'Remove image background free. AI-powered.') },
+        { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']       || 'HEIC to JPG',       desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.') },
+        { href: '/image-to-ico',      title: t.nav_short['image-to-ico']      || 'Image to ICO',      desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.') },
+        { href: '/jpg-to-svg',        title: t.nav_short['jpg-to-svg']        || 'JPG to SVG',        desc: cardDesc('jpg-to-svg',        'Convert JPG to SVG free.') },
       ]
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
         const slug = c.href.replace('/', '')
