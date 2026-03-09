@@ -7,7 +7,7 @@ const slug = 'png-to-gif'
 const inputMime = 'image/png'
 const toolName = (t.nav_short && t.nav_short[slug]) || 'PNG to GIF'
 const seoData  = t.seo && t.seo[slug]
-const descText = seoData ? seoData.h2a : 'Convert JPG images to GIF free. No upload required.'
+const descText = seoData ? seoData.h2a : 'Convert PNG images to GIF free. No upload required.'
 const selectLbl = t.select_images || 'Select Images'
 const dropHint  = t.drop_hint    || 'or drop images anywhere'
 const dlBtn     = t.download     || 'Download'
@@ -216,13 +216,16 @@ function renderGrid() {
 
 function addFiles(incoming) {
   const valid = Array.from(incoming).filter(f =>
-    f.type === 'image/jpeg' || f.name.toLowerCase().match(/\.jpe?g$/)
+    f.type === 'image/png' || f.name.toLowerCase().endsWith('.png')
   ).slice(0, 25 - files.length)
   files.push(...valid)
   renderGrid()
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files) })
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) addFiles(fileInput.files)
+  fileInput.value = ''
+})
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
