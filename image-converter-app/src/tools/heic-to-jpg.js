@@ -62,9 +62,13 @@ document.querySelector('#app').innerHTML = `
     <input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple style="display:none;" />
     <div id="fileGrid" class="file-grid"></div>
     <button class="opt-btn" id="convertBtn" disabled>Convert to JPG</button>
-    <div id="dlList" class="dl-list" style="display:none;"></div>
+    <div id="singleDl" style="display:none;margin-bottom:10px;"></div>
     <div id="zipWrap" style="display:none;margin-bottom:10px;">
       <a id="zipBtn" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:#2C1810;color:#F5F0E8;">⬇ ${dlZipBtn}</a>
+    </div>
+    <div id="nextSteps" style="display:none;margin-top:20px;">
+      <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">What's Next?</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
     </div>
   </div>
 `
@@ -74,7 +78,7 @@ injectHeader()
 const fileInput  = document.getElementById('fileInput')
 const fileGrid   = document.getElementById('fileGrid')
 const convertBtn = document.getElementById('convertBtn')
-const dlList     = document.getElementById('dlList')
+const singleDl   = document.getElementById('singleDl')
 const zipWrap    = document.getElementById('zipWrap')
 const zipBtn     = document.getElementById('zipBtn')
 
@@ -130,8 +134,9 @@ convertBtn.addEventListener('click', async () => {
   if (!files.length) return
   convertBtn.disabled = true
   results = []
-  dlList.style.display = 'none'; dlList.innerHTML = ''
+  singleDl.style.display = 'none'; singleDl.innerHTML = ''
   zipWrap.style.display = 'none'
+  document.getElementById('nextSteps').style.display = 'none'
 
   const heic2any = await loadHeic2any()
   const usedNames = new Set()
@@ -162,14 +167,13 @@ convertBtn.addEventListener('click', async () => {
     }
   }
 
-  dlList.innerHTML = results.map(r => `
-    <div class="dl-item">
-      <a href="${r.url}" download="${r.name}" onclick="setTimeout(()=>URL.revokeObjectURL(this.href),10000)">${dlBtn}: ${r.name}</a>
-      <span>${Math.round(r.size / 1024)} KB</span>
-    </div>`).join('')
-  dlList.style.display = 'block'
-
-  if (results.length > 1) {
+  if (results.length === 1) {
+    // Single file — just a download button
+    const r = results[0]
+    singleDl.innerHTML = `<a href="${r.url}" download="${r.name}" onclick="setTimeout(()=>URL.revokeObjectURL(this.href),10000)" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:#2C1810;color:#F5F0E8;">⬇ ${dlBtn} (${Math.round(r.size / 1024)} KB)</a>`
+    singleDl.style.display = 'block'
+  } else if (results.length > 1) {
+    // Multiple files — ZIP only
     try {
       const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
       const JSZip = mod.default || window.JSZip
@@ -179,13 +183,68 @@ convertBtn.addEventListener('click', async () => {
       const zipUrl = URL.createObjectURL(zipBlob)
       zipBtn.href = zipUrl
       zipBtn.download = 'heic-to-jpg.zip'
+      zipBtn.textContent = `⬇ ${dlZipBtn} (${Math.round(zipBlob.size / 1024)} KB)`
       zipBtn.onclick = () => setTimeout(() => URL.revokeObjectURL(zipUrl), 10000)
       zipWrap.style.display = 'block'
     } catch(e) { console.warn('ZIP failed', e) }
   }
 
+  buildNextSteps()
   convertBtn.disabled = false
 })
+
+// ── IDB helpers ───────────────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  store.clear()
+  items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+  return new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject })
+}
+
+// ── What's Next ───────────────────────────────────────────────────────────────
+function buildNextSteps() {
+  const buttons = [
+    { label: 'Compress',     href: '/compress' },
+    { label: 'Resize',       href: '/resize' },
+    { label: 'Crop',         href: '/crop' },
+    { label: 'Rotate',       href: '/rotate' },
+    { label: 'Flip',         href: '/flip' },
+    { label: 'Black & White', href: '/grayscale' },
+    { label: 'Watermark',    href: '/watermark' },
+    { label: 'Convert to PNG',  href: '/jpg-to-png' },
+    { label: 'Convert to WebP', href: '/jpg-to-webp' },
+  ]
+  const container = document.getElementById('nextStepsButtons')
+  container.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.textContent = b.label
+    btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:500;color:#2C1810;background:#fff;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;'
+    btn.onmouseover = () => { btn.style.borderColor='#C84B31'; btn.style.color='#C84B31' }
+    btn.onmouseout  = () => { btn.style.borderColor='#DDD5C8'; btn.style.color='#2C1810' }
+    btn.addEventListener('click', async () => {
+      if (results.length) {
+        try {
+          await saveFilesToIDB(results.map(r => ({ blob: r.blob, name: r.name, type: 'image/jpeg' })))
+          sessionStorage.setItem('pendingFromIDB', '1')
+        } catch(e) {}
+      }
+      window.location.href = b.href
+    })
+    container.appendChild(btn)
+  })
+  document.getElementById('nextSteps').style.display = 'block'
+}
 
 ;(function injectSEO() {
   const seo = t.seo && t.seo['heic-to-jpg']

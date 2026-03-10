@@ -117,6 +117,10 @@ document.querySelector('#app').innerHTML = `
     <a id="downloadLink" class="main-btn dark-btn" style="display:none;text-align:center;text-decoration:none;"></a>
     <button class="main-btn dark-btn" id="zipBtn" style="display:none;">⬇ ${dlZipBtn}</button>
     <p id="statusNote" style="font-size:12px;color:#9A8A7A;text-align:center;margin:4px 0 0;font-family:'DM Sans',sans-serif;min-height:16px;"></p>
+    <div id="nextSteps" style="display:none;margin-top:20px;">
+      <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">What's Next?</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -316,6 +320,7 @@ convertBtn.addEventListener('click', async () => {
       statusNote.textContent = 'Encoding animated GIF…'
       const blob = animatedGifFromCanvases(canvases, delayMs, loopOn)
       const url = URL.createObjectURL(blob)
+      lastResults = [{ blob, name: 'animated.gif', type: 'image/gif' }]
       // Show preview
       previewGif.src = url
       animatedPreview.style.display = 'block'
@@ -325,7 +330,7 @@ convertBtn.addEventListener('click', async () => {
       downloadLink.download = 'animated.gif'
       downloadLink.textContent = `⬇ ${dlBtn} animated.gif (${Math.round(blob.size / 1024)} KB)`
       downloadLink.style.display = 'block'
-      statusNote.textContent = `${files.length} frames · ${Math.round(blob.size / 1024)} KB`
+      statusNote.textContent = ''
 
     } else {
       // ── Static GIF(s) ──
@@ -335,11 +340,13 @@ convertBtn.addEventListener('click', async () => {
         const blob = staticGifFromCanvas(canvas)
         const url = URL.createObjectURL(blob)
         const base = files[0].name.replace(/\.[^.]+$/, '')
+        lastResults = [{ blob, name: `${base}.gif`, type: 'image/gif' }]
         downloadLink.href = url
         downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
         downloadLink.download = `${base}.gif`
         downloadLink.textContent = `⬇ ${dlBtn} (${Math.round(blob.size / 1024)} KB)`
         downloadLink.style.display = 'block'
+        statusNote.textContent = ''
       } else {
         // Multiple static GIFs → ZIP
         const blobs = []
@@ -359,13 +366,14 @@ convertBtn.addEventListener('click', async () => {
             document.head.appendChild(s)
           })
         }
+        lastResults = blobs.map(b => ({ blob: b.blob, name: b.name, type: 'image/gif' }))
         const zip = new window.JSZip()
         for (const { name, blob } of blobs) zip.file(name, await blob.arrayBuffer())
         const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
         const zipUrl = URL.createObjectURL(zipBlob)
         zipBtn._url = zipUrl
         zipBtn.style.display = 'block'
-        statusNote.textContent = `${files.length} GIFs ready — ${Math.round(zipBlob.size / 1024)} KB total`
+        statusNote.textContent = ''
         zipBtn.addEventListener('click', () => {
           const a = document.createElement('a')
           a.href = zipBtn._url; a.download = 'converted-gif.zip'; a.click()
@@ -374,6 +382,7 @@ convertBtn.addEventListener('click', async () => {
       }
       statusNote.textContent = statusNote.textContent || 'Done!'
     }
+    buildNextSteps()
 
   } catch (err) {
     alert('Error: ' + (err?.message || err))
@@ -382,6 +391,59 @@ convertBtn.addEventListener('click', async () => {
   convertBtn.disabled = false
   convertBtn.textContent = 'Convert to GIF'
 })
+
+// ── IDB helpers ───────────────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  store.clear()
+  items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+  return new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject })
+}
+
+// ── What's Next ───────────────────────────────────────────────────────────────
+let lastResults = []
+
+function buildNextSteps() {
+  const buttons = [
+    { label: 'Compress', href: '/compress' },
+    { label: 'Resize',   href: '/resize' },
+    { label: 'Crop',     href: '/crop' },
+    { label: 'Rotate',   href: '/rotate' },
+    { label: 'Flip',     href: '/flip' },
+    { label: 'Black & White', href: '/grayscale' },
+    { label: 'Watermark', href: '/watermark' },
+    { label: 'Convert to JPG',  href: '/png-to-jpg' },
+    { label: 'Convert to PNG',  href: '/jpg-to-png' },
+    { label: 'Convert to WebP', href: '/jpg-to-webp' },
+  ]
+  const container = document.getElementById('nextStepsButtons')
+  container.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.textContent = b.label
+    btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:500;color:#2C1810;background:#fff;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;'
+    btn.onmouseover = () => { btn.style.borderColor='#C84B31'; btn.style.color='#C84B31' }
+    btn.onmouseout  = () => { btn.style.borderColor='#DDD5C8'; btn.style.color='#2C1810' }
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {}
+      }
+      window.location.href = b.href
+    })
+    container.appendChild(btn)
+  })
+  document.getElementById('nextSteps').style.display = 'block'
+}
 
 // ── SEO ───────────────────────────────────────────────────────────────────────
 ;(function injectSEO() {
