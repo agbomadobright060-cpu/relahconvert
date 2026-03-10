@@ -111,6 +111,10 @@ document.querySelector('#app').innerHTML = `
     <button class="remove-all-btn" id="removeAllBtn" style="display:none;">⚡ Remove All Backgrounds</button>
     <button class="zip-btn" id="zipBtn">${dlZipBtn}</button>
     <button class="new-btn" id="newBtn">+ Add more images</button>
+    <div id="nextSteps" style="display:none;margin-top:20px;">
+      <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">What's Next?</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -235,6 +239,7 @@ async function startProcessing(entry) {
     if (entries[currentIdx] === entry) { procBar.style.width = '30%'; procLabel.textContent = 'Removing background…' }
     const blob = await removeBackgroundFn(entry.file, {
       model: 'small',
+      cacheMode: 'cache-first',
       progress: (key, cur, tot) => {
         if (tot > 0 && entries[currentIdx] === entry) procBar.style.width = (30 + Math.round((cur / tot) * 60)) + '%'
       },
@@ -262,6 +267,7 @@ async function startProcessing(entry) {
       statusText.textContent = 'Done — drag slider to adjust, then download.'
       const doneCount = entries.filter(e => e.resultBlob).length
       zipBtn.style.display = doneCount > 1 ? 'block' : 'none'
+      buildNextSteps()
     }
   } catch(err) {
     entry.processing = false
@@ -291,7 +297,9 @@ function addFiles(newFiles) {
   for (const file of fileArr) {
     const entry = { file, origData: null, maskData: null, resultBlob: null, sliderValue: 100, processing: false, thumbEl: null, badgeEl: null }
     const img = new Image()
+    const _imgUrl = URL.createObjectURL(file)
     img.onload = () => {
+      URL.revokeObjectURL(_imgUrl)
       const off = document.createElement('canvas')
       off.width = img.naturalWidth; off.height = img.naturalHeight
       off.getContext('2d').drawImage(img, 0, 0)
@@ -301,8 +309,6 @@ function addFiles(newFiles) {
         canvas.getContext('2d').putImageData(entry.origData, 0, 0)
       }
     }
-    const _imgUrl = URL.createObjectURL(file)
-    img.onload = () => { URL.revokeObjectURL(_imgUrl) }
     img.src = _imgUrl
     const thumbItem = document.createElement('div')
     thumbItem.className = 'thumb-item'
@@ -387,7 +393,62 @@ removeAllBtn.addEventListener('click', async () => {
   removeAllBtn.textContent = `✓ All ${entries.length} done`
   removeAllBtn.disabled = false
   zipBtn.style.display = 'block'
+  buildNextSteps()
 })
+
+// ── IDB helpers ───────────────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  store.clear()
+  items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+  return new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject })
+}
+
+// ── What's Next ───────────────────────────────────────────────────────────────
+function buildNextSteps() {
+  const buttons = [
+    { label: 'Compress',      href: '/compress' },
+    { label: 'Resize',        href: '/resize' },
+    { label: 'Crop',          href: '/crop' },
+    { label: 'Rotate',        href: '/rotate' },
+    { label: 'Flip',          href: '/flip' },
+    { label: 'Black & White', href: '/grayscale' },
+    { label: 'Watermark',     href: '/watermark' },
+    { label: 'Convert to JPG',  href: '/png-to-jpg' },
+    { label: 'Convert to WebP', href: '/png-to-webp' },
+  ]
+  const container = document.getElementById('nextStepsButtons')
+  container.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.textContent = b.label
+    btn.style.cssText = "padding:8px 16px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:500;color:#2C1810;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;"
+    btn.onmouseover = () => { btn.style.borderColor='#C84B31'; btn.style.color='#C84B31' }
+    btn.onmouseout  = () => { btn.style.borderColor='#DDD5C8'; btn.style.color='#2C1810' }
+    btn.addEventListener('click', async () => {
+      const done = entries.filter(e => e.resultBlob)
+      if (done.length) {
+        try {
+          await saveFilesToIDB(done.map(e => ({ blob: e.resultBlob, name: e.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png', type: 'image/png' })))
+          sessionStorage.setItem('pendingFromIDB', '1')
+        } catch(e) {}
+      }
+      window.location.href = b.href
+    })
+    container.appendChild(btn)
+  })
+  document.getElementById('nextSteps').style.display = 'block'
+}
 
 ;(function injectSEO() {
   const seo = t.seo && t.seo['remove-background']
