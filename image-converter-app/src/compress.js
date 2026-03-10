@@ -349,7 +349,7 @@ compressBtn.addEventListener('click', async () => {
         compressedBlobs.push({ blob, name: safeName, type })
         zip.file(safeName, blob)
       }
-      const zipBlob = await zip.generateAsync({ type: 'blob' })
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
       currentDownloadUrl = URL.createObjectURL(zipBlob)
       downloadLink.href = currentDownloadUrl; downloadLink.download = 'compressed-images.zip'; downloadLink.style.display = 'block'
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`

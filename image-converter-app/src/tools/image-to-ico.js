@@ -85,6 +85,7 @@ const convertBtn   = document.getElementById('convertBtn')
 const downloadLink = document.getElementById('downloadLink')
 const icoPreviews  = document.getElementById('icoPreviews')
 let loadedImg = null
+let currentPreviewUrl = null
 
 document.getElementById('sizeGrid').addEventListener('click', e => {
   const btn = e.target.closest('.size-btn')
@@ -107,7 +108,9 @@ function renderPreviews() {
 
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
+  if (currentPreviewUrl) URL.revokeObjectURL(currentPreviewUrl)
   const url = URL.createObjectURL(file)
+  currentPreviewUrl = url
   const img = new Image()
   img.onload = () => {
     loadedImg = img; previewImg.src = url
@@ -162,10 +165,14 @@ convertBtn.addEventListener('click', () => {
     return c
   })
   const blob = buildIco(canvases)
+  // Revoke previous download URL
+  if (downloadLink.href && downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href)
   const url = URL.createObjectURL(blob)
-  downloadLink.href = url; downloadLink.download = 'favicon.ico'
+  downloadLink.href = url
+  downloadLink.download = 'favicon.ico'
   downloadLink.textContent = `${dlBtn} favicon.ico (${sorted.join(', ')}px)`
   downloadLink.style.display = 'block'
+  downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
 })
 
 ;(function injectSEO() {

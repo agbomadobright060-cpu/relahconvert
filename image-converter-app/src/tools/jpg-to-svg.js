@@ -111,7 +111,9 @@ function addFiles(newFiles) {
     const card = document.createElement('div')
     card.className = 'file-card'
     const img = document.createElement('img')
-    img.src = URL.createObjectURL(file)
+    const _purl = URL.createObjectURL(file)
+    img.onload = () => URL.revokeObjectURL(_purl)
+    img.src = _purl
     const fname = document.createElement('div')
     fname.className = 'fname'; fname.textContent = file.name
     const dlLink = document.createElement('a')
@@ -165,7 +167,7 @@ convertBtn.addEventListener('click', async () => {
     const rawName = f.file.name.replace(/\.[^.]+$/, '') + '.svg'
     const safeName = makeUnique(usedNames, rawName)
     const url = URL.createObjectURL(blob)
-    f.dlLink.href = url; f.dlLink.download = safeName; f.dlLink.style.display = 'block'
+    f.dlLink.href = url; f.dlLink.download = safeName; f.dlLink.style.display = 'block'; f.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
     results.push({ name: safeName, blob })
   }
   convertBtn.disabled = false
@@ -182,9 +184,9 @@ zipBtn.addEventListener('click', async () => {
     const JSZip = mod.default || window.JSZip
     const zip = new JSZip()
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
-    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(zipBlob); a.download = 'svg-files.zip'; a.click()
+    a.href = URL.createObjectURL(zipBlob); a.download = 'svg-files.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })

@@ -449,7 +449,9 @@ function loadFiles(files) {
         renderFileChips(); renderPreview()
       }
     }
-    img.src = URL.createObjectURL(file)
+    const _lurl = URL.createObjectURL(file)
+    img.onload = () => { URL.revokeObjectURL(_lurl); }
+    img.src = _lurl
   })
 }
 
@@ -475,7 +477,7 @@ applyBtn.addEventListener('click', async () => {
     const blob = await canvasToBlob(canvas, mime, 0.92)
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = `watermarked.${ext}`; a.click()
+    a.href = url; a.download = `watermarked.${ext}`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000)
     applyBtn.disabled = false; applyBtn.textContent = dlBtn
     return
   }
@@ -503,7 +505,7 @@ applyBtn.addEventListener('click', async () => {
     zip.file(safeName, await blob.arrayBuffer())
   }
 
-  const zipBlob = await zip.generateAsync({ type: 'blob' })
+  const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
   const url = URL.createObjectURL(zipBlob)
   const zipBtn = document.getElementById('zipBtn')
   zipBtn.href = url; zipBtn.download = 'watermarked-images.zip'

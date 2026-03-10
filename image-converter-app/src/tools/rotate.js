@@ -107,7 +107,9 @@ function addFiles(newFiles) {
     const imgWrap = document.createElement('div')
     imgWrap.className = 'card-img-wrap'
     const img = document.createElement('img')
-    img.src = URL.createObjectURL(file)
+    const _purl = URL.createObjectURL(file)
+    img.onload = () => URL.revokeObjectURL(_purl)
+    img.src = _purl
     entry.img = img
     const rotBtn = document.createElement('button')
     rotBtn.className = 'card-rot-btn'
@@ -192,6 +194,7 @@ applyBtn.addEventListener('click', async () => {
       entry.dlLink.href = url
       entry.dlLink.download = safeName
       entry.dlLink.style.display = 'block'
+      entry.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       const ab = await entry.file.arrayBuffer()
       results.push({ name: safeName, blob: new Blob([ab], { type: entry.file.type }) })
     } else {
@@ -202,6 +205,7 @@ applyBtn.addEventListener('click', async () => {
       entry.dlLink.href = url
       entry.dlLink.download = safeName
       entry.dlLink.style.display = 'block'
+      entry.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       results.push({ name: safeName, blob })
     }
   }
@@ -221,11 +225,12 @@ zipBtn.addEventListener('click', async () => {
     const JSZip = mod.default || window.JSZip
     const zip = new JSZip()
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
-    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob)
     a.download = 'rotated-images.zip'
     a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn
   zipBtn.disabled = false

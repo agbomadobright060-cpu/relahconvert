@@ -13,7 +13,6 @@ const dlZipBtn  = t.download_zip || 'Download ZIP'
 const parts     = toolName.split(' ')
 const h1Main    = parts[0]
 const h1Em      = parts.slice(1).join(' ')
-
 const bg = '#F2F2F2'
 
 if (document.head) {
@@ -122,7 +121,7 @@ function renderGrid() {
       <div class="card-imgs">
         <div>
           <div class="card-label">Original</div>
-          <img src="${item.originalUrl}" />
+          <img src="${item.originalUrl}" onload="URL.revokeObjectURL(this.src)" />
         </div>
         <div>
           <div class="card-label">B&W</div>
@@ -155,8 +154,9 @@ function loadFiles(newFiles) {
     const url = URL.createObjectURL(file)
     img.onload = () => {
       const grayCanvas = applyGrayscale(img)
+      URL.revokeObjectURL(url)
       grayCanvas.style.cssText = 'width:100%; height:80px; object-fit:cover; display:block;'
-      files.push({ file, originalUrl: url, grayCanvas })
+      files.push({ file, originalUrl: URL.createObjectURL(file), grayCanvas })
       loaded++
       if (loaded === toAdd.length) {
         renderGrid()
@@ -168,7 +168,7 @@ function loadFiles(newFiles) {
   })
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFiles(fileInput.files) })
+fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) loadFiles(e.dataTransfer.files) })
 
@@ -178,29 +178,31 @@ applyBtn.addEventListener('click', async () => {
   applyBtn.textContent = 'Processing...'
   zipWrap.style.display = 'none'
 
-  // Single file — direct download, no ZIP
   if (files.length === 1) {
     const item = files[0]
     const img = new Image()
+    const srcUrl = URL.createObjectURL(item.file)
     img.onload = () => {
+      URL.revokeObjectURL(srcUrl)
       const canvas = applyGrayscale(img)
       const mime = item.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
       const ext  = mime === 'image/png' ? 'png' : 'jpg'
       const baseName = item.file.name.replace(/\.[^.]+$/, '')
       canvas.toBlob(blob => {
         const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
+        const url = URL.createObjectURL(blob)
+        a.href = url
         a.download = `grayscale-${baseName}.${ext}`
         a.click()
+        setTimeout(() => URL.revokeObjectURL(url), 10000)
         applyBtn.disabled = false
         applyBtn.textContent = dlBtn
       }, mime, 0.92)
     }
-    img.src = item.originalUrl
+    img.src = srcUrl
     return
   }
 
-  // Multiple files — ZIP
   if (!window.JSZip) {
     await new Promise((res, rej) => {
       const s = document.createElement('script')
@@ -214,7 +216,9 @@ applyBtn.addEventListener('click', async () => {
   let done = 0
   files.forEach(item => {
     const img = new Image()
+    const srcUrl = URL.createObjectURL(item.file)
     img.onload = () => {
+      URL.revokeObjectURL(srcUrl)
       const canvas = applyGrayscale(img)
       const mime = item.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
       const ext  = mime === 'image/png' ? 'png' : 'jpg'
@@ -223,11 +227,12 @@ applyBtn.addEventListener('click', async () => {
         zip.file(`grayscale-${baseName}.${ext}`, blob)
         done++
         if (done === files.length) {
-          zip.generateAsync({ type: 'blob' }).then(zipBlob => {
+          zip.generateAsync({ type: 'blob', compression: 'STORE' }).then(zipBlob => {
             const url = URL.createObjectURL(zipBlob)
             const zipBtn = document.getElementById('zipBtn')
             zipBtn.href = url
             zipBtn.download = 'grayscale-images.zip'
+            zipBtn.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
             const totalKB = Math.round(zipBlob.size / 1024)
             document.getElementById('zipNote').textContent = `${files.length} images — ${totalKB} KB total`
             zipWrap.style.display = 'block'
@@ -237,7 +242,7 @@ applyBtn.addEventListener('click', async () => {
         }
       }, mime, 0.92)
     }
-    img.src = item.originalUrl
+    img.src = srcUrl
   })
 })
 

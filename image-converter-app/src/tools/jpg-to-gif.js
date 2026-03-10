@@ -197,7 +197,9 @@ function renderGrid() {
     const card = document.createElement('div')
     card.className = 'file-card'
     const img = document.createElement('img')
-    img.src = URL.createObjectURL(file)
+    const previewUrl = URL.createObjectURL(file)
+    img.onload = () => URL.revokeObjectURL(previewUrl)
+    img.src = previewUrl
     const name = document.createElement('div')
     name.className = 'card-name'
     name.textContent = file.name
@@ -222,7 +224,7 @@ function addFiles(incoming) {
   renderGrid()
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files) })
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
@@ -319,6 +321,7 @@ convertBtn.addEventListener('click', async () => {
       animatedPreview.style.display = 'block'
       // Download button
       downloadLink.href = url
+      downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       downloadLink.download = 'animated.gif'
       downloadLink.textContent = `⬇ ${dlBtn} animated.gif (${Math.round(blob.size / 1024)} KB)`
       downloadLink.style.display = 'block'
@@ -333,6 +336,7 @@ convertBtn.addEventListener('click', async () => {
         const url = URL.createObjectURL(blob)
         const base = files[0].name.replace(/\.[^.]+$/, '')
         downloadLink.href = url
+        downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
         downloadLink.download = `${base}.gif`
         downloadLink.textContent = `⬇ ${dlBtn} (${Math.round(blob.size / 1024)} KB)`
         downloadLink.style.display = 'block'
@@ -357,7 +361,7 @@ convertBtn.addEventListener('click', async () => {
         }
         const zip = new window.JSZip()
         for (const { name, blob } of blobs) zip.file(name, await blob.arrayBuffer())
-        const zipBlob = await zip.generateAsync({ type: 'blob' })
+        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
         const zipUrl = URL.createObjectURL(zipBlob)
         zipBtn._url = zipUrl
         zipBtn.style.display = 'block'
@@ -365,6 +369,7 @@ convertBtn.addEventListener('click', async () => {
         zipBtn.addEventListener('click', () => {
           const a = document.createElement('a')
           a.href = zipBtn._url; a.download = 'converted-gif.zip'; a.click()
+          setTimeout(() => URL.revokeObjectURL(zipBtn._url), 10000)
         }, { once: true })
       }
       statusNote.textContent = statusNote.textContent || 'Done!'

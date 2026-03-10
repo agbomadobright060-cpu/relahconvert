@@ -149,8 +149,12 @@ convertBtn.addEventListener('click', async () => {
       statusEl.textContent = '✓ Done'; statusEl.style.color = '#2C8A4A'
       const img = new Image()
       img.onload = () => {
+        URL.revokeObjectURL(img.src)
         const card = document.getElementById(`card-${i}`)
-        if (card) card.querySelector('div').innerHTML = `<img src="${url}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;" />`
+        if (card) {
+          const previewUrl = URL.createObjectURL(outBlob)
+          card.querySelector('div').innerHTML = `<img src="${previewUrl}" onload="URL.revokeObjectURL(this.src)" style="width:100%;height:100px;object-fit:cover;border-radius:6px;" />`
+        }
       }
       img.src = url
     } catch (e) {
@@ -160,7 +164,7 @@ convertBtn.addEventListener('click', async () => {
 
   dlList.innerHTML = results.map(r => `
     <div class="dl-item">
-      <a href="${r.url}" download="${r.name}">${dlBtn}: ${r.name}</a>
+      <a href="${r.url}" download="${r.name}" onclick="setTimeout(()=>URL.revokeObjectURL(this.href),10000)">${dlBtn}: ${r.name}</a>
       <span>${Math.round(r.size / 1024)} KB</span>
     </div>`).join('')
   dlList.style.display = 'block'
@@ -171,9 +175,11 @@ convertBtn.addEventListener('click', async () => {
       const JSZip = mod.default || window.JSZip
       const zip = new JSZip()
       for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
-      const zipBlob = await zip.generateAsync({ type: 'blob' })
-      zipBtn.href = URL.createObjectURL(zipBlob)
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+      const zipUrl = URL.createObjectURL(zipBlob)
+      zipBtn.href = zipUrl
       zipBtn.download = 'heic-to-jpg.zip'
+      zipBtn.onclick = () => setTimeout(() => URL.revokeObjectURL(zipUrl), 10000)
       zipWrap.style.display = 'block'
     } catch(e) { console.warn('ZIP failed', e) }
   }

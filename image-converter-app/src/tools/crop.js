@@ -187,7 +187,8 @@ previewImg.onload = () => {
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   originalFile = file
-  previewImg.src = URL.createObjectURL(file)
+  const url = URL.createObjectURL(file)
+  previewImg.src = url
   previewArea.style.display = 'block'
   downloadLink.style.display = 'none'
   cropBtn.disabled = false
@@ -247,10 +248,14 @@ cropBtn.addEventListener('click', () => {
   const mime = originalFile.type === 'image/png' ? 'image/png' : 'image/jpeg'
   const ext  = mime === 'image/png' ? 'png' : 'jpg'
   canvas.toBlob(blob => {
+    // Revoke previous URL if any
+    if (downloadLink.href && downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href)
     const url = URL.createObjectURL(blob)
     downloadLink.href = url
     downloadLink.download = `cropped-image.${ext}`
     downloadLink.textContent = `${t.download || 'Download'} (${Math.round(blob.size / 1024)} KB)`
     downloadLink.style.display = 'block'
+    // Revoke after user has had time to click
+    downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
   }, mime, 0.92)
 })

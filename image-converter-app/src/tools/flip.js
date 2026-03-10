@@ -21,25 +21,19 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:#A63D26;}
-
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:16px;}
-
   .file-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:visible;position:relative;padding-bottom:8px;}
   .card-img-wrap{position:relative;width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:#F5F0E8;border-radius:10px 10px 0 0;overflow:hidden;}
   .card-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;display:block;transition:transform 0.2s ease;}
-
-  /* Flip buttons on each card */
   .card-flip-btns{display:flex;justify-content:center;gap:6px;margin:14px 8px 4px;}
   .card-flip-btn{flex:1;padding:6px 4px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:11px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center;}
   .card-flip-btn:hover{border-color:#C84B31;color:#C84B31;}
   .card-flip-btn.active{border-color:#C84B31;background:#FDE8E3;color:#C84B31;}
-
   .card-fname{font-size:11px;color:#5A4A3A;font-family:'DM Sans',sans-serif;padding:2px 8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
   .card-status{font-size:10px;color:#9A8A7A;font-family:'DM Sans',sans-serif;text-align:center;min-height:14px;padding:0 8px;}
   .card-dl{display:none;font-size:11px;font-weight:700;color:#C84B31;font-family:'DM Sans',sans-serif;padding:2px 8px 0;text-align:center;text-decoration:none;}
   .card-dl:hover{text-decoration:underline;}
   .card-rm{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.4);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;}
-
   #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   #actionRow.on{display:flex;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;min-width:160px;}
@@ -47,9 +41,7 @@ style.textContent = `
   .action-btn.dark{background:#2C1810;}
   .action-btn.dark:hover{background:#1a0f09;}
   .action-btn:disabled{background:#C4B8A8;cursor:not-allowed;}
-
   .status-text{font-size:13px;color:#7A6A5A;font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
-
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
   .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
   .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -94,7 +86,6 @@ const applyBtn   = document.getElementById('applyBtn')
 const zipBtn     = document.getElementById('zipBtn')
 const statusText = document.getElementById('statusText')
 
-// entries[i] = { file, img, flippedH, flippedV, dlLink }
 let files = []
 
 function getStatus(entry) {
@@ -107,34 +98,27 @@ function getStatus(entry) {
 function addFiles(newFiles) {
   Array.from(newFiles).forEach(file => {
     if (!file.type.startsWith('image/')) return
-
     const entry = { file, img: null, flippedH: false, flippedV: false, dlLink: null }
-
     const card = document.createElement('div')
     card.className = 'file-card'
-
     const imgWrap = document.createElement('div')
     imgWrap.className = 'card-img-wrap'
-
     const img = document.createElement('img')
-    img.src = URL.createObjectURL(file)
+    const previewUrl = URL.createObjectURL(file)
+    img.src = previewUrl
+    img.onload = () => URL.revokeObjectURL(previewUrl)
     entry.img = img
     imgWrap.appendChild(img)
-
-    // Flip buttons
     const flipBtns = document.createElement('div')
     flipBtns.className = 'card-flip-btns'
-
     const btnH = document.createElement('button')
     btnH.className = 'card-flip-btn'
     btnH.textContent = '⇄ H'
     btnH.title = 'Flip Horizontal'
-
     const btnV = document.createElement('button')
     btnV.className = 'card-flip-btn'
     btnV.textContent = '⇅ V'
     btnV.title = 'Flip Vertical'
-
     btnH.addEventListener('click', () => {
       entry.flippedH = !entry.flippedH
       btnH.classList.toggle('active', entry.flippedH)
@@ -142,7 +126,6 @@ function addFiles(newFiles) {
       statusLabel.textContent = getStatus(entry)
       entry.dlLink.style.display = 'none'
     })
-
     btnV.addEventListener('click', () => {
       entry.flippedV = !entry.flippedV
       btnV.classList.toggle('active', entry.flippedV)
@@ -150,22 +133,17 @@ function addFiles(newFiles) {
       statusLabel.textContent = getStatus(entry)
       entry.dlLink.style.display = 'none'
     })
-
     flipBtns.append(btnH, btnV)
-
     const fname = document.createElement('div')
     fname.className = 'card-fname'
     fname.textContent = file.name
-
     const statusLabel = document.createElement('div')
     statusLabel.className = 'card-status'
     statusLabel.textContent = 'No flip'
-
     const dlLink = document.createElement('a')
     dlLink.className = 'card-dl'
     dlLink.textContent = '⬇ Download'
     entry.dlLink = dlLink
-
     const rmBtn = document.createElement('button')
     rmBtn.className = 'card-rm'
     rmBtn.textContent = '×'
@@ -174,12 +152,10 @@ function addFiles(newFiles) {
       card.remove()
       if (files.length === 0) { actionRow.classList.remove('on'); statusText.textContent = '' }
     })
-
     card.append(imgWrap, flipBtns, fname, statusLabel, dlLink, rmBtn)
     fileGrid.appendChild(card)
     files.push(entry)
   })
-
   if (files.length > 0) {
     actionRow.classList.add('on')
     zipBtn.style.display = 'none'
@@ -196,7 +172,9 @@ function updateImgTransform(entry) {
 function flipToBlob(entry) {
   return new Promise(resolve => {
     const image = new Image()
+    const url = URL.createObjectURL(entry.file)
     image.onload = () => {
+      URL.revokeObjectURL(url)
       const W = image.naturalWidth, H = image.naturalHeight
       const canvas = document.createElement('canvas')
       canvas.width = W; canvas.height = H
@@ -208,7 +186,7 @@ function flipToBlob(entry) {
       const ext  = mime === 'image/png' ? 'png' : 'jpg'
       canvas.toBlob(blob => resolve({ blob, ext }), mime, 0.92)
     }
-    image.src = URL.createObjectURL(entry.file)
+    image.src = url
   })
 }
 
@@ -221,14 +199,13 @@ applyBtn.addEventListener('click', async () => {
   for (const entry of files) {
     const baseName = entry.file.name.replace(/\.[^.]+$/, '')
     const suffix = entry.flippedH && entry.flippedV ? 'hv' : entry.flippedH ? 'h' : entry.flippedV ? 'v' : 'original'
-
     if (!entry.flippedH && !entry.flippedV) {
-      // No flip — use original
       const url = URL.createObjectURL(entry.file)
       const ext = entry.file.name.split('.').pop()
       entry.dlLink.href = url
       entry.dlLink.download = `${baseName}-flipped-${suffix}.${ext}`
       entry.dlLink.style.display = 'block'
+      entry.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       const ab = await entry.file.arrayBuffer()
       results.push({ name: entry.dlLink.download, blob: new Blob([ab], { type: entry.file.type }) })
     } else {
@@ -237,6 +214,7 @@ applyBtn.addEventListener('click', async () => {
       entry.dlLink.href = url
       entry.dlLink.download = `${baseName}-flipped-${suffix}.${ext}`
       entry.dlLink.style.display = 'block'
+      entry.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       results.push({ name: entry.dlLink.download, blob })
     }
   }
@@ -256,17 +234,18 @@ zipBtn.addEventListener('click', async () => {
     const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
     const zip = new JSZip()
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
-    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob)
     a.download = 'flipped-images.zip'
     a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn
   zipBtn.disabled = false
 })
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files) })
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 

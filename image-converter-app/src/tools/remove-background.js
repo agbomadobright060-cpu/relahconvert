@@ -301,11 +301,15 @@ function addFiles(newFiles) {
         canvas.getContext('2d').putImageData(entry.origData, 0, 0)
       }
     }
-    img.src = URL.createObjectURL(file)
+    const _imgUrl = URL.createObjectURL(file)
+    img.onload = () => { URL.revokeObjectURL(_imgUrl) }
+    img.src = _imgUrl
     const thumbItem = document.createElement('div')
     thumbItem.className = 'thumb-item'
     const thumbImg = document.createElement('img')
-    thumbImg.src = URL.createObjectURL(file)
+    const _turl = URL.createObjectURL(file)
+    thumbImg.onload = () => URL.revokeObjectURL(_turl)
+    thumbImg.src = _turl
     const badgeEl = document.createElement('div')
     badgeEl.className = 'thumb-badge'
     entry.badgeEl = badgeEl; entry.thumbEl = thumbItem
@@ -361,9 +365,9 @@ zipBtn.addEventListener('click', async () => {
       const safeName = makeUnique(usedNames, rawName)
       zip.file(safeName, await e.resultBlob.arrayBuffer())
     }
-    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(zipBlob); a.download = 'removed-backgrounds.zip'; a.click()
+    a.href = URL.createObjectURL(zipBlob); a.download = 'removed-backgrounds.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(err) { alert('ZIP failed: ' + err.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })
