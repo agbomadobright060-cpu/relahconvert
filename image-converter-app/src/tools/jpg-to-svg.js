@@ -19,14 +19,10 @@ style.textContent = `
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:#A63D26;}
   .notice{font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:#fff;border-radius:8px;border:1.5px solid #E8E0D5;}
-
-  /* Width control */
   #widthRow{display:none;align-items:center;gap:12px;margin-bottom:14px;background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:12px 16px;}
   #widthRow.on{display:flex;}
   #widthRow label{font-size:12px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;white-space:nowrap;}
   #svgWidth{width:90px;padding:6px 10px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;outline:none;}
-
-  /* File grid */
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
   .file-card{background:#fff;border-radius:10px;border:1.5px solid #E8E0D5;overflow:hidden;position:relative;}
   .file-card img{width:100%;height:110px;object-fit:contain;display:block;background:#F5F0E8;}
@@ -34,7 +30,6 @@ style.textContent = `
   .file-card .dl-link{display:none;font-size:11px;font-weight:700;color:#C84B31;font-family:'DM Sans',sans-serif;padding:0 8px 7px;text-decoration:none;}
   .file-card .dl-link:hover{text-decoration:underline;}
   .file-card .rm-btn{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-
   #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   #actionRow.on{display:flex;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;}
@@ -42,7 +37,6 @@ style.textContent = `
   .action-btn.dark{background:#2C1810;}
   .action-btn.dark:hover{background:#1a0f09;}
   .status-text{font-size:13px;color:#7A6A5A;font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
-
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
   .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
   .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -72,16 +66,13 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px;color:#9A8A7A;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
-
     <div id="widthRow">
       <label>SVG output width (px):</label>
       <input type="number" id="svgWidth" value="800" min="100" max="4000" />
       <span style="font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif;">Height scales proportionally</span>
     </div>
-
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
-
     <div id="actionRow">
       <button class="action-btn" id="convertBtn">Convert to SVG</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
@@ -91,16 +82,28 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput  = document.getElementById('fileInput')
-const widthRow   = document.getElementById('widthRow')
-const fileGrid   = document.getElementById('fileGrid')
-const actionRow  = document.getElementById('actionRow')
-const convertBtn = document.getElementById('convertBtn')
-const zipBtn     = document.getElementById('zipBtn')
-const svgWidthInp= document.getElementById('svgWidth')
-const statusText = document.getElementById('statusText')
+const fileInput   = document.getElementById('fileInput')
+const widthRow    = document.getElementById('widthRow')
+const fileGrid    = document.getElementById('fileGrid')
+const actionRow   = document.getElementById('actionRow')
+const convertBtn  = document.getElementById('convertBtn')
+const zipBtn      = document.getElementById('zipBtn')
+const svgWidthInp = document.getElementById('svgWidth')
+const statusText  = document.getElementById('statusText')
 
-let files = []  // { file, card, dlLink, naturalW, naturalH }
+let files = []
+
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(`${base}-${i}${ext}`)) i++
+  const unique = `${base}-${i}${ext}`
+  usedNames.add(unique)
+  return unique
+}
 
 function addFiles(newFiles) {
   Array.from(newFiles).forEach(file => {
@@ -110,14 +113,11 @@ function addFiles(newFiles) {
     const img = document.createElement('img')
     img.src = URL.createObjectURL(file)
     const fname = document.createElement('div')
-    fname.className = 'fname'
-    fname.textContent = file.name
+    fname.className = 'fname'; fname.textContent = file.name
     const dlLink = document.createElement('a')
-    dlLink.className = 'dl-link'
-    dlLink.textContent = '⬇ Download SVG'
+    dlLink.className = 'dl-link'; dlLink.textContent = '⬇ Download SVG'
     const rmBtn = document.createElement('button')
-    rmBtn.className = 'rm-btn'
-    rmBtn.textContent = '×'
+    rmBtn.className = 'rm-btn'; rmBtn.textContent = '×'
     rmBtn.addEventListener('click', () => {
       const idx = files.findIndex(f => f.card === card)
       if (idx !== -1) files.splice(idx, 1)
@@ -126,21 +126,15 @@ function addFiles(newFiles) {
     })
     card.append(img, fname, dlLink, rmBtn)
     fileGrid.appendChild(card)
-
-    // Get natural dimensions
     const tmpImg = new Image()
-    tmpImg.onload = () => {
-      files.push({ file, card, dlLink, naturalW: tmpImg.naturalWidth, naturalH: tmpImg.naturalHeight })
-    }
+    tmpImg.onload = () => { files.push({ file, card, dlLink, naturalW: tmpImg.naturalWidth, naturalH: tmpImg.naturalHeight }) }
     tmpImg.src = img.src
   })
-  widthRow.classList.add('on')
-  actionRow.classList.add('on')
-  zipBtn.style.display = 'none'
-  statusText.textContent = ''
+  widthRow.classList.add('on'); actionRow.classList.add('on')
+  zipBtn.style.display = 'none'; statusText.textContent = ''
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files) })
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
@@ -163,44 +157,36 @@ function fileToSVGBlob(f) {
 
 convertBtn.addEventListener('click', async () => {
   if (!files.length) return
-  convertBtn.disabled = true
-  statusText.textContent = 'Converting…'
+  convertBtn.disabled = true; statusText.textContent = 'Converting…'
   const results = []
+  const usedNames = new Set()
   for (const f of files) {
     const blob = await fileToSVGBlob(f)
+    const rawName = f.file.name.replace(/\.[^.]+$/, '') + '.svg'
+    const safeName = makeUnique(usedNames, rawName)
     const url = URL.createObjectURL(blob)
-    const baseName = f.file.name.replace(/\.[^.]+$/, '')
-    f.dlLink.href = url
-    f.dlLink.download = `${baseName}.svg`
-    f.dlLink.style.display = 'block'
-    results.push({ name: `${baseName}.svg`, blob })
+    f.dlLink.href = url; f.dlLink.download = safeName; f.dlLink.style.display = 'block'
+    results.push({ name: safeName, blob })
   }
   convertBtn.disabled = false
   statusText.textContent = files.length > 1 ? `${files.length} SVGs ready.` : 'SVG ready.'
-  if (files.length > 1) zipBtn.style.display = 'block'
-  zipBtn._results = results
+  if (files.length > 1) { zipBtn.style.display = 'block'; zipBtn._results = results }
 })
 
 zipBtn.addEventListener('click', async () => {
   const results = zipBtn._results
   if (!results || !results.length) return
-  zipBtn.textContent = 'Zipping…'
-  zipBtn.disabled = true
+  zipBtn.textContent = 'Zipping…'; zipBtn.disabled = true
   try {
-    const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+    const JSZip = mod.default || window.JSZip
     const zip = new JSZip()
-    for (const r of results) {
-      const ab = await r.blob.arrayBuffer()
-      zip.file(r.name, ab)
-    }
+    for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
     const zipBlob = await zip.generateAsync({ type: 'blob' })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(zipBlob)
-    a.download = 'svg-files.zip'
-    a.click()
+    a.href = URL.createObjectURL(zipBlob); a.download = 'svg-files.zip'; a.click()
   } catch(e) { alert('ZIP failed: ' + e.message) }
-  zipBtn.textContent = dlZipBtn
-  zipBtn.disabled = false
+  zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })
 
 ;(function injectSEO() {

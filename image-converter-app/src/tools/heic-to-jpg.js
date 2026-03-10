@@ -3,7 +3,6 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 const bg = '#F2F2F2'
-
 const toolName  = (t.nav_short && t.nav_short['heic-to-jpg']) || 'HEIC to JPG'
 const seoData   = t.seo && t.seo['heic-to-jpg']
 const descText  = seoData ? seoData.h2a : 'Convert iPhone HEIC photos to JPG free. No upload. Files never leave your device.'
@@ -82,6 +81,18 @@ const zipBtn     = document.getElementById('zipBtn')
 let files = []
 let results = []
 
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(`${base}-${i}${ext}`)) i++
+  const unique = `${base}-${i}${ext}`
+  usedNames.add(unique)
+  return unique
+}
+
 async function loadHeic2any() {
   if (window.heic2any) return window.heic2any
   await new Promise((res, rej) => {
@@ -111,7 +122,7 @@ function addFiles(newFiles) {
   renderGrid()
 }
 
-fileInput.addEventListener('change', () => addFiles(fileInput.files))
+fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); addFiles(e.dataTransfer.files) })
 
@@ -119,11 +130,11 @@ convertBtn.addEventListener('click', async () => {
   if (!files.length) return
   convertBtn.disabled = true
   results = []
-  dlList.style.display = 'none'
-  dlList.innerHTML = ''
+  dlList.style.display = 'none'; dlList.innerHTML = ''
   zipWrap.style.display = 'none'
 
   const heic2any = await loadHeic2any()
+  const usedNames = new Set()
 
   for (let i = 0; i < files.length; i++) {
     const statusEl = document.getElementById(`status-${i}`)
@@ -131,13 +142,11 @@ convertBtn.addEventListener('click', async () => {
     try {
       const blob = await heic2any({ blob: files[i], toType: 'image/jpeg', quality: 0.92 })
       const outBlob = Array.isArray(blob) ? blob[0] : blob
-      const name = files[i].name.replace(/\.(heic|heif)$/i, '.jpg')
+      const rawName = files[i].name.replace(/\.(heic|heif)$/i, '.jpg')
+      const name = makeUnique(usedNames, rawName)
       const url = URL.createObjectURL(outBlob)
       results.push({ name, url, blob: outBlob, size: outBlob.size })
-      statusEl.textContent = '✓ Done'
-      statusEl.style.color = '#2C8A4A'
-
-      // Show preview
+      statusEl.textContent = '✓ Done'; statusEl.style.color = '#2C8A4A'
       const img = new Image()
       img.onload = () => {
         const card = document.getElementById(`card-${i}`)
@@ -145,12 +154,10 @@ convertBtn.addEventListener('click', async () => {
       }
       img.src = url
     } catch (e) {
-      statusEl.textContent = '✗ Failed'
-      statusEl.style.color = '#C84B31'
+      statusEl.textContent = '✗ Failed'; statusEl.style.color = '#C84B31'
     }
   }
 
-  // Show download list
   dlList.innerHTML = results.map(r => `
     <div class="dl-item">
       <a href="${r.url}" download="${r.name}">${dlBtn}: ${r.name}</a>
@@ -158,15 +165,12 @@ convertBtn.addEventListener('click', async () => {
     </div>`).join('')
   dlList.style.display = 'block'
 
-  // ZIP if multiple
   if (results.length > 1) {
     try {
-      const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+      const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+      const JSZip = mod.default || window.JSZip
       const zip = new JSZip()
-      for (const r of results) {
-        const ab = await r.blob.arrayBuffer()
-        zip.file(r.name, ab)
-      }
+      for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
       const zipBlob = await zip.generateAsync({ type: 'blob' })
       zipBtn.href = URL.createObjectURL(zipBlob)
       zipBtn.download = 'heic-to-jpg.zip'
@@ -177,18 +181,13 @@ convertBtn.addEventListener('click', async () => {
   convertBtn.disabled = false
 })
 
-// ── SEO Section ──────────────────────────────────────────────────────────────
 ;(function injectSEO() {
   const seo = t.seo && t.seo['heic-to-jpg']
   if (!seo) return
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-  const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
-  const faqsHtml  = seo.faqs.map(f => `<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')
-  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
   const div = document.createElement('div')
   div.className = 'seo-section'
-  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${stepsHtml}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${faqsHtml}<h3>${alsoTry}</h3><div class="seo-links">${linksHtml}</div>`
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
-// ─────────────────────────────────────────────────────────────────────────────

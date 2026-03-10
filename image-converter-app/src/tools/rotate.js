@@ -20,23 +20,17 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:#A63D26;}
-
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:16px;}
-
   .file-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:visible;position:relative;padding-bottom:8px;}
   .card-img-wrap{position:relative;width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:#F5F0E8;border-radius:10px 10px 0 0;overflow:hidden;}
   .card-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;display:block;transition:transform 0.25s ease;}
-
-  /* Rotate button on each card */
   .card-rot-btn{position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#C84B31;border:2px solid #fff;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(200,75,49,0.35);transition:background 0.15s;z-index:5;}
   .card-rot-btn:hover{background:#A63D26;}
-
   .card-fname{font-size:11px;color:#5A4A3A;font-family:'DM Sans',sans-serif;padding:18px 8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
   .card-angle{font-size:11px;font-weight:700;color:#C84B31;font-family:'DM Sans',sans-serif;text-align:center;min-height:16px;}
   .card-dl{display:none;font-size:11px;font-weight:700;color:#2C1810;font-family:'DM Sans',sans-serif;padding:2px 8px 0;text-align:center;text-decoration:none;}
   .card-dl:hover{text-decoration:underline;color:#C84B31;}
   .card-rm{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.4);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;}
-
   #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   #actionRow.on{display:flex;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;min-width:160px;}
@@ -44,9 +38,7 @@ style.textContent = `
   .action-btn.dark{background:#2C1810;}
   .action-btn.dark:hover{background:#1a0f09;}
   .action-btn:disabled{background:#C4B8A8;cursor:not-allowed;}
-
   .status-text{font-size:13px;color:#7A6A5A;font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
-
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
   .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
   .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -91,25 +83,32 @@ const applyBtn   = document.getElementById('applyBtn')
 const zipBtn     = document.getElementById('zipBtn')
 const statusText = document.getElementById('statusText')
 
-// files[i] = { file, img, angle, dlLink }
 let files = []
+
+// Unique filename helper to avoid ZIP collisions
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(`${base}-${i}${ext}`)) i++
+  const unique = `${base}-${i}${ext}`
+  usedNames.add(unique)
+  return unique
+}
 
 function addFiles(newFiles) {
   Array.from(newFiles).forEach(file => {
     if (!file.type.startsWith('image/')) return
-
     const entry = { file, img: null, angle: 0, dlLink: null }
-
     const card = document.createElement('div')
     card.className = 'file-card'
-
     const imgWrap = document.createElement('div')
     imgWrap.className = 'card-img-wrap'
-
     const img = document.createElement('img')
     img.src = URL.createObjectURL(file)
     entry.img = img
-
     const rotBtn = document.createElement('button')
     rotBtn.className = 'card-rot-btn'
     rotBtn.title = 'Tap to rotate 90°'
@@ -118,23 +117,18 @@ function addFiles(newFiles) {
       entry.angle = (entry.angle + 90) % 360
       img.style.transform = `rotate(${entry.angle}deg)`
       angleLabel.textContent = entry.angle > 0 ? entry.angle + '°' : ''
-      entry.dlLink.style.display = 'none' // reset dl if re-rotated
+      entry.dlLink.style.display = 'none'
     })
-
     imgWrap.append(img, rotBtn)
-
     const fname = document.createElement('div')
     fname.className = 'card-fname'
     fname.textContent = file.name
-
     const angleLabel = document.createElement('div')
     angleLabel.className = 'card-angle'
-
     const dlLink = document.createElement('a')
     dlLink.className = 'card-dl'
     dlLink.textContent = '⬇ Download'
     entry.dlLink = dlLink
-
     const rmBtn = document.createElement('button')
     rmBtn.className = 'card-rm'
     rmBtn.textContent = '×'
@@ -143,12 +137,10 @@ function addFiles(newFiles) {
       card.remove()
       if (files.length === 0) { actionRow.classList.remove('on'); statusText.textContent = '' }
     })
-
     card.append(imgWrap, fname, angleLabel, dlLink, rmBtn)
     fileGrid.appendChild(card)
     files.push(entry)
   })
-
   if (files.length > 0) {
     actionRow.classList.add('on')
     zipBtn.style.display = 'none'
@@ -156,7 +148,7 @@ function addFiles(newFiles) {
   }
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files) })
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
@@ -188,33 +180,35 @@ applyBtn.addEventListener('click', async () => {
   applyBtn.disabled = true
   statusText.textContent = 'Processing…'
   const results = []
+  const usedNames = new Set()
 
   for (const entry of files) {
+    const baseName = entry.file.name.replace(/\.[^.]+$/, '')
     if (entry.angle === 0) {
-      // No rotation — just use original
-      const url = URL.createObjectURL(entry.file)
       const ext = entry.file.name.split('.').pop()
-      const baseName = entry.file.name.replace(/\.[^.]+$/, '')
+      const rawName = `${baseName}-rotated-0deg.${ext}`
+      const safeName = makeUnique(usedNames, rawName)
+      const url = URL.createObjectURL(entry.file)
       entry.dlLink.href = url
-      entry.dlLink.download = `${baseName}-rotated-0deg.${ext}`
+      entry.dlLink.download = safeName
       entry.dlLink.style.display = 'block'
       const ab = await entry.file.arrayBuffer()
-      results.push({ name: entry.dlLink.download, blob: new Blob([ab], { type: entry.file.type }) })
+      results.push({ name: safeName, blob: new Blob([ab], { type: entry.file.type }) })
     } else {
       const { blob, mime, ext } = await rotateToBlob(entry)
-      const baseName = entry.file.name.replace(/\.[^.]+$/, '')
+      const rawName = `${baseName}-rotated-${entry.angle}deg.${ext}`
+      const safeName = makeUnique(usedNames, rawName)
       const url = URL.createObjectURL(blob)
       entry.dlLink.href = url
-      entry.dlLink.download = `${baseName}-rotated-${entry.angle}deg.${ext}`
+      entry.dlLink.download = safeName
       entry.dlLink.style.display = 'block'
-      results.push({ name: entry.dlLink.download, blob })
+      results.push({ name: safeName, blob })
     }
   }
 
   applyBtn.disabled = false
   statusText.textContent = files.length > 1 ? `${files.length} images ready.` : 'Image ready.'
-  if (files.length > 1) zipBtn.style.display = 'block'
-  zipBtn._results = results
+  if (files.length > 1) { zipBtn.style.display = 'block'; zipBtn._results = results }
 })
 
 zipBtn.addEventListener('click', async () => {
@@ -223,7 +217,8 @@ zipBtn.addEventListener('click', async () => {
   zipBtn.textContent = 'Zipping…'
   zipBtn.disabled = true
   try {
-    const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+    const JSZip = mod.default || window.JSZip
     const zip = new JSZip()
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
     const zipBlob = await zip.generateAsync({ type: 'blob' })

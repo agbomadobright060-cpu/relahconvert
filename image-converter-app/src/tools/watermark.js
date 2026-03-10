@@ -11,7 +11,6 @@ const dlZipBtn  = t.download_zip || 'Download ZIP'
 const parts     = toolName.split(' ')
 const h1Main    = parts[0]
 const h1Em      = parts.slice(1).join(' ')
-
 const bg = '#F2F2F2'
 
 if (document.head) {
@@ -20,23 +19,17 @@ if (document.head) {
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
-
     .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:8px; }
     .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
     .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
     .opt-btn.dark { background:#2C1810; }
     .opt-btn.dark:hover { background:#1a0f09; }
-    .opt-btn.secondary { background:#fff; color:#2C1810; border:1.5px solid #DDD5C8; }
-    .opt-btn.secondary:hover { border-color:#C84B31; color:#C84B31; transform:translateY(-1px); }
     .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
-
     .tool-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start; }
     .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:16px; gap:10px; }
     #previewCanvas { max-width:100%; max-height:420px; border-radius:6px; display:block; cursor:move; }
-
     .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:16px; font-family:'DM Sans',sans-serif; max-height:85vh; overflow-y:auto; }
     .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:#2C1810; margin:0 0 12px; }
-
     .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:6px; font-family:'DM Sans',sans-serif; }
     .divider { height:1px; background:#F0EAE3; margin:12px 0; }
     .ctrl-input { width:100%; padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:#fff; color:#2C1810; outline:none; box-sizing:border-box; }
@@ -44,8 +37,6 @@ if (document.head) {
     input[type=range] { width:100%; accent-color:#C84B31; margin:3px 0; }
     .range-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
     .range-val { font-size:12px; color:#9A8A7A; min-width:36px; text-align:right; font-family:'DM Sans',sans-serif; }
-
-    /* Watermark layer cards */
     .wm-list { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
     .wm-card { border:1.5px solid #E8E0D5; border-radius:10px; overflow:hidden; }
     .wm-card.selected { border-color:#C84B31; }
@@ -59,30 +50,31 @@ if (document.head) {
     .wm-delete:hover { color:#C84B31; }
     .wm-card-body { padding:10px; display:none; }
     .wm-card-body.open { display:block; }
-
-    /* Add buttons row */
     .add-row { display:flex; gap:8px; margin-bottom:12px; }
     .add-btn { flex:1; padding:8px; border:1.5px dashed #DDD5C8; border-radius:8px; background:#fff; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:#5A4A3A; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.15s; }
     .add-btn:hover { border-color:#C84B31; color:#C84B31; background:#FDE8E3; }
-
-    /* Color swatches */
     .swatches { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
     .swatch { width:20px; height:20px; border-radius:50%; border:2px solid #E8E0D5; cursor:pointer; transition:transform 0.15s; flex-shrink:0; }
     .swatch:hover { transform:scale(1.2); }
-
-    /* Batch file chips */
     .file-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
     .file-chip { display:flex; align-items:center; gap:5px; background:#F5F0E8; border-radius:20px; padding:4px 10px; font-size:11px; font-family:'DM Sans',sans-serif; color:#5A4A3A; }
     .file-chip button { background:none; border:none; cursor:pointer; color:#9A8A7A; font-size:12px; line-height:1; padding:0; }
     .file-chip button:hover { color:#C84B31; }
-
-    /* Hint */
     .drag-hint { display:flex; align-items:center; gap:6px; background:#F5F0E8; border-radius:8px; padding:8px 10px; font-size:11px; color:#7A6A5A; font-family:'DM Sans',sans-serif; }
-
-    @media (max-width:700px) {
-      .tool-layout { grid-template-columns:1fr; }
-      .image-col { min-height:220px; }
-    }
+    @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
+    .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+    .seo-section ol{padding-left:20px;margin:0 0 12px;}
+    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
+    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
+    .seo-faq{border-top:1px solid #E8E0D5;padding:10px 0;}
+    .seo-faq:last-child{border-bottom:1px solid #E8E0D5;}
+    .seo-faq-q{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif;}
+    .seo-faq-a{font-size:13px;color:#5A4A3A;margin:0;line-height:1.6;}
+    .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .seo-link:hover{border-color:#C84B31;color:#C84B31;}
   `
   document.head.appendChild(style)
 }
@@ -97,10 +89,7 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px; color:#9A8A7A; margin-left:10px;">up to 25 images</span>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
     </div>
-
     <div class="tool-layout" id="toolLayout" style="display:none;">
-
-      <!-- Left: preview -->
       <div class="image-col">
         <div class="file-chips" id="fileChips"></div>
         <canvas id="previewCanvas"></canvas>
@@ -109,11 +98,8 @@ document.querySelector('#app').innerHTML = `
           Click a watermark layer then drag it on the preview to reposition
         </div>
       </div>
-
-      <!-- Right: controls -->
       <div class="controls-col">
         <h3>Watermark Layers</h3>
-
         <div class="add-row">
           <button class="add-btn" id="addTextBtn">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
@@ -125,9 +111,7 @@ document.querySelector('#app').innerHTML = `
           </label>
           <input type="file" id="addImgInput" accept="image/*" style="display:none;" />
         </div>
-
         <div class="wm-list" id="wmList"></div>
-
         <div class="divider"></div>
         <button class="opt-btn" id="applyBtn" disabled>${dlBtn}</button>
         <div id="zipWrap" style="display:none; margin-top:4px;">
@@ -141,27 +125,31 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-// ── State ──────────────────────────────────────────────
-let baseFiles   = []       // { file, img }
-let activeFileIdx = 0
-let watermarks  = []       // { id, type, text, color, fontSize, imgEl, imgSizePct, opacity, posX, posY }
-let selectedWmId = null
-let isDragging  = false
-let dragOffsetX = 0
-let dragOffsetY = 0
-let wmIdCounter = 0
+let baseFiles = [], activeFileIdx = 0, watermarks = [], selectedWmId = null
+let isDragging = false, dragOffsetX = 0, dragOffsetY = 0, wmIdCounter = 0
 
-const fileInput    = document.getElementById('fileInput')
-const toolLayout   = document.getElementById('toolLayout')
-const previewCanvas= document.getElementById('previewCanvas')
-const fileChips    = document.getElementById('fileChips')
-const wmList       = document.getElementById('wmList')
-const applyBtn     = document.getElementById('applyBtn')
-const addTextBtn   = document.getElementById('addTextBtn')
-const addImgInput  = document.getElementById('addImgInput')
+const fileInput     = document.getElementById('fileInput')
+const toolLayout    = document.getElementById('toolLayout')
+const previewCanvas = document.getElementById('previewCanvas')
+const fileChips     = document.getElementById('fileChips')
+const wmList        = document.getElementById('wmList')
+const applyBtn      = document.getElementById('applyBtn')
+const addTextBtn    = document.getElementById('addTextBtn')
+const addImgInput   = document.getElementById('addImgInput')
 
-// ── Helpers ─────────────────────────────────────────────
 function newId() { return ++wmIdCounter }
+
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(`${base}-${i}${ext}`)) i++
+  const unique = `${base}-${i}${ext}`
+  usedNames.add(unique)
+  return unique
+}
 
 function getWmRect(wm, cw, ch) {
   if (wm.type === 'text') {
@@ -187,11 +175,9 @@ function renderPreview() {
   const scale = Math.min(1, maxW / img.naturalWidth)
   const cw = Math.round(img.naturalWidth * scale)
   const ch = Math.round(img.naturalHeight * scale)
-  previewCanvas.width = cw
-  previewCanvas.height = ch
+  previewCanvas.width = cw; previewCanvas.height = ch
   const ctx = previewCanvas.getContext('2d')
   ctx.drawImage(img, 0, 0, cw, ch)
-
   watermarks.forEach(wm => {
     ctx.save()
     ctx.globalAlpha = wm.opacity / 100
@@ -200,32 +186,24 @@ function renderPreview() {
       const fs = Math.round(wm.fontSize * scale)
       ctx.font = `bold ${fs}px 'DM Sans', Arial, sans-serif`
       ctx.fillStyle = wm.color
-      ctx.shadowColor = 'rgba(0,0,0,0.35)'
-      ctx.shadowBlur = Math.round(4 * scale)
+      ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = Math.round(4 * scale)
       ctx.fillText(wm.text || '© Watermark', x, y + h)
     } else if (wm.imgEl) {
       ctx.drawImage(wm.imgEl, x, y, w, h)
     }
-    // Draw selection outline
     if (wm.id === selectedWmId) {
-      ctx.globalAlpha = 1
-      ctx.strokeStyle = '#C84B31'
-      ctx.lineWidth = 2
-      ctx.setLineDash([5, 3])
-      ctx.strokeRect(x - 4, y - 4, w + 8, h + 8)
+      ctx.globalAlpha = 1; ctx.strokeStyle = '#C84B31'; ctx.lineWidth = 2
+      ctx.setLineDash([5, 3]); ctx.strokeRect(x - 4, y - 4, w + 8, h + 8)
     }
     ctx.restore()
   })
 }
 
 function drawWatermarkFull(ctx, cw, ch, wm) {
-  ctx.save()
-  ctx.globalAlpha = wm.opacity / 100
+  ctx.save(); ctx.globalAlpha = wm.opacity / 100
   if (wm.type === 'text') {
     ctx.font = `bold ${wm.fontSize}px 'DM Sans', Arial, sans-serif`
-    ctx.fillStyle = wm.color
-    ctx.shadowColor = 'rgba(0,0,0,0.35)'
-    ctx.shadowBlur = 4
+    ctx.fillStyle = wm.color; ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 4
     const tw = ctx.measureText(wm.text || '© Watermark').width
     const th = wm.fontSize
     ctx.fillText(wm.text || '© Watermark', wm.posX * cw - tw / 2, wm.posY * ch - th / 2 + th)
@@ -237,23 +215,25 @@ function drawWatermarkFull(ctx, cw, ch, wm) {
   ctx.restore()
 }
 
-// ── Watermark layer UI ──────────────────────────────────
+// Promise wrapper for canvas.toBlob
+function canvasToBlob(canvas, mime, quality) {
+  return new Promise(resolve => canvas.toBlob(resolve, mime, quality))
+}
+
 function renderWmList() {
   wmList.innerHTML = ''
   watermarks.forEach(wm => {
     const card = document.createElement('div')
     card.className = 'wm-card' + (wm.id === selectedWmId ? ' selected' : '')
     card.dataset.id = wm.id
-
     const previewThumb = wm.type === 'image' && wm.imgEl
       ? `<img src="${wm.imgEl.src}" style="width:20px;height:20px;object-fit:contain;border-radius:3px;border:1px solid #E8E0D5;">`
       : ''
-
     card.innerHTML = `
       <div class="wm-card-header">
         <span class="wm-type-badge ${wm.type}">${wm.type === 'text' ? 'T' : '⬛'}</span>
         ${previewThumb}
-        <span class="wm-card-title">${wm.type === 'text' ? (wm.text || '© Watermark') : (wm.imgEl?.src.split('/').pop() || 'Logo')}</span>
+        <span class="wm-card-title">${wm.type === 'text' ? (wm.text || '© Watermark') : 'Logo'}</span>
         <button class="wm-delete" data-id="${wm.id}">✕</button>
       </div>
       <div class="wm-card-body ${wm.id === selectedWmId ? 'open' : ''}">
@@ -286,19 +266,16 @@ function renderWmList() {
           <input type="range" class="wm-opacity" data-id="${wm.id}" min="5" max="100" value="${wm.opacity}" />
           <span class="range-val wm-opacity-val" data-id="${wm.id}">${wm.opacity}%</span>
         </div>
-      </div>
-    `
+      </div>`
     wmList.appendChild(card)
   })
 
-  // Events
   wmList.querySelectorAll('.wm-card-header').forEach(h => {
     h.addEventListener('click', e => {
       if (e.target.classList.contains('wm-delete')) return
       const id = parseInt(h.closest('.wm-card').dataset.id)
       selectedWmId = selectedWmId === id ? null : id
-      renderWmList()
-      renderPreview()
+      renderWmList(); renderPreview()
     })
   })
   wmList.querySelectorAll('.wm-delete').forEach(btn => {
@@ -307,14 +284,13 @@ function renderWmList() {
       const id = parseInt(btn.dataset.id)
       watermarks = watermarks.filter(w => w.id !== id)
       if (selectedWmId === id) selectedWmId = null
-      renderWmList()
-      renderPreview()
+      renderWmList(); renderPreview()
     })
   })
   wmList.querySelectorAll('.wm-text').forEach(inp => {
     inp.addEventListener('input', () => {
       const wm = watermarks.find(w => w.id === parseInt(inp.dataset.id))
-      if (wm) { wm.text = inp.value; renderPreview(); h3Title(wm) }
+      if (wm) { wm.text = inp.value; renderPreview() }
     })
   })
   wmList.querySelectorAll('.wm-color').forEach(inp => {
@@ -369,18 +345,9 @@ function renderWmList() {
   })
 }
 
-function h3Title(wm) {
-  const title = wmList.querySelector(`.wm-card[data-id="${wm.id}"] .wm-card-title`)
-  if (title) title.textContent = wm.text || '© Watermark'
-}
-
-// ── Add watermark actions ───────────────────────────────
 addTextBtn.addEventListener('click', () => {
   const wm = { id: newId(), type: 'text', text: '© Your Brand', color: '#ffffff', fontSize: 36, opacity: 60, posX: 0.5, posY: 0.5 }
-  watermarks.push(wm)
-  selectedWmId = wm.id
-  renderWmList()
-  renderPreview()
+  watermarks.push(wm); selectedWmId = wm.id; renderWmList(); renderPreview()
 })
 
 addImgInput.addEventListener('change', () => {
@@ -389,20 +356,15 @@ addImgInput.addEventListener('change', () => {
   const img = new Image()
   img.onload = () => {
     const wm = { id: newId(), type: 'image', imgEl: img, imgSizePct: 25, opacity: 70, posX: 0.5, posY: 0.5 }
-    watermarks.push(wm)
-    selectedWmId = wm.id
-    renderWmList()
-    renderPreview()
+    watermarks.push(wm); selectedWmId = wm.id; renderWmList(); renderPreview()
   }
   img.src = URL.createObjectURL(file)
   addImgInput.value = ''
 })
 
-// ── Canvas drag ─────────────────────────────────────────
 function getCanvasPos(e) {
   const rect = previewCanvas.getBoundingClientRect()
-  const scaleX = previewCanvas.width / rect.width
-  const scaleY = previewCanvas.height / rect.height
+  const scaleX = previewCanvas.width / rect.width, scaleY = previewCanvas.height / rect.height
   const cx = e.touches ? e.touches[0].clientX : e.clientX
   const cy = e.touches ? e.touches[0].clientY : e.clientY
   return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY }
@@ -429,9 +391,7 @@ previewCanvas.addEventListener('mousemove', e => {
   renderPreview()
 })
 
-document.addEventListener('mouseup', () => {
-  if (isDragging) { isDragging = false; previewCanvas.style.cursor = 'move' }
-})
+document.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; previewCanvas.style.cursor = 'move' } })
 
 previewCanvas.addEventListener('touchstart', e => {
   if (!selectedWmId) return
@@ -457,7 +417,6 @@ previewCanvas.addEventListener('touchmove', e => {
 
 previewCanvas.addEventListener('touchend', () => { isDragging = false })
 
-// ── File chips ──────────────────────────────────────────
 function renderFileChips() {
   fileChips.innerHTML = ''
   if (baseFiles.length <= 1) return
@@ -477,129 +436,89 @@ function renderFileChips() {
   })
 }
 
-// ── Load base images ────────────────────────────────────
 function loadFiles(files) {
   const toAdd = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 25 - baseFiles.length)
   let loaded = 0
   toAdd.forEach(file => {
     const img = new Image()
     img.onload = () => {
-      baseFiles.push({ file, img })
-      loaded++
+      baseFiles.push({ file, img }); loaded++
       if (loaded === toAdd.length) {
         toolLayout.style.display = 'grid'
         applyBtn.disabled = false
-        renderFileChips()
-        renderPreview()
+        renderFileChips(); renderPreview()
       }
     }
     img.src = URL.createObjectURL(file)
   })
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFiles(fileInput.files) })
+fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) loadFiles(e.dataTransfer.files) })
 
-// ── Apply & Download ────────────────────────────────────
 applyBtn.addEventListener('click', async () => {
   if (baseFiles.length === 0 || watermarks.length === 0) return
   applyBtn.disabled = true
   applyBtn.textContent = 'Processing...'
   document.getElementById('zipWrap').style.display = 'none'
 
-  if (!window.JSZip) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script')
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
-      s.onload = res; s.onerror = rej
-      document.head.appendChild(s)
-    })
-  }
-
   if (baseFiles.length === 1) {
-    // Single file — direct download
     const entry = baseFiles[0]
     const canvas = document.createElement('canvas')
-    canvas.width = entry.img.naturalWidth
-    canvas.height = entry.img.naturalHeight
+    canvas.width = entry.img.naturalWidth; canvas.height = entry.img.naturalHeight
     const ctx = canvas.getContext('2d')
     ctx.drawImage(entry.img, 0, 0)
     watermarks.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
     const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
     const ext = mime === 'image/png' ? 'png' : 'jpg'
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url; a.download = `watermarked.${ext}`; a.click()
-      applyBtn.disabled = false
-      applyBtn.textContent = 'Apply & Download'
-    }, mime, 0.92)
+    const blob = await canvasToBlob(canvas, mime, 0.92)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `watermarked.${ext}`; a.click()
+    applyBtn.disabled = false; applyBtn.textContent = dlBtn
     return
   }
 
-  // Batch — ZIP
-  const zip = new window.JSZip()
-  let done = 0
-  baseFiles.forEach(entry => {
+  // Batch — properly await all toBlob calls
+  const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+  const JSZip = mod.default || window.JSZip
+  const zip = new JSZip()
+  const usedNames = new Set()
+  let totalSize = 0
+
+  for (const entry of baseFiles) {
     const canvas = document.createElement('canvas')
-    canvas.width = entry.img.naturalWidth
-    canvas.height = entry.img.naturalHeight
+    canvas.width = entry.img.naturalWidth; canvas.height = entry.img.naturalHeight
     const ctx = canvas.getContext('2d')
     ctx.drawImage(entry.img, 0, 0)
     watermarks.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
     const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
     const ext = mime === 'image/png' ? 'png' : 'jpg'
     const base = entry.file.name.replace(/\.[^.]+$/, '')
-    canvas.toBlob(blob => {
-      zip.file(`watermarked-${base}.${ext}`, blob)
-      done++
-      if (done === baseFiles.length) {
-        zip.generateAsync({ type: 'blob' }).then(zipBlob => {
-          const url = URL.createObjectURL(zipBlob)
-          const zipBtn = document.getElementById('zipBtn')
-          zipBtn.href = url
-          zipBtn.download = 'watermarked-images.zip'
-          document.getElementById('zipNote').textContent = `${baseFiles.length} images — ${Math.round(zipBlob.size / 1024)} KB`
-          document.getElementById('zipWrap').style.display = 'block'
-          applyBtn.disabled = false
-          applyBtn.textContent = 'Apply & Download'
-        })
-      }
-    }, mime, 0.92)
-  })
+    const rawName = `watermarked-${base}.${ext}`
+    const safeName = makeUnique(usedNames, rawName)
+    const blob = await canvasToBlob(canvas, mime, 0.92)
+    totalSize += blob.size
+    zip.file(safeName, await blob.arrayBuffer())
+  }
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' })
+  const url = URL.createObjectURL(zipBlob)
+  const zipBtn = document.getElementById('zipBtn')
+  zipBtn.href = url; zipBtn.download = 'watermarked-images.zip'
+  document.getElementById('zipNote').textContent = `${baseFiles.length} images — ${Math.round(zipBlob.size / 1024)} KB`
+  document.getElementById('zipWrap').style.display = 'block'
+  applyBtn.disabled = false; applyBtn.textContent = dlBtn
 })
 
-// ── SEO Section ──────────────────────────────────────────────────────────────
 ;(function injectSEO() {
-  // t already defined at top of file
   const seo = t.seo && t.seo['watermark']
   if (!seo) return
-  const faqTitle = (t.seo_faq_title) || 'Frequently Asked Questions'
-  const alsoTry  = (t.seo_also_try)  || 'Also Try'
-  const style = document.createElement('style')
-  style.textContent = `
-    .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
-    .seo-section ol{padding-left:20px;margin:0 0 12px;}
-    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
-    .seo-faq{border-top:1px solid #E8E0D5;padding:10px 0;}
-    .seo-faq:last-child{border-bottom:1px solid #E8E0D5;}
-    .seo-faq-q{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif;}
-    .seo-faq-a{font-size:13px;color:#5A4A3A;margin:0;line-height:1.6;}
-    .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-  `
-  document.head.appendChild(style)
-  const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
-  const faqsHtml  = seo.faqs.map(f => `<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')
-  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
+  const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
+  const alsoTry  = t.seo_also_try  || 'Also Try'
   const div = document.createElement('div')
   div.className = 'seo-section'
-  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${stepsHtml}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${faqsHtml}<h3>${alsoTry}</h3><div class="seo-links">${linksHtml}</div>`
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
-// ─────────────────────────────────────────────────────────────────────────────

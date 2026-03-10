@@ -3,8 +3,6 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 const bg = '#F2F2F2'
-
-// ── i18n UI strings (with fallbacks) ────────────────────────────────────────
 const toolName  = (t.nav_short && t.nav_short['crop']) || 'Crop Image'
 const seo       = t.seo && t.seo['crop']
 const descText  = seo ? seo.h2a : 'Crop any image free. Files never leave your device.'
@@ -12,13 +10,10 @@ const selectLbl = t.select_images || 'Select Image'
 const dropHint  = t.drop_hint || 'or drop image anywhere'
 const faqTitle  = t.seo_faq_title || 'Frequently Asked Questions'
 const alsoTry   = t.seo_also_try || 'Also Try'
-
-// Crop-specific labels — i18n fallback by language via resize keys where available
-const lblWidth   = t.resize_width  || 'Width (px)'
-const lblHeight  = t.resize_height || 'Height (px)'
-const lblX       = 'Position X (px)'
-const lblY       = 'Position Y (px)'
-// ─────────────────────────────────────────────────────────────────────────────
+const lblWidth  = t.resize_width  || 'Width (px)'
+const lblHeight = t.resize_height || 'Height (px)'
+const lblX      = 'Position X (px)'
+const lblY      = 'Position Y (px)'
 
 if (document.head) {
   document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
@@ -65,8 +60,6 @@ if (document.head) {
 }
 
 document.title = `${toolName} Free | No Upload — RelahConvert`
-
-// Split toolName into two parts for styled H1: e.g. "Crop" + "Image"
 const parts = toolName.split(' ')
 const h1Main = parts[0]
 const h1Em   = parts.slice(1).join(' ')
@@ -95,22 +88,10 @@ document.querySelector('#app').innerHTML = `
       <div class="crop-options">
         <div class="crop-options-title">${toolName}</div>
         <div class="crop-inputs-grid">
-          <div class="crop-input-group">
-            <label class="crop-input-label">${lblWidth}</label>
-            <input class="crop-input" type="number" id="inputW" min="1" />
-          </div>
-          <div class="crop-input-group">
-            <label class="crop-input-label">${lblHeight}</label>
-            <input class="crop-input" type="number" id="inputH" min="1" />
-          </div>
-          <div class="crop-input-group">
-            <label class="crop-input-label">${lblX}</label>
-            <input class="crop-input" type="number" id="inputX" min="0" />
-          </div>
-          <div class="crop-input-group">
-            <label class="crop-input-label">${lblY}</label>
-            <input class="crop-input" type="number" id="inputY" min="0" />
-          </div>
+          <div class="crop-input-group"><label class="crop-input-label">${lblWidth}</label><input class="crop-input" type="number" id="inputW" min="1" /></div>
+          <div class="crop-input-group"><label class="crop-input-label">${lblHeight}</label><input class="crop-input" type="number" id="inputH" min="1" /></div>
+          <div class="crop-input-group"><label class="crop-input-label">${lblX}</label><input class="crop-input" type="number" id="inputX" min="0" /></div>
+          <div class="crop-input-group"><label class="crop-input-label">${lblY}</label><input class="crop-input" type="number" id="inputY" min="0" /></div>
         </div>
       </div>
     </div>
@@ -121,33 +102,12 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-// ── SEO Section ──────────────────────────────────────────────────────────────
 if (seo) {
-  const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
-  const faqsHtml  = seo.faqs.map(f => `
-    <div class="seo-faq">
-      <p class="seo-faq-q">${f.q}</p>
-      <p class="seo-faq-a">${f.a}</p>
-    </div>`).join('')
-  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
-
   const seoDiv = document.createElement('div')
   seoDiv.className = 'seo-section'
-  seoDiv.innerHTML = `
-    <h2>${seo.h2a}</h2>
-    <ol>${stepsHtml}</ol>
-    <h2>${seo.h2b}</h2>
-    ${seo.body}
-    <h3>${seo.h3why}</h3>
-    <p>${seo.why}</p>
-    <h3>${faqTitle}</h3>
-    ${faqsHtml}
-    <h3>${alsoTry}</h3>
-    <div class="seo-links">${linksHtml}</div>
-  `
+  seoDiv.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(seoDiv)
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 const fileInput    = document.getElementById('fileInput')
 const previewArea  = document.getElementById('previewArea')
@@ -204,14 +164,10 @@ function onInputChange() {
   let nY = clamp(parseInt(inputY.value) || 0, 0, imgNaturalH - 1)
   let nW = clamp(parseInt(inputW.value) || 1, 1, imgNaturalW - nX)
   let nH = clamp(parseInt(inputH.value) || 1, 1, imgNaturalH - nY)
-  box.x = toDisplay(nX, scaleX)
-  box.y = toDisplay(nY, scaleY)
-  box.w = toDisplay(nW, scaleX)
-  box.h = toDisplay(nH, scaleY)
-  cropBox.style.left   = box.x + 'px'
-  cropBox.style.top    = box.y + 'px'
-  cropBox.style.width  = box.w + 'px'
-  cropBox.style.height = box.h + 'px'
+  box.x = toDisplay(nX, scaleX); box.y = toDisplay(nY, scaleY)
+  box.w = toDisplay(nW, scaleX); box.h = toDisplay(nH, scaleY)
+  cropBox.style.left = box.x + 'px'; cropBox.style.top = box.y + 'px'
+  cropBox.style.width = box.w + 'px'; cropBox.style.height = box.h + 'px'
   updatingFromInputs = false
 }
 
@@ -221,16 +177,11 @@ inputX.addEventListener('input', onInputChange)
 inputY.addEventListener('input', onInputChange)
 
 previewImg.onload = () => {
-  displayW = previewImg.offsetWidth
-  displayH = previewImg.offsetHeight
-  imgNaturalW = previewImg.naturalWidth
-  imgNaturalH = previewImg.naturalHeight
-  inputW.max = imgNaturalW
-  inputH.max = imgNaturalH
-  inputX.max = imgNaturalW - 1
-  inputY.max = imgNaturalH - 1
-  initBox()
-  cropBtn.disabled = false
+  displayW = previewImg.offsetWidth; displayH = previewImg.offsetHeight
+  imgNaturalW = previewImg.naturalWidth; imgNaturalH = previewImg.naturalHeight
+  inputW.max = imgNaturalW; inputH.max = imgNaturalH
+  inputX.max = imgNaturalW - 1; inputY.max = imgNaturalH - 1
+  initBox(); cropBtn.disabled = false
 }
 
 function loadFile(file) {
@@ -242,7 +193,7 @@ function loadFile(file) {
   cropBtn.disabled = false
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]) })
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]) })
 
@@ -254,30 +205,13 @@ cropBox.addEventListener('mousedown', e => {
 
 document.addEventListener('mousemove', e => {
   if (!dragState) return
-  const dx = e.clientX - dragState.startX
-  const dy = e.clientY - dragState.startY
-  const sb = dragState.startBox
-  const MIN = 10
-  if (dragState.type === 'move') {
-    box.x = clamp(sb.x + dx, 0, displayW - box.w)
-    box.y = clamp(sb.y + dy, 0, displayH - box.h)
-  } else if (dragState.type === 'se') {
-    box.w = clamp(sb.w + dx, MIN, displayW - box.x)
-    box.h = clamp(sb.h + dy, MIN, displayH - box.y)
-  } else if (dragState.type === 'sw') {
-    const newW = clamp(sb.w - dx, MIN, sb.x + sb.w)
-    box.x = sb.x + sb.w - newW; box.w = newW
-    box.h = clamp(sb.h + dy, MIN, displayH - box.y)
-  } else if (dragState.type === 'ne') {
-    box.w = clamp(sb.w + dx, MIN, displayW - box.x)
-    const newH = clamp(sb.h - dy, MIN, sb.y + sb.h)
-    box.y = sb.y + sb.h - newH; box.h = newH
-  } else if (dragState.type === 'nw') {
-    const newW = clamp(sb.w - dx, MIN, sb.x + sb.w)
-    box.x = sb.x + sb.w - newW; box.w = newW
-    const newH = clamp(sb.h - dy, MIN, sb.y + sb.h)
-    box.y = sb.y + sb.h - newH; box.h = newH
-  }
+  const dx = e.clientX - dragState.startX, dy = e.clientY - dragState.startY
+  const sb = dragState.startBox, MIN = 10
+  if (dragState.type === 'move') { box.x = clamp(sb.x + dx, 0, displayW - box.w); box.y = clamp(sb.y + dy, 0, displayH - box.h) }
+  else if (dragState.type === 'se') { box.w = clamp(sb.w + dx, MIN, displayW - box.x); box.h = clamp(sb.h + dy, MIN, displayH - box.y) }
+  else if (dragState.type === 'sw') { const nW = clamp(sb.w - dx, MIN, sb.x + sb.w); box.x = sb.x + sb.w - nW; box.w = nW; box.h = clamp(sb.h + dy, MIN, displayH - box.y) }
+  else if (dragState.type === 'ne') { box.w = clamp(sb.w + dx, MIN, displayW - box.x); const nH = clamp(sb.h - dy, MIN, sb.y + sb.h); box.y = sb.y + sb.h - nH; box.h = nH }
+  else if (dragState.type === 'nw') { const nW = clamp(sb.w - dx, MIN, sb.x + sb.w); box.x = sb.x + sb.w - nW; box.w = nW; const nH = clamp(sb.h - dy, MIN, sb.y + sb.h); box.y = sb.y + sb.h - nH; box.h = nH }
   applyBox()
 })
 
@@ -293,35 +227,23 @@ cropBox.addEventListener('touchstart', e => {
 document.addEventListener('touchmove', e => {
   if (!dragState) return
   const touch = e.touches[0]
-  const dx = touch.clientX - dragState.startX
-  const dy = touch.clientY - dragState.startY
-  const sb = dragState.startBox
-  const MIN = 10
-  if (dragState.type === 'move') {
-    box.x = clamp(sb.x + dx, 0, displayW - box.w)
-    box.y = clamp(sb.y + dy, 0, displayH - box.h)
-  } else if (dragState.type === 'se') {
-    box.w = clamp(sb.w + dx, MIN, displayW - box.x)
-    box.h = clamp(sb.h + dy, MIN, displayH - box.y)
-  }
-  applyBox()
-  e.preventDefault()
+  const dx = touch.clientX - dragState.startX, dy = touch.clientY - dragState.startY
+  const sb = dragState.startBox, MIN = 10
+  if (dragState.type === 'move') { box.x = clamp(sb.x + dx, 0, displayW - box.w); box.y = clamp(sb.y + dy, 0, displayH - box.h) }
+  else if (dragState.type === 'se') { box.w = clamp(sb.w + dx, MIN, displayW - box.x); box.h = clamp(sb.h + dy, MIN, displayH - box.y) }
+  applyBox(); e.preventDefault()
 }, { passive: false })
 
 document.addEventListener('touchend', () => { dragState = null })
 
 cropBtn.addEventListener('click', () => {
   if (!originalFile) return
-  const scaleX = imgNaturalW / displayW
-  const scaleY = imgNaturalH / displayH
-  const sx = Math.round(box.x * scaleX)
-  const sy = Math.round(box.y * scaleY)
-  const sw = Math.round(box.w * scaleX)
-  const sh = Math.round(box.h * scaleY)
+  const scaleX = imgNaturalW / displayW, scaleY = imgNaturalH / displayH
+  const sx = Math.round(box.x * scaleX), sy = Math.round(box.y * scaleY)
+  const sw = Math.round(box.w * scaleX), sh = Math.round(box.h * scaleY)
   const canvas = document.createElement('canvas')
   canvas.width = sw; canvas.height = sh
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(previewImg, sx, sy, sw, sh, 0, 0, sw, sh)
+  canvas.getContext('2d').drawImage(previewImg, sx, sy, sw, sh, 0, 0, sw, sh)
   const mime = originalFile.type === 'image/png' ? 'image/png' : 'image/jpeg'
   const ext  = mime === 'image/png' ? 'png' : 'jpg'
   canvas.toBlob(blob => {

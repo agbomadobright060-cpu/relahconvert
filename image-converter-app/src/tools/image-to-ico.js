@@ -3,7 +3,6 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 const bg = '#F2F2F2'
-
 const toolName  = (t.nav_short && t.nav_short['image-to-ico']) || 'Image to ICO'
 const seoData   = t.seo && t.seo['image-to-ico']
 const descText  = seoData ? seoData.h2a : 'Convert any image to ICO favicon free. No upload. Files never leave your device.'
@@ -62,9 +61,7 @@ document.querySelector('#app').innerHTML = `
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     <div id="previewArea" style="display:none;margin-bottom:16px;">
       <div class="preview-row">
-        <div>
-          <img id="previewImg" src="" alt="preview" style="max-width:120px;max-height:120px;border-radius:8px;display:block;" />
-        </div>
+        <div><img id="previewImg" src="" alt="preview" style="max-width:120px;max-height:120px;border-radius:8px;display:block;" /></div>
         <div id="icoPreviews" class="ico-preview"></div>
       </div>
       <div style="margin-bottom:8px;">
@@ -81,27 +78,21 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput   = document.getElementById('fileInput')
-const previewArea = document.getElementById('previewArea')
-const previewImg  = document.getElementById('previewImg')
-const convertBtn  = document.getElementById('convertBtn')
-const downloadLink= document.getElementById('downloadLink')
-const icoPreviews = document.getElementById('icoPreviews')
+const fileInput    = document.getElementById('fileInput')
+const previewArea  = document.getElementById('previewArea')
+const previewImg   = document.getElementById('previewImg')
+const convertBtn   = document.getElementById('convertBtn')
+const downloadLink = document.getElementById('downloadLink')
+const icoPreviews  = document.getElementById('icoPreviews')
 let loadedImg = null
 
-// Size toggle
 document.getElementById('sizeGrid').addEventListener('click', e => {
   const btn = e.target.closest('.size-btn')
   if (!btn) return
   const s = parseInt(btn.dataset.size)
-  if (selectedSizes.includes(s)) {
-    if (selectedSizes.length > 1) selectedSizes = selectedSizes.filter(x => x !== s)
-  } else {
-    selectedSizes.push(s)
-  }
-  document.querySelectorAll('.size-btn').forEach(b => {
-    b.classList.toggle('active', selectedSizes.includes(parseInt(b.dataset.size)))
-  })
+  if (selectedSizes.includes(s)) { if (selectedSizes.length > 1) selectedSizes = selectedSizes.filter(x => x !== s) }
+  else selectedSizes.push(s)
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', selectedSizes.includes(parseInt(b.dataset.size))))
   if (loadedImg) renderPreviews()
 })
 
@@ -119,27 +110,21 @@ function loadFile(file) {
   const url = URL.createObjectURL(file)
   const img = new Image()
   img.onload = () => {
-    loadedImg = img
-    previewImg.src = url
-    previewArea.style.display = 'block'
-    convertBtn.disabled = false
-    downloadLink.style.display = 'none'
-    renderPreviews()
+    loadedImg = img; previewImg.src = url
+    previewArea.style.display = 'block'; convertBtn.disabled = false
+    downloadLink.style.display = 'none'; renderPreviews()
   }
   img.src = url
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]) })
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]) })
 
-// Build ICO binary from multiple canvas sizes
 function buildIco(canvases) {
   const NUM = canvases.length
-  const HEADER = 6
-  const DIR_ENTRY = 16
+  const HEADER = 6, DIR_ENTRY = 16
   const dirOffset = HEADER + NUM * DIR_ENTRY
-  let imageOffset = dirOffset
   const imageDataList = canvases.map(c => {
     const dataUrl = c.toDataURL('image/png')
     const b64 = dataUrl.split(',')[1]
@@ -151,31 +136,19 @@ function buildIco(canvases) {
   const totalSize = dirOffset + imageDataList.reduce((a, d) => a + d.length, 0)
   const buf = new ArrayBuffer(totalSize)
   const view = new DataView(buf)
-  // Header
-  view.setUint16(0, 0, true)
-  view.setUint16(2, 1, true)
-  view.setUint16(4, NUM, true)
-  // Directory
-  let off = HEADER
-  let imgOff = imageOffset
+  view.setUint16(0, 0, true); view.setUint16(2, 1, true); view.setUint16(4, NUM, true)
+  let off = HEADER, imgOff = dirOffset
   for (let i = 0; i < NUM; i++) {
     const s = canvases[i].width
-    view.setUint8(off, s >= 256 ? 0 : s)
-    view.setUint8(off+1, s >= 256 ? 0 : s)
+    view.setUint8(off, s >= 256 ? 0 : s); view.setUint8(off+1, s >= 256 ? 0 : s)
     view.setUint8(off+2, 0); view.setUint8(off+3, 0)
     view.setUint16(off+4, 1, true); view.setUint16(off+6, 32, true)
-    view.setUint32(off+8, imageDataList[i].length, true)
-    view.setUint32(off+12, imgOff, true)
-    imgOff += imageDataList[i].length
-    off += DIR_ENTRY
+    view.setUint32(off+8, imageDataList[i].length, true); view.setUint32(off+12, imgOff, true)
+    imgOff += imageDataList[i].length; off += DIR_ENTRY
   }
-  // Image data
   let writeOff = dirOffset
   const uint8 = new Uint8Array(buf)
-  for (const data of imageDataList) {
-    uint8.set(data, writeOff)
-    writeOff += data.length
-  }
+  for (const data of imageDataList) { uint8.set(data, writeOff); writeOff += data.length }
   return new Blob([buf], { type: 'image/x-icon' })
 }
 
@@ -190,24 +163,18 @@ convertBtn.addEventListener('click', () => {
   })
   const blob = buildIco(canvases)
   const url = URL.createObjectURL(blob)
-  downloadLink.href = url
-  downloadLink.download = 'favicon.ico'
+  downloadLink.href = url; downloadLink.download = 'favicon.ico'
   downloadLink.textContent = `${dlBtn} favicon.ico (${sorted.join(', ')}px)`
   downloadLink.style.display = 'block'
 })
 
-// ── SEO Section ──────────────────────────────────────────────────────────────
 ;(function injectSEO() {
   const seo = t.seo && t.seo['image-to-ico']
   if (!seo) return
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-  const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
-  const faqsHtml  = seo.faqs.map(f => `<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')
-  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
   const div = document.createElement('div')
   div.className = 'seo-section'
-  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${stepsHtml}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${faqsHtml}<h3>${alsoTry}</h3><div class="seo-links">${linksHtml}</div>`
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
-// ─────────────────────────────────────────────────────────────────────────────
