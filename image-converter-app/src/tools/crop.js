@@ -42,6 +42,10 @@ if (document.head) {
     .crop-input-label { font-size:11px; font-weight:600; color:#5A4A3A; font-family:'DM Sans',sans-serif; }
     .crop-input { padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none; width:100%; box-sizing:border-box; }
     .crop-input:focus { border-color:#C84B31; box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
+    .next-steps { margin-top:20px; }
+    .next-steps-label { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:#C84B31; color:#C84B31; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
@@ -97,6 +101,10 @@ document.querySelector('#app').innerHTML = `
     </div>
     <button class="opt-btn" id="cropBtn" disabled>${toolName}</button>
     <a class="download-btn" id="downloadLink">${t.download || 'Download'}</a>
+    <div id="nextSteps" style="display:none;" class="next-steps">
+      <div class="next-steps-label">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -115,6 +123,8 @@ const previewImg   = document.getElementById('previewImg')
 const cropBox      = document.getElementById('cropBox')
 const cropBtn      = document.getElementById('cropBtn')
 const downloadLink = document.getElementById('downloadLink')
+const nextSteps    = document.getElementById('nextSteps')
+const nextStepsButtons = document.getElementById('nextStepsButtons')
 const inputW       = document.getElementById('inputW')
 const inputH       = document.getElementById('inputH')
 const inputX       = document.getElementById('inputX')
@@ -127,7 +137,88 @@ let box = { x: 0, y: 0, w: 0, h: 0 }
 let dragState = null
 let updatingFromInputs = false
 let updatingFromDrag = false
+let lastCroppedBlob = null
 
+// ── IndexedDB helpers ──────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const file = new File([records[0].blob], records[0].name, { type: records[0].type })
+    loadFile(file)
+  } catch (e) {}
+}
+
+// ── Next steps ─────────────────────────────────────────────────────────────
+function buildNextSteps(mime) {
+  const isJpg = mime === 'image/jpeg'
+  const isPng = mime === 'image/png'
+  const isWebp = mime === 'image/webp'
+
+  const buttons = []
+  // Optimization tools (always show, except current = crop)
+  buttons.push({ label: t.nav_short?.compress || 'Compress', href: '/compress' })
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
+  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: '/grayscale' })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
+  // Format conversions — filter out current format and redundant ones
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (lastCroppedBlob) {
+        try {
+          await saveFilesToIDB([{ blob: lastCroppedBlob, name: originalFile.name, type: lastCroppedBlob.type }])
+          sessionStorage.setItem('pendingFromIDB', '1')
+        } catch (e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  nextSteps.style.display = 'block'
+}
+
+// ── Core logic ─────────────────────────────────────────────────────────────
 function clamp(val, min, max) { return Math.max(min, Math.min(max, val)) }
 function toDisplay(val, scale) { return val / scale }
 function toNatural(val, scale) { return Math.round(val * scale) }
@@ -188,10 +279,18 @@ function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   originalFile = file
   const url = URL.createObjectURL(file)
+  previewImg.onload = () => {
+    URL.revokeObjectURL(url)
+    displayW = previewImg.offsetWidth; displayH = previewImg.offsetHeight
+    imgNaturalW = previewImg.naturalWidth; imgNaturalH = previewImg.naturalHeight
+    inputW.max = imgNaturalW; inputH.max = imgNaturalH
+    inputX.max = imgNaturalW - 1; inputY.max = imgNaturalH - 1
+    initBox(); cropBtn.disabled = false
+  }
   previewImg.src = url
   previewArea.style.display = 'block'
   downloadLink.style.display = 'none'
-  cropBtn.disabled = false
+  nextSteps.style.display = 'none'
 }
 
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); fileInput.value = '' })
@@ -248,14 +347,16 @@ cropBtn.addEventListener('click', () => {
   const mime = originalFile.type === 'image/png' ? 'image/png' : 'image/jpeg'
   const ext  = mime === 'image/png' ? 'png' : 'jpg'
   canvas.toBlob(blob => {
-    // Revoke previous URL if any
+    lastCroppedBlob = blob
     if (downloadLink.href && downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href)
     const url = URL.createObjectURL(blob)
     downloadLink.href = url
     downloadLink.download = `cropped-image.${ext}`
     downloadLink.textContent = `${t.download || 'Download'} (${Math.round(blob.size / 1024)} KB)`
     downloadLink.style.display = 'block'
-    // Revoke after user has had time to click
     downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
+    buildNextSteps(mime)
   }, mime, 0.92)
 })
+
+loadPendingFiles()

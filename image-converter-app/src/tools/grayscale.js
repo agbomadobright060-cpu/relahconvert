@@ -36,6 +36,10 @@ if (document.head) {
     .file-card .remove-btn:hover { color:#C84B31; }
     .file-card .card-label { font-size:9px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.06em; padding:3px 6px; font-family:'DM Sans',sans-serif; background:#F5F0E8; }
     .count-badge { display:inline-block; background:#FDE8E3; color:#C84B31; font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:10px; }
+    .next-steps { margin-top:20px; }
+    .next-steps-label { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:#C84B31; color:#C84B31; }
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
     .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -72,6 +76,10 @@ document.querySelector('#app').innerHTML = `
       <a id="zipBtn" class="opt-btn" style="display:block; text-align:center; text-decoration:none; background:#2C1810; color:#F5F0E8;">⬇ ${dlZipBtn}</a>
       <p id="zipNote" style="font-size:12px; color:#9A8A7A; text-align:center; margin:8px 0 0; font-family:'DM Sans',sans-serif;"></p>
     </div>
+    <div id="nextSteps" style="display:none;" class="next-steps">
+      <div class="next-steps-label">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -82,9 +90,86 @@ const fileGrid   = document.getElementById('fileGrid')
 const applyBtn   = document.getElementById('applyBtn')
 const countBadge = document.getElementById('countBadge')
 const zipWrap    = document.getElementById('zipWrap')
+const nextSteps  = document.getElementById('nextSteps')
+const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 let files = []
+let lastResults = []
 
+// ── IndexedDB helpers ──────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const fileObjs = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    loadFiles(fileObjs)
+  } catch (e) {}
+}
+
+// ── Next steps ─────────────────────────────────────────────────────────────
+function buildNextSteps() {
+  const mime = files.length > 0 ? files[0].file.type : 'image/jpeg'
+  const isJpg = mime === 'image/jpeg'
+  const isPng = mime === 'image/png'
+  const isWebp = mime === 'image/webp'
+  const buttons = []
+  buttons.push({ label: t.nav_short?.compress || 'Compress', href: '/compress' })
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  nextSteps.style.display = 'block'
+}
+
+// ── Core grayscale logic ───────────────────────────────────────────────────
 function applyGrayscale(img) {
   const canvas = document.createElement('canvas')
   canvas.width = img.naturalWidth
@@ -139,6 +224,7 @@ function renderGrid() {
       renderGrid()
       updateCountBadge()
       zipWrap.style.display = 'none'
+      nextSteps.style.display = 'none'
     })
     fileGrid.appendChild(card)
   })
@@ -162,6 +248,7 @@ function loadFiles(newFiles) {
         renderGrid()
         updateCountBadge()
         zipWrap.style.display = 'none'
+        nextSteps.style.display = 'none'
       }
     }
     img.src = url
@@ -177,6 +264,8 @@ applyBtn.addEventListener('click', async () => {
   applyBtn.disabled = true
   applyBtn.textContent = 'Processing...'
   zipWrap.style.display = 'none'
+  nextSteps.style.display = 'none'
+  lastResults = []
 
   if (files.length === 1) {
     const item = files[0]
@@ -189,6 +278,7 @@ applyBtn.addEventListener('click', async () => {
       const ext  = mime === 'image/png' ? 'png' : 'jpg'
       const baseName = item.file.name.replace(/\.[^.]+$/, '')
       canvas.toBlob(blob => {
+        lastResults = [{ blob, name: `grayscale-${baseName}.${ext}`, type: mime }]
         const a = document.createElement('a')
         const url = URL.createObjectURL(blob)
         a.href = url
@@ -197,6 +287,7 @@ applyBtn.addEventListener('click', async () => {
         setTimeout(() => URL.revokeObjectURL(url), 10000)
         applyBtn.disabled = false
         applyBtn.textContent = dlBtn
+        buildNextSteps()
       }, mime, 0.92)
     }
     img.src = srcUrl
@@ -224,7 +315,9 @@ applyBtn.addEventListener('click', async () => {
       const ext  = mime === 'image/png' ? 'png' : 'jpg'
       const baseName = item.file.name.replace(/\.[^.]+$/, '')
       canvas.toBlob(blob => {
-        zip.file(`grayscale-${baseName}.${ext}`, blob)
+        const fname = `grayscale-${baseName}.${ext}`
+        zip.file(fname, blob)
+        lastResults.push({ blob, name: fname, type: mime })
         done++
         if (done === files.length) {
           zip.generateAsync({ type: 'blob', compression: 'STORE' }).then(zipBlob => {
@@ -238,6 +331,7 @@ applyBtn.addEventListener('click', async () => {
             zipWrap.style.display = 'block'
             applyBtn.disabled = false
             applyBtn.textContent = `${dlBtn} (${files.length})`
+            buildNextSteps()
           })
         }
       }, mime, 0.92)
@@ -259,3 +353,5 @@ applyBtn.addEventListener('click', async () => {
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${stepsHtml}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${faqsHtml}<h3>${alsoTry}</h3><div class="seo-links">${linksHtml}</div>`
   document.querySelector('#app').appendChild(div)
 })()
+
+loadPendingFiles()

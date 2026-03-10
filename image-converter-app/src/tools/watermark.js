@@ -61,6 +61,10 @@ if (document.head) {
     .file-chip button { background:none; border:none; cursor:pointer; color:#9A8A7A; font-size:12px; line-height:1; padding:0; }
     .file-chip button:hover { color:#C84B31; }
     .drag-hint { display:flex; align-items:center; gap:6px; background:#F5F0E8; border-radius:8px; padding:8px 10px; font-size:11px; color:#7A6A5A; font-family:'DM Sans',sans-serif; }
+    .next-steps { margin-top:20px; }
+    .next-steps-label { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:#C84B31; color:#C84B31; }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
@@ -120,6 +124,10 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
     </div>
+    <div id="nextSteps" style="display:none;" class="next-steps">
+      <div class="next-steps-label">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -127,6 +135,7 @@ injectHeader()
 
 let baseFiles = [], activeFileIdx = 0, watermarks = [], selectedWmId = null
 let isDragging = false, dragOffsetX = 0, dragOffsetY = 0, wmIdCounter = 0
+let lastResults = []
 
 const fileInput     = document.getElementById('fileInput')
 const toolLayout    = document.getElementById('toolLayout')
@@ -136,6 +145,8 @@ const wmList        = document.getElementById('wmList')
 const applyBtn      = document.getElementById('applyBtn')
 const addTextBtn    = document.getElementById('addTextBtn')
 const addImgInput   = document.getElementById('addImgInput')
+const nextSteps     = document.getElementById('nextSteps')
+const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 function newId() { return ++wmIdCounter }
 
@@ -149,6 +160,79 @@ function makeUnique(usedNames, name) {
   const unique = `${base}-${i}${ext}`
   usedNames.add(unique)
   return unique
+}
+
+// ── IndexedDB helpers ──────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const fileObjs = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    loadFiles(fileObjs)
+  } catch (e) {}
+}
+
+// ── Next steps ─────────────────────────────────────────────────────────────
+function buildNextSteps() {
+  const mime = baseFiles.length > 0 ? baseFiles[0].file.type : 'image/jpeg'
+  const isJpg = mime === 'image/jpeg'
+  const isPng = mime === 'image/png'
+  const isWebp = mime === 'image/webp'
+  const buttons = []
+  buttons.push({ label: t.nav_short?.compress || 'Compress', href: '/compress' })
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
+  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: '/grayscale' })
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  nextSteps.style.display = 'block'
 }
 
 function getWmRect(wm, cw, ch) {
@@ -215,7 +299,6 @@ function drawWatermarkFull(ctx, cw, ch, wm) {
   ctx.restore()
 }
 
-// Promise wrapper for canvas.toBlob
 function canvasToBlob(canvas, mime, quality) {
   return new Promise(resolve => canvas.toBlob(resolve, mime, quality))
 }
@@ -436,12 +519,14 @@ function renderFileChips() {
   })
 }
 
-function loadFiles(files) {
-  const toAdd = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 25 - baseFiles.length)
+function loadFiles(newFiles) {
+  const toAdd = Array.from(newFiles).filter(f => f.type.startsWith('image/')).slice(0, 25 - baseFiles.length)
   let loaded = 0
   toAdd.forEach(file => {
     const img = new Image()
+    const _lurl = URL.createObjectURL(file)
     img.onload = () => {
+      URL.revokeObjectURL(_lurl)
       baseFiles.push({ file, img }); loaded++
       if (loaded === toAdd.length) {
         toolLayout.style.display = 'grid'
@@ -449,8 +534,6 @@ function loadFiles(files) {
         renderFileChips(); renderPreview()
       }
     }
-    const _lurl = URL.createObjectURL(file)
-    img.onload = () => { URL.revokeObjectURL(_lurl); }
     img.src = _lurl
   })
 }
@@ -464,6 +547,8 @@ applyBtn.addEventListener('click', async () => {
   applyBtn.disabled = true
   applyBtn.textContent = 'Processing...'
   document.getElementById('zipWrap').style.display = 'none'
+  nextSteps.style.display = 'none'
+  lastResults = []
 
   if (baseFiles.length === 1) {
     const entry = baseFiles[0]
@@ -475,19 +560,19 @@ applyBtn.addEventListener('click', async () => {
     const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
     const ext = mime === 'image/png' ? 'png' : 'jpg'
     const blob = await canvasToBlob(canvas, mime, 0.92)
+    lastResults = [{ blob, name: `watermarked.${ext}`, type: mime }]
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url; a.download = `watermarked.${ext}`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000)
     applyBtn.disabled = false; applyBtn.textContent = dlBtn
+    buildNextSteps()
     return
   }
 
-  // Batch — properly await all toBlob calls
   const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
   const JSZip = mod.default || window.JSZip
   const zip = new JSZip()
   const usedNames = new Set()
-  let totalSize = 0
 
   for (const entry of baseFiles) {
     const canvas = document.createElement('canvas')
@@ -501,7 +586,7 @@ applyBtn.addEventListener('click', async () => {
     const rawName = `watermarked-${base}.${ext}`
     const safeName = makeUnique(usedNames, rawName)
     const blob = await canvasToBlob(canvas, mime, 0.92)
-    totalSize += blob.size
+    lastResults.push({ blob, name: safeName, type: mime })
     zip.file(safeName, await blob.arrayBuffer())
   }
 
@@ -509,9 +594,11 @@ applyBtn.addEventListener('click', async () => {
   const url = URL.createObjectURL(zipBlob)
   const zipBtn = document.getElementById('zipBtn')
   zipBtn.href = url; zipBtn.download = 'watermarked-images.zip'
+  zipBtn.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
   document.getElementById('zipNote').textContent = `${baseFiles.length} images — ${Math.round(zipBlob.size / 1024)} KB`
   document.getElementById('zipWrap').style.display = 'block'
   applyBtn.disabled = false; applyBtn.textContent = dlBtn
+  buildNextSteps()
 })
 
 ;(function injectSEO() {
@@ -524,3 +611,5 @@ applyBtn.addEventListener('click', async () => {
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
+
+loadPendingFiles()

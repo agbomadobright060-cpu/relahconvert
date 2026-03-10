@@ -39,6 +39,10 @@ style.textContent = `
   .action-btn.dark:hover{background:#1a0f09;}
   .action-btn:disabled{background:#C4B8A8;cursor:not-allowed;}
   .status-text{font-size:13px;color:#7A6A5A;font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
+  .next-steps{margin-top:20px;}
+  .next-steps-label{font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;}
+  .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:500;color:#2C1810;text-decoration:none;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .next-link:hover{border-color:#C84B31;color:#C84B31;}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
   .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
   .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
@@ -71,6 +75,10 @@ document.querySelector('#app').innerHTML = `
       <button class="action-btn" id="applyBtn">⬇ Download All</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
+    <div id="nextSteps" style="display:none;" class="next-steps">
+      <div class="next-steps-label">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -82,10 +90,88 @@ const actionRow  = document.getElementById('actionRow')
 const applyBtn   = document.getElementById('applyBtn')
 const zipBtn     = document.getElementById('zipBtn')
 const statusText = document.getElementById('statusText')
+const nextSteps  = document.getElementById('nextSteps')
+const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 let files = []
+let lastResults = []
 
-// Unique filename helper to avoid ZIP collisions
+// ── IndexedDB helpers ──────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const fileObjs = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    addFiles(fileObjs)
+  } catch (e) {}
+}
+
+// ── Next steps ─────────────────────────────────────────────────────────────
+function buildNextSteps() {
+  const mime = files.length > 0 ? files[0].file.type : 'image/jpeg'
+  const isJpg = mime === 'image/jpeg'
+  const isPng = mime === 'image/png'
+  const isWebp = mime === 'image/webp'
+
+  const buttons = []
+  buttons.push({ label: t.nav_short?.compress || 'Compress', href: '/compress' })
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
+  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: '/grayscale' })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  nextSteps.style.display = 'block'
+}
+
+// ── Unique filename helper ─────────────────────────────────────────────────
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
   const dot = name.lastIndexOf('.')
@@ -137,7 +223,7 @@ function addFiles(newFiles) {
     rmBtn.addEventListener('click', () => {
       files = files.filter(f => f !== entry)
       card.remove()
-      if (files.length === 0) { actionRow.classList.remove('on'); statusText.textContent = '' }
+      if (files.length === 0) { actionRow.classList.remove('on'); statusText.textContent = ''; nextSteps.style.display = 'none' }
     })
     card.append(imgWrap, fname, angleLabel, dlLink, rmBtn)
     fileGrid.appendChild(card)
@@ -183,6 +269,7 @@ applyBtn.addEventListener('click', async () => {
   statusText.textContent = 'Processing…'
   const results = []
   const usedNames = new Set()
+  lastResults = []
 
   for (const entry of files) {
     const baseName = entry.file.name.replace(/\.[^.]+$/, '')
@@ -196,7 +283,9 @@ applyBtn.addEventListener('click', async () => {
       entry.dlLink.style.display = 'block'
       entry.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       const ab = await entry.file.arrayBuffer()
-      results.push({ name: safeName, blob: new Blob([ab], { type: entry.file.type }) })
+      const blob = new Blob([ab], { type: entry.file.type })
+      results.push({ name: safeName, blob })
+      lastResults.push({ blob, name: safeName, type: entry.file.type })
     } else {
       const { blob, mime, ext } = await rotateToBlob(entry)
       const rawName = `${baseName}-rotated-${entry.angle}deg.${ext}`
@@ -207,12 +296,14 @@ applyBtn.addEventListener('click', async () => {
       entry.dlLink.style.display = 'block'
       entry.dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
       results.push({ name: safeName, blob })
+      lastResults.push({ blob, name: safeName, type: mime })
     }
   }
 
   applyBtn.disabled = false
   statusText.textContent = files.length > 1 ? `${files.length} images ready.` : 'Image ready.'
   if (files.length > 1) { zipBtn.style.display = 'block'; zipBtn._results = results }
+  buildNextSteps()
 })
 
 zipBtn.addEventListener('click', async () => {
@@ -246,3 +337,5 @@ zipBtn.addEventListener('click', async () => {
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
+
+loadPendingFiles()

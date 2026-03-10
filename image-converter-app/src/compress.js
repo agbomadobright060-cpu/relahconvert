@@ -36,7 +36,7 @@ if (document.head) {
     .result-saved { font-size:14px; color:#2C1810; margin:0 0 4px; font-weight:400; }
     .result-sizes { font-size:13px; color:#7A6A5A; display:flex; align-items:center; gap:8px; }
     .result-arrow { color:#C84B31; font-size:16px; }
-    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
     .next-link:hover { border-color:#C84B31; color:#C84B31; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -147,11 +147,7 @@ document.querySelector('#app').innerHTML = `
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="next-link" data-href="/jpg-to-png">${t.next_to_png}</button>
-        <button class="next-link" data-href="/jpg-to-webp">${t.next_to_webp}</button>
-        <button class="next-link" data-href="/png-to-jpg">${t.next_to_jpg}</button>
-      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
     </div>
   </div>
   ${buildSeoSection()}
@@ -164,6 +160,7 @@ const previewGrid = document.getElementById('previewGrid')
 const warning = document.getElementById('warning')
 const resultBar = document.getElementById('resultBar')
 const nextSteps = document.getElementById('nextSteps')
+const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 let selectedFiles = [], currentDownloadUrl = null, compressedBlobs = []
 
@@ -207,6 +204,43 @@ async function loadPendingFiles() {
   } catch (e) {}
 }
 
+// ── Next steps ─────────────────────────────────────────────────────────────
+function buildNextSteps() {
+  // Determine dominant mime from compressed output
+  const outputMime = compressedBlobs.length > 0 ? compressedBlobs[0].type : (selectedFiles.length > 0 ? getOutputMime(selectedFiles[0].type) : 'image/jpeg')
+  const isJpg = outputMime === 'image/jpeg'
+  const isPng = outputMime === 'image/png'
+  const isWebp = outputMime === 'image/webp'
+
+  const buttons = []
+  // Optimization tools (never show compress = current tool)
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
+  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: '/grayscale' })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
+  // Format conversions — filter out current output format
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (compressedBlobs.length) {
+        try { await saveFilesToIDB(compressedBlobs); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  nextSteps.style.display = 'block'
+}
+
 function getOutputMime(mime) { return mime === 'image/png' ? 'image/jpeg' : mime }
 function getQuality(mime) { return mime === 'image/webp' ? 0.65 : 0.6 }
 function setDisabled() { compressBtn.disabled = true; compressBtn.textContent = t.compress_btn; compressBtn.style.background = '#C4B8A8'; compressBtn.style.cursor = 'not-allowed'; compressBtn.style.opacity = '0.7' }
@@ -243,7 +277,7 @@ function showResultBar(originalBytes, outputBytes) {
     const circle = document.getElementById('circleAnim')
     if (circle) circle.style.strokeDashoffset = dashOffset
   }))
-  nextSteps.style.display = 'block'
+  buildNextSteps()
 }
 
 async function compressFile(file) {
@@ -299,7 +333,6 @@ function validateAndAdd(incoming) {
   if (wrongFormat.length) showWarning(`${t.warn_unsupported} ${wrongFormat.length} ${t.warn_wrong_format}`)
   if (tooBig.length) showWarning(`${tooBig.length} ${t.warn_too_large}`)
   if (valid.some(f => f.type === 'image/png')) showWarning(t.warn_png_to_jpg)
-  // Allow duplicates — just append, no deduplication
   let merged = [...selectedFiles, ...valid]
   if (merged.length > LIMITS.MAX_FILES) merged = merged.slice(0, LIMITS.MAX_FILES)
   while (totalBytes(merged) > LIMITS.MAX_TOTAL_BYTES && merged.length > 0) merged.pop()
@@ -308,15 +341,6 @@ function validateAndAdd(incoming) {
   renderPreviews()
   if (selectedFiles.length) setIdle(); else setDisabled()
 }
-
-nextSteps.querySelectorAll('.next-link').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const href = btn.getAttribute('data-href')
-    if (!compressedBlobs.length) { window.location.href = href; return }
-    try { await saveFilesToIDB(compressedBlobs); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
-    window.location.href = href
-  })
-})
 
 fileInput.addEventListener('change', () => { validateAndAdd(Array.from(fileInput.files || [])); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
