@@ -178,11 +178,7 @@ document.querySelector('#app').innerHTML = `
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="next-link" data-href="/compress">${t.next_compress}</button>
-        <button class="next-link" data-href="/jpg-to-png">${t.next_to_png}</button>
-        <button class="next-link" data-href="/jpg-to-webp">${t.next_to_webp}</button>
-      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
     </div>
   </div>
   ${buildSeoSection()}
@@ -326,15 +322,39 @@ function getTargetDimensions(file) {
   })
 }
 
-function bindNextSteps() {
-  nextSteps.querySelectorAll('.next-link').forEach(btn => {
+function buildNextSteps() {
+  const mime = resizedBlobs.length > 0 ? resizedBlobs[0].type : (selectedFiles.length > 0 ? selectedFiles[0].type : 'image/jpeg')
+  const isJpg = mime === 'image/jpeg'
+  const isPng = mime === 'image/png'
+  const isWebp = mime === 'image/webp'
+
+  const buttons = []
+  // Optimization tools (never show resize = current tool)
+  buttons.push({ label: t.nav_short?.compress || 'Compress', href: '/compress' })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
+  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: '/grayscale' })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+
+  const nextStepsButtons = document.getElementById('nextStepsButtons')
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
     btn.addEventListener('click', async () => {
-      const href = btn.getAttribute('data-href')
-      if (!resizedBlobs.length) { window.location.href = href; return }
-      try { await saveFilesToIDB(resizedBlobs); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
-      window.location.href = href
+      if (resizedBlobs.length) {
+        try { await saveFilesToIDB(resizedBlobs); sessionStorage.setItem('pendingFromIDB', '1') } catch (e) {}
+      }
+      window.location.href = b.href
     })
+    nextStepsButtons.appendChild(btn)
   })
+  nextSteps.style.display = 'block'
 }
 
 resizeBtn.addEventListener('click', async () => {
@@ -366,7 +386,7 @@ resizeBtn.addEventListener('click', async () => {
       downloadLink.href = currentDownloadUrl; downloadLink.download = 'resized-images.zip'; downloadLink.style.display = 'block'
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
     }
-    nextSteps.style.display = 'block'; bindNextSteps(); setIdle(); fileInput.value = ''
+    buildNextSteps(); setIdle(); fileInput.value = ''
   } catch (err) {
     alert(err?.message || 'Resize error')
     if (selectedFiles.length) setIdle(); else setDisabled()
