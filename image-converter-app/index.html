@@ -52,6 +52,13 @@
       .hero p { font-size: 15px; color: #7A6A5A; line-height: 1.6; }
       .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: #FDE8E3; color: #C84B31; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; letter-spacing: 0.04em; }
       .tools-section { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; flex: 1; width: 100%; position: relative; z-index: 2; }
+      /* ── Filter bar ── */
+      .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+      .filter-btn { padding: 8px 20px; border-radius: 24px; border: 1.5px solid #DDD5C8; background: #fff; font-size: 13px; font-weight: 600; color: #5A4A3A; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+      .filter-btn:hover { border-color: #C84B31; color: #C84B31; }
+      .filter-btn.active { background: #C84B31; border-color: #C84B31; color: #fff; }
+      .tool-card[style*="display:none"] { display: none !important; }
+      /* ── */
       .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
       .tool-card { background: #fff; border-radius: 14px; padding: 20px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; display: block; }
       .tool-card:hover { border-color: #C84B31; box-shadow: 0 4px 16px rgba(200,75,49,0.12); transform: translateY(-2px); }
@@ -86,6 +93,8 @@
         .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 6px; }
         .footer-bottom { flex-direction: column; align-items: flex-start; }
         .photo-block { opacity: 0.5; }
+        .filter-bar { gap: 6px; }
+        .filter-btn { padding: 7px 14px; font-size: 12px; }
       }
     </style>
   </head>
@@ -127,6 +136,12 @@
       <p id="heroDesc"></p>
     </section>
     <section class="tools-section">
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="optimize">Optimize</button>
+        <button class="filter-btn" data-filter="edit">Edit</button>
+        <button class="filter-btn" data-filter="convert">Convert</button>
+      </div>
       <div class="tools-grid" id="toolsGrid"></div>
     </section>
     <footer id="site-footer">
@@ -170,6 +185,37 @@
         'crop','rotate','flip','grayscale','watermark',
         'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg'
       ]
+
+      // ── Category map ──────────────────────────────────────────────────────
+      const categoryMap = {
+        'compress':          'optimize',
+        'resize':            'optimize',
+        'remove-background': 'optimize',
+        'crop':              'edit',
+        'rotate':            'edit',
+        'flip':              'edit',
+        'grayscale':         'edit',
+        'watermark':         'edit',
+        'jpg-to-png':        'convert',
+        'png-to-jpg':        'convert',
+        'jpg-to-webp':       'convert',
+        'webp-to-jpg':       'convert',
+        'png-to-webp':       'convert',
+        'webp-to-png':       'convert',
+        'jpg-to-pdf':        'convert',
+        'png-to-pdf':        'convert',
+        'gif-to-jpg':        'convert',
+        'gif-to-png':        'convert',
+        'bmp-to-jpg':        'convert',
+        'bmp-to-png':        'convert',
+        'tiff-to-jpg':       'convert',
+        'jpg-to-gif':        'convert',
+        'png-to-gif':        'convert',
+        'heic-to-jpg':       'convert',
+        'image-to-ico':      'convert',
+        'jpg-to-svg':        'convert',
+      }
+
       document.getElementById('desktopNav').innerHTML =
         mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
         `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
@@ -213,7 +259,6 @@
             ${t.nav_short[slug] || slug}
           </a>`
         }).join('')
-      // Helper: get translated desc — uses card_*_desc if exists, else seo block h2a, else fallback
       function cardDesc(slug, fallback) {
         const key = 'card_' + slug.replace(/-/g,'_') + '_desc'
         if (t[key]) return t[key]
@@ -221,42 +266,55 @@
         return fallback
       }
       const cardData = [
-        { href: '/compress',          title: t.nav_short['compress'],                       desc: cardDesc('compress',          'Reduce image file size free.') },
-        { href: '/resize',            title: t.nav_short['resize'],                         desc: cardDesc('resize',            'Resize images free.') },
-        { href: '/jpg-to-png',        title: t.nav_short['jpg-to-png'],                     desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.') },
-        { href: '/png-to-jpg',        title: t.nav_short['png-to-jpg'],                     desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.') },
-        { href: '/jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                    desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.') },
-        { href: '/webp-to-jpg',       title: t.nav_short['webp-to-jpg'],                    desc: cardDesc('webp_to_jpg',       'Convert WebP to JPG free.') },
-        { href: '/png-to-webp',       title: t.nav_short['png-to-webp'],                    desc: cardDesc('png_to_webp',       'Convert PNG to WebP free.') },
-        { href: '/webp-to-png',       title: t.nav_short['webp-to-png'],                    desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.') },
-        { href: '/jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                     desc: cardDesc('jpg_to_pdf',        'Convert JPG to PDF free.') },
-        { href: '/png-to-pdf',        title: t.nav_short['png-to-pdf'],                     desc: cardDesc('png_to_pdf',        'Convert PNG to PDF free.') },
-        { href: '/gif-to-jpg',        title: t.nav_short['gif-to-jpg']  || 'GIF to JPG',   desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.') },
-        { href: '/gif-to-png',        title: t.nav_short['gif-to-png']  || 'GIF to PNG',   desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.') },
-        { href: '/bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']  || 'BMP to JPG',   desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.') },
-        { href: '/bmp-to-png',        title: t.nav_short['bmp-to-png']  || 'BMP to PNG',   desc: cardDesc('bmp-to-png',        'Convert BMP to PNG free.') },
-        { href: '/tiff-to-jpg',       title: t.nav_short['tiff-to-jpg'] || 'TIFF to JPG',  desc: cardDesc('tiff-to-jpg',       'Convert TIFF to JPG free.') },
-        { href: '/jpg-to-gif',        title: t.nav_short['jpg-to-gif']  || 'JPG to GIF',   desc: cardDesc('jpg-to-gif',        'Convert JPG to GIF free.') },
-        { href: '/png-to-gif',        title: t.nav_short['png-to-gif']  || 'PNG to GIF',   desc: cardDesc('png-to-gif',        'Convert PNG to GIF free.') },
-        { href: '/crop',              title: t.nav_short['crop']        || 'Crop Image',    desc: cardDesc('crop',              'Crop any image free.') },
-        { href: '/rotate',            title: t.nav_short['rotate']      || 'Rotate Image',  desc: cardDesc('rotate',            'Rotate any image free.') },
-        { href: '/flip',              title: t.nav_short['flip']        || 'Flip Image',    desc: cardDesc('flip',              'Flip any image free.') },
-        { href: '/grayscale',         title: t.nav_short['grayscale']   || 'Grayscale',     desc: cardDesc('grayscale',         'Convert image to black & white free.') },
-        { href: '/watermark',         title: t.nav_short['watermark']   || 'Add Watermark', desc: cardDesc('watermark',         'Add watermark to any image free.') },
-        { href: '/remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: cardDesc('remove-background', 'Remove image background free. AI-powered.') },
-        { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']       || 'HEIC to JPG',       desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.') },
-        { href: '/image-to-ico',      title: t.nav_short['image-to-ico']      || 'Image to ICO',      desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.') },
-        { href: '/jpg-to-svg',        title: t.nav_short['jpg-to-svg']        || 'JPG to SVG',        desc: cardDesc('jpg-to-svg',        'Convert JPG to SVG free.') },
+        { href: '/compress',          title: t.nav_short['compress'],                       desc: cardDesc('compress',          'Reduce image file size free.'),           cat: 'optimize' },
+        { href: '/resize',            title: t.nav_short['resize'],                         desc: cardDesc('resize',            'Resize images free.'),                    cat: 'optimize' },
+        { href: '/remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: cardDesc('remove-background', 'Remove image background free. AI-powered.'), cat: 'optimize' },
+        { href: '/crop',              title: t.nav_short['crop']        || 'Crop Image',    desc: cardDesc('crop',              'Crop any image free.'),                   cat: 'edit' },
+        { href: '/rotate',            title: t.nav_short['rotate']      || 'Rotate Image',  desc: cardDesc('rotate',            'Rotate any image free.'),                 cat: 'edit' },
+        { href: '/flip',              title: t.nav_short['flip']        || 'Flip Image',    desc: cardDesc('flip',              'Flip any image free.'),                   cat: 'edit' },
+        { href: '/grayscale',         title: t.nav_short['grayscale']   || 'Grayscale',     desc: cardDesc('grayscale',         'Convert image to black & white free.'),   cat: 'edit' },
+        { href: '/watermark',         title: t.nav_short['watermark']   || 'Add Watermark', desc: cardDesc('watermark',         'Add watermark to any image free.'),       cat: 'edit' },
+        { href: '/jpg-to-png',        title: t.nav_short['jpg-to-png'],                     desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.'),               cat: 'convert' },
+        { href: '/png-to-jpg',        title: t.nav_short['png-to-jpg'],                     desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.'),               cat: 'convert' },
+        { href: '/jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                    desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.'),              cat: 'convert' },
+        { href: '/webp-to-jpg',       title: t.nav_short['webp-to-jpg'],                    desc: cardDesc('webp_to_jpg',       'Convert WebP to JPG free.'),              cat: 'convert' },
+        { href: '/png-to-webp',       title: t.nav_short['png-to-webp'],                    desc: cardDesc('png_to_webp',       'Convert PNG to WebP free.'),              cat: 'convert' },
+        { href: '/webp-to-png',       title: t.nav_short['webp-to-png'],                    desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.'),              cat: 'convert' },
+        { href: '/jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                     desc: cardDesc('jpg_to_pdf',        'Convert JPG to PDF free.'),               cat: 'convert' },
+        { href: '/png-to-pdf',        title: t.nav_short['png-to-pdf'],                     desc: cardDesc('png_to_pdf',        'Convert PNG to PDF free.'),               cat: 'convert' },
+        { href: '/gif-to-jpg',        title: t.nav_short['gif-to-jpg']  || 'GIF to JPG',   desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.'),               cat: 'convert' },
+        { href: '/gif-to-png',        title: t.nav_short['gif-to-png']  || 'GIF to PNG',   desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.'),               cat: 'convert' },
+        { href: '/bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']  || 'BMP to JPG',   desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.'),               cat: 'convert' },
+        { href: '/bmp-to-png',        title: t.nav_short['bmp-to-png']  || 'BMP to PNG',   desc: cardDesc('bmp-to-png',        'Convert BMP to PNG free.'),               cat: 'convert' },
+        { href: '/tiff-to-jpg',       title: t.nav_short['tiff-to-jpg'] || 'TIFF to JPG',  desc: cardDesc('tiff-to-jpg',       'Convert TIFF to JPG free.'),              cat: 'convert' },
+        { href: '/jpg-to-gif',        title: t.nav_short['jpg-to-gif']  || 'JPG to GIF',   desc: cardDesc('jpg-to-gif',        'Convert JPG to GIF free.'),               cat: 'convert' },
+        { href: '/png-to-gif',        title: t.nav_short['png-to-gif']  || 'PNG to GIF',   desc: cardDesc('png-to-gif',        'Convert PNG to GIF free.'),               cat: 'convert' },
+        { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']       || 'HEIC to JPG',       desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.'),       cat: 'convert' },
+        { href: '/image-to-ico',      title: t.nav_short['image-to-ico']      || 'Image to ICO',      desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.'),     cat: 'convert' },
+        { href: '/jpg-to-svg',        title: t.nav_short['jpg-to-svg']        || 'JPG to SVG',        desc: cardDesc('jpg-to-svg',        'Convert JPG to SVG free.'),               cat: 'convert' },
       ]
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
         const slug = c.href.replace('/', '')
         const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '' }
-        return `<a href="${c.href}" class="tool-card">
+        return `<a href="${c.href}" class="tool-card" data-category="${c.cat}">
           <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
           <h2>${c.title}</h2>
           <p>${c.desc}</p>
         </a>`
       }).join('')
+
+      // ── Filter logic ──────────────────────────────────────────────────────
+      document.getElementById('filterBar').addEventListener('click', e => {
+        const btn = e.target.closest('.filter-btn')
+        if (!btn) return
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        const filter = btn.dataset.filter
+        document.querySelectorAll('.tool-card').forEach(card => {
+          card.style.display = (filter === 'all' || card.dataset.category === filter) ? '' : 'none'
+        })
+      })
+
       document.getElementById('footerCompany').textContent = t.footer_company
       document.getElementById('footerAbout').textContent   = t.footer_about
       document.getElementById('footerContact').textContent = t.footer_contact
