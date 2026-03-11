@@ -181,4 +181,11 @@ export const tools = {
     outputFormat: 'image/svg+xml',
     slug: 'jpg-to-svg'
   },
+  'round-corners': {
+    title: 'Round Image Corners',
+    description: 'Round image corners free. Transparent PNG output. No upload required.',
+    inputFormats: [],
+    outputFormat: 'image/png',
+    slug: 'round-corners'
+  },
 }
