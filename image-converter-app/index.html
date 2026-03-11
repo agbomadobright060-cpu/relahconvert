@@ -136,12 +136,7 @@
       <p id="heroDesc"></p>
     </section>
     <section class="tools-section">
-      <div class="filter-bar" id="filterBar">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="optimize">Optimize</button>
-        <button class="filter-btn" data-filter="edit">Edit</button>
-        <button class="filter-btn" data-filter="convert">Convert</button>
-      </div>
+      <div class="filter-bar" id="filterBar"></div>
       <div class="tools-grid" id="toolsGrid"></div>
     </section>
     <footer id="site-footer">
@@ -176,6 +171,17 @@
       import { getLang, setLang, getT, supportedLangs, langLabels } from '/src/core/i18n.js'
       const t = getT()
       const currentLang = getLang()
+
+      // ── Build filter bar from i18n ────────────────────────────────────
+      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert' }
+      document.getElementById('filterBar').innerHTML = [
+        { key: 'all',      label: f.all      },
+        { key: 'optimize', label: f.optimize },
+        { key: 'edit',     label: f.edit     },
+        { key: 'convert',  label: f.convert  },
+      ].map(({key, label}) =>
+        `<button class="filter-btn${key === 'all' ? ' active' : ''}" data-filter="${key}">${label}</button>`
+      ).join('')
       const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
       const allSlugs = [
         'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',

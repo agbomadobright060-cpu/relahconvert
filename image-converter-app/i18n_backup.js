@@ -1,7 +1,6 @@
 const translations = {
   en: {
     nav_more_tools: 'More Tools',
-    filter:{all:'All',optimize:'Optimize',edit:'Edit',convert:'Convert'},
     nav_short: {
       'jpg-to-png':'JPG to PNG','png-to-jpg':'PNG to JPG','jpg-to-webp':'JPG to WebP','webp-to-jpg':'WebP to JPG',
       'png-to-webp':'PNG to WebP','webp-to-png':'WebP to PNG','compress':'Compress Image','resize':'Resize Image',
@@ -466,7 +465,6 @@ const translations = {
   },
   fr:{
     nav_more_tools:"Plus d'outils",
-    filter:{all:'Tout',optimize:'Optimiser',edit:'Éditer',convert:'Convertir'},
     nav_short:{'jpg-to-png':'JPG en PNG','png-to-jpg':'PNG en JPG','jpg-to-webp':'JPG en WebP','webp-to-jpg':'WebP en JPG','png-to-webp':'PNG en WebP','webp-to-png':'WebP en PNG','compress':'Compresser','resize':'Redimensionner','jpg-to-pdf':'JPG en PDF','png-to-pdf':'PNG en PDF','gif-to-jpg':'GIF en JPG','gif-to-png':'GIF en PNG','bmp-to-jpg':'BMP en JPG','bmp-to-png':'BMP en PNG','tiff-to-jpg':'TIFF en JPG','jpg-to-gif':'JPG en GIF','png-to-gif':'PNG en GIF','crop':'Recadrer','rotate':'Pivoter','flip':'Retourner','grayscale':'Noir & Blanc','watermark':'Filigrane','remove-background':'Supprimer fond','heic-to-jpg':'HEIC en JPG','image-to-ico':'Image en ICO','jpg-to-svg':'JPG en SVG'},
     footer_copy:'© 2026 RelahConvert. Tous droits réservés.',footer_company:'Société',footer_legal:'Légal',footer_about:'À propos',footer_contact:'Nous contacter',footer_privacy:'Politique de confidentialité',footer_terms:"Conditions d'utilisation",footer_cookies:'Politique de cookies',
     hero_badge:'✦ Gratuit · Sans upload · Navigateur uniquement',hero_title_1:'Tous les outils image',hero_title_2:'dont vous avez besoin,',hero_title_em:'gratuitement',
@@ -515,7 +513,6 @@ const translations = {
 
   es:{
     nav_more_tools:'Más herramientas',
-    filter:{all:'Todo',optimize:'Optimizar',edit:'Editar',convert:'Convertir'},
     nav_short:{'jpg-to-png':'JPG a PNG','png-to-jpg':'PNG a JPG','jpg-to-webp':'JPG a WebP','webp-to-jpg':'WebP a JPG','png-to-webp':'PNG a WebP','webp-to-png':'WebP a PNG','compress':'Comprimir','resize':'Redimensionar','jpg-to-pdf':'JPG a PDF','png-to-pdf':'PNG a PDF','gif-to-jpg':'GIF a JPG','gif-to-png':'GIF a PNG','bmp-to-jpg':'BMP a JPG','bmp-to-png':'BMP a PNG','tiff-to-jpg':'TIFF a JPG','jpg-to-gif':'JPG a GIF','png-to-gif':'PNG a GIF','crop':'Recortar','rotate':'Rotar','flip':'Voltear','grayscale':'Blanco y Negro','watermark':'Marca de agua','remove-background':'Quitar fondo','heic-to-jpg':'HEIC a JPG','image-to-ico':'Imagen a ICO','jpg-to-svg':'JPG a SVG'},
     footer_copy:'© 2026 RelahConvert. Todos los derechos reservados.',footer_company:'Empresa',footer_legal:'Legal',footer_about:'Sobre nosotros',footer_contact:'Contacto',footer_privacy:'Política de privacidad',footer_terms:'Términos y condiciones',footer_cookies:'Política de cookies',
     hero_badge:'✦ Gratis · Sin subida · Solo navegador',hero_title_1:'Todas las herramientas',hero_title_2:'que necesitas,',hero_title_em:'gratis',
@@ -564,7 +561,6 @@ const translations = {
 
   pt:{
     nav_more_tools:'Mais ferramentas',
-    filter:{all:'Tudo',optimize:'Otimizar',edit:'Editar',convert:'Converter'},
     nav_short:{'jpg-to-png':'JPG para PNG','png-to-jpg':'PNG para JPG','jpg-to-webp':'JPG para WebP','webp-to-jpg':'WebP para JPG','png-to-webp':'PNG para WebP','webp-to-png':'WebP para PNG','compress':'Comprimir','resize':'Redimensionar','jpg-to-pdf':'JPG para PDF','png-to-pdf':'PNG para PDF','gif-to-jpg':'GIF para JPG','gif-to-png':'GIF para PNG','bmp-to-jpg':'BMP para JPG','bmp-to-png':'BMP para PNG','tiff-to-jpg':'TIFF para JPG','jpg-to-gif':'JPG para GIF','png-to-gif':'PNG para GIF','crop':'Cortar','rotate':'Girar','flip':'Espelhar','grayscale':'Preto e Branco','watermark':'Marca d\'água','remove-background':'Remover fundo','heic-to-jpg':'HEIC para JPG','image-to-ico':'Imagem para ICO','jpg-to-svg':'JPG para SVG'},
     footer_copy:'© 2026 RelahConvert. Todos os direitos reservados.',footer_company:'Empresa',footer_legal:'Legal',footer_about:'Sobre nós',footer_contact:'Contato',footer_privacy:'Política de privacidade',footer_terms:'Termos e condições',footer_cookies:'Política de cookies',
     hero_badge:'✦ Grátis · Sem upload · Apenas navegador',hero_title_1:'Todas as ferramentas',hero_title_2:'que você precisa,',hero_title_em:'grátis',
@@ -613,7 +609,6 @@ const translations = {
 
   de:{
     nav_more_tools:'Mehr Tools',
-    filter:{all:'Alle',optimize:'Optimieren',edit:'Bearbeiten',convert:'Konvertieren'},
     nav_short:{'jpg-to-png':'JPG zu PNG','png-to-jpg':'PNG zu JPG','jpg-to-webp':'JPG zu WebP','webp-to-jpg':'WebP zu JPG','png-to-webp':'PNG zu WebP','webp-to-png':'WebP zu PNG','compress':'Komprimieren','resize':'Größe ändern','jpg-to-pdf':'JPG zu PDF','png-to-pdf':'PNG zu PDF','gif-to-jpg':'GIF zu JPG','gif-to-png':'GIF zu PNG','bmp-to-jpg':'BMP zu JPG','bmp-to-png':'BMP zu PNG','tiff-to-jpg':'TIFF zu JPG','jpg-to-gif':'JPG zu GIF','png-to-gif':'PNG zu GIF','crop':'Zuschneiden','rotate':'Drehen','flip':'Spiegeln','grayscale':'Schwarzweiß','watermark':'Wasserzeichen','remove-background':'Hintergrund entfernen','heic-to-jpg':'HEIC zu JPG','image-to-ico':'Bild zu ICO','jpg-to-svg':'JPG zu SVG'},
     footer_copy:'© 2026 RelahConvert. Alle Rechte vorbehalten.',footer_company:'Unternehmen',footer_legal:'Rechtliches',footer_about:'Über uns',footer_contact:'Kontakt',footer_privacy:'Datenschutzrichtlinie',footer_terms:'Nutzungsbedingungen',footer_cookies:'Cookie-Richtlinie',
     hero_badge:'✦ Kostenlos · Kein Upload · Nur Browser',hero_title_1:'Alle Bildwerkzeuge',hero_title_2:'die Sie brauchen,',hero_title_em:'kostenlos',
@@ -662,7 +657,6 @@ const translations = {
 
   ar:{
     nav_more_tools:'المزيد من الأدوات',
-    filter:{all:'الكل',optimize:'تحسين',edit:'تحرير',convert:'تحويل'},
     nav_short:{'jpg-to-png':'JPG إلى PNG','png-to-jpg':'PNG إلى JPG','jpg-to-webp':'JPG إلى WebP','webp-to-jpg':'WebP إلى JPG','png-to-webp':'PNG إلى WebP','webp-to-png':'WebP إلى PNG','compress':'ضغط','resize':'تغيير الحجم','jpg-to-pdf':'JPG إلى PDF','png-to-pdf':'PNG إلى PDF','gif-to-jpg':'GIF إلى JPG','gif-to-png':'GIF إلى PNG','bmp-to-jpg':'BMP إلى JPG','bmp-to-png':'BMP إلى PNG','tiff-to-jpg':'TIFF إلى JPG','jpg-to-gif':'JPG إلى GIF','png-to-gif':'PNG إلى GIF','crop':'قص','rotate':'تدوير','flip':'قلب','grayscale':'أبيض وأسود','watermark':'علامة مائية','remove-background':'إزالة الخلفية','heic-to-jpg':'HEIC إلى JPG','image-to-ico':'صورة إلى ICO','jpg-to-svg':'JPG إلى SVG'},
     footer_copy:'© 2026 RelahConvert. جميع الحقوق محفوظة.',footer_company:'الشركة',footer_legal:'قانوني',footer_about:'من نحن',footer_contact:'اتصل بنا',footer_privacy:'سياسة الخصوصية',footer_terms:'الشروط والأحكام',footer_cookies:'سياسة الكوكيز',
     hero_badge:'✦ مجاني · بدون رفع · المتصفح فقط',hero_title_1:'كل أدوات الصور',hero_title_2:'التي تحتاجها،',hero_title_em:'مجاناً',
