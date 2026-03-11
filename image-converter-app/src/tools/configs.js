@@ -188,4 +188,11 @@ export const tools = {
     outputFormat: 'image/png',
     slug: 'round-corners'
   },
+  'meme-generator': {
+    title: 'Meme Generator',
+    description: 'Create memes free. Add text to any image. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'meme-generator'
+  },
 }
