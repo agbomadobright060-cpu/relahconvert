@@ -3,7 +3,7 @@ import { injectHeader } from '../core/header.js'
 import { getT } from '../core/i18n.js'
 
 const t = getT()
-const toolName  = (t.nav_short && t.nav_short['round-corners']) || 'Round Image Corners'
+const toolName  = (t.nav_short && t.nav_short['round-corners']) || t.round_corners_title_1 + ' ' + t.round_corners_title_em
 const seoData   = t.seo && t.seo['round-corners']
 const descText  = seoData ? seoData.h2a : 'Round image corners free. Files never leave your device.'
 const selectLbl = t.select_images || 'Select Images'
@@ -79,20 +79,20 @@ document.querySelector('#app').innerHTML = `
     </div>
     <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
     <div id="radiusPanel" class="radius-panel" style="display:none;">
-      <div class="radius-panel-title">Corner Radius</div>
+      <div class="radius-panel-title">${t.round_corners_panel}</div>
       <div class="slider-row">
         <input type="range" class="radius-slider" id="radiusSlider" min="0" max="50" value="20" />
         <span class="radius-value" id="radiusValue">20%</span>
       </div>
       <div class="preset-btns">
-        <button class="preset-btn" data-val="10">Slight</button>
-        <button class="preset-btn active" data-val="20">Rounded</button>
-        <button class="preset-btn" data-val="35">Very Rounded</button>
-        <button class="preset-btn" data-val="50">Circle</button>
+        <button class="preset-btn" data-val="10">${t.round_corners_preset_slight}</button>
+        <button class="preset-btn active" data-val="20">${t.round_corners_preset_rounded}</button>
+        <button class="preset-btn" data-val="35">${t.round_corners_preset_very}</button>
+        <button class="preset-btn" data-val="50">${t.round_corners_preset_circle}</button>
       </div>
     </div>
     <div id="fileGrid"></div>
-    <button class="opt-btn" id="applyBtn" disabled>Round Corners</button>
+    <button class="opt-btn" id="applyBtn" disabled>${t.round_corners_btn}</button>
     <div id="zipWrap" style="display:none; margin-top:10px;">
       <a id="zipBtn" class="opt-btn" style="display:block; text-align:center; text-decoration:none; background:#2C1810; color:#F5F0E8;">⬇ ${dlZipBtn}</a>
       <p id="zipNote" style="font-size:12px; color:#9A8A7A; text-align:center; margin:8px 0 0; font-family:'DM Sans',sans-serif;"></p>
@@ -217,7 +217,7 @@ function updateCountBadge() {
     radiusPanel.style.display = 'block'
   }
   applyBtn.disabled = files.length === 0
-  applyBtn.textContent = files.length > 1 ? `Round Corners (${files.length})` : 'Round Corners'
+  applyBtn.textContent = files.length > 1 ? `${t.round_corners_btn} (${files.length})` : t.round_corners_btn
 }
 
 // ── Draw rounded preview onto a canvas ────────────────────────────────────
@@ -357,7 +357,7 @@ applyBtn.addEventListener('click', async () => {
     a.href = url; a.download = fname; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
     applyBtn.disabled = false
-    applyBtn.textContent = 'Round Corners'
+    applyBtn.textContent = t.round_corners_btn
     buildNextSteps()
     return
   }
@@ -392,7 +392,7 @@ applyBtn.addEventListener('click', async () => {
   document.getElementById('zipNote').textContent = `${files.length} images — ${totalKB} KB total`
   zipWrap.style.display = 'block'
   applyBtn.disabled = false
-  applyBtn.textContent = `Round Corners (${files.length})`
+  applyBtn.textContent = `${t.round_corners_btn} (${files.length})`
   buildNextSteps()
 })
 

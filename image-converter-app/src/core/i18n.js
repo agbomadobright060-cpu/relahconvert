@@ -81,6 +81,7 @@ const translations = {
     next_compress:'Compress Image',next_resize:'Resize Image',
     next_to_png:'Convert to PNG',next_to_jpg:'Convert to JPG',
     next_to_webp:'Convert to WebP',next_to_pdf:'Convert to PDF',
+    round_corners_title_1:'Round',round_corners_title_em:'Image Corners',round_corners_btn:'Round Corners',round_corners_panel:'Corner Radius',round_corners_preset_slight:'Slight',round_corners_preset_rounded:'Rounded',round_corners_preset_very:'Very Rounded',round_corners_preset_circle:'Circle',
     seo_faq_title:'Frequently Asked Questions',
     seo_also_try:'Also Try',
     seo:{
@@ -480,6 +481,7 @@ const translations = {
     convert_btn:'Convertir les images',convert_btn_loading:'Conversion...',convert_output_format:'Format de sortie',convert_to_jpg:'Convertir en JPG',convert_to_png:'Convertir en PNG',convert_to_webp:'Convertir en WebP',also_convert:'Aussi convertir :',
     pdf_btn:'Convertir en PDF',pdf_btn_loading:'Conversion...',pdf_options:'Options PDF',pdf_mode_one:'Un PDF par image',pdf_mode_all:'Toutes les images en un PDF',
     whats_next:'Et ensuite ?',next_compress:'Compresser',next_resize:'Redimensionner',next_to_png:'Convertir en PNG',next_to_jpg:'Convertir en JPG',next_to_webp:'Convertir en WebP',next_to_pdf:'Convertir en PDF',
+    round_corners_title_1:'Arrondir les',round_corners_title_em:'coins d\'image',round_corners_btn:'Arrondir les coins',round_corners_panel:'Rayon de coin',round_corners_preset_slight:'Léger',round_corners_preset_rounded:'Arrondi',round_corners_preset_very:'Très arrondi',round_corners_preset_circle:'Cercle',
     seo_faq_title:'Questions fréquentes',seo_also_try:'Essayez aussi',
     seo:{
       'jpg-to-png':{h2a:'Comment convertir JPG en PNG sans télécharger',steps:['<strong>Sélectionnez vos JPG</strong>.','<strong>Cliquez sur Convertir</strong>.','<strong>Téléchargez votre PNG</strong>.'],h2b:"Le meilleur convertisseur JPG en PNG gratuit",body:"<p>RelahConvert convertit JPG en PNG entièrement dans votre navigateur.</p>",h3why:'Pourquoi convertir JPG en PNG ?',why:"PNG est un format sans perte qui prend en charge les fonds transparents.",faqs:[{q:'PNG prend-il en charge les fonds transparents ?',a:'Oui.'},{q:'Stockez-vous mes images ?',a:'Jamais.'}],links:[{href:'/png-to-jpg',label:'PNG en JPG'},{href:'/jpg-to-webp',label:'JPG en WebP'},{href:'/compress',label:'Compresser'},{href:'/resize',label:'Redimensionner'}]},
@@ -529,6 +531,7 @@ const translations = {
     convert_btn:'Convertir imágenes',convert_btn_loading:'Convirtiendo...',convert_output_format:'Formato de salida',convert_to_jpg:'Convertir a JPG',convert_to_png:'Convertir a PNG',convert_to_webp:'Convertir a WebP',also_convert:'También convertir:',
     pdf_btn:'Convertir a PDF',pdf_btn_loading:'Convirtiendo...',pdf_options:'Opciones PDF',pdf_mode_one:'Un PDF por imagen',pdf_mode_all:'Todas en un PDF',
     whats_next:'¿Qué sigue?',next_compress:'Comprimir',next_resize:'Redimensionar',next_to_png:'Convertir a PNG',next_to_jpg:'Convertir a JPG',next_to_webp:'Convertir a WebP',next_to_pdf:'Convertir a PDF',
+    round_corners_title_1:'Redondear',round_corners_title_em:'esquinas',round_corners_btn:'Redondear esquinas',round_corners_panel:'Radio de esquina',round_corners_preset_slight:'Leve',round_corners_preset_rounded:'Redondeado',round_corners_preset_very:'Muy redondeado',round_corners_preset_circle:'Círculo',
     seo_faq_title:'Preguntas frecuentes',seo_also_try:'También prueba',
     seo:{
       'jpg-to-png':{h2a:'Cómo convertir JPG a PNG sin subir',steps:['<strong>Selecciona tus JPG</strong>.','<strong>Haz clic en Convertir</strong>.','<strong>Descarga tu PNG</strong>.'],h2b:"El mejor convertidor JPG a PNG gratis",body:"<p>RelahConvert convierte en tu navegador.</p>",h3why:'¿Por qué JPG a PNG?',why:"PNG soporta fondos transparentes.",faqs:[{q:'¿Almacenan mis imágenes?',a:'Nunca.'}],links:[{href:'/png-to-jpg',label:'PNG a JPG'},{href:'/compress',label:'Comprimir'},{href:'/gif-to-png',label:'GIF a PNG'},{href:'/resize',label:'Redimensionar'}]},
@@ -578,6 +581,7 @@ const translations = {
     convert_btn:'Converter imagens',convert_btn_loading:'Convertendo...',convert_output_format:'Formato de saída',convert_to_jpg:'Converter para JPG',convert_to_png:'Converter para PNG',convert_to_webp:'Converter para WebP',also_convert:'Também converter:',
     pdf_btn:'Converter para PDF',pdf_btn_loading:'Convertendo...',pdf_options:'Opções PDF',pdf_mode_one:'Um PDF por imagem',pdf_mode_all:'Todas em um PDF',
     whats_next:'O que vem a seguir?',next_compress:'Comprimir',next_resize:'Redimensionar',next_to_png:'Converter para PNG',next_to_jpg:'Converter para JPG',next_to_webp:'Converter para WebP',next_to_pdf:'Converter para PDF',
+    round_corners_title_1:'Arredondar',round_corners_title_em:'cantos',round_corners_btn:'Arredondar cantos',round_corners_panel:'Raio de canto',round_corners_preset_slight:'Suave',round_corners_preset_rounded:'Arredondado',round_corners_preset_very:'Muito arredondado',round_corners_preset_circle:'Círculo',
     seo_faq_title:'Perguntas frequentes',seo_also_try:'Experimente também',
     seo:{
       'jpg-to-png':{h2a:'Como converter JPG para PNG sem upload',steps:['<strong>Selecione seus JPG</strong>.','<strong>Converter</strong>.','<strong>Baixe o PNG</strong>.'],h2b:"Melhor conversor JPG para PNG grátis",body:"<p>RelahConvert converte no seu navegador.</p>",h3why:'Por que JPG para PNG?',why:"PNG suporta fundos transparentes.",faqs:[{q:'Vocês armazenam imagens?',a:'Nunca.'}],links:[{href:'/png-to-jpg',label:'PNG para JPG'},{href:'/compress',label:'Comprimir'},{href:'/gif-to-png',label:'GIF para PNG'},{href:'/resize',label:'Redimensionar'}]},
@@ -627,6 +631,7 @@ const translations = {
     convert_btn:'Bilder konvertieren',convert_btn_loading:'Konvertierung...',convert_output_format:'Ausgabeformat',convert_to_jpg:'In JPG konvertieren',convert_to_png:'In PNG konvertieren',convert_to_webp:'In WebP konvertieren',also_convert:'Auch konvertieren:',
     pdf_btn:'In PDF konvertieren',pdf_btn_loading:'Konvertierung...',pdf_options:'PDF-Optionen',pdf_mode_one:'Ein PDF pro Bild',pdf_mode_all:'Alle in einem PDF',
     whats_next:'Was als nächstes?',next_compress:'Komprimieren',next_resize:'Skalieren',next_to_png:'In PNG konvertieren',next_to_jpg:'In JPG konvertieren',next_to_webp:'In WebP konvertieren',next_to_pdf:'In PDF konvertieren',
+    round_corners_title_1:'Ecken',round_corners_title_em:'abrunden',round_corners_btn:'Ecken abrunden',round_corners_panel:'Eckenradius',round_corners_preset_slight:'Leicht',round_corners_preset_rounded:'Abgerundet',round_corners_preset_very:'Stark abgerundet',round_corners_preset_circle:'Kreis',
     seo_faq_title:'Häufig gestellte Fragen',seo_also_try:'Auch ausprobieren',
     seo:{
       'jpg-to-png':{h2a:'So konvertieren Sie JPG in PNG ohne Upload',steps:['<strong>JPG auswählen</strong>.','<strong>Konvertieren klicken</strong>.','<strong>PNG herunterladen</strong>.'],h2b:"Bester kostenloser JPG zu PNG Konverter",body:"<p>RelahConvert konvertiert in Ihrem Browser.</p>",h3why:'Warum JPG zu PNG?',why:"PNG unterstützt transparente Hintergründe.",faqs:[{q:'Speichern Sie meine Bilder?',a:'Niemals.'}],links:[{href:'/png-to-jpg',label:'PNG zu JPG'},{href:'/compress',label:'Komprimieren'},{href:'/gif-to-png',label:'GIF zu PNG'},{href:'/resize',label:'Skalieren'}]},
@@ -676,6 +681,7 @@ const translations = {
     convert_btn:'تحويل الصور',convert_btn_loading:'جارٍ التحويل...',convert_output_format:'تنسيق الإخراج',convert_to_jpg:'تحويل إلى JPG',convert_to_png:'تحويل إلى PNG',convert_to_webp:'تحويل إلى WebP',also_convert:'أيضاً تحويل:',
     pdf_btn:'تحويل إلى PDF',pdf_btn_loading:'جارٍ التحويل...',pdf_options:'خيارات PDF',pdf_mode_one:'PDF واحد لكل صورة',pdf_mode_all:'جميع الصور في PDF واحد',
     whats_next:'ما التالي؟',next_compress:'ضغط',next_resize:'تغيير الحجم',next_to_png:'تحويل إلى PNG',next_to_jpg:'تحويل إلى JPG',next_to_webp:'تحويل إلى WebP',next_to_pdf:'تحويل إلى PDF',
+    round_corners_title_1:'تقريب',round_corners_title_em:'زوايا الصورة',round_corners_btn:'تقريب الزوايا',round_corners_panel:'نصف قطر الزاوية',round_corners_preset_slight:'خفيف',round_corners_preset_rounded:'مستدير',round_corners_preset_very:'مستدير جداً',round_corners_preset_circle:'دائرة',
     seo_faq_title:'الأسئلة الشائعة',seo_also_try:'جرّب أيضاً',
     seo:{
       'jpg-to-png':{h2a:'كيفية تحويل JPG إلى PNG بدون رفع',steps:['<strong>اختر JPG</strong>.','<strong>تحويل</strong>.','<strong>حمّل PNG</strong>.'],h2b:"أفضل محوّل JPG إلى PNG مجاناً",body:"<p>RelahConvert يحوّل في متصفحك.</p>",h3why:'لماذا JPG إلى PNG؟',why:"PNG يدعم الخلفيات الشفافة.",faqs:[{q:'هل تحتفظون بصوري؟',a:'أبداً.'}],links:[{href:'/png-to-jpg',label:'PNG إلى JPG'},{href:'/compress',label:'ضغط'},{href:'/gif-to-png',label:'GIF إلى PNG'},{href:'/resize',label:'تغيير الحجم'}]},
