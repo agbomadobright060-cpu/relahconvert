@@ -28,7 +28,7 @@ if (document.head) {
     #fileGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; margin-bottom:20px; }
     .file-card { background:#fff; border-radius:10px; border:1.5px solid #E8E0D5; overflow:hidden; position:relative; }
     .file-card .card-img-wrap { width:100%; height:130px; display:flex; align-items:center; justify-content:center; background:repeating-conic-gradient(#e8e0d5 0% 25%,#fff 0% 50%) 0 0/12px 12px; overflow:hidden; }
-    .file-card .card-img-wrap img { max-width:100%; max-height:100%; object-fit:contain; display:block; }
+    .file-card .card-img-wrap canvas { max-width:100%; max-height:100%; object-fit:contain; display:block; }
     .file-card .card-footer { padding:6px 8px; display:flex; align-items:center; justify-content:space-between; }
     .file-card .card-name { font-size:11px; color:#5A4A3A; font-family:'DM Sans',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100px; }
     .file-card .remove-btn { background:none; border:none; cursor:pointer; color:#C4B8A8; font-size:14px; line-height:1; padding:2px 4px; }
@@ -193,6 +193,19 @@ function buildNextSteps() {
   nextSteps.style.display = 'block'
 }
 
+// ── Unique filename helper ─────────────────────────────────────────────────
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(`${base}-${i}${ext}`)) i++
+  const unique = `${base}-${i}${ext}`
+  usedNames.add(unique)
+  return unique
+}
+
 // ── Count badge & button state ─────────────────────────────────────────────
 function updateCountBadge() {
   if (files.length === 0) {
@@ -207,19 +220,54 @@ function updateCountBadge() {
   applyBtn.textContent = files.length > 1 ? `Round Corners (${files.length})` : 'Round Corners'
 }
 
+// ── Draw rounded preview onto a canvas ────────────────────────────────────
+function drawRounded(img, canvas, radiusPct) {
+  const w = img.naturalWidth || img.width
+  const h = img.naturalHeight || img.height
+  canvas.width = w
+  canvas.height = h
+  const r = Math.min(w, h) * (radiusPct / 100)
+  const ctx = canvas.getContext('2d')
+  ctx.clearRect(0, 0, w, h)
+  ctx.beginPath()
+  ctx.moveTo(r, 0)
+  ctx.lineTo(w - r, 0)
+  ctx.arcTo(w, 0, w, r, r)
+  ctx.lineTo(w, h - r)
+  ctx.arcTo(w, h, w - r, h, r)
+  ctx.lineTo(r, h)
+  ctx.arcTo(0, h, 0, h - r, r)
+  ctx.lineTo(0, r)
+  ctx.arcTo(0, 0, r, 0, r)
+  ctx.closePath()
+  ctx.clip()
+  ctx.drawImage(img, 0, 0, w, h)
+}
+
+// ── Update all previews when slider changes ────────────────────────────────
+function refreshPreviews() {
+  const radiusPct = parseInt(radiusSlider.value)
+  files.forEach(item => {
+    if (item.imgEl && item.previewCanvas) {
+      drawRounded(item.imgEl, item.previewCanvas, radiusPct)
+    }
+  })
+}
+
 // ── Render grid ────────────────────────────────────────────────────────────
 function renderGrid() {
   fileGrid.innerHTML = ''
+  const radiusPct = parseInt(radiusSlider.value)
   files.forEach((item, idx) => {
     const card = document.createElement('div')
     card.className = 'file-card'
     const imgWrap = document.createElement('div')
     imgWrap.className = 'card-img-wrap'
-    const img = document.createElement('img')
-    const purl = URL.createObjectURL(item.file)
-    img.onload = () => URL.revokeObjectURL(purl)
-    img.src = purl
-    imgWrap.appendChild(img)
+    const canvas = document.createElement('canvas')
+    canvas.style.cssText = 'max-width:100%; max-height:130px; object-fit:contain; display:block;'
+    item.previewCanvas = canvas
+    if (item.imgEl) drawRounded(item.imgEl, canvas, radiusPct)
+    imgWrap.appendChild(canvas)
     const footer = document.createElement('div')
     footer.className = 'card-footer'
     footer.innerHTML = `<span class="card-name">${item.file.name}</span><button class="remove-btn" data-idx="${idx}">✕</button>`
@@ -240,11 +288,23 @@ function loadFiles(newFiles) {
   const remaining = 25 - files.length
   const toAdd = Array.from(newFiles).filter(f => f.type.startsWith('image/')).slice(0, remaining)
   if (toAdd.length === 0) return
-  toAdd.forEach(file => files.push({ file }))
-  renderGrid()
-  updateCountBadge()
-  zipWrap.style.display = 'none'
-  nextSteps.style.display = 'none'
+  let loaded = 0
+  toAdd.forEach(file => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      files.push({ file, imgEl: img, previewCanvas: null })
+      loaded++
+      if (loaded === toAdd.length) {
+        renderGrid()
+        updateCountBadge()
+        zipWrap.style.display = 'none'
+        nextSteps.style.display = 'none'
+      }
+    }
+    img.src = url
+  })
 }
 
 fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFiles(fileInput.files); fileInput.value = '' })
@@ -256,6 +316,7 @@ radiusSlider.addEventListener('input', () => {
   const val = radiusSlider.value
   radiusValue.textContent = val + '%'
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.val === val))
+  refreshPreviews()
 })
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -263,40 +324,13 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
     radiusValue.textContent = btn.dataset.val + '%'
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'))
     btn.classList.add('active')
+    refreshPreviews()
   })
 })
 
-// ── Round one file to blob ─────────────────────────────────────────────────
-function roundToBlob(file, radiusPct) {
-  return new Promise(resolve => {
-    const img = new Image()
-    const objUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objUrl)
-      const w = img.naturalWidth
-      const h = img.naturalHeight
-      const r = Math.min(w, h) * (radiusPct / 100)
-      const canvas = document.createElement('canvas')
-      canvas.width = w; canvas.height = h
-      const ctx = canvas.getContext('2d')
-      ctx.clearRect(0, 0, w, h)
-      ctx.beginPath()
-      ctx.moveTo(r, 0)
-      ctx.lineTo(w - r, 0)
-      ctx.arcTo(w, 0, w, r, r)
-      ctx.lineTo(w, h - r)
-      ctx.arcTo(w, h, w - r, h, r)
-      ctx.lineTo(r, h)
-      ctx.arcTo(0, h, 0, h - r, r)
-      ctx.lineTo(0, r)
-      ctx.arcTo(0, 0, r, 0, r)
-      ctx.closePath()
-      ctx.clip()
-      ctx.drawImage(img, 0, 0, w, h)
-      canvas.toBlob(blob => resolve(blob), 'image/png')
-    }
-    img.src = objUrl
-  })
+// ── Canvas to blob ─────────────────────────────────────────────────────────
+function canvasToBlob(canvas) {
+  return new Promise(resolve => canvas.toBlob(blob => resolve(blob), 'image/png'))
 }
 
 // ── Apply ──────────────────────────────────────────────────────────────────
@@ -308,17 +342,19 @@ applyBtn.addEventListener('click', async () => {
   nextSteps.style.display = 'none'
   lastResults = []
   const radiusPct = parseInt(radiusSlider.value)
+  const usedNames = new Set()
 
   if (files.length === 1) {
     const item = files[0]
+    const canvas = document.createElement('canvas')
+    drawRounded(item.imgEl, canvas, radiusPct)
+    const blob = await canvasToBlob(canvas)
     const baseName = item.file.name.replace(/\.[^.]+$/, '')
-    const blob = await roundToBlob(item.file, radiusPct)
-    lastResults = [{ blob, name: `${baseName}-rounded.png`, type: 'image/png' }]
+    const fname = makeUnique(usedNames, `${baseName}-rounded.png`)
+    lastResults = [{ blob, name: fname, type: 'image/png' }]
     const a = document.createElement('a')
     const url = URL.createObjectURL(blob)
-    a.href = url
-    a.download = `${baseName}-rounded.png`
-    a.click()
+    a.href = url; a.download = fname; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
     applyBtn.disabled = false
     applyBtn.textContent = 'Round Corners'
@@ -337,9 +373,11 @@ applyBtn.addEventListener('click', async () => {
 
   const zip = new window.JSZip()
   for (const item of files) {
+    const canvas = document.createElement('canvas')
+    drawRounded(item.imgEl, canvas, radiusPct)
+    const blob = await canvasToBlob(canvas)
     const baseName = item.file.name.replace(/\.[^.]+$/, '')
-    const blob = await roundToBlob(item.file, radiusPct)
-    const fname = `${baseName}-rounded.png`
+    const fname = makeUnique(usedNames, `${baseName}-rounded.png`)
     zip.file(fname, blob)
     lastResults.push({ blob, name: fname, type: 'image/png' })
   }
