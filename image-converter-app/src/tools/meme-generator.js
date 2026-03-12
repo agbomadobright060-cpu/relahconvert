@@ -49,8 +49,8 @@ if (document.head) {
     .ftb-color-wrap{position:relative;flex-shrink:0}
     .ftb-swatch-btn{width:30px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px}
     .ftb-swatch-btn:hover{border-color:#C84B31}
-    .ftb-swatch-letter{font-size:12px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif}
-    .ftb-swatch-bar{width:16px;height:3px;border-radius:1px}
+    .ftb-swatch-letter{font-size:12px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none}
+    .ftb-swatch-bar{width:16px;height:3px;border-radius:1px;pointer-events:none}
     .ftb-swatch-panel{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,0.14);z-index:100;width:192px}
     .ftb-swatch-panel.open{display:block}
     .ftb-swatch-panel p{font-size:10px;font-weight:700;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;font-family:'DM Sans',sans-serif}
@@ -719,9 +719,9 @@ buildSwatches('scGrid', c => {
 })
 
 document.addEventListener('mousedown', e => {
-  // Only close if clicking completely outside the wrap (not the button itself)
-  if (!$('tcWrap').contains(e.target) && e.target.id !== 'tcBtn') $('tcPanel').classList.remove('open')
-  if (!$('scWrap').contains(e.target) && e.target.id !== 'scBtn') $('scPanel').classList.remove('open')
+  // Use contains() — covers button AND all its child elements (span, div inside button)
+  if (!$('tcWrap').contains(e.target)) $('tcPanel').classList.remove('open')
+  if (!$('scWrap').contains(e.target)) $('scPanel').classList.remove('open')
 })
 
 // ── Add Text ──
