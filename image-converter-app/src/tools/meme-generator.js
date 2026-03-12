@@ -3,6 +3,8 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 let allTemplates = []
+let templatePage = 0
+const TEMPLATES_PER_PAGE = 20
 
 if (document.head) {
   document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
@@ -15,7 +17,7 @@ if (document.head) {
     .tool-sub{font-size:13px;color:#7A6A5A;margin:0}
     .meme-layout{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
     @media(max-width:768px){.meme-layout{grid-template-columns:1fr}}
-    .meme-controls{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1.5px solid #E8E0D5;display:flex;flex-direction:column;gap:0}
+    .meme-controls{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1.5px solid #E8E0D5;display:flex;flex-direction:column}
     .meme-section{padding:12px 0;border-bottom:1px solid #F0EAE4}
     .meme-section:last-child{border-bottom:none;padding-bottom:0}
     .meme-section:first-child{padding-top:0}
@@ -45,20 +47,26 @@ if (document.head) {
     .meme-preview-wrap{position:sticky;top:84px}
     .meme-preview-box{background:#fff;border-radius:14px;border:1.5px solid #E8E0D5;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px;min-height:300px}
     .meme-preview-box canvas{max-width:100%;border-radius:6px;display:block}
-    .meme-hint{font-size:11px;color:#B0A090;margin-top:6px;text-align:center;font-family:'DM Sans',sans-serif}
+    .meme-hint{font-size:11px;color:#B0A090;margin-top:6px;text-align:center;font-family:'DM Sans',sans-serif;display:none}
     .meme-modal-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
-    .meme-modal{background:#fff;border-radius:16px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
+    .meme-modal{background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
     .meme-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid #E8E0D5;flex-shrink:0}
     .meme-modal-header h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:0}
-    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:#F5F0E8;color:#5A4A3A;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:#F5F0E8;color:#5A4A3A;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
     .meme-modal-close:hover{background:#C84B31;color:#fff}
     .meme-search{width:100%;padding:11px 16px;border:none;border-bottom:1px solid #E8E0D5;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;flex-shrink:0;box-sizing:border-box}
     .meme-search::placeholder{color:#C4B8A8}
-    .meme-template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:16px;overflow-y:auto}
+    .meme-template-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;overflow-y:auto;flex:1}
+    @media(max-width:600px){.meme-template-grid{grid-template-columns:repeat(2,1fr)}}
     .meme-template-item{border:1.5px solid #E8E0D5;border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.15s;background:#FAFAF8}
     .meme-template-item:hover{border-color:#C84B31;box-shadow:0 4px 12px rgba(200,75,49,0.15);transform:translateY(-2px)}
-    .meme-template-item img{width:100%;height:140px;object-fit:cover;display:block;background:#F0EAE4}
-    .meme-template-item span{display:block;font-size:11px;font-weight:600;color:#5A4A3A;padding:7px 9px;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meme-template-item img{width:100%;height:110px;object-fit:cover;display:block;background:#F0EAE4}
+    .meme-template-item span{display:block;font-size:10px;font-weight:600;color:#5A4A3A;padding:6px 8px;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meme-pagination{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;border-top:1px solid #E8E0D5;flex-shrink:0}
+    .meme-page-btn{padding:7px 16px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#2C1810;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+    .meme-page-btn:hover:not(:disabled){border-color:#C84B31;color:#C84B31}
+    .meme-page-btn:disabled{opacity:0.4;cursor:not-allowed}
+    .meme-page-info{font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif}
     .seo-section{max-width:700px;margin:40px auto 0;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px}
     .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px}
@@ -142,7 +150,7 @@ document.getElementById('app').innerHTML = `
     </div>
     <div id="previewWrap" style="display:none" class="meme-preview-wrap">
       <div class="meme-preview-box" id="previewBox"></div>
-      <p class="meme-hint" id="dragHint" style="display:none">💡 Drag text on the image to reposition it</p>
+      <p class="meme-hint" id="dragHint">💡 Drag text on the image to reposition it</p>
     </div>
   </div>
   <div class="meme-modal-overlay" id="templateModal" style="display:none">
@@ -153,6 +161,11 @@ document.getElementById('app').innerHTML = `
       </div>
       <input type="text" id="templateSearch" class="meme-search" placeholder="Search templates... (try 'dog', 'drake', 'brain')">
       <div class="meme-template-grid" id="templateGrid"></div>
+      <div class="meme-pagination" id="pagination" style="display:none">
+        <button class="meme-page-btn" id="prevPage">← Prev</button>
+        <span class="meme-page-info" id="pageInfo"></span>
+        <button class="meme-page-btn" id="nextPage">Next →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -164,15 +177,14 @@ injectHeader()
 let mainImage = null
 let overlayImage = null
 let overlayX = 0.5, overlayY = 0.5
-let topX = 0.5, topY = 0.1
-let botX = 0.5, botY = 0.9
+let topX = 0.5, topY = 0.12
+let botX = 0.5, botY = 0.88
 let textPosition = 'inside'
 let downloadFmt = 'jpg'
 let canvas = null, ctx = null
-let dragging = null // 'top' | 'bot' | 'overlay'
-let dragStartX = 0, dragStartY = 0
+let dragging = null
+let filteredTemplates = []
 
-// Elements
 const fileInput = document.getElementById('fileInput')
 const overlayInput = document.getElementById('overlayInput')
 const uploadBtn = document.getElementById('uploadBtn')
@@ -199,6 +211,10 @@ const outsideBtn = document.getElementById('outsideBtn')
 const fmtJpg = document.getElementById('fmtJpg')
 const fmtPng = document.getElementById('fmtPng')
 const dragHint = document.getElementById('dragHint')
+const pagination = document.getElementById('pagination')
+const prevPage = document.getElementById('prevPage')
+const nextPage = document.getElementById('nextPage')
+const pageInfo = document.getElementById('pageInfo')
 
 const extraIds = ['secTopText','secBottomText','secPosition','secFontSize','secColors','secOverlay','secFormat']
 
@@ -208,7 +224,6 @@ function showControls() {
   document.getElementById('previewWrap').style.display = 'block'
 }
 
-// Upload
 uploadBtn.onclick = () => { fileInput.value = ''; fileInput.click() }
 fileInput.onchange = e => {
   const file = e.target.files[0]; if (!file) return
@@ -221,7 +236,6 @@ fileInput.onchange = e => {
   reader.readAsDataURL(file)
 }
 
-// Overlay
 overlayBtn.onclick = () => { overlayInput.value = ''; overlayInput.click() }
 overlayInput.onchange = e => {
   const file = e.target.files[0]; if (!file) return
@@ -235,11 +249,10 @@ overlayInput.onchange = e => {
 }
 removeOverlay.onclick = () => { overlayImage = null; overlayControls.style.display = 'none'; render() }
 
-// Toggles
 insideBtn.onclick = () => {
   textPosition = 'inside'
   insideBtn.classList.add('active'); outsideBtn.classList.remove('active')
-  topY = 0.1; botY = 0.9
+  topX = 0.5; topY = 0.12; botX = 0.5; botY = 0.88
   textColor.value = '#ffffff'; render()
 }
 outsideBtn.onclick = () => {
@@ -247,10 +260,10 @@ outsideBtn.onclick = () => {
   outsideBtn.classList.add('active'); insideBtn.classList.remove('active')
   textColor.value = '#000000'; render()
 }
+
 fmtJpg.onclick = () => { downloadFmt = 'jpg'; fmtJpg.classList.add('active'); fmtPng.classList.remove('active') }
 fmtPng.onclick = () => { downloadFmt = 'png'; fmtPng.classList.add('active'); fmtJpg.classList.remove('active') }
 
-// Live inputs
 topText.oninput = render
 bottomText.oninput = render
 fontSize.oninput = () => { fontSizeVal.textContent = fontSize.value; render() }
@@ -258,63 +271,112 @@ textColor.oninput = render
 strokeColor.oninput = render
 overlaySize.oninput = () => { overlaySizeVal.textContent = overlaySize.value; render() }
 
-// Templates
+// Templates + pagination
 templateBtn.onclick = async () => {
   templateModal.style.display = 'flex'
-  if (allTemplates.length) { renderTemplates(allTemplates); return }
-  templateGrid.innerHTML = '<p style="padding:24px;color:#9A8A7A;font-size:13px;font-family:\'DM Sans\',sans-serif">Loading templates…</p>'
+  if (allTemplates.length) { filteredTemplates = allTemplates; showPage(0); return }
+  templateGrid.innerHTML = '<p style="padding:24px;color:#9A8A7A;font-size:13px;font-family:\'DM Sans\',sans-serif;grid-column:1/-1">Loading templates…</p>'
   try {
     const res = await fetch('https://api.imgflip.com/get_memes')
     const json = await res.json()
     allTemplates = json.data.memes
-    renderTemplates(allTemplates)
+    filteredTemplates = allTemplates
+    showPage(0)
   } catch {
-    templateGrid.innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;font-family:\'DM Sans\',sans-serif">Failed to load. Check your connection.</p>'
+    templateGrid.innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;font-family:\'DM Sans\',sans-serif;grid-column:1/-1">Failed to load. Check your connection.</p>'
   }
 }
+
 closeModal.onclick = () => { templateModal.style.display = 'none' }
 templateModal.onclick = e => { if (e.target === templateModal) templateModal.style.display = 'none' }
+
 templateSearch.oninput = () => {
   const q = templateSearch.value.toLowerCase().trim()
-  renderTemplates(q ? allTemplates.filter(m => m.name.toLowerCase().includes(q)) : allTemplates)
+  filteredTemplates = q ? allTemplates.filter(m => m.name.toLowerCase().includes(q)) : allTemplates
+  showPage(0)
 }
 
-function renderTemplates(list) {
-  templateGrid.innerHTML = list.map(m => `
+prevPage.onclick = () => { if (templatePage > 0) showPage(templatePage - 1) }
+nextPage.onclick = () => { if ((templatePage + 1) * TEMPLATES_PER_PAGE < filteredTemplates.length) showPage(templatePage + 1) }
+
+function showPage(page) {
+  templatePage = page
+  const total = filteredTemplates.length
+  const totalPages = Math.ceil(total / TEMPLATES_PER_PAGE)
+  const start = page * TEMPLATES_PER_PAGE
+  const slice = filteredTemplates.slice(start, start + TEMPLATES_PER_PAGE)
+
+  templateGrid.innerHTML = slice.map(m => `
     <div class="meme-template-item" data-url="${m.url}" data-name="${m.name}">
       <img src="${m.url}" alt="${m.name}" loading="lazy">
       <span>${m.name}</span>
     </div>
   `).join('')
+
   templateGrid.querySelectorAll('.meme-template-item').forEach(item => {
     item.onclick = () => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
-      img.onload = () => { mainImage = img; canvas = null; topX=0.5; topY=0.1; botX=0.5; botY=0.9; render(); templateModal.style.display = 'none' }
+      img.onload = () => { mainImage = img; canvas = null; topX=0.5; topY=0.12; botX=0.5; botY=0.88; render(); templateModal.style.display = 'none' }
       img.onerror = () => {
         const img2 = new Image()
-        img2.onload = () => { mainImage = img2; canvas = null; topX=0.5; topY=0.1; botX=0.5; botY=0.9; render(); templateModal.style.display = 'none' }
+        img2.onload = () => { mainImage = img2; canvas = null; topX=0.5; topY=0.12; botX=0.5; botY=0.88; render(); templateModal.style.display = 'none' }
         img2.src = item.dataset.url
       }
       img.src = item.dataset.url
     }
   })
+
+  if (totalPages > 1) {
+    pagination.style.display = 'flex'
+    pageInfo.textContent = `Page ${page + 1} of ${totalPages}`
+    prevPage.disabled = page === 0
+    nextPage.disabled = page >= totalPages - 1
+  } else {
+    pagination.style.display = 'none'
+  }
 }
 
-// Render
+// Text drawing helper with word wrap
+function drawWrappedText(text, cx, cy, maxWidth, fs) {
+  if (!text) return
+  ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.lineWidth = Math.max(1, fs / 9)
+  ctx.strokeStyle = strokeColor.value
+  ctx.fillStyle = textColor.value
+
+  const words = text.split(' ')
+  const lines = []
+  let line = ''
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w
+    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = w } else line = test
+  }
+  lines.push(line)
+
+  const lineH = fs * 1.25
+  const totalH = lines.length * lineH
+  lines.forEach((l, i) => {
+    const ly = cy - totalH / 2 + i * lineH + lineH / 2
+    ctx.strokeText(l, cx, ly)
+    ctx.fillText(l, cx, ly)
+  })
+}
+
 function render() {
   if (!mainImage) return
   showControls()
   downloadBtn.disabled = false
 
   const fs = parseInt(fontSize.value)
-  const tc = textColor.value
-  const sc = strokeColor.value
   const top = topText.value.trim().toUpperCase()
   const bot = bottomText.value.trim().toUpperCase()
   const ovSize = parseInt(overlaySize.value) / 100
   const W = mainImage.naturalWidth
   const H = mainImage.naturalHeight
+  const bandH = fs * 2.8  // height of outside text band
 
   if (!canvas) {
     canvas = document.createElement('canvas')
@@ -322,60 +384,31 @@ function render() {
     previewBox.innerHTML = ''
     previewBox.appendChild(canvas)
     setupDrag()
-    if (top || bot) dragHint.style.display = 'block'
   }
 
-  // Outside text bands
-  const topBand = textPosition === 'outside' && top ? fs * 2.2 : 0
-  const botBand = textPosition === 'outside' && bot ? fs * 2.2 : 0
+  const topBand = textPosition === 'outside' && top ? bandH : 0
+  const botBand = textPosition === 'outside' && bot ? bandH : 0
 
   canvas.width = W
   canvas.height = H + topBand + botBand
   ctx = canvas.getContext('2d')
 
-  // Background
-  ctx.fillStyle = '#fff'
+  // White background for bands
+  ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, canvas.height)
 
   // Main image
   ctx.drawImage(mainImage, 0, topBand, W, H)
 
-  // Text helper
-  function drawText(text, xFrac, yFrac) {
-    if (!text) return
-    const x = xFrac * W
-    const y = yFrac * canvas.height
-    ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.lineWidth = Math.max(1, fs / 10)
-    ctx.strokeStyle = sc
-    ctx.fillStyle = tc
-    // word wrap
-    const words = text.split(' ')
-    const maxW = W * 0.9
-    const lines = []
-    let line = ''
-    for (const w of words) {
-      const test = line ? line + ' ' + w : w
-      if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w } else line = test
-    }
-    lines.push(line)
-    const lineH = fs * 1.2
-    const totalH = lines.length * lineH
-    lines.forEach((l, i) => {
-      const ly = y - totalH / 2 + i * lineH + lineH / 2
-      ctx.strokeText(l, x, ly)
-      ctx.fillText(l, x, ly)
-    })
-  }
+  const maxW = W * 0.92
 
   if (textPosition === 'inside') {
-    drawText(top, topX, topY)
-    drawText(bot, botX, botY)
+    drawWrappedText(top, topX * W, topY * H + topBand, maxW, fs)
+    drawWrappedText(bot, botX * W, botY * H + topBand, maxW, fs)
   } else {
-    if (top) drawText(top, 0.5, topBand / 2 / canvas.height)
-    if (bot) drawText(bot, 0.5, (topBand + H + botBand / 2) / canvas.height)
+    // Outside: center text vertically in its band
+    if (top) drawWrappedText(top, W / 2, bandH / 2, maxW, fs)
+    if (bot) drawWrappedText(bot, W / 2, topBand + H + bandH / 2, maxW, fs)
   }
 
   // Overlay
@@ -385,44 +418,38 @@ function render() {
     ctx.drawImage(overlayImage, overlayX * W - ow / 2, overlayY * canvas.height - oh / 2, ow, oh)
   }
 
-  // Show drag hint when text exists
   dragHint.style.display = (top || bot) ? 'block' : 'none'
 }
 
-// Drag logic
 function getCanvasPos(e) {
   const rect = canvas.getBoundingClientRect()
   const clientX = e.touches ? e.touches[0].clientX : e.clientX
   const clientY = e.touches ? e.touches[0].clientY : e.clientY
   return {
-    x: (clientX - rect.left) / rect.width,
-    y: (clientY - rect.top) / rect.height
+    x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+    y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
   }
-}
-
-function hitTest(px, py, fx, fy, threshold = 0.15) {
-  return Math.abs(px - fx) < threshold && Math.abs(py - fy) < threshold
 }
 
 function setupDrag() {
   function onStart(e) {
+    if (textPosition === 'outside') return // outside text not draggable
     const p = getCanvasPos(e)
     const top = topText.value.trim()
     const bot = bottomText.value.trim()
-    if (overlayImage && hitTest(p.x, p.y, overlayX, overlayY)) { dragging = 'overlay' }
-    else if (top && hitTest(p.x, p.y, topX, topY)) { dragging = 'top' }
-    else if (bot && hitTest(p.x, p.y, botX, botY)) { dragging = 'bot' }
+    const th = 0.15
+    if (overlayImage && Math.abs(p.x - overlayX) < th && Math.abs(p.y - overlayY) < th) dragging = 'overlay'
+    else if (top && Math.abs(p.x - topX) < th && Math.abs(p.y - topY) < th) dragging = 'top'
+    else if (bot && Math.abs(p.x - botX) < th && Math.abs(p.y - botY) < th) dragging = 'bot'
     if (dragging) { e.preventDefault(); canvas.style.cursor = 'grabbing' }
   }
   function onMove(e) {
     if (!dragging) return
     e.preventDefault()
     const p = getCanvasPos(e)
-    const x = Math.max(0, Math.min(1, p.x))
-    const y = Math.max(0, Math.min(1, p.y))
-    if (dragging === 'top') { topX = x; topY = y }
-    else if (dragging === 'bot') { botX = x; botY = y }
-    else if (dragging === 'overlay') { overlayX = x; overlayY = y }
+    if (dragging === 'top') { topX = p.x; topY = p.y }
+    else if (dragging === 'bot') { botX = p.x; botY = p.y }
+    else if (dragging === 'overlay') { overlayX = p.x; overlayY = p.y }
     render()
   }
   function onEnd() { dragging = null; canvas.style.cursor = 'default' }
@@ -435,7 +462,6 @@ function setupDrag() {
   window.addEventListener('touchend', onEnd)
 }
 
-// Download
 downloadBtn.onclick = () => {
   if (!canvas) return
   const mime = downloadFmt === 'png' ? 'image/png' : 'image/jpeg'
@@ -452,7 +478,6 @@ downloadBtn.onclick = () => {
   }
 }
 
-// SEO
 ;(function injectSEO() {
   const s = t.seo?.['meme-generator']
   if (!s) return
