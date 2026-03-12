@@ -719,8 +719,9 @@ buildSwatches('scGrid', c => {
 })
 
 document.addEventListener('mousedown', e => {
-  if (!$('tcWrap').contains(e.target)) $('tcPanel').classList.remove('open')
-  if (!$('scWrap').contains(e.target)) $('scPanel').classList.remove('open')
+  // Only close if clicking completely outside the wrap (not the button itself)
+  if (!$('tcWrap').contains(e.target) && e.target.id !== 'tcBtn') $('tcPanel').classList.remove('open')
+  if (!$('scWrap').contains(e.target) && e.target.id !== 'scBtn') $('scPanel').classList.remove('open')
 })
 
 // ── Add Text ──
