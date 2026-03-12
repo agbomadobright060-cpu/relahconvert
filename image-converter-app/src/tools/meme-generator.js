@@ -31,7 +31,7 @@ if (document.head) {
     .meme-canvas-col{display:flex;flex-direction:column;gap:8px}
 
     /* floating toolbar */
-    .ftb{display:none;background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);align-items:center;gap:3px;overflow-x:auto;white-space:nowrap}
+    .ftb{display:none;background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);align-items:center;gap:3px;flex-wrap:wrap;overflow:visible}
     .ftb.show{display:flex}
     .ftb-div{width:1px;height:22px;background:#E0D8D0;margin:0 3px;flex-shrink:0}
     .ftb-font{height:30px;padding:0 6px;border:1.5px solid #DDD5C8;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#fff;cursor:pointer;outline:none;flex-shrink:0;min-width:110px}
@@ -187,27 +187,17 @@ document.getElementById('app').innerHTML = `
         <div class="ftb-div"></div>
 
         <!-- text color -->
-        <div class="ftb-color-wrap" id="tcWrap">
-          <button class="ftb-swatch-btn" id="tcBtn" title="Text color">
-            <span class="ftb-swatch-letter">A</span>
-            <div class="ftb-swatch-bar" id="tcBar" style="background:#000000"></div>
-          </button>
-          <div class="ftb-swatch-panel" id="tcPanel">
-            <p>Text Color</p>
-            <div class="ftb-grid" id="tcGrid"></div>
-          </div>
+        <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0" title="Text color" onclick="document.getElementById('tcInput').click()">
+          <span style="font-size:13px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">A</span>
+          <div id="tcBar" style="width:16px;height:3px;border-radius:1px;background:#000000;pointer-events:none"></div>
+          <input type="color" id="tcInput" value="#000000" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
         </div>
 
         <!-- stroke color -->
-        <div class="ftb-color-wrap" id="scWrap">
-          <button class="ftb-swatch-btn" id="scBtn" title="Stroke color">
-            <span class="ftb-swatch-letter" style="font-size:9px;color:#888">STR</span>
-            <div class="ftb-swatch-bar" id="scBar" style="background:#000000"></div>
-          </button>
-          <div class="ftb-swatch-panel" id="scPanel">
-            <p>Stroke Color</p>
-            <div class="ftb-grid" id="scGrid"></div>
-          </div>
+        <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0" title="Stroke color" onclick="document.getElementById('scInput').click()">
+          <span style="font-size:9px;font-weight:700;color:#888;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">STR</span>
+          <div id="scBar" style="width:16px;height:3px;border-radius:1px;background:#ffffff;pointer-events:none"></div>
+          <input type="color" id="scInput" value="#ffffff" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
         </div>
 
         <div class="ftb-div"></div>
@@ -694,33 +684,28 @@ function buildSwatches(gridId, onPick) {
   })
 }
 
-$('tcBtn').addEventListener('mousedown', e => {
-  e.preventDefault() // prevent text input from losing focus
-  e.stopPropagation()
-  $('tcPanel').classList.toggle('open')
-  $('scPanel').classList.remove('open')
-})
-$('scBtn').addEventListener('mousedown', e => {
-  e.preventDefault()
-  e.stopPropagation()
-  $('scPanel').classList.toggle('open')
-  $('tcPanel').classList.remove('open')
-})
-
-buildSwatches('tcGrid', c => {
-  applyStyle('textColor', c)
+// Text color picker
+$('tcInput').addEventListener('input', () => {
+  const c = $('tcInput').value
   $('tcBar').style.background = c
-  $('tcPanel').classList.remove('open')
+  applyStyle('textColor', c)
 })
-buildSwatches('scGrid', c => {
-  applyStyle('strokeColor', c)
-  $('scBar').style.background = c
-  $('scPanel').classList.remove('open')
+$('tcInput').addEventListener('change', () => {
+  const c = $('tcInput').value
+  $('tcBar').style.background = c
+  applyStyle('textColor', c)
 })
 
-document.addEventListener('click', e => {
-  if (!$('tcWrap').contains(e.target)) $('tcPanel').classList.remove('open')
-  if (!$('scWrap').contains(e.target)) $('scPanel').classList.remove('open')
+// Stroke color picker
+$('scInput').addEventListener('input', () => {
+  const c = $('scInput').value
+  $('scBar').style.background = c
+  applyStyle('strokeColor', c)
+})
+$('scInput').addEventListener('change', () => {
+  const c = $('scInput').value
+  $('scBar').style.background = c
+  applyStyle('strokeColor', c)
 })
 
 // ── Add Text ──
