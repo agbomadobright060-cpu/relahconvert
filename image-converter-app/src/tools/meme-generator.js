@@ -1,99 +1,63 @@
 import { injectHeader } from '../core/header.js'
 import { getT } from '../core/i18n.js'
 
-// JSZip not needed for meme generator (single output)
-
 const t = getT()
-
 let allTemplates = []
 
 if (document.head) {
   document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
   const style = document.createElement('style')
   style.textContent = `
-    /* ── Layout ───────────────────────────────────────────────────────── */
     .tool-wrap { max-width:1100px; margin:0 auto; padding:32px 16px 60px; font-family:'DM Sans',sans-serif; }
     .tool-hero { margin-bottom:24px; }
     .tool-title { font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em; }
     .brand-em { font-style:italic; color:#C84B31; }
     .tool-sub { font-size:13px; color:#7A6A5A; margin:0; }
-
-    /* ── Two-column ───────────────────────────────────────────────────── */
     .meme-layout { display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start; }
     @media (max-width:768px) { .meme-layout { grid-template-columns:1fr; } }
-
-    /* ── Controls panel ───────────────────────────────────────────────── */
     .meme-controls { background:#fff; border-radius:14px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1.5px solid #E8E0D5; display:flex; flex-direction:column; }
     .meme-section { padding:14px 0; border-bottom:1px solid #F0EAE4; }
     .meme-section:last-child { border-bottom:none; padding-bottom:0; }
     .meme-section:first-child { padding-top:0; }
-
-    /* ── Labels ───────────────────────────────────────────────────────── */
     .meme-label { display:block; font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; font-family:'DM Sans',sans-serif; }
     .meme-optional { font-weight:400; text-transform:none; letter-spacing:0; color:#B0A090; font-size:11px; }
-
-    /* ── Source buttons ───────────────────────────────────────────────── */
     .meme-btn-row { display:flex; gap:8px; }
     .meme-pick-btn { flex:1; padding:10px 12px; border:1.5px solid #DDD5C8; border-radius:8px; background:#fff; font-size:13px; font-weight:600; color:#2C1810; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; text-align:center; }
     .meme-pick-btn:hover { border-color:#C84B31; color:#C84B31; background:#FDE8E3; }
-
-    /* ── Text inputs ──────────────────────────────────────────────────── */
     .meme-input { width:100%; padding:10px 12px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAFAF8; outline:none; box-sizing:border-box; transition:border-color 0.15s; }
     .meme-input:focus { border-color:#C84B31; background:#fff; }
     .meme-input::placeholder { color:#C4B8A8; }
-
-    /* ── Toggle buttons ───────────────────────────────────────────────── */
     .meme-toggle-row { display:flex; gap:6px; }
     .meme-toggle { flex:1; padding:8px 12px; border:1.5px solid #DDD5C8; border-radius:8px; background:#fff; font-size:12px; font-weight:600; color:#5A4A3A; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
     .meme-toggle:hover { border-color:#C84B31; color:#C84B31; }
     .meme-toggle.active { background:#C84B31; border-color:#C84B31; color:#fff; }
-
-    /* ── Slider ───────────────────────────────────────────────────────── */
     .meme-slider { width:100%; -webkit-appearance:none; appearance:none; height:4px; border-radius:2px; background:#DDD5C8; outline:none; cursor:pointer; margin-top:4px; display:block; }
     .meme-slider::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#C84B31; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.2); }
     .meme-slider::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:#C84B31; cursor:pointer; border:none; }
-
-    /* ── Color pickers ────────────────────────────────────────────────── */
     .meme-color-row { display:flex; gap:20px; }
     .meme-color-row > div { flex:1; }
     .meme-color { width:48px; height:32px; border:1.5px solid #DDD5C8; border-radius:6px; cursor:pointer; padding:2px; background:#fff; display:block; }
-
-    /* ── Remove overlay ───────────────────────────────────────────────── */
     .meme-remove-btn { margin-top:8px; padding:7px 12px; border:1.5px solid #E8D0C8; border-radius:8px; background:#FDE8E3; font-size:12px; font-weight:600; color:#C84B31; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
     .meme-remove-btn:hover { background:#C84B31; color:#fff; border-color:#C84B31; }
-
-    /* ── Download button ──────────────────────────────────────────────── */
-    .meme-extra { display:none; }
     .apply-btn { width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-top:4px; }
     .apply-btn:hover { background:#A63D26; transform:translateY(-1px); }
     .apply-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
-
-    /* ── Preview ──────────────────────────────────────────────────────── */
     .meme-preview-wrap { position:sticky; top:84px; }
-    .meme-preview-box { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; box-shadow:0 1px 4px rgba(0,0,0,0.06); min-height:360px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
+    .meme-preview-box { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; box-shadow:0 1px 4px rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
     .meme-preview-box canvas { max-width:100%; border-radius:6px; display:block; }
-    .meme-placeholder { font-size:13px; color:#C4B8A8; text-align:center; font-family:'DM Sans',sans-serif; margin:0; }
-
-    /* ── Modal overlay ────────────────────────────────────────────────── */
     .meme-modal-overlay { position:fixed; inset:0; background:rgba(44,24,16,0.55); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
     .meme-modal { background:#fff; border-radius:16px; width:100%; max-width:680px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 64px rgba(0,0,0,0.2); }
     .meme-modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 20px 12px; border-bottom:1px solid #E8E0D5; flex-shrink:0; }
     .meme-modal-header h2 { font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:#2C1810; margin:0; }
     .meme-modal-close { width:32px; height:32px; border:none; border-radius:8px; background:#F5F0E8; color:#5A4A3A; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
     .meme-modal-close:hover { background:#C84B31; color:#fff; }
-
-    /* ── Template search ──────────────────────────────────────────────── */
     .meme-search { width:100%; padding:12px 16px; border:none; border-bottom:1px solid #E8E0D5; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAFAF8; outline:none; flex-shrink:0; box-sizing:border-box; }
     .meme-search::placeholder { color:#C4B8A8; }
-
-    /* ── Template grid ────────────────────────────────────────────────── */
     .meme-template-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; padding:16px; overflow-y:auto; }
     .meme-template-item { border:1.5px solid #E8E0D5; border-radius:10px; overflow:hidden; cursor:pointer; transition:all 0.15s; background:#FAFAF8; }
     .meme-template-item:hover { border-color:#C84B31; box-shadow:0 4px 12px rgba(200,75,49,0.15); transform:translateY(-2px); }
-    .meme-template-item img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#F0EAE4; }
+    .meme-template-item img { width:100%; height:120px; object-fit:cover; display:block; background:#F0EAE4; }
     .meme-template-item span { display:block; font-size:11px; font-weight:600; color:#5A4A3A; padding:6px 8px; font-family:'DM Sans',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-    /* ── SEO section ──────────────────────────────────────────────────── */
     .seo-section { max-width:700px; margin:40px auto 0; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
@@ -117,10 +81,7 @@ document.getElementById('app').innerHTML = `
   </div>
 
   <div class="meme-layout">
-    <!-- LEFT: controls -->
     <div class="meme-controls">
-
-      <!-- Image source -->
       <div class="meme-section">
         <label class="meme-label">Image</label>
         <div class="meme-btn-row">
@@ -129,32 +90,26 @@ document.getElementById('app').innerHTML = `
         </div>
         <input type="file" id="fileInput" accept="image/*" style="display:none">
       </div>
-
-      <!-- Text options -->
-      <div class="meme-section meme-extra">
+      <div class="meme-section" id="secTopText" style="display:none">
         <label class="meme-label">Top Text <span class="meme-optional">(optional)</span></label>
         <input type="text" id="topText" class="meme-input" placeholder="TOP TEXT">
       </div>
-
-      <div class="meme-section meme-extra">
+      <div class="meme-section" id="secBottomText" style="display:none">
         <label class="meme-label">Bottom Text <span class="meme-optional">(optional)</span></label>
         <input type="text" id="bottomText" class="meme-input" placeholder="BOTTOM TEXT">
       </div>
-
-      <div class="meme-section meme-extra">
+      <div class="meme-section" id="secPosition" style="display:none">
         <label class="meme-label">Text Position</label>
         <div class="meme-toggle-row">
-          <button class="meme-toggle active" id="insideBtn" data-val="inside">Inside Image</button>
-          <button class="meme-toggle" id="outsideBtn" data-val="outside">Outside Image</button>
+          <button class="meme-toggle active" id="insideBtn">Inside Image</button>
+          <button class="meme-toggle" id="outsideBtn">Outside Image</button>
         </div>
       </div>
-
-      <div class="meme-section meme-extra">
+      <div class="meme-section" id="secFontSize" style="display:none">
         <label class="meme-label">Font Size: <span id="fontSizeVal">40</span>px</label>
         <input type="range" id="fontSize" min="16" max="100" value="40" class="meme-slider">
       </div>
-
-      <div class="meme-section meme-color-row meme-extra">
+      <div class="meme-section meme-color-row" id="secColors" style="display:none">
         <div>
           <label class="meme-label">Text Color</label>
           <input type="color" id="textColor" value="#ffffff" class="meme-color">
@@ -164,9 +119,7 @@ document.getElementById('app').innerHTML = `
           <input type="color" id="strokeColor" value="#000000" class="meme-color">
         </div>
       </div>
-
-      <!-- Overlay image -->
-      <div class="meme-section meme-extra">
+      <div class="meme-section" id="secOverlay" style="display:none">
         <label class="meme-label">Add Overlay Image <span class="meme-optional">(optional — drag to position)</span></label>
         <button class="meme-pick-btn" id="overlayBtn">+ Add Sticker / Image</button>
         <input type="file" id="overlayInput" accept="image/*" style="display:none">
@@ -176,26 +129,21 @@ document.getElementById('app').innerHTML = `
           <button class="meme-remove-btn" id="removeOverlay">✕ Remove Overlay</button>
         </div>
       </div>
-
-      <!-- Download -->
-      <div class="meme-section meme-extra">
+      <div class="meme-section" id="secFormat" style="display:none">
         <label class="meme-label">Download Format</label>
         <div class="meme-toggle-row">
-          <button class="meme-toggle active" id="fmtJpg" data-fmt="jpg">JPG</button>
-          <button class="meme-toggle" id="fmtPng" data-fmt="png">PNG</button>
+          <button class="meme-toggle active" id="fmtJpg">JPG</button>
+          <button class="meme-toggle" id="fmtPng">PNG</button>
         </div>
       </div>
-
-      <button class="apply-btn meme-extra" id="downloadBtn" disabled>⬇ Download Meme</button>
+      <button class="apply-btn" id="downloadBtn" style="display:none" disabled>⬇ Download Meme</button>
     </div>
 
-    <!-- RIGHT: preview -->
     <div class="meme-preview-wrap" id="previewWrap" style="display:none">
       <div class="meme-preview-box" id="previewBox"></div>
     </div>
   </div>
 
-  <!-- Template modal -->
   <div class="meme-modal-overlay" id="templateModal" style="display:none">
     <div class="meme-modal">
       <div class="meme-modal-header">
@@ -211,7 +159,6 @@ document.getElementById('app').innerHTML = `
 
 injectHeader()
 
-// State
 let mainImage = null
 let overlayImage = null
 let overlayX = 0.5
@@ -219,12 +166,9 @@ let overlayY = 0.5
 let textPosition = 'inside'
 let downloadFmt = 'jpg'
 let isDraggingOverlay = false
-let dragOffsetX = 0
-let dragOffsetY = 0
 let canvas = null
 let ctx = null
 
-// Elements
 const fileInput = document.getElementById('fileInput')
 const overlayInput = document.getElementById('overlayInput')
 const uploadBtn = document.getElementById('uploadBtn')
@@ -251,7 +195,14 @@ const outsideBtn = document.getElementById('outsideBtn')
 const fmtJpg = document.getElementById('fmtJpg')
 const fmtPng = document.getElementById('fmtPng')
 
-// Upload
+const extraIds = ['secTopText','secBottomText','secPosition','secFontSize','secColors','secOverlay','secFormat']
+
+function showControls() {
+  extraIds.forEach(id => { document.getElementById(id).style.display = 'block' })
+  downloadBtn.style.display = 'block'
+  document.getElementById('previewWrap').style.display = 'block'
+}
+
 uploadBtn.onclick = () => { fileInput.value = ''; fileInput.click() }
 fileInput.onchange = e => {
   const file = e.target.files[0]
@@ -259,13 +210,12 @@ fileInput.onchange = e => {
   const reader = new FileReader()
   reader.onload = ev => {
     const img = new Image()
-    img.onload = () => { mainImage = img; render() }
+    img.onload = () => { mainImage = img; canvas = null; render() }
     img.src = ev.target.result
   }
   reader.readAsDataURL(file)
 }
 
-// Overlay
 overlayBtn.onclick = () => { overlayInput.value = ''; overlayInput.click() }
 overlayInput.onchange = e => {
   const file = e.target.files[0]
@@ -280,15 +230,20 @@ overlayInput.onchange = e => {
 }
 removeOverlay.onclick = () => { overlayImage = null; overlayControls.style.display = 'none'; render() }
 
-// Text position toggle
-insideBtn.onclick = () => { textPosition = 'inside'; insideBtn.classList.add('active'); outsideBtn.classList.remove('active'); textColor.value = '#ffffff'; render() }
-outsideBtn.onclick = () => { textPosition = 'outside'; outsideBtn.classList.add('active'); insideBtn.classList.remove('active'); textColor.value = '#000000'; render() }
+insideBtn.onclick = () => {
+  textPosition = 'inside'
+  insideBtn.classList.add('active'); outsideBtn.classList.remove('active')
+  textColor.value = '#ffffff'; render()
+}
+outsideBtn.onclick = () => {
+  textPosition = 'outside'
+  outsideBtn.classList.add('active'); insideBtn.classList.remove('active')
+  textColor.value = '#000000'; render()
+}
 
-// Format toggle
 fmtJpg.onclick = () => { downloadFmt = 'jpg'; fmtJpg.classList.add('active'); fmtPng.classList.remove('active') }
 fmtPng.onclick = () => { downloadFmt = 'png'; fmtPng.classList.add('active'); fmtJpg.classList.remove('active') }
 
-// Live inputs
 topText.oninput = render
 bottomText.oninput = render
 fontSize.oninput = () => { fontSizeVal.textContent = fontSize.value; render() }
@@ -296,7 +251,6 @@ textColor.oninput = render
 strokeColor.oninput = render
 overlaySize.oninput = () => { overlaySizeVal.textContent = overlaySize.value; render() }
 
-// Template modal
 templateBtn.onclick = async () => {
   templateModal.style.display = 'flex'
   if (allTemplates.length) { renderTemplates(allTemplates); return }
@@ -328,21 +282,18 @@ function renderTemplates(list) {
   templateGrid.querySelectorAll('.meme-template-item').forEach(item => {
     item.onclick = () => {
       const img = new Image()
-      img.onload = () => { mainImage = img; render(); templateModal.style.display = 'none' }
+      img.crossOrigin = 'anonymous'
+      img.onload = () => { mainImage = img; canvas = null; render(); templateModal.style.display = 'none' }
+      img.onerror = () => {
+        const img2 = new Image()
+        img2.onload = () => { mainImage = img2; canvas = null; render(); templateModal.style.display = 'none' }
+        img2.src = item.dataset.url
+      }
       img.src = item.dataset.url
     }
   })
 }
 
-// Show controls once an image is loaded
-function showControls() {
-  document.getElementById('previewWrap').style.display = ''
-  document.querySelectorAll('.meme-extra').forEach(el => {
-    el.style.display = ''
-  })
-}
-
-// Render canvas
 function render() {
   if (!mainImage) return
   showControls()
@@ -354,16 +305,14 @@ function render() {
   const top = topText.value.trim().toUpperCase()
   const bot = bottomText.value.trim().toUpperCase()
   const ovSize = parseInt(overlaySize.value) / 100
-
   const W = mainImage.naturalWidth
   const H = mainImage.naturalHeight
-  const padding = textPosition === 'outside' && (top || bot) ? fs * 2 : 0
+  const padding = fs * 2
 
   if (!canvas) {
     canvas = document.createElement('canvas')
     canvas.style.maxWidth = '100%'
     canvas.style.borderRadius = '8px'
-    canvas.style.cursor = overlayImage ? 'move' : 'default'
     previewBox.innerHTML = ''
     previewBox.appendChild(canvas)
     setupDrag()
@@ -376,7 +325,6 @@ function render() {
   canvas.height = H + topPad + botPad
   ctx = canvas.getContext('2d')
 
-  // Background for outside text
   if (topPad || botPad) {
     ctx.fillStyle = '#fff'
     ctx.fillRect(0, 0, W, canvas.height)
@@ -384,7 +332,6 @@ function render() {
 
   ctx.drawImage(mainImage, 0, topPad, W, H)
 
-  // Draw text
   ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
   ctx.textAlign = 'center'
   ctx.lineWidth = fs / 8
@@ -410,7 +357,6 @@ function render() {
     }
   }
 
-  // Draw overlay
   if (overlayImage) {
     const ow = W * ovSize
     const oh = (overlayImage.naturalHeight / overlayImage.naturalWidth) * ow
@@ -421,32 +367,16 @@ function render() {
 }
 
 function setupDrag() {
-  canvas.addEventListener('mousedown', e => {
-    if (!overlayImage) return
-    isDraggingOverlay = true
-    const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    dragOffsetX = (e.clientX - rect.left) * scaleX
-    dragOffsetY = (e.clientY - rect.top) * scaleY
-  })
+  canvas.addEventListener('mousedown', () => { if (overlayImage) isDraggingOverlay = true })
   window.addEventListener('mousemove', e => {
     if (!isDraggingOverlay) return
     const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    overlayX = Math.max(0, Math.min(1, (e.clientX - rect.left) * scaleX / canvas.width))
-    overlayY = Math.max(0, Math.min(1, (e.clientY - rect.top) * scaleY / canvas.height))
+    overlayX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    overlayY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
     render()
   })
   window.addEventListener('mouseup', () => { isDraggingOverlay = false })
-
-  // Touch support
-  canvas.addEventListener('touchstart', e => {
-    if (!overlayImage) return
-    isDraggingOverlay = true
-    e.preventDefault()
-  }, { passive: false })
+  canvas.addEventListener('touchstart', e => { if (overlayImage) { isDraggingOverlay = true; e.preventDefault() } }, { passive: false })
   window.addEventListener('touchmove', e => {
     if (!isDraggingOverlay) return
     const rect = canvas.getBoundingClientRect()
@@ -458,28 +388,24 @@ function setupDrag() {
   window.addEventListener('touchend', () => { isDraggingOverlay = false })
 }
 
-// Download
 downloadBtn.onclick = () => {
   if (!canvas) return
   const mime = downloadFmt === 'png' ? 'image/png' : 'image/jpeg'
-  const ext = downloadFmt
   try {
     canvas.toBlob(blob => {
       if (!blob) return
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `meme.${ext}`
+      a.download = `meme.${downloadFmt}`
       a.click()
       setTimeout(() => URL.revokeObjectURL(url), 10000)
     }, mime, 0.92)
   } catch {
-    // Canvas tainted by cross-origin template image
-    alert('To save this meme: right-click the preview and choose "Save image as…"\n\nOr upload the template image from your device to enable direct download.')
+    alert('To save this meme: right-click the preview and choose "Save image as…"\n\nOr upload the template from your device to enable direct download.')
   }
 }
 
-// SEO
 ;(function injectSEO() {
   const s = t.seo?.['meme-generator']
   if (!s) return
