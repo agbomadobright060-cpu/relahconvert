@@ -328,6 +328,7 @@ let filteredTemplates = []
 
 // drag state
 let dragging = null  // { layer, startX, startY, origX, origY }
+let editingLayer = null  // layer currently being typed into
 
 const $ = id => document.getElementById(id)
 const topText = $('topText'), bottomText = $('bottomText')
@@ -424,6 +425,7 @@ function render() {
 
   // draggable text layers
   layers.forEach(layer => {
+    if (layer === editingLayer) return  // skip — shown as input overlay
     const lfs = layer.size || S.size
     const lfont = layer.font || S.font
     const lfill = layer.textColor || '#ffffff'
@@ -455,18 +457,34 @@ function render() {
       ctx.fillRect(ux, py + lfs*0.55, tw, Math.max(1, lfs/18))
     }
 
-    // selection indicator
+    // selection indicator + X delete handle
     if (layer === selectedLayer) {
       ctx.save()
       const tw2 = ctx.measureText(layer.text).width
-      const pad = 6
+      const pad = 8
       const bx = lalign === 'center' ? px - tw2/2 - pad : lalign === 'right' ? px - tw2 - pad : px - pad
+      const by = py - lfs*0.75
+      const bw = tw2 + pad*2
+      const bh = lfs*1.4
       ctx.strokeStyle = '#4488ff'
       ctx.lineWidth = 2
       ctx.setLineDash([4,3])
-      ctx.strokeRect(bx, py - lfs*0.7, tw2 + pad*2, lfs*1.3)
+      ctx.strokeRect(bx, by, bw, bh)
       ctx.setLineDash([])
+      // X delete button — top-right corner
+      const xr = 10
+      const xcx = bx + bw + xr + 2
+      const xcy = by - xr - 2
+      ctx.fillStyle = '#ff3333'
+      ctx.beginPath(); ctx.arc(xcx, xcy, xr, 0, Math.PI*2); ctx.fill()
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.setLineDash([])
+      ctx.beginPath(); ctx.moveTo(xcx-5, xcy-5); ctx.lineTo(xcx+5, xcy+5); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(xcx+5, xcy-5); ctx.lineTo(xcx-5, xcy+5); ctx.stroke()
+      // store hit area for click detection
+      layer._xBtn = { cx: xcx, cy: xcy, r: xr, bx, by, bw, bh }
       ctx.restore()
+    } else {
+      layer._xBtn = null
     }
   })
 }
@@ -528,6 +546,15 @@ function setupCanvasDrag() {
     const scaleY = canvas.height / rect.height
     const cx = (e.clientX - rect.left) * scaleX
     const cy = (e.clientY - rect.top) * scaleY
+
+    // check X delete button first
+    if (selectedLayer && selectedLayer._xBtn) {
+      const { cx: xcx, cy: xcy, r } = selectedLayer._xBtn
+      if (Math.hypot(cx - xcx, cy - xcy) <= r + 4) {
+        layers = layers.filter(l => l !== selectedLayer)
+        selectedLayer = null; hideToolbar(); render(); e.preventDefault(); return
+      }
+    }
 
     // hit test layers (reverse = top layer first)
     let hit = null
@@ -687,44 +714,64 @@ $('addTextBtn').onclick = () => {
 // double-click to edit layer text
 // inline text editor on canvas
 function openInlineEditor(layer) {
-  // remove any existing editor
-  const old = document.getElementById('layerEditor')
-  if (old) old.remove()
+  const oldEl = document.getElementById('layerEditor')
+  if (oldEl) oldEl.remove()
+
+  editingLayer = layer  // tell render() to skip drawing this layer
+  render()              // redraw without the text so no overlap
 
   const rect = canvas.getBoundingClientRect()
   const scaleX = rect.width / canvas.width
   const scaleY = rect.height / canvas.height
+  const wrapRect = canvasWrap.getBoundingClientRect()
 
-  const px = layer.x * canvas.width * scaleX + rect.left - canvasWrap.getBoundingClientRect().left
-  const py = layer.y * canvas.height * scaleY + rect.top - canvasWrap.getBoundingClientRect().top
+  const px = layer.x * canvas.width * scaleX + rect.left - wrapRect.left
+  const py = layer.y * canvas.height * scaleY + rect.top - wrapRect.top
+
+  // scale font size to match canvas display size
+  const displayFontSize = Math.max(12, (layer.size || S.size) * scaleY)
 
   const inp = document.createElement('input')
   inp.id = 'layerEditor'
-  inp.value = layer.text
-  inp.style.cssText = `
-    position:absolute;
-    left:${px}px; top:${py}px;
-    transform:translate(-50%, -50%);
-    background:rgba(0,0,0,0.6);
-    color:#fff;
-    border:2px solid #4488ff;
-    border-radius:6px;
-    padding:4px 8px;
-    font-size:14px;
-    font-family:'DM Sans',sans-serif;
-    outline:none;
-    z-index:50;
-    min-width:120px;
-    text-align:center;
-  `
+  inp.value = layer.text === 'Text' ? '' : layer.text
+  inp.placeholder = 'Type here...'
+  inp.style.cssText = [
+    'position:absolute',
+    `left:${px}px`,
+    `top:${py}px`,
+    'transform:translate(-50%,-50%)',
+    'background:rgba(0,0,0,0.75)',
+    'color:#fff',
+    'border:2px solid #4488ff',
+    'border-radius:6px',
+    'padding:4px 10px',
+    `font-size:${displayFontSize}px`,
+    `font-family:${layer.font || S.font}`,
+    'outline:none',
+    'z-index:50',
+    'min-width:80px',
+    'max-width:90%',
+    'text-align:center',
+    'box-shadow:0 2px 12px rgba(0,0,0,0.4)'
+  ].join(';')
+
   canvasWrap.style.position = 'relative'
   canvasWrap.appendChild(inp)
   inp.focus()
   inp.select()
 
-  inp.addEventListener('input', () => { layer.text = inp.value || ' '; render() })
+  // grow width as user types
+  inp.addEventListener('input', () => {
+    layer.text = inp.value || ' '
+    inp.style.width = Math.max(80, inp.value.length * displayFontSize * 0.6) + 'px'
+  })
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur() })
-  inp.addEventListener('blur', () => { layer.text = inp.value.trim() || 'Text'; inp.remove(); render() })
+  inp.addEventListener('blur', () => {
+    editingLayer = null
+    layer.text = inp.value.trim() || 'Text'
+    inp.remove()
+    render()
+  })
 }
 
 canvasWrap.addEventListener('dblclick', e => {
