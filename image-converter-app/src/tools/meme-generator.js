@@ -94,6 +94,7 @@ if (document.head) {
     .meme-remove-btn:hover { background:#C84B31; color:#fff; border-color:#C84B31; }
 
     /* ── Download button ──────────────────────────────────────────────── */
+    .meme-extra { display:none; }
     .apply-btn { width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-top:4px; }
     .apply-btn:hover { background:#A63D26; transform:translateY(-1px); }
     .apply-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
@@ -161,17 +162,17 @@ document.getElementById('app').innerHTML = `
       </div>
 
       <!-- Text options -->
-      <div class="meme-section">
+      <div class="meme-section meme-extra">
         <label class="meme-label">Top Text <span class="meme-optional">(optional)</span></label>
         <input type="text" id="topText" class="meme-input" placeholder="TOP TEXT">
       </div>
 
-      <div class="meme-section">
+      <div class="meme-section meme-extra">
         <label class="meme-label">Bottom Text <span class="meme-optional">(optional)</span></label>
         <input type="text" id="bottomText" class="meme-input" placeholder="BOTTOM TEXT">
       </div>
 
-      <div class="meme-section">
+      <div class="meme-section meme-extra">
         <label class="meme-label">Text Position</label>
         <div class="meme-toggle-row">
           <button class="meme-toggle active" id="insideBtn" data-val="inside">Inside Image</button>
@@ -179,12 +180,12 @@ document.getElementById('app').innerHTML = `
         </div>
       </div>
 
-      <div class="meme-section">
+      <div class="meme-section meme-extra">
         <label class="meme-label">Font Size: <span id="fontSizeVal">40</span>px</label>
         <input type="range" id="fontSize" min="16" max="100" value="40" class="meme-slider">
       </div>
 
-      <div class="meme-section meme-color-row">
+      <div class="meme-section meme-color-row meme-extra">
         <div>
           <label class="meme-label">Text Color</label>
           <input type="color" id="textColor" value="#ffffff" class="meme-color">
@@ -196,7 +197,7 @@ document.getElementById('app').innerHTML = `
       </div>
 
       <!-- Overlay image -->
-      <div class="meme-section">
+      <div class="meme-section meme-extra">
         <label class="meme-label">Add Overlay Image <span class="meme-optional">(optional — drag to position)</span></label>
         <button class="meme-pick-btn" id="overlayBtn">+ Add Sticker / Image</button>
         <input type="file" id="overlayInput" accept="image/*" style="display:none">
@@ -208,7 +209,7 @@ document.getElementById('app').innerHTML = `
       </div>
 
       <!-- Download -->
-      <div class="meme-section">
+      <div class="meme-section meme-extra">
         <label class="meme-label">Download Format</label>
         <div class="meme-toggle-row">
           <button class="meme-toggle active" id="fmtJpg" data-fmt="jpg">JPG</button>
@@ -216,7 +217,7 @@ document.getElementById('app').innerHTML = `
         </div>
       </div>
 
-      <button class="apply-btn" id="downloadBtn" disabled>⬇ Download Meme</button>
+      <button class="apply-btn meme-extra" id="downloadBtn" disabled>⬇ Download Meme</button>
     </div>
 
     <!-- RIGHT: preview -->
@@ -313,8 +314,8 @@ overlayInput.onchange = e => {
 removeOverlay.onclick = () => { overlayImage = null; overlayControls.style.display = 'none'; render() }
 
 // Text position toggle
-insideBtn.onclick = () => { textPosition = 'inside'; insideBtn.classList.add('active'); outsideBtn.classList.remove('active'); render() }
-outsideBtn.onclick = () => { textPosition = 'outside'; outsideBtn.classList.add('active'); insideBtn.classList.remove('active'); render() }
+insideBtn.onclick = () => { textPosition = 'inside'; insideBtn.classList.add('active'); outsideBtn.classList.remove('active'); textColor.value = '#ffffff'; render() }
+outsideBtn.onclick = () => { textPosition = 'outside'; outsideBtn.classList.add('active'); insideBtn.classList.remove('active'); textColor.value = '#000000'; render() }
 
 // Format toggle
 fmtJpg.onclick = () => { downloadFmt = 'jpg'; fmtJpg.classList.add('active'); fmtPng.classList.remove('active') }
@@ -355,12 +356,9 @@ function renderTemplates(list) {
   templateGrid.querySelectorAll('.meme-template-item').forEach(item => {
     item.onclick = () => {
       const img = new Image()
-      img.crossOrigin = 'anonymous'
       img.onload = () => { mainImage = img; render(); templateModal.style.display = 'none' }
       img.onerror = () => {
-        // try alternate url
         const img2 = new Image()
-        img2.crossOrigin = 'anonymous'
         img2.onload = () => { mainImage = img2; render(); templateModal.style.display = 'none' }
         img2.src = `https://i.imgflip.com/${item.dataset.id}s.jpg`
       }
@@ -369,9 +367,17 @@ function renderTemplates(list) {
   })
 }
 
+// Show controls once an image is loaded
+function showControls() {
+  document.querySelectorAll('.meme-extra').forEach(el => {
+    el.style.display = ''
+  })
+}
+
 // Render canvas
 function render() {
   if (!mainImage) return
+  showControls()
   downloadBtn.disabled = false
 
   const fs = parseInt(fontSize.value)
@@ -404,7 +410,7 @@ function render() {
 
   // Background for outside text
   if (topPad || botPad) {
-    ctx.fillStyle = '#000'
+    ctx.fillStyle = '#fff'
     ctx.fillRect(0, 0, W, canvas.height)
   }
 
@@ -489,14 +495,20 @@ downloadBtn.onclick = () => {
   if (!canvas) return
   const mime = downloadFmt === 'png' ? 'image/png' : 'image/jpeg'
   const ext = downloadFmt
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `meme.${ext}`
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 10000)
-  }, mime, 0.92)
+  try {
+    canvas.toBlob(blob => {
+      if (!blob) return
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `meme.${ext}`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+    }, mime, 0.92)
+  } catch {
+    // Canvas tainted by cross-origin template image
+    alert('To save this meme: right-click the preview and choose "Save image as…"\n\nOr upload the template image from your device to enable direct download.')
+  }
 }
 
 // SEO
