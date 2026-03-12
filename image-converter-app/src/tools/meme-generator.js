@@ -50,73 +50,56 @@ if (document.head) {
     .meme-remove-btn:hover{background:#C84B31;color:#fff;border-color:#C84B31}
     .apply-btn{width:100%;padding:12px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-top:4px}
     .apply-btn:hover{background:#A63D26;transform:translateY(-1px)}
-    .apply-btn:disabled{background:#C4B8A8;cursor:not-allowed;opacity:0.7;transform:none}
 
     /* preview column */
-    .meme-preview-col{display:flex;flex-direction:column;gap:0;position:sticky;top:84px}
+    .meme-preview-col{display:flex;flex-direction:column;gap:8px;position:sticky;top:84px}
 
-    /* FLOATING TOOLBAR — sits above the preview box */
-    .meme-float-toolbar{
-      display:none;align-items:center;flex-wrap:nowrap;gap:2px;
-      background:#fff;border:1.5px solid #E0D8D0;
-      border-radius:10px;padding:6px 10px;
-      box-shadow:0 4px 16px rgba(0,0,0,0.12);
-      margin-bottom:8px;overflow-x:auto;
-    }
-    .meme-float-toolbar.show{display:flex}
-    .ftb-sep{width:1px;height:20px;background:#E0D8D0;margin:0 2px;flex-shrink:0}
+    /* FLOATING TOOLBAR */
+    .ftb{display:none;background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);align-items:center;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+    .ftb.show{display:flex}
+    .ftb-div{width:1px;height:22px;background:#E0D8D0;margin:0 2px;flex-shrink:0}
 
-    /* font dropdown — styled like iLoveIMG */
-    .ftb-font-wrap{position:relative;flex-shrink:0}
-    .ftb-font-btn{display:flex;align-items:center;gap:4px;height:30px;padding:0 8px;border:1px solid #E0D8D0;border-radius:6px;background:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;color:#2C1810;cursor:pointer;white-space:nowrap}
-    .ftb-font-btn:hover{border-color:#C84B31;color:#C84B31}
-    .ftb-font-btn svg{flex-shrink:0}
-    .ftb-font-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:50;min-width:160px;overflow:hidden}
-    .ftb-font-dropdown.open{display:block}
-    .ftb-font-option{padding:8px 14px;font-size:13px;color:#2C1810;cursor:pointer;border-bottom:1px solid #F5F0E8;font-family:'DM Sans',sans-serif;white-space:nowrap}
-    .ftb-font-option:last-child{border-bottom:none}
-    .ftb-font-option:hover,.ftb-font-option.selected{background:#FDE8E3;color:#C84B31}
-    .ftb-font-option.selected{font-weight:700}
+    /* font select — real native select, each option shows its own font */
+    .ftb-font{height:30px;padding:0 6px;border:1.5px solid #DDD5C8;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#fff;cursor:pointer;outline:none;flex-shrink:0;min-width:110px}
+    .ftb-font:focus{border-color:#C84B31}
 
-    /* size picker */
-    .ftb-size-wrap{position:relative;flex-shrink:0}
-    .ftb-size-btn{display:flex;align-items:center;gap:3px;height:30px;padding:0 7px;border:1px solid #E0D8D0;border-radius:6px;background:#fff;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:600;color:#2C1810;cursor:pointer;white-space:nowrap}
-    .ftb-size-btn:hover{border-color:#C84B31;color:#C84B31}
-    .ftb-size-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:50;min-width:70px;max-height:200px;overflow-y:auto}
-    .ftb-size-dropdown.open{display:block}
-    .ftb-size-option{padding:6px 14px;font-size:12px;color:#2C1810;cursor:pointer;font-family:'DM Sans',sans-serif}
-    .ftb-size-option:hover,.ftb-size-option.selected{background:#FDE8E3;color:#C84B31}
+    /* size select */
+    .ftb-size{height:30px;width:58px;padding:0 4px;border:1.5px solid #DDD5C8;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#fff;cursor:pointer;outline:none;flex-shrink:0}
+    .ftb-size:focus{border-color:#C84B31}
 
     /* icon buttons */
-    .ftb-btn{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#3A2A1A;transition:all 0.12s;font-family:'DM Sans',sans-serif;font-weight:700;flex-shrink:0}
+    .ftb-btn{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:14px;color:#2C1810;transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700}
     .ftb-btn:hover{background:#F5EDE8;color:#C84B31}
-    .ftb-btn.active{background:#C84B31;color:#fff}
+    .ftb-btn.on{background:#C84B31;color:#fff}
 
-    /* color button with swatch dropdown */
+    /* color swatches inline */
     .ftb-color-wrap{position:relative;flex-shrink:0}
-    .ftb-color-trigger{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;transition:all 0.12s;flex-direction:column;gap:1px;padding:4px}
-    .ftb-color-trigger:hover{background:#F5EDE8}
-    .ftb-color-letter{font-size:13px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif}
-    .ftb-color-bar{width:16px;height:3px;border-radius:2px;background:#C84B31}
-    .ftb-color-bg-icon{font-size:14px;line-height:1}
-    .ftb-swatch-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #E0D8D0;border-radius:12px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,0.14);z-index:50;min-width:220px}
-    .ftb-swatch-dropdown.open{display:block}
-    .ftb-swatch-label{font-size:10px;font-weight:700;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-family:'DM Sans',sans-serif}
-    .ftb-swatch-grid{display:grid;grid-template-columns:repeat(10,18px);gap:3px;margin-bottom:6px}
-    .ftb-swatch{width:18px;height:18px;border-radius:3px;cursor:pointer;border:1px solid rgba(0,0,0,0.08);flex-shrink:0;transition:transform 0.1s}
-    .ftb-swatch:hover{transform:scale(1.3);position:relative;z-index:1}
-    .ftb-swatch.none{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cline x1='0' y1='18' x2='18' y2='0' stroke='%23e74c3c' stroke-width='1.5'/%3E%3C/svg%3E") center/cover;border:1px solid #ddd}
+    .ftb-swatch-btn{width:30px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;flex-shrink:0}
+    .ftb-swatch-btn:hover{border-color:#C84B31}
+    .ftb-swatch-letter{font-size:12px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif}
+    .ftb-swatch-bar{width:16px;height:3px;border-radius:1px}
+    .ftb-swatch-panel{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,0.14);z-index:100;width:186px}
+    .ftb-swatch-panel.open{display:block}
+    .ftb-swatch-panel p{font-size:10px;font-weight:700;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;font-family:'DM Sans',sans-serif}
+    .ftb-grid{display:flex;flex-wrap:wrap;gap:4px}
+    .ftb-dot{width:20px;height:20px;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,0.1);transition:transform 0.1s}
+    .ftb-dot:hover{transform:scale(1.25);position:relative;z-index:1}
+
+    /* align buttons */
+    .ftb-align{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#2C1810;transition:all 0.12s;flex-shrink:0}
+    .ftb-align:hover{background:#F5EDE8}
+    .ftb-align.on{background:#C84B31;color:#fff}
 
     /* preview box */
     .meme-preview-box{background:#fff;border-radius:14px;border:1.5px solid #E8E0D5;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:300px;padding:12px}
     .meme-preview-box canvas{max-width:100%;border-radius:6px;display:block}
 
-    /* template modal */
+    /* modal */
     .meme-modal-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
     .meme-modal{background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
     .meme-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid #E8E0D5;flex-shrink:0}
     .meme-modal-header h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:0}
-    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:#F5F0E8;color:#5A4A3A;font-size:14px;cursor:pointer;transition:all 0.15s}
+    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:#F5F0E8;color:#5A4A3A;font-size:14px;cursor:pointer}
     .meme-modal-close:hover{background:#C84B31;color:#fff}
     .meme-search{width:100%;padding:11px 16px;border:none;border-bottom:1px solid #E8E0D5;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;flex-shrink:0}
     .meme-search::placeholder{color:#C4B8A8}
@@ -141,12 +124,26 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-const FONTS = ['Impact','Arial Black','Arial','Verdana','Comic Sans MS','Times New Roman','Courier New','Georgia']
-const SIZES = [12,14,16,18,20,24,28,32,36,42,48,56,64,72,96]
-const SWATCHES_TEXT = ['#ffffff','#000000','#ffff00','#ff0000','#ff6600','#00ff00','#00ffff','#0000ff','#ff00ff','#888888',
-  '#ffd700','#ff4444','#ff8800','#44dd44','#4488ff','#aa44ff','#ff44aa','#44ffee','#334455','#cc9966']
-const SWATCHES_BG = ['transparent','#ffffff','#000000','#ffff00','#ff0000','#ff6600','#00ff00','#00bcd4','#2196f3','#9c27b0',
-  '#ffd700','#ff4444','#ff8800','#44dd44','#4488ff','#aa44ff','#ff44aa','#44ffee','#334455','#cc9966']
+// All fonts that actually work in browsers without loading
+const FONTS = [
+  { label: 'Impact',          value: 'Impact, Haettenschweiler, sans-serif' },
+  { label: 'Arial Black',     value: '"Arial Black", Gadget, sans-serif' },
+  { label: 'Arial',           value: 'Arial, Helvetica, sans-serif' },
+  { label: 'Verdana',         value: 'Verdana, Geneva, sans-serif' },
+  { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
+  { label: 'Georgia',         value: 'Georgia, serif' },
+  { label: 'Courier New',     value: '"Courier New", Courier, monospace' },
+  { label: 'Comic Sans',      value: '"Comic Sans MS", cursive' },
+]
+
+const TEXT_COLORS = [
+  '#ffffff','#000000','#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff','#ff6600','#ff4444',
+  '#ffd700','#44dd44','#4488ff','#aa44ff','#ff44aa','#44ffee','#888888','#444444','#cc9966','#334455'
+]
+const STROKE_COLORS = [
+  '#000000','#ffffff','#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff','#ff6600','#888888',
+  '#ffd700','#cc0000','#005500','#000088','#440044','#004444','#222222','#666666','#cc9966','#334455'
+]
 
 document.getElementById('app').innerHTML = `
 <div class="tool-wrap">
@@ -163,6 +160,8 @@ document.getElementById('app').innerHTML = `
   </div>
 
   <div class="meme-layout" id="memeLayout">
+
+    <!-- LEFT PANEL -->
     <div class="meme-controls">
       <div class="meme-section">
         <label class="meme-label">Top Text <span class="meme-optional">(optional)</span></label>
@@ -181,16 +180,16 @@ document.getElementById('app').innerHTML = `
       </div>
       <div class="meme-section">
         <label class="meme-label">Font Size: <span id="fontSizeVal">40</span>px</label>
-        <input type="range" id="fontSize" min="16" max="100" value="40" class="meme-slider">
+        <input type="range" id="fontSizeSlider" min="12" max="120" value="40" class="meme-slider">
       </div>
       <div class="meme-section meme-color-row">
         <div>
           <label class="meme-label">Text Color</label>
-          <input type="color" id="textColor" value="#ffffff" class="meme-color">
+          <input type="color" id="textColorPicker" value="#ffffff" class="meme-color">
         </div>
         <div>
           <label class="meme-label">Stroke Color</label>
-          <input type="color" id="strokeColor" value="#000000" class="meme-color">
+          <input type="color" id="strokeColorPicker" value="#000000" class="meme-color">
         </div>
       </div>
       <div class="meme-section">
@@ -198,8 +197,8 @@ document.getElementById('app').innerHTML = `
         <button class="meme-pick-btn" id="overlayBtn">+ Add Sticker / Image</button>
         <input type="file" id="overlayInput" accept="image/*" style="display:none">
         <div id="overlayControls" style="display:none;margin-top:8px">
-          <label class="meme-label" style="margin-top:6px">Size: <span id="overlaySizeVal">30</span>%</label>
-          <input type="range" id="overlaySize" min="5" max="100" value="30" class="meme-slider">
+          <label class="meme-label">Size: <span id="overlaySizeVal">30</span>%</label>
+          <input type="range" id="overlaySizeSlider" min="5" max="100" value="30" class="meme-slider">
           <button class="meme-remove-btn" id="removeOverlay">✕ Remove Overlay</button>
         </div>
       </div>
@@ -213,72 +212,69 @@ document.getElementById('app').innerHTML = `
       <button class="apply-btn" id="downloadBtn">⬇ Download Meme</button>
     </div>
 
-    <div class="meme-preview-col" id="previewCol">
-      <!-- Floating toolbar — above preview box, hidden until text focus -->
-      <div class="meme-float-toolbar" id="floatToolbar">
+    <!-- RIGHT COLUMN: toolbar + preview -->
+    <div class="meme-preview-col">
 
-        <!-- Font picker -->
-        <div class="ftb-font-wrap" id="ftbFontWrap">
-          <button class="ftb-font-btn" id="ftbFontBtn">
-            <span id="ftbFontLabel">Impact</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#888" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <!-- FLOATING TOOLBAR — shows on text input focus -->
+      <div class="ftb" id="ftb">
+
+        <!-- Font family -->
+        <select class="ftb-font" id="ftbFont">
+          ${FONTS.map(f => `<option value="${f.value}" style="font-family:${f.value}">${f.label}</option>`).join('')}
+        </select>
+
+        <!-- Font size -->
+        <select class="ftb-size" id="ftbSize">
+          ${[12,14,16,18,20,24,28,32,36,42,48,56,64,72,96,120].map(s =>
+            `<option value="${s}"${s===40?' selected':''}>${s}</option>`).join('')}
+        </select>
+
+        <div class="ftb-div"></div>
+
+        <!-- Bold / Italic / Underline -->
+        <button class="ftb-btn" id="ftbB" title="Bold"><b>B</b></button>
+        <button class="ftb-btn" id="ftbI" title="Italic"><i>I</i></button>
+        <button class="ftb-btn" id="ftbU" title="Underline"><u>U</u></button>
+
+        <div class="ftb-div"></div>
+
+        <!-- Text color swatch button -->
+        <div class="ftb-color-wrap" id="tcWrap">
+          <button class="ftb-swatch-btn" id="tcBtn" title="Text color">
+            <span class="ftb-swatch-letter">A</span>
+            <div class="ftb-swatch-bar" id="tcBar" style="background:#ffffff"></div>
           </button>
-          <div class="ftb-font-dropdown" id="ftbFontDropdown">
-            ${FONTS.map(f => `<div class="ftb-font-option${f==='Impact'?' selected':''}" data-font="${f}" style="font-family:${f}">${f}</div>`).join('')}
+          <div class="ftb-swatch-panel" id="tcPanel">
+            <p>Text Color</p>
+            <div class="ftb-grid" id="tcGrid"></div>
           </div>
         </div>
 
-        <!-- Size picker -->
-        <div class="ftb-size-wrap" id="ftbSizeWrap">
-          <button class="ftb-size-btn" id="ftbSizeBtn">
-            <span id="ftbSizeLabel">40</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#888" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <!-- Stroke color swatch button -->
+        <div class="ftb-color-wrap" id="scWrap">
+          <button class="ftb-swatch-btn" id="scBtn" title="Stroke color">
+            <span class="ftb-swatch-letter" style="color:#888;font-size:10px">STR</span>
+            <div class="ftb-swatch-bar" id="scBar" style="background:#000000"></div>
           </button>
-          <div class="ftb-size-dropdown" id="ftbSizeDropdown">
-            ${SIZES.map(s => `<div class="ftb-size-option${s===40?' selected':''}" data-size="${s}">${s}</div>`).join('')}
+          <div class="ftb-swatch-panel" id="scPanel">
+            <p>Stroke Color</p>
+            <div class="ftb-grid" id="scGrid"></div>
           </div>
         </div>
 
-        <div class="ftb-sep"></div>
-        <button class="ftb-btn" id="ftbBold" title="Bold"><b>B</b></button>
-        <button class="ftb-btn" id="ftbItalic" title="Italic"><i>I</i></button>
-        <button class="ftb-btn" id="ftbUnder" title="Underline"><u>U</u></button>
+        <div class="ftb-div"></div>
 
-        <div class="ftb-sep"></div>
-
-        <!-- Background color -->
-        <div class="ftb-color-wrap" id="ftbBgWrap">
-          <button class="ftb-color-trigger" id="ftbBgBtn" title="Background color">
-            <span class="ftb-color-bg-icon">▩</span>
-          </button>
-          <div class="ftb-swatch-dropdown" id="ftbBgDropdown">
-            <div class="ftb-swatch-label">Background Color</div>
-            <div class="ftb-swatch-grid" id="ftbBgSwatches"></div>
-          </div>
-        </div>
-
-        <!-- Text color -->
-        <div class="ftb-color-wrap" id="ftbTcWrap">
-          <button class="ftb-color-trigger" id="ftbTcBtn" title="Text color">
-            <span class="ftb-color-letter">A</span>
-            <div class="ftb-color-bar" id="ftbColorBar"></div>
-          </button>
-          <div class="ftb-swatch-dropdown" id="ftbTcDropdown">
-            <div class="ftb-swatch-label">Text Color</div>
-            <div class="ftb-swatch-grid" id="ftbTcSwatches"></div>
-          </div>
-        </div>
-
-        <div class="ftb-sep"></div>
-        <button class="ftb-btn active" id="ftbAlignC" title="Center">≡</button>
-        <button class="ftb-btn" id="ftbAlignL" title="Left">⬛</button>
-        <button class="ftb-btn" id="ftbAlignR" title="Right">⬛</button>
+        <!-- Alignment -->
+        <button class="ftb-align on" id="ftbAC" title="Center">≡</button>
+        <button class="ftb-align" id="ftbAL" title="Left">⬛</button>
+        <button class="ftb-align" id="ftbAR" title="Right">⬛</button>
       </div>
 
       <div class="meme-preview-box" id="previewBox"></div>
     </div>
   </div>
 
+  <!-- Template modal -->
   <div class="meme-modal-overlay" id="templateModal" style="display:none">
     <div class="meme-modal">
       <div class="meme-modal-header">
@@ -299,267 +295,44 @@ document.getElementById('app').innerHTML = `
 
 injectHeader()
 
-// ── State ──
+// ── State — single source of truth ──
+const S = {
+  font: FONTS[0].value,
+  size: 40,
+  bold: false,
+  italic: false,
+  underline: false,
+  align: 'center',
+  textColor: '#ffffff',
+  strokeColor: '#000000',
+  position: 'inside',
+  fmt: 'jpg'
+}
+
 let mainImage = null, overlayImage = null
-let overlayX = 0.5, overlayY = 0.5
-let textPosition = 'inside', downloadFmt = 'jpg'
-let isDragging = false
+let overlayX = 0.5, overlayY = 0.5, isDragging = false
 let canvas = null, ctx = null
 let filteredTemplates = []
-let tbFont = 'Impact', tbSize = 40, tbBold = false, tbItalic = false, tbUnder = false
-let tbAlign = 'center', tbTextColor = '#ffffff', tbStrokeColor = '#000000', tbBgColor = 'transparent'
 
-// ── Element refs ──
-const fileInput = document.getElementById('fileInput')
-const overlayInput = document.getElementById('overlayInput')
-const topText = document.getElementById('topText')
-const bottomText = document.getElementById('bottomText')
-const fontSize = document.getElementById('fontSize')
-const fontSizeVal = document.getElementById('fontSizeVal')
-const textColor = document.getElementById('textColor')
-const strokeColor = document.getElementById('strokeColor')
-const overlaySize = document.getElementById('overlaySize')
-const overlaySizeVal = document.getElementById('overlaySizeVal')
-const overlayControls = document.getElementById('overlayControls')
-const downloadBtn = document.getElementById('downloadBtn')
-const previewBox = document.getElementById('previewBox')
-const memeLayout = document.getElementById('memeLayout')
-const floatToolbar = document.getElementById('floatToolbar')
-const insideBtn = document.getElementById('insideBtn')
-const outsideBtn = document.getElementById('outsideBtn')
-const fmtJpg = document.getElementById('fmtJpg')
-const fmtPng = document.getElementById('fmtPng')
+// ── DOM refs ──
+const $ = id => document.getElementById(id)
+const topText = $('topText'), bottomText = $('bottomText')
+const fontSizeSlider = $('fontSizeSlider'), fontSizeVal = $('fontSizeVal')
+const textColorPicker = $('textColorPicker'), strokeColorPicker = $('strokeColorPicker')
+const overlaySizeSlider = $('overlaySizeSlider')
+const previewBox = $('previewBox'), memeLayout = $('memeLayout')
+const ftb = $('ftb')
 
-// ── Show layout after image load ──
+// ── Helpers ──
 function showLayout() { memeLayout.classList.add('visible') }
-
-// ── Upload ──
-document.getElementById('uploadBtn').onclick = () => { fileInput.value = ''; fileInput.click() }
-fileInput.onchange = e => {
-  const f = e.target.files[0]; if (!f) return
-  const reader = new FileReader()
-  reader.onload = ev => { const img = new Image(); img.onload = () => { mainImage = img; canvas = null; showLayout(); render() }; img.src = ev.target.result }
-  reader.readAsDataURL(f)
-}
-
-// ── Overlay ──
-document.getElementById('overlayBtn').onclick = () => { overlayInput.value = ''; overlayInput.click() }
-overlayInput.onchange = e => {
-  const f = e.target.files[0]; if (!f) return
-  const reader = new FileReader()
-  reader.onload = ev => { const img = new Image(); img.onload = () => { overlayImage = img; overlayControls.style.display = 'block'; render() }; img.src = ev.target.result }
-  reader.readAsDataURL(f)
-}
-document.getElementById('removeOverlay').onclick = () => { overlayImage = null; overlayControls.style.display = 'none'; render() }
-
-// ── Toggles ──
-insideBtn.onclick = () => { textPosition='inside'; insideBtn.classList.add('active'); outsideBtn.classList.remove('active'); tbTextColor='#ffffff'; textColor.value='#ffffff'; syncToolbarColor(); render() }
-outsideBtn.onclick = () => { textPosition='outside'; outsideBtn.classList.add('active'); insideBtn.classList.remove('active'); tbTextColor='#000000'; textColor.value='#000000'; syncToolbarColor(); render() }
-fmtJpg.onclick = () => { downloadFmt='jpg'; fmtJpg.classList.add('active'); fmtPng.classList.remove('active') }
-fmtPng.onclick = () => { downloadFmt='png'; fmtPng.classList.add('active'); fmtJpg.classList.remove('active') }
-
-// ── Left panel inputs ──
-topText.oninput = render
-bottomText.oninput = render
-fontSize.oninput = () => { tbSize = parseInt(fontSize.value); fontSizeVal.textContent = tbSize; document.getElementById('ftbSizeLabel').textContent = tbSize; render() }
-textColor.oninput = textColor.onchange = () => { tbTextColor = textColor.value; syncToolbarColor(); render() }
-strokeColor.oninput = strokeColor.onchange = () => { tbStrokeColor = strokeColor.value; render() }
-overlaySize.oninput = () => { overlaySizeVal.textContent = overlaySize.value; render() }
-
-function syncToolbarColor() {
-  document.getElementById('ftbColorBar').style.background = tbTextColor
-}
-
-// ── Floating toolbar show/hide ──
-;[topText, bottomText].forEach(inp => {
-  inp.addEventListener('focus', () => floatToolbar.classList.add('show'))
-  inp.addEventListener('blur', () => {
-    setTimeout(() => {
-      if (!floatToolbar.contains(document.activeElement)) floatToolbar.classList.remove('show')
-    }, 150)
-  })
-})
-
-// ── Close dropdowns on outside click ──
-document.addEventListener('click', e => {
-  if (!document.getElementById('ftbFontWrap').contains(e.target)) document.getElementById('ftbFontDropdown').classList.remove('open')
-  if (!document.getElementById('ftbSizeWrap').contains(e.target)) document.getElementById('ftbSizeDropdown').classList.remove('open')
-  if (!document.getElementById('ftbBgWrap').contains(e.target)) document.getElementById('ftbBgDropdown').classList.remove('open')
-  if (!document.getElementById('ftbTcWrap').contains(e.target)) document.getElementById('ftbTcDropdown').classList.remove('open')
-})
-
-// ── Font dropdown ──
-document.getElementById('ftbFontBtn').onclick = e => { e.stopPropagation(); document.getElementById('ftbFontDropdown').classList.toggle('open') }
-document.getElementById('ftbFontDropdown').querySelectorAll('.ftb-font-option').forEach(opt => {
-  opt.onclick = e => {
-    e.stopPropagation()
-    tbFont = opt.dataset.font
-    document.getElementById('ftbFontLabel').textContent = tbFont
-    document.querySelectorAll('.ftb-font-option').forEach(o => o.classList.remove('selected'))
-    opt.classList.add('selected')
-    document.getElementById('ftbFontDropdown').classList.remove('open')
-    render()
-  }
-})
-
-// ── Size dropdown ──
-document.getElementById('ftbSizeBtn').onclick = e => { e.stopPropagation(); document.getElementById('ftbSizeDropdown').classList.toggle('open') }
-document.getElementById('ftbSizeDropdown').querySelectorAll('.ftb-size-option').forEach(opt => {
-  opt.onclick = e => {
-    e.stopPropagation()
-    tbSize = parseInt(opt.dataset.size)
-    document.getElementById('ftbSizeLabel').textContent = tbSize
-    fontSize.value = tbSize; fontSizeVal.textContent = tbSize
-    document.querySelectorAll('.ftb-size-option').forEach(o => o.classList.remove('selected'))
-    opt.classList.add('selected')
-    document.getElementById('ftbSizeDropdown').classList.remove('open')
-    render()
-  }
-})
-
-// ── B / I / U ──
-document.getElementById('ftbBold').onclick = () => { tbBold = !tbBold; document.getElementById('ftbBold').classList.toggle('active', tbBold); render() }
-document.getElementById('ftbItalic').onclick = () => { tbItalic = !tbItalic; document.getElementById('ftbItalic').classList.toggle('active', tbItalic); render() }
-document.getElementById('ftbUnder').onclick = () => { tbUnder = !tbUnder; document.getElementById('ftbUnder').classList.toggle('active', tbUnder); render() }
-
-// ── Alignment ──
-;[['ftbAlignC','center'],['ftbAlignL','left'],['ftbAlignR','right']].forEach(([id,val]) => {
-  document.getElementById(id).onclick = () => {
-    tbAlign = val
-    ;['ftbAlignC','ftbAlignL','ftbAlignR'].forEach(i => document.getElementById(i).classList.remove('active'))
-    document.getElementById(id).classList.add('active')
-    render()
-  }
-})
-
-// ── Build swatch grids ──
-function buildSwatches(gridId, colors, onPick) {
-  const grid = document.getElementById(gridId)
-  colors.forEach(c => {
-    const s = document.createElement('div')
-    s.className = 'ftb-swatch' + (c === 'transparent' ? ' none' : '')
-    if (c !== 'transparent') s.style.background = c
-    s.title = c
-    s.onclick = e => { e.stopPropagation(); onPick(c) }
-    grid.appendChild(s)
-  })
-}
-
-document.getElementById('ftbBgBtn').onclick = e => { e.stopPropagation(); document.getElementById('ftbBgDropdown').classList.toggle('open'); document.getElementById('ftbTcDropdown').classList.remove('open') }
-document.getElementById('ftbTcBtn').onclick = e => { e.stopPropagation(); document.getElementById('ftbTcDropdown').classList.toggle('open'); document.getElementById('ftbBgDropdown').classList.remove('open') }
-
-buildSwatches('ftbBgSwatches', SWATCHES_BG, c => {
-  tbBgColor = c
-  document.getElementById('ftbBgDropdown').classList.remove('open')
-  render()
-})
-buildSwatches('ftbTcSwatches', SWATCHES_TEXT, c => {
-  tbTextColor = c
-  textColor.value = c === 'transparent' ? '#ffffff' : c
-  document.getElementById('ftbColorBar').style.background = c
-  document.getElementById('ftbTcDropdown').classList.remove('open')
-  render()
-})
-
-// ── Templates ──
-document.getElementById('templateBtn').onclick = async () => {
-  document.getElementById('templateModal').style.display = 'flex'
-  if (allTemplates.length) { filteredTemplates = allTemplates; showPage(0); return }
-  document.getElementById('templateGrid').innerHTML = '<p style="padding:24px;color:#9A8A7A;font-size:13px;grid-column:1/-1;font-family:\'DM Sans\',sans-serif">Loading templates…</p>'
-  try {
-    const res = await fetch('https://api.imgflip.com/get_memes')
-    const json = await res.json()
-    allTemplates = json.data.memes; filteredTemplates = allTemplates; showPage(0)
-  } catch { document.getElementById('templateGrid').innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;grid-column:1/-1">Failed to load.</p>' }
-}
-document.getElementById('closeModal').onclick = () => { document.getElementById('templateModal').style.display = 'none' }
-document.getElementById('templateModal').onclick = e => { if (e.target === document.getElementById('templateModal')) document.getElementById('templateModal').style.display = 'none' }
-document.getElementById('templateSearch').oninput = e => {
-  const q = e.target.value.toLowerCase().trim()
-  filteredTemplates = q ? allTemplates.filter(m => m.name.toLowerCase().includes(q)) : allTemplates; showPage(0)
-}
-document.getElementById('prevPage').onclick = () => { if (templatePage > 0) showPage(templatePage - 1) }
-document.getElementById('nextPage').onclick = () => { if ((templatePage + 1) * PER_PAGE < filteredTemplates.length) showPage(templatePage + 1) }
-
-function showPage(page) {
-  templatePage = page
-  const total = filteredTemplates.length, totalPages = Math.ceil(total / PER_PAGE)
-  const slice = filteredTemplates.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
-  document.getElementById('templateGrid').innerHTML = slice.map(m =>
-    `<div class="meme-template-item" data-url="${m.url}"><img src="${m.url}" alt="${m.name}" loading="lazy"><span>${m.name}</span></div>`
-  ).join('')
-  document.getElementById('templateGrid').querySelectorAll('.meme-template-item').forEach(item => {
-    item.onclick = () => {
-      const img = new Image(); img.crossOrigin = 'anonymous'
-      img.onload = () => { mainImage = img; canvas = null; showLayout(); render(); document.getElementById('templateModal').style.display = 'none' }
-      img.onerror = () => { const i2 = new Image(); i2.onload = () => { mainImage = i2; canvas = null; showLayout(); render(); document.getElementById('templateModal').style.display = 'none' }; i2.src = item.dataset.url }
-      img.src = item.dataset.url
-    }
-  })
-  const pag = document.getElementById('pagination')
-  if (totalPages > 1) {
-    pag.style.display = 'flex'
-    document.getElementById('pageInfo').textContent = `Page ${page + 1} of ${totalPages}`
-    document.getElementById('prevPage').disabled = page === 0
-    document.getElementById('nextPage').disabled = page >= totalPages - 1
-  } else pag.style.display = 'none'
-}
-
-// ── Text rendering helpers ──
-function makeFont(fs) {
-  return `${tbItalic ? 'italic' : 'normal'} ${tbBold ? '900' : '700'} ${fs}px ${tbFont}, Arial Black, sans-serif`
-}
-function measureLines(text, maxW, fs) {
-  const tmp = document.createElement('canvas').getContext('2d')
-  tmp.font = makeFont(fs)
-  const words = text.split(' '), lines = []
-  let line = ''
-  for (const w of words) {
-    const test = line ? line + ' ' + w : w
-    if (tmp.measureText(test).width > maxW && line) { lines.push(line); line = w } else line = test
-  }
-  lines.push(line)
-  return lines
-}
-function blockHeight(text, maxW, fs) {
-  return text ? measureLines(text, maxW, fs).length * fs * 1.3 : 0
-}
-function drawText(text, cx, cy, maxW, fs, fill, stroke, forceAlign) {
-  if (!text) return
-  const lines = measureLines(text, maxW, fs)
-  const align = forceAlign || tbAlign
-  ctx.font = makeFont(fs)
-  ctx.textAlign = align
-  ctx.textBaseline = 'middle'
-  ctx.lineWidth = Math.max(fs / 7, 3)
-  ctx.strokeStyle = stroke
-  ctx.fillStyle = fill
-  const lineH = fs * 1.3, totalH = lines.length * lineH
-  const x = align === 'left' ? cx - maxW / 2 : align === 'right' ? cx + maxW / 2 : cx
-  lines.forEach((l, i) => {
-    const y = cy - totalH / 2 + i * lineH + lineH / 2
-    ctx.strokeText(l, x, y)
-    ctx.fillText(l, x, y)
-    // underline
-    if (tbUnder) {
-      const tw = ctx.measureText(l).width
-      const ux = align === 'center' ? x - tw / 2 : align === 'right' ? x - tw : x
-      ctx.fillRect(ux, y + fs * 0.55, tw, Math.max(1, fs / 18))
-    }
-  })
-}
-
-// ── Main render ──
 function render() {
   if (!mainImage) return
-  const fs = tbSize
-  const tc = tbTextColor
-  const sc = tbStrokeColor
-  const top = topText.value.trim().toUpperCase()
-  const bot = bottomText.value.trim().toUpperCase()
-  const ovSz = parseInt(overlaySize.value) / 100
+  const fs = S.size
   const W = mainImage.naturalWidth, H = mainImage.naturalHeight
   const maxW = W * 0.92, vpad = fs * 0.5
+  const top = topText.value.trim().toUpperCase()
+  const bot = bottomText.value.trim().toUpperCase()
+  const ovSz = parseInt(overlaySizeSlider.value) / 100
 
   if (!canvas) {
     canvas = document.createElement('canvas')
@@ -570,40 +343,268 @@ function render() {
   }
 
   let topBand = 0, botBand = 0
-  if (textPosition === 'outside') {
-    if (top) topBand = blockHeight(top, maxW, fs) + vpad * 2
-    if (bot) botBand = blockHeight(bot, maxW, fs) + vpad * 2
+  if (S.position === 'outside') {
+    if (top) topBand = blockH(top, maxW, fs) + vpad * 2
+    if (bot) botBand = blockH(bot, maxW, fs) + vpad * 2
   }
 
   canvas.width = W; canvas.height = H + topBand + botBand
   ctx = canvas.getContext('2d')
 
-  if (topBand || botBand) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, canvas.height) }
+  if (topBand || botBand) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, canvas.height) }
   ctx.drawImage(mainImage, 0, topBand, W, H)
 
-  if (textPosition === 'inside') {
-    // background box behind text if tbBgColor set
-    if (tbBgColor !== 'transparent') {
-      ;[[top, topBand + vpad, blockHeight(top, maxW, fs)], [bot, topBand + H - vpad - blockHeight(bot, maxW, fs), blockHeight(bot, maxW, fs)]].forEach(([txt, y, bh]) => {
-        if (!txt) return
-        ctx.fillStyle = tbBgColor; ctx.fillRect(0, y - 2, W, bh + 8)
-      })
-    }
-    const topY = topBand + vpad + blockHeight(top, maxW, fs) / 2 + fs * 0.15
-    const botY = topBand + H - vpad - blockHeight(bot, maxW, fs) / 2 - fs * 0.15
-    drawText(top, W / 2, topY, maxW, fs, tc, sc)
-    drawText(bot, W / 2, botY, maxW, fs, tc, sc)
+  if (S.position === 'inside') {
+    drawText(top, W/2, topBand + vpad + blockH(top,maxW,fs)/2 + fs*0.15, maxW, fs, S.textColor, S.strokeColor)
+    drawText(bot, W/2, topBand + H - vpad - blockH(bot,maxW,fs)/2 - fs*0.15, maxW, fs, S.textColor, S.strokeColor)
   } else {
-    if (top) drawText(top, W / 2, topBand / 2, maxW, fs, '#000000', '#ffffff', 'center')
-    if (bot) drawText(bot, W / 2, topBand + H + botBand / 2, maxW, fs, '#000000', '#ffffff', 'center')
+    if (top) drawText(top, W/2, topBand/2, maxW, fs, '#000', '#fff', 'center')
+    if (bot) drawText(bot, W/2, topBand+H+botBand/2, maxW, fs, '#000', '#fff', 'center')
   }
 
   if (overlayImage) {
     const ow = W * ovSz, oh = (overlayImage.naturalHeight / overlayImage.naturalWidth) * ow
-    ctx.drawImage(overlayImage, overlayX * W - ow / 2, overlayY * canvas.height - oh / 2, ow, oh)
+    ctx.drawImage(overlayImage, overlayX*W - ow/2, overlayY*canvas.height - oh/2, ow, oh)
   }
 }
 
+function fontStr(fs) {
+  const style = S.italic ? 'italic ' : ''
+  const weight = S.bold ? '900 ' : '700 '
+  return `${style}${weight}${fs}px ${S.font}`
+}
+
+function wrapLines(text, maxW, fs) {
+  const tmp = document.createElement('canvas').getContext('2d')
+  tmp.font = fontStr(fs)
+  const words = text.split(' '), lines = []
+  let line = ''
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w
+    if (tmp.measureText(test).width > maxW && line) { lines.push(line); line = w } else line = test
+  }
+  lines.push(line)
+  return lines
+}
+
+function blockH(text, maxW, fs) {
+  return text ? wrapLines(text, maxW, fs).length * fs * 1.3 : 0
+}
+
+function drawText(text, cx, cy, maxW, fs, fill, stroke, forceAlign) {
+  if (!text) return
+  const lines = wrapLines(text, maxW, fs)
+  const align = forceAlign || S.align
+  ctx.font = fontStr(fs)
+  ctx.textAlign = align
+  ctx.textBaseline = 'middle'
+  ctx.lineWidth = Math.max(fs / 7, 3)
+  ctx.strokeStyle = stroke
+  ctx.fillStyle = fill
+  const lineH = fs * 1.3, totalH = lines.length * lineH
+  const x = align === 'left' ? cx - maxW/2 : align === 'right' ? cx + maxW/2 : cx
+  lines.forEach((l, i) => {
+    const y = cy - totalH/2 + i*lineH + lineH/2
+    ctx.strokeText(l, x, y)
+    ctx.fillText(l, x, y)
+    if (S.underline) {
+      const tw = ctx.measureText(l).width
+      const ux = align === 'center' ? x - tw/2 : align === 'right' ? x - tw : x
+      ctx.fillStyle = fill
+      ctx.fillRect(ux, y + fs*0.55, tw, Math.max(1, fs/18))
+    }
+  })
+}
+
+// ── Upload ──
+$('uploadBtn').onclick = () => { $('fileInput').value = ''; $('fileInput').click() }
+$('fileInput').onchange = e => {
+  const f = e.target.files[0]; if (!f) return
+  const r = new FileReader()
+  r.onload = ev => { const img = new Image(); img.onload = () => { mainImage = img; canvas = null; showLayout(); render() }; img.src = ev.target.result }
+  r.readAsDataURL(f)
+}
+
+// ── Overlay ──
+$('overlayBtn').onclick = () => { $('overlayInput').value = ''; $('overlayInput').click() }
+$('overlayInput').onchange = e => {
+  const f = e.target.files[0]; if (!f) return
+  const r = new FileReader()
+  r.onload = ev => { const img = new Image(); img.onload = () => { overlayImage = img; $('overlayControls').style.display = 'block'; render() }; img.src = ev.target.result }
+  r.readAsDataURL(f)
+}
+$('removeOverlay').onclick = () => { overlayImage = null; $('overlayControls').style.display = 'none'; render() }
+
+// ── Left panel controls ──
+topText.oninput = render
+bottomText.oninput = render
+fontSizeSlider.oninput = () => { S.size = parseInt(fontSizeSlider.value); fontSizeVal.textContent = S.size; $('ftbSize').value = S.size; render() }
+overlaySizeSlider.oninput = () => { $('overlaySizeVal').textContent = overlaySizeSlider.value; render() }
+
+// Left panel color pickers sync → state → render
+textColorPicker.oninput = textColorPicker.onchange = () => {
+  S.textColor = textColorPicker.value
+  $('tcBar').style.background = S.textColor
+  render()
+}
+strokeColorPicker.oninput = strokeColorPicker.onchange = () => {
+  S.strokeColor = strokeColorPicker.value
+  $('scBar').style.background = S.strokeColor
+  render()
+}
+
+// Position toggles
+$('insideBtn').onclick = () => {
+  S.position = 'inside'
+  $('insideBtn').classList.add('active'); $('outsideBtn').classList.remove('active')
+  render()
+}
+$('outsideBtn').onclick = () => {
+  S.position = 'outside'
+  $('outsideBtn').classList.add('active'); $('insideBtn').classList.remove('active')
+  render()
+}
+
+// Format
+$('fmtJpg').onclick = () => { S.fmt='jpg'; $('fmtJpg').classList.add('active'); $('fmtPng').classList.remove('active') }
+$('fmtPng').onclick = () => { S.fmt='png'; $('fmtPng').classList.add('active'); $('fmtJpg').classList.remove('active') }
+
+// ── Toolbar show/hide ──
+let toolbarPinned = false
+;[topText, bottomText].forEach(inp => {
+  inp.addEventListener('focus', () => ftb.classList.add('show'))
+  inp.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (!toolbarPinned && !ftb.matches(':focus-within')) ftb.classList.remove('show')
+    }, 200)
+  })
+})
+ftb.addEventListener('mousedown', () => { toolbarPinned = true })
+ftb.addEventListener('mouseup', () => { toolbarPinned = false })
+
+// ── Toolbar: font family ──
+$('ftbFont').onchange = () => {
+  S.font = $('ftbFont').value
+  render()
+}
+
+// ── Toolbar: font size ──
+$('ftbSize').onchange = () => {
+  S.size = parseInt($('ftbSize').value)
+  fontSizeSlider.value = S.size
+  fontSizeVal.textContent = S.size
+  render()
+}
+
+// ── Toolbar: B / I / U ──
+$('ftbB').onclick = () => { S.bold = !S.bold; $('ftbB').classList.toggle('on', S.bold); render() }
+$('ftbI').onclick = () => { S.italic = !S.italic; $('ftbI').classList.toggle('on', S.italic); render() }
+$('ftbU').onclick = () => { S.underline = !S.underline; $('ftbU').classList.toggle('on', S.underline); render() }
+
+// ── Toolbar: alignment ──
+;[['ftbAC','center'],['ftbAL','left'],['ftbAR','right']].forEach(([id, val]) => {
+  $(id).onclick = () => {
+    S.align = val
+    ;['ftbAC','ftbAL','ftbAR'].forEach(i => $(i).classList.remove('on'))
+    $(id).classList.add('on')
+    render()
+  }
+})
+
+// ── Toolbar: color swatches ──
+function buildSwatches(gridId, colors, onPick) {
+  const grid = $(gridId)
+  grid.innerHTML = ''
+  colors.forEach(c => {
+    const d = document.createElement('div')
+    d.className = 'ftb-dot'
+    d.style.background = c
+    d.title = c
+    d.onclick = () => onPick(c)
+    grid.appendChild(d)
+  })
+}
+
+// Text color panel
+$('tcBtn').onclick = e => {
+  e.stopPropagation()
+  $('tcPanel').classList.toggle('open')
+  $('scPanel').classList.remove('open')
+}
+buildSwatches('tcGrid', TEXT_COLORS, c => {
+  S.textColor = c
+  textColorPicker.value = c
+  $('tcBar').style.background = c
+  $('tcPanel').classList.remove('open')
+  render()
+})
+
+// Stroke color panel
+$('scBtn').onclick = e => {
+  e.stopPropagation()
+  $('scPanel').classList.toggle('open')
+  $('tcPanel').classList.remove('open')
+}
+buildSwatches('scGrid', STROKE_COLORS, c => {
+  S.strokeColor = c
+  strokeColorPicker.value = c
+  $('scBar').style.background = c
+  $('scPanel').classList.remove('open')
+  render()
+})
+
+// Close panels on outside click
+document.addEventListener('click', () => {
+  $('tcPanel').classList.remove('open')
+  $('scPanel').classList.remove('open')
+})
+
+// ── Templates ──
+$('templateBtn').onclick = async () => {
+  $('templateModal').style.display = 'flex'
+  if (allTemplates.length) { filteredTemplates = allTemplates; showPage(0); return }
+  $('templateGrid').innerHTML = '<p style="padding:24px;color:#9A8A7A;font-size:13px;grid-column:1/-1">Loading templates…</p>'
+  try {
+    const res = await fetch('https://api.imgflip.com/get_memes')
+    const json = await res.json()
+    allTemplates = json.data.memes; filteredTemplates = allTemplates; showPage(0)
+  } catch { $('templateGrid').innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;grid-column:1/-1">Failed to load.</p>' }
+}
+$('closeModal').onclick = () => { $('templateModal').style.display = 'none' }
+$('templateModal').onclick = e => { if (e.target === $('templateModal')) $('templateModal').style.display = 'none' }
+$('templateSearch').oninput = e => {
+  const q = e.target.value.toLowerCase().trim()
+  filteredTemplates = q ? allTemplates.filter(m => m.name.toLowerCase().includes(q)) : allTemplates
+  showPage(0)
+}
+$('prevPage').onclick = () => { if (templatePage > 0) showPage(templatePage - 1) }
+$('nextPage').onclick = () => { if ((templatePage+1)*PER_PAGE < filteredTemplates.length) showPage(templatePage+1) }
+
+function showPage(page) {
+  templatePage = page
+  const total = filteredTemplates.length, totalPages = Math.ceil(total / PER_PAGE)
+  const slice = filteredTemplates.slice(page*PER_PAGE, (page+1)*PER_PAGE)
+  $('templateGrid').innerHTML = slice.map(m =>
+    `<div class="meme-template-item" data-url="${m.url}"><img src="${m.url}" alt="${m.name}" loading="lazy"><span>${m.name}</span></div>`
+  ).join('')
+  $('templateGrid').querySelectorAll('.meme-template-item').forEach(item => {
+    item.onclick = () => {
+      const img = new Image(); img.crossOrigin = 'anonymous'
+      img.onload = () => { mainImage = img; canvas = null; showLayout(); render(); $('templateModal').style.display = 'none' }
+      img.onerror = () => { const i2 = new Image(); i2.onload = () => { mainImage = i2; canvas = null; showLayout(); render(); $('templateModal').style.display = 'none' }; i2.src = item.dataset.url }
+      img.src = item.dataset.url
+    }
+  })
+  const pag = $('pagination')
+  if (totalPages > 1) {
+    pag.style.display = 'flex'
+    $('pageInfo').textContent = `Page ${page+1} of ${totalPages}`
+    $('prevPage').disabled = page === 0
+    $('nextPage').disabled = page >= totalPages-1
+  } else pag.style.display = 'none'
+}
+
+// ── Drag overlay ──
 function setupDrag() {
   canvas.addEventListener('mousedown', () => { if (overlayImage) isDragging = true })
   window.addEventListener('mousemove', e => {
@@ -614,29 +615,30 @@ function setupDrag() {
     render()
   })
   window.addEventListener('mouseup', () => { isDragging = false })
-  canvas.addEventListener('touchstart', e => { if (overlayImage) { isDragging = true; e.preventDefault() } }, { passive: false })
+  canvas.addEventListener('touchstart', e => { if (overlayImage) { isDragging = true; e.preventDefault() } }, { passive:false })
   window.addEventListener('touchmove', e => {
     if (!isDragging) return
-    const rect = canvas.getBoundingClientRect()
-    const touch = e.touches[0]
-    overlayX = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width))
-    overlayY = Math.max(0, Math.min(1, (touch.clientY - rect.top) / rect.height))
+    const rect = canvas.getBoundingClientRect(), t = e.touches[0]
+    overlayX = Math.max(0, Math.min(1, (t.clientX - rect.left) / rect.width))
+    overlayY = Math.max(0, Math.min(1, (t.clientY - rect.top) / rect.height))
     render()
-  }, { passive: true })
+  }, { passive:true })
   window.addEventListener('touchend', () => { isDragging = false })
 }
 
-downloadBtn.onclick = () => {
+// ── Download ──
+$('downloadBtn').onclick = () => {
   if (!canvas) return
-  const mime = downloadFmt === 'png' ? 'image/png' : 'image/jpeg'
+  const mime = S.fmt === 'png' ? 'image/png' : 'image/jpeg'
   canvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = `meme.${downloadFmt}`; a.click()
+    const a = document.createElement('a'); a.href = url; a.download = `meme.${S.fmt}`; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
   }, mime, 0.92)
 }
 
-;(function injectSEO() {
+// ── SEO ──
+;(function() {
   const s = t.seo?.['meme-generator']; if (!s) return
   const sec = document.createElement('section'); sec.className = 'seo-section'
   sec.innerHTML = `<h2>${s.h2a||''}</h2><p>${s.body||''}</p>${(s.faqs||[]).map(f=>`<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}`
