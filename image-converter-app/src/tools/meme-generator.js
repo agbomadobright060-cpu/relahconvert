@@ -185,6 +185,18 @@ document.getElementById('app').innerHTML = `
         <button class="ftb-btn" id="ftbI" title="Italic"><i>I</i></button>
         <button class="ftb-btn" id="ftbU" title="Underline"><u>U</u></button>
         <div class="ftb-div"></div>
+        <button class="ftb-align on" id="ftbAC" title="Center">
+          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="2" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="2" y="10" width="10" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="ftb-align" id="ftbAL" title="Left">
+          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="0" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="10" width="8" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="ftb-align" id="ftbAR" title="Right">
+          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="4" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="6" y="10" width="8" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        <div class="ftb-div"></div>
+        <button class="ftb-del" id="ftbDel" title="Delete layer">🗑</button>
+        <div class="ftb-div"></div>
 
         <!-- text color -->
         <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0" title="Text color" onclick="document.getElementById('tcInput').click()">
@@ -199,19 +211,6 @@ document.getElementById('app').innerHTML = `
           <div id="scBar" style="width:16px;height:3px;border-radius:1px;background:#ffffff;pointer-events:none"></div>
           <input type="color" id="scInput" value="#ffffff" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
         </div>
-
-        <div class="ftb-div"></div>
-        <button class="ftb-align on" id="ftbAC" title="Center">
-          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="2" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="2" y="10" width="10" height="2" rx="1" fill="currentColor"/></svg>
-        </button>
-        <button class="ftb-align" id="ftbAL" title="Left">
-          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="0" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="10" width="8" height="2" rx="1" fill="currentColor"/></svg>
-        </button>
-        <button class="ftb-align" id="ftbAR" title="Right">
-          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="4" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="6" y="10" width="8" height="2" rx="1" fill="currentColor"/></svg>
-        </button>
-        <div class="ftb-div"></div>
-        <button class="ftb-del" id="ftbDel" title="Delete layer">🗑</button>
       </div>
 
       <!-- canvas -->
