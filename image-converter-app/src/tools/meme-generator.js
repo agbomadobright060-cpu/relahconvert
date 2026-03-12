@@ -375,7 +375,23 @@ function render() {
   const ovSize = parseInt(overlaySize.value) / 100
   const W = mainImage.naturalWidth
   const H = mainImage.naturalHeight
-  const bandH = fs * 2.8
+  // Count lines for each text to size band correctly
+  function countLines(text, maxW, fs) {
+    if (!text) return 0
+    ctx2.font = `900 ${fs}px Impact, Arial Black, sans-serif`
+    const words = text.split(' ')
+    let lines = 1, line = ''
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w
+      if (ctx2.measureText(test).width > maxW && line) { lines++; line = w } else line = test
+    }
+    return lines
+  }
+  const ctx2 = document.createElement('canvas').getContext('2d')
+  const maxW = W * 0.92
+  const topLines = textPosition === 'outside' ? countLines(top, maxW, fs) : 0
+  const botLines = textPosition === 'outside' ? countLines(bot, maxW, fs) : 0
+  const bandH = (n) => n > 0 ? fs * 1.4 * n + fs * 1.2 : 0
 
   if (!canvas) {
     canvas = document.createElement('canvas')
@@ -385,8 +401,8 @@ function render() {
     setupDrag()
   }
 
-  const topBand = textPosition === 'outside' && top ? bandH : 0
-  const botBand = textPosition === 'outside' && bot ? bandH : 0
+  const topBand = bandH(topLines)
+  const botBand = bandH(botLines)
 
   canvas.width = W
   canvas.height = H + topBand + botBand
@@ -396,14 +412,50 @@ function render() {
   ctx.fillRect(0, 0, W, canvas.height)
   ctx.drawImage(mainImage, 0, topBand, W, H)
 
-  const maxW = W * 0.92
-
   if (textPosition === 'inside') {
     drawWrappedText(top, topX * W, topY * H + topBand, maxW, fs)
     drawWrappedText(bot, botX * W, botY * H + topBand, maxW, fs)
   } else {
-    if (top) drawWrappedText(top, W / 2, bandH / 2, maxW, fs)
-    if (bot) drawWrappedText(bot, W / 2, topBand + H + bandH / 2, maxW, fs)
+    // Outside: big black text centered in white band, no stroke
+    if (top) {
+      ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.lineWidth = 0
+      ctx.strokeStyle = 'rgba(0,0,0,0)'
+      ctx.fillStyle = '#000000'
+      const topWords = top.split(' ')
+      const topLines2 = []
+      let tLine = ''
+      for (const w of topWords) {
+        const test = tLine ? tLine + ' ' + w : w
+        if (ctx.measureText(test).width > maxW && tLine) { topLines2.push(tLine); tLine = w } else tLine = test
+      }
+      topLines2.push(tLine)
+      const lh = fs * 1.4
+      const startY = (topBand - topLines2.length * lh) / 2 + lh / 2
+      topLines2.forEach((l, i) => ctx.fillText(l, W / 2, startY + i * lh))
+    }
+    if (bot) {
+      ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.lineWidth = 0
+      ctx.strokeStyle = 'rgba(0,0,0,0)'
+      ctx.fillStyle = '#000000'
+      const botWords = bot.split(' ')
+      const botLines2 = []
+      let bLine = ''
+      for (const w of botWords) {
+        const test = bLine ? bLine + ' ' + w : w
+        if (ctx.measureText(test).width > maxW && bLine) { botLines2.push(bLine); bLine = w } else bLine = test
+      }
+      botLines2.push(bLine)
+      const lh = fs * 1.4
+      const bandStart = topBand + H
+      const startY = bandStart + (botBand - botLines2.length * lh) / 2 + lh / 2
+      botLines2.forEach((l, i) => ctx.fillText(l, W / 2, startY + i * lh))
+    }
   }
 
   if (overlayImage) {
