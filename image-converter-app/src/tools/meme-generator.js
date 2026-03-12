@@ -185,11 +185,11 @@ document.getElementById('app').innerHTML = `
         <button class="ftb-btn" id="ftbI" title="Italic"><i>I</i></button>
         <button class="ftb-btn" id="ftbU" title="Underline"><u>U</u></button>
         <div class="ftb-div"></div>
-        <button class="ftb-align on" id="ftbAC" title="Center">
-          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="2" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="2" y="10" width="10" height="2" rx="1" fill="currentColor"/></svg>
-        </button>
         <button class="ftb-align" id="ftbAL" title="Left">
           <svg width="14" height="12" viewBox="0 0 14 12"><rect x="0" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="10" width="8" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="ftb-align on" id="ftbAC" title="Center">
+          <svg width="14" height="12" viewBox="0 0 14 12"><rect x="2" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="2" y="10" width="10" height="2" rx="1" fill="currentColor"/></svg>
         </button>
         <button class="ftb-align" id="ftbAR" title="Right">
           <svg width="14" height="12" viewBox="0 0 14 12"><rect x="4" y="0" width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="5" width="14" height="2" rx="1" fill="currentColor"/><rect x="6" y="10" width="8" height="2" rx="1" fill="currentColor"/></svg>
@@ -624,11 +624,11 @@ bottomText.addEventListener('focus', () => {
   syncToolbarToState(SB); showToolbar()
 })
 topText.addEventListener('blur', () => {
-  // Don't clear activeInput if focus moved to toolbar
   setTimeout(() => {
     const focused = document.activeElement
     const inToolbar = ftb.contains(focused)
-    if (!inToolbar && !selectedLayer) {
+    const inTextInputs = focused === topText || focused === bottomText
+    if (!inToolbar && !inTextInputs && !selectedLayer) {
       activeInput = null
       hideToolbar()
     }
@@ -638,7 +638,8 @@ bottomText.addEventListener('blur', () => {
   setTimeout(() => {
     const focused = document.activeElement
     const inToolbar = ftb.contains(focused)
-    if (!inToolbar && !selectedLayer) {
+    const inTextInputs = focused === topText || focused === bottomText
+    if (!inToolbar && !inTextInputs && !selectedLayer) {
       activeInput = null
       hideToolbar()
     }
