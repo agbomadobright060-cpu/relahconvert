@@ -718,8 +718,7 @@ buildSwatches('scGrid', c => {
   $('scPanel').classList.remove('open')
 })
 
-document.addEventListener('mousedown', e => {
-  // Use contains() — covers button AND all its child elements (span, div inside button)
+document.addEventListener('click', e => {
   if (!$('tcWrap').contains(e.target)) $('tcPanel').classList.remove('open')
   if (!$('scWrap').contains(e.target)) $('scPanel').classList.remove('open')
 })
