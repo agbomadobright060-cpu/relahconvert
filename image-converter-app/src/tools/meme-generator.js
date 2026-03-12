@@ -634,8 +634,27 @@ bottomText.addEventListener('focus', () => {
   activeInput = 'bottom'; selectedLayer = null
   syncToolbarToState(SB); showToolbar()
 })
-topText.addEventListener('blur', () => { setTimeout(() => { if (!selectedLayer) { activeInput = null; if (!ftb.matches(':focus-within')) hideToolbar() } }, 200) })
-bottomText.addEventListener('blur', () => { setTimeout(() => { if (!selectedLayer) { activeInput = null; if (!ftb.matches(':focus-within')) hideToolbar() } }, 200) })
+topText.addEventListener('blur', () => {
+  // Don't clear activeInput if focus moved to toolbar
+  setTimeout(() => {
+    const focused = document.activeElement
+    const inToolbar = ftb.contains(focused)
+    if (!inToolbar && !selectedLayer) {
+      activeInput = null
+      hideToolbar()
+    }
+  }, 150)
+})
+bottomText.addEventListener('blur', () => {
+  setTimeout(() => {
+    const focused = document.activeElement
+    const inToolbar = ftb.contains(focused)
+    if (!inToolbar && !selectedLayer) {
+      activeInput = null
+      hideToolbar()
+    }
+  }, 150)
+})
 topText.addEventListener('input', render)
 bottomText.addEventListener('input', render)
 
@@ -675,8 +694,18 @@ function buildSwatches(gridId, onPick) {
   })
 }
 
-$('tcBtn').onclick = e => { e.stopPropagation(); $('tcPanel').classList.toggle('open'); $('scPanel').classList.remove('open') }
-$('scBtn').onclick = e => { e.stopPropagation(); $('scPanel').classList.toggle('open'); $('tcPanel').classList.remove('open') }
+$('tcBtn').addEventListener('mousedown', e => {
+  e.preventDefault() // prevent text input from losing focus
+  e.stopPropagation()
+  $('tcPanel').classList.toggle('open')
+  $('scPanel').classList.remove('open')
+})
+$('scBtn').addEventListener('mousedown', e => {
+  e.preventDefault()
+  e.stopPropagation()
+  $('scPanel').classList.toggle('open')
+  $('tcPanel').classList.remove('open')
+})
 
 buildSwatches('tcGrid', c => {
   applyStyle('textColor', c)
