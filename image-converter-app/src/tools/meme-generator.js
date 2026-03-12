@@ -160,7 +160,7 @@ document.getElementById('app').innerHTML = `
     <p class="tool-sub">Create memes online. Choose a template or upload your own image. Private — runs in your browser.</p>
   </div>
 
-  <div class="meme-source-row">
+  <div class="meme-source-row" id="sourceRow">
     <button class="meme-source-btn" id="uploadBtn">⬆ Upload Image</button>
     <span class="meme-or">or</span>
     <button class="meme-source-btn" id="templateBtn">🎭 Choose Template</button>
@@ -364,6 +364,7 @@ function syncToolbarToState(src) {
 function showLayout() {
   $('memeLayout').classList.add('visible')
   $('placeholder').style.display = 'none'
+  $('sourceRow').style.display = 'none'
 }
 
 // ── Render ──
