@@ -190,7 +190,7 @@ document.getElementById('app').innerHTML = `
         <div class="ftb-color-wrap" id="tcWrap">
           <button class="ftb-swatch-btn" id="tcBtn" title="Text color">
             <span class="ftb-swatch-letter">A</span>
-            <div class="ftb-swatch-bar" id="tcBar" style="background:#ffffff"></div>
+            <div class="ftb-swatch-bar" id="tcBar" style="background:#000000"></div>
           </button>
           <div class="ftb-swatch-panel" id="tcPanel">
             <p>Text Color</p>
@@ -312,7 +312,7 @@ const S = {
   font: FONTS[0].val, size: 40,
   bold: false, italic: false, underline: false,
   align: 'center',
-  textColor: '#ffffff', strokeColor: '#000000',
+  textColor: '#000000', strokeColor: '#ffffff',
   position: 'inside', bandColor: '#ffffff', fmt: 'jpg'
 }
 
@@ -636,11 +636,11 @@ topText.addEventListener('input', render)
 bottomText.addEventListener('input', render)
 
 // keep toolbar open while interacting with it
-ftb.addEventListener('mousedown', e => e.preventDefault())
+ftb.addEventListener('mousedown', e => { if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'INPUT') e.preventDefault() })
 
 // ── Toolbar controls ──
-$('ftbFont').addEventListener('change', () => { applyStyle('font', $('ftbFont').value); render() })
-$('ftbSize').addEventListener('change', () => { applyStyle('size', parseInt($('ftbSize').value)); render() })
+$('ftbFont').addEventListener('change', () => { applyStyle('font', $('ftbFont').value) })
+$('ftbSize').addEventListener('change', () => { applyStyle('size', parseInt($('ftbSize').value)) })
 $('ftbB').onclick = () => { const v = !(getActiveStyle().bold ?? false); applyStyle('bold', v); $('ftbB').classList.toggle('on', v) }
 $('ftbI').onclick = () => { const v = !(getActiveStyle().italic ?? false); applyStyle('italic', v); $('ftbI').classList.toggle('on', v) }
 $('ftbU').onclick = () => { const v = !(getActiveStyle().underline ?? false); applyStyle('underline', v); $('ftbU').classList.toggle('on', v) }
