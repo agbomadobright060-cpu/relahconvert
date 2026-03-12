@@ -669,7 +669,7 @@ $('addTextBtn').onclick = () => {
   if (!mainImage) return
   const layer = {
     id: ++textIdCounter,
-    text: 'Double click to edit',
+    text: 'Text',
     x: 0.5, y: 0.5,
     font: S.font, size: S.size,
     bold: false, italic: false, underline: false,
@@ -680,13 +680,56 @@ $('addTextBtn').onclick = () => {
   syncToolbarToState(layer)
   showToolbar()
   render()
+  // open editor right away
+  setTimeout(() => openInlineEditor(layer), 50)
 }
 
 // double-click to edit layer text
+// inline text editor on canvas
+function openInlineEditor(layer) {
+  // remove any existing editor
+  const old = document.getElementById('layerEditor')
+  if (old) old.remove()
+
+  const rect = canvas.getBoundingClientRect()
+  const scaleX = rect.width / canvas.width
+  const scaleY = rect.height / canvas.height
+
+  const px = layer.x * canvas.width * scaleX + rect.left - canvasWrap.getBoundingClientRect().left
+  const py = layer.y * canvas.height * scaleY + rect.top - canvasWrap.getBoundingClientRect().top
+
+  const inp = document.createElement('input')
+  inp.id = 'layerEditor'
+  inp.value = layer.text
+  inp.style.cssText = `
+    position:absolute;
+    left:${px}px; top:${py}px;
+    transform:translate(-50%, -50%);
+    background:rgba(0,0,0,0.6);
+    color:#fff;
+    border:2px solid #4488ff;
+    border-radius:6px;
+    padding:4px 8px;
+    font-size:14px;
+    font-family:'DM Sans',sans-serif;
+    outline:none;
+    z-index:50;
+    min-width:120px;
+    text-align:center;
+  `
+  canvasWrap.style.position = 'relative'
+  canvasWrap.appendChild(inp)
+  inp.focus()
+  inp.select()
+
+  inp.addEventListener('input', () => { layer.text = inp.value || ' '; render() })
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur() })
+  inp.addEventListener('blur', () => { layer.text = inp.value.trim() || 'Text'; inp.remove(); render() })
+}
+
 canvasWrap.addEventListener('dblclick', e => {
   if (!selectedLayer) return
-  const newText = prompt('Edit text:', selectedLayer.text)
-  if (newText !== null) { selectedLayer.text = newText || 'Text'; render() }
+  openInlineEditor(selectedLayer)
 })
 
 // ── Position toggles ──
