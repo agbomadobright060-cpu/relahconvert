@@ -23,9 +23,10 @@ if (document.head) {
     .meme-section:first-child{padding-top:0}
     .meme-label{display:block;font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;font-family:'DM Sans',sans-serif}
     .meme-optional{font-weight:400;text-transform:none;letter-spacing:0;color:#B0A090;font-size:10px}
-    .meme-btn-row{display:flex;gap:8px}
-    .meme-pick-btn{flex:1;padding:9px 10px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#2C1810;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
-    .meme-pick-btn:hover{border-color:#C84B31;color:#C84B31;background:#FDE8E3}
+    .meme-source-row{display:flex;align-items:center;gap:8px}
+    .meme-source-btn{flex:1;padding:11px 10px;border:none;border-radius:8px;background:#C84B31;color:#fff;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
+    .meme-source-btn:hover{background:#A63D26;transform:translateY(-1px)}
+    .meme-or{font-size:11px;font-weight:700;color:#B0A090;font-family:'DM Sans',sans-serif;flex-shrink:0}
     .meme-input{width:100%;padding:9px 11px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;box-sizing:border-box;transition:border-color 0.15s}
     .meme-input:focus{border-color:#C84B31;background:#fff}
     .meme-input::placeholder{color:#C4B8A8}
@@ -39,6 +40,8 @@ if (document.head) {
     .meme-color-row{display:flex;gap:16px}
     .meme-color-row>div{flex:1}
     .meme-color{width:44px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;padding:2px;background:#fff;display:block;margin-top:4px}
+    .meme-pick-btn{width:100%;padding:9px 10px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#2C1810;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
+    .meme-pick-btn:hover{border-color:#C84B31;color:#C84B31;background:#FDE8E3}
     .meme-remove-btn{margin-top:8px;padding:6px 10px;border:1.5px solid #E8D0C8;border-radius:7px;background:#FDE8E3;font-size:11px;font-weight:600;color:#C84B31;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
     .meme-remove-btn:hover{background:#C84B31;color:#fff;border-color:#C84B31}
     .apply-btn{width:100%;padding:12px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-top:4px}
@@ -91,10 +94,10 @@ document.getElementById('app').innerHTML = `
   <div class="meme-layout">
     <div class="meme-controls">
       <div class="meme-section">
-        <label class="meme-label">Image</label>
-        <div class="meme-btn-row">
-          <button class="meme-pick-btn" id="uploadBtn">⬆ Upload Image</button>
-          <button class="meme-pick-btn" id="templateBtn">🎭 Choose Template</button>
+        <div class="meme-source-row">
+          <button class="meme-source-btn" id="uploadBtn">⬆ Upload Image</button>
+          <span class="meme-or">or</span>
+          <button class="meme-source-btn" id="templateBtn">🎭 Choose Template</button>
         </div>
         <input type="file" id="fileInput" accept="image/*" style="display:none">
       </div>
@@ -173,7 +176,6 @@ document.getElementById('app').innerHTML = `
 
 injectHeader()
 
-// State
 let mainImage = null
 let overlayImage = null
 let overlayX = 0.5, overlayY = 0.5
@@ -271,7 +273,6 @@ textColor.oninput = render
 strokeColor.oninput = render
 overlaySize.oninput = () => { overlaySizeVal.textContent = overlaySize.value; render() }
 
-// Templates + pagination
 templateBtn.onclick = async () => {
   templateModal.style.display = 'flex'
   if (allTemplates.length) { filteredTemplates = allTemplates; showPage(0); return }
@@ -286,7 +287,6 @@ templateBtn.onclick = async () => {
     templateGrid.innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;font-family:\'DM Sans\',sans-serif;grid-column:1/-1">Failed to load. Check your connection.</p>'
   }
 }
-
 closeModal.onclick = () => { templateModal.style.display = 'none' }
 templateModal.onclick = e => { if (e.target === templateModal) templateModal.style.display = 'none' }
 
@@ -337,7 +337,6 @@ function showPage(page) {
   }
 }
 
-// Text drawing helper with word wrap
 function drawWrappedText(text, cx, cy, maxWidth, fs) {
   if (!text) return
   ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
@@ -376,7 +375,7 @@ function render() {
   const ovSize = parseInt(overlaySize.value) / 100
   const W = mainImage.naturalWidth
   const H = mainImage.naturalHeight
-  const bandH = fs * 2.8  // height of outside text band
+  const bandH = fs * 2.8
 
   if (!canvas) {
     canvas = document.createElement('canvas')
@@ -393,11 +392,8 @@ function render() {
   canvas.height = H + topBand + botBand
   ctx = canvas.getContext('2d')
 
-  // White background for bands
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, canvas.height)
-
-  // Main image
   ctx.drawImage(mainImage, 0, topBand, W, H)
 
   const maxW = W * 0.92
@@ -406,12 +402,10 @@ function render() {
     drawWrappedText(top, topX * W, topY * H + topBand, maxW, fs)
     drawWrappedText(bot, botX * W, botY * H + topBand, maxW, fs)
   } else {
-    // Outside: center text vertically in its band
     if (top) drawWrappedText(top, W / 2, bandH / 2, maxW, fs)
     if (bot) drawWrappedText(bot, W / 2, topBand + H + bandH / 2, maxW, fs)
   }
 
-  // Overlay
   if (overlayImage) {
     const ow = W * ovSize
     const oh = (overlayImage.naturalHeight / overlayImage.naturalWidth) * ow
@@ -433,7 +427,7 @@ function getCanvasPos(e) {
 
 function setupDrag() {
   function onStart(e) {
-    if (textPosition === 'outside') return // outside text not draggable
+    if (textPosition === 'outside') return
     const p = getCanvasPos(e)
     const top = topText.value.trim()
     const bot = bottomText.value.trim()
