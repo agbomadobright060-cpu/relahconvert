@@ -8,67 +8,68 @@ if (document.head) {
   document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
   const style = document.createElement('style')
   style.textContent = `
-    .tool-wrap { max-width:1100px; margin:0 auto; padding:32px 16px 60px; font-family:'DM Sans',sans-serif; }
-    .tool-hero { margin-bottom:24px; }
-    .tool-title { font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em; }
-    .brand-em { font-style:italic; color:#C84B31; }
-    .tool-sub { font-size:13px; color:#7A6A5A; margin:0; }
-    .meme-layout { display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start; }
-    @media (max-width:768px) { .meme-layout { grid-template-columns:1fr; } }
-    .meme-controls { background:#fff; border-radius:14px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1.5px solid #E8E0D5; display:flex; flex-direction:column; }
-    .meme-section { padding:14px 0; border-bottom:1px solid #F0EAE4; }
-    .meme-section:last-child { border-bottom:none; padding-bottom:0; }
-    .meme-section:first-child { padding-top:0; }
-    .meme-label { display:block; font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; font-family:'DM Sans',sans-serif; }
-    .meme-optional { font-weight:400; text-transform:none; letter-spacing:0; color:#B0A090; font-size:11px; }
-    .meme-btn-row { display:flex; gap:8px; }
-    .meme-pick-btn { flex:1; padding:10px 12px; border:1.5px solid #DDD5C8; border-radius:8px; background:#fff; font-size:13px; font-weight:600; color:#2C1810; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; text-align:center; }
-    .meme-pick-btn:hover { border-color:#C84B31; color:#C84B31; background:#FDE8E3; }
-    .meme-input { width:100%; padding:10px 12px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAFAF8; outline:none; box-sizing:border-box; transition:border-color 0.15s; }
-    .meme-input:focus { border-color:#C84B31; background:#fff; }
-    .meme-input::placeholder { color:#C4B8A8; }
-    .meme-toggle-row { display:flex; gap:6px; }
-    .meme-toggle { flex:1; padding:8px 12px; border:1.5px solid #DDD5C8; border-radius:8px; background:#fff; font-size:12px; font-weight:600; color:#5A4A3A; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
-    .meme-toggle:hover { border-color:#C84B31; color:#C84B31; }
-    .meme-toggle.active { background:#C84B31; border-color:#C84B31; color:#fff; }
-    .meme-slider { width:100%; -webkit-appearance:none; appearance:none; height:4px; border-radius:2px; background:#DDD5C8; outline:none; cursor:pointer; margin-top:4px; display:block; }
-    .meme-slider::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#C84B31; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.2); }
-    .meme-slider::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:#C84B31; cursor:pointer; border:none; }
-    .meme-color-row { display:flex; gap:20px; }
-    .meme-color-row > div { flex:1; }
-    .meme-color { width:48px; height:32px; border:1.5px solid #DDD5C8; border-radius:6px; cursor:pointer; padding:2px; background:#fff; display:block; }
-    .meme-remove-btn { margin-top:8px; padding:7px 12px; border:1.5px solid #E8D0C8; border-radius:8px; background:#FDE8E3; font-size:12px; font-weight:600; color:#C84B31; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
-    .meme-remove-btn:hover { background:#C84B31; color:#fff; border-color:#C84B31; }
-    .apply-btn { width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-top:4px; }
-    .apply-btn:hover { background:#A63D26; transform:translateY(-1px); }
-    .apply-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
-    .meme-preview-wrap { position:sticky; top:84px; }
-    .meme-preview-box { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; box-shadow:0 1px 4px rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
-    .meme-preview-box canvas { max-width:100%; border-radius:6px; display:block; }
-    .meme-modal-overlay { position:fixed; inset:0; background:rgba(44,24,16,0.55); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
-    .meme-modal { background:#fff; border-radius:16px; width:100%; max-width:680px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 64px rgba(0,0,0,0.2); }
-    .meme-modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 20px 12px; border-bottom:1px solid #E8E0D5; flex-shrink:0; }
-    .meme-modal-header h2 { font-family:'Fraunces',serif; font-size:18px; font-weight:700; color:#2C1810; margin:0; }
-    .meme-modal-close { width:32px; height:32px; border:none; border-radius:8px; background:#F5F0E8; color:#5A4A3A; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
-    .meme-modal-close:hover { background:#C84B31; color:#fff; }
-    .meme-search { width:100%; padding:12px 16px; border:none; border-bottom:1px solid #E8E0D5; font-size:14px; font-family:'DM Sans',sans-serif; color:#2C1810; background:#FAFAF8; outline:none; flex-shrink:0; box-sizing:border-box; }
-    .meme-search::placeholder { color:#C4B8A8; }
-    .meme-template-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; padding:16px; overflow-y:auto; }
-    .meme-template-item { border:1.5px solid #E8E0D5; border-radius:10px; overflow:hidden; cursor:pointer; transition:all 0.15s; background:#FAFAF8; }
-    .meme-template-item:hover { border-color:#C84B31; box-shadow:0 4px 12px rgba(200,75,49,0.15); transform:translateY(-2px); }
-    .meme-template-item img { width:100%; height:120px; object-fit:cover; display:block; background:#F0EAE4; }
-    .meme-template-item span { display:block; font-size:11px; font-weight:600; color:#5A4A3A; padding:6px 8px; font-family:'DM Sans',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .seo-section { max-width:700px; margin:40px auto 0; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
-    .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
-    .seo-section ol { padding-left:20px; margin:0 0 12px; }
-    .seo-section ol li { font-size:13px; color:#5A4A3A; line-height:1.6; margin-bottom:6px; }
-    .seo-section p { font-size:13px; color:#5A4A3A; line-height:1.6; margin:0 0 12px; }
-    .faq-item { border-top:1px solid #E8E0D5; padding:10px 0; }
-    .faq-item h4 { font-size:13px; font-weight:700; color:#2C1810; margin:0 0 4px; font-family:'DM Sans',sans-serif; }
-    .seo-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
-    .seo-links a { padding:7px 14px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .seo-links a:hover { border-color:#C84B31; color:#C84B31; }
+    .tool-wrap{max-width:1100px;margin:0 auto;padding:32px 16px 60px;font-family:'DM Sans',sans-serif}
+    .tool-hero{margin-bottom:24px}
+    .tool-title{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em}
+    .brand-em{font-style:italic;color:#C84B31}
+    .tool-sub{font-size:13px;color:#7A6A5A;margin:0}
+    .meme-layout{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+    @media(max-width:768px){.meme-layout{grid-template-columns:1fr}}
+    .meme-controls{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1.5px solid #E8E0D5;display:flex;flex-direction:column;gap:0}
+    .meme-section{padding:12px 0;border-bottom:1px solid #F0EAE4}
+    .meme-section:last-child{border-bottom:none;padding-bottom:0}
+    .meme-section:first-child{padding-top:0}
+    .meme-label{display:block;font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;font-family:'DM Sans',sans-serif}
+    .meme-optional{font-weight:400;text-transform:none;letter-spacing:0;color:#B0A090;font-size:10px}
+    .meme-btn-row{display:flex;gap:8px}
+    .meme-pick-btn{flex:1;padding:9px 10px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#2C1810;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
+    .meme-pick-btn:hover{border-color:#C84B31;color:#C84B31;background:#FDE8E3}
+    .meme-input{width:100%;padding:9px 11px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;box-sizing:border-box;transition:border-color 0.15s}
+    .meme-input:focus{border-color:#C84B31;background:#fff}
+    .meme-input::placeholder{color:#C4B8A8}
+    .meme-toggle-row{display:flex;gap:6px}
+    .meme-toggle{flex:1;padding:7px 10px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:11px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+    .meme-toggle:hover{border-color:#C84B31;color:#C84B31}
+    .meme-toggle.active{background:#C84B31;border-color:#C84B31;color:#fff}
+    .meme-slider{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#DDD5C8;outline:none;cursor:pointer;margin-top:4px;display:block}
+    .meme-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#C84B31;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+    .meme-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#C84B31;cursor:pointer;border:none}
+    .meme-color-row{display:flex;gap:16px}
+    .meme-color-row>div{flex:1}
+    .meme-color{width:44px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;padding:2px;background:#fff;display:block;margin-top:4px}
+    .meme-remove-btn{margin-top:8px;padding:6px 10px;border:1.5px solid #E8D0C8;border-radius:7px;background:#FDE8E3;font-size:11px;font-weight:600;color:#C84B31;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+    .meme-remove-btn:hover{background:#C84B31;color:#fff;border-color:#C84B31}
+    .apply-btn{width:100%;padding:12px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-top:4px}
+    .apply-btn:hover{background:#A63D26;transform:translateY(-1px)}
+    .apply-btn:disabled{background:#C4B8A8;cursor:not-allowed;opacity:0.7;transform:none}
+    .meme-preview-wrap{position:sticky;top:84px}
+    .meme-preview-box{background:#fff;border-radius:14px;border:1.5px solid #E8E0D5;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px;min-height:300px}
+    .meme-preview-box canvas{max-width:100%;border-radius:6px;display:block}
+    .meme-hint{font-size:11px;color:#B0A090;margin-top:6px;text-align:center;font-family:'DM Sans',sans-serif}
+    .meme-modal-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+    .meme-modal{background:#fff;border-radius:16px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
+    .meme-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid #E8E0D5;flex-shrink:0}
+    .meme-modal-header h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:0}
+    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:#F5F0E8;color:#5A4A3A;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+    .meme-modal-close:hover{background:#C84B31;color:#fff}
+    .meme-search{width:100%;padding:11px 16px;border:none;border-bottom:1px solid #E8E0D5;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;flex-shrink:0;box-sizing:border-box}
+    .meme-search::placeholder{color:#C4B8A8}
+    .meme-template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:16px;overflow-y:auto}
+    .meme-template-item{border:1.5px solid #E8E0D5;border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.15s;background:#FAFAF8}
+    .meme-template-item:hover{border-color:#C84B31;box-shadow:0 4px 12px rgba(200,75,49,0.15);transform:translateY(-2px)}
+    .meme-template-item img{width:100%;height:140px;object-fit:cover;display:block;background:#F0EAE4}
+    .meme-template-item span{display:block;font-size:11px;font-weight:600;color:#5A4A3A;padding:7px 9px;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .seo-section{max-width:700px;margin:40px auto 0;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px}
+    .seo-section ol{padding-left:20px;margin:0 0 12px}
+    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px}
+    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px}
+    .faq-item{border-top:1px solid #E8E0D5;padding:10px 0}
+    .faq-item h4{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif}
+    .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+    .seo-links a{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+    .seo-links a:hover{border-color:#C84B31;color:#C84B31}
   `
   document.head.appendChild(style)
 }
@@ -76,10 +77,9 @@ if (document.head) {
 document.getElementById('app').innerHTML = `
 <div class="tool-wrap">
   <div class="tool-hero">
-    <h1 class="tool-title"><span class="t1">Meme</span> <em class="brand-em">Generator</em></h1>
+    <h1 class="tool-title"><span>Meme</span> <em class="brand-em">Generator</em></h1>
     <p class="tool-sub">Create memes online. Choose a template or upload your own image. Private — runs in your browser.</p>
   </div>
-
   <div class="meme-layout">
     <div class="meme-controls">
       <div class="meme-section">
@@ -90,46 +90,48 @@ document.getElementById('app').innerHTML = `
         </div>
         <input type="file" id="fileInput" accept="image/*" style="display:none">
       </div>
-      <div class="meme-section" id="secTopText" style="display:none">
-        <label class="meme-label">Top Text <span class="meme-optional">(optional)</span></label>
+      <div id="secTopText" style="display:none" class="meme-section">
+        <label class="meme-label">Top Text <span class="meme-optional">(optional — drag on preview)</span></label>
         <input type="text" id="topText" class="meme-input" placeholder="TOP TEXT">
       </div>
-      <div class="meme-section" id="secBottomText" style="display:none">
-        <label class="meme-label">Bottom Text <span class="meme-optional">(optional)</span></label>
+      <div id="secBottomText" style="display:none" class="meme-section">
+        <label class="meme-label">Bottom Text <span class="meme-optional">(optional — drag on preview)</span></label>
         <input type="text" id="bottomText" class="meme-input" placeholder="BOTTOM TEXT">
       </div>
-      <div class="meme-section" id="secPosition" style="display:none">
+      <div id="secPosition" style="display:none" class="meme-section">
         <label class="meme-label">Text Position</label>
         <div class="meme-toggle-row">
           <button class="meme-toggle active" id="insideBtn">Inside Image</button>
           <button class="meme-toggle" id="outsideBtn">Outside Image</button>
         </div>
       </div>
-      <div class="meme-section" id="secFontSize" style="display:none">
-        <label class="meme-label">Font Size: <span id="fontSizeVal">40</span>px</label>
-        <input type="range" id="fontSize" min="16" max="100" value="40" class="meme-slider">
+      <div id="secFontSize" style="display:none" class="meme-section">
+        <label class="meme-label">Font Size: <span id="fontSizeVal">36</span>px</label>
+        <input type="range" id="fontSize" min="12" max="120" value="36" class="meme-slider">
       </div>
-      <div class="meme-section meme-color-row" id="secColors" style="display:none">
-        <div>
-          <label class="meme-label">Text Color</label>
-          <input type="color" id="textColor" value="#ffffff" class="meme-color">
-        </div>
-        <div>
-          <label class="meme-label">Stroke Color</label>
-          <input type="color" id="strokeColor" value="#000000" class="meme-color">
+      <div id="secColors" style="display:none" class="meme-section">
+        <div class="meme-color-row">
+          <div>
+            <label class="meme-label">Text Color</label>
+            <input type="color" id="textColor" value="#ffffff" class="meme-color">
+          </div>
+          <div>
+            <label class="meme-label">Stroke Color</label>
+            <input type="color" id="strokeColor" value="#000000" class="meme-color">
+          </div>
         </div>
       </div>
-      <div class="meme-section" id="secOverlay" style="display:none">
-        <label class="meme-label">Add Overlay Image <span class="meme-optional">(optional — drag to position)</span></label>
+      <div id="secOverlay" style="display:none" class="meme-section">
+        <label class="meme-label">Overlay Image <span class="meme-optional">(optional — drag to position)</span></label>
         <button class="meme-pick-btn" id="overlayBtn">+ Add Sticker / Image</button>
         <input type="file" id="overlayInput" accept="image/*" style="display:none">
         <div id="overlayControls" style="display:none;margin-top:8px">
-          <label class="meme-label">Overlay Size: <span id="overlaySizeVal">30</span>%</label>
+          <label class="meme-label">Size: <span id="overlaySizeVal">30</span>%</label>
           <input type="range" id="overlaySize" min="5" max="100" value="30" class="meme-slider">
           <button class="meme-remove-btn" id="removeOverlay">✕ Remove Overlay</button>
         </div>
       </div>
-      <div class="meme-section" id="secFormat" style="display:none">
+      <div id="secFormat" style="display:none" class="meme-section">
         <label class="meme-label">Download Format</label>
         <div class="meme-toggle-row">
           <button class="meme-toggle active" id="fmtJpg">JPG</button>
@@ -138,12 +140,11 @@ document.getElementById('app').innerHTML = `
       </div>
       <button class="apply-btn" id="downloadBtn" style="display:none" disabled>⬇ Download Meme</button>
     </div>
-
-    <div class="meme-preview-wrap" id="previewWrap" style="display:none">
+    <div id="previewWrap" style="display:none" class="meme-preview-wrap">
       <div class="meme-preview-box" id="previewBox"></div>
+      <p class="meme-hint" id="dragHint" style="display:none">💡 Drag text on the image to reposition it</p>
     </div>
   </div>
-
   <div class="meme-modal-overlay" id="templateModal" style="display:none">
     <div class="meme-modal">
       <div class="meme-modal-header">
@@ -159,16 +160,19 @@ document.getElementById('app').innerHTML = `
 
 injectHeader()
 
+// State
 let mainImage = null
 let overlayImage = null
-let overlayX = 0.5
-let overlayY = 0.5
+let overlayX = 0.5, overlayY = 0.5
+let topX = 0.5, topY = 0.1
+let botX = 0.5, botY = 0.9
 let textPosition = 'inside'
 let downloadFmt = 'jpg'
-let isDraggingOverlay = false
-let canvas = null
-let ctx = null
+let canvas = null, ctx = null
+let dragging = null // 'top' | 'bot' | 'overlay'
+let dragStartX = 0, dragStartY = 0
 
+// Elements
 const fileInput = document.getElementById('fileInput')
 const overlayInput = document.getElementById('overlayInput')
 const uploadBtn = document.getElementById('uploadBtn')
@@ -194,6 +198,7 @@ const insideBtn = document.getElementById('insideBtn')
 const outsideBtn = document.getElementById('outsideBtn')
 const fmtJpg = document.getElementById('fmtJpg')
 const fmtPng = document.getElementById('fmtPng')
+const dragHint = document.getElementById('dragHint')
 
 const extraIds = ['secTopText','secBottomText','secPosition','secFontSize','secColors','secOverlay','secFormat']
 
@@ -203,10 +208,10 @@ function showControls() {
   document.getElementById('previewWrap').style.display = 'block'
 }
 
+// Upload
 uploadBtn.onclick = () => { fileInput.value = ''; fileInput.click() }
 fileInput.onchange = e => {
-  const file = e.target.files[0]
-  if (!file) return
+  const file = e.target.files[0]; if (!file) return
   const reader = new FileReader()
   reader.onload = ev => {
     const img = new Image()
@@ -216,10 +221,10 @@ fileInput.onchange = e => {
   reader.readAsDataURL(file)
 }
 
+// Overlay
 overlayBtn.onclick = () => { overlayInput.value = ''; overlayInput.click() }
 overlayInput.onchange = e => {
-  const file = e.target.files[0]
-  if (!file) return
+  const file = e.target.files[0]; if (!file) return
   const reader = new FileReader()
   reader.onload = ev => {
     const img = new Image()
@@ -230,9 +235,11 @@ overlayInput.onchange = e => {
 }
 removeOverlay.onclick = () => { overlayImage = null; overlayControls.style.display = 'none'; render() }
 
+// Toggles
 insideBtn.onclick = () => {
   textPosition = 'inside'
   insideBtn.classList.add('active'); outsideBtn.classList.remove('active')
+  topY = 0.1; botY = 0.9
   textColor.value = '#ffffff'; render()
 }
 outsideBtn.onclick = () => {
@@ -240,10 +247,10 @@ outsideBtn.onclick = () => {
   outsideBtn.classList.add('active'); insideBtn.classList.remove('active')
   textColor.value = '#000000'; render()
 }
-
 fmtJpg.onclick = () => { downloadFmt = 'jpg'; fmtJpg.classList.add('active'); fmtPng.classList.remove('active') }
 fmtPng.onclick = () => { downloadFmt = 'png'; fmtPng.classList.add('active'); fmtJpg.classList.remove('active') }
 
+// Live inputs
 topText.oninput = render
 bottomText.oninput = render
 fontSize.oninput = () => { fontSizeVal.textContent = fontSize.value; render() }
@@ -251,22 +258,22 @@ textColor.oninput = render
 strokeColor.oninput = render
 overlaySize.oninput = () => { overlaySizeVal.textContent = overlaySize.value; render() }
 
+// Templates
 templateBtn.onclick = async () => {
   templateModal.style.display = 'flex'
   if (allTemplates.length) { renderTemplates(allTemplates); return }
-  templateGrid.innerHTML = '<p style="padding:24px;color:#9A8A7A;font-family:\'DM Sans\',sans-serif;font-size:13px">Loading templates…</p>'
+  templateGrid.innerHTML = '<p style="padding:24px;color:#9A8A7A;font-size:13px;font-family:\'DM Sans\',sans-serif">Loading templates…</p>'
   try {
     const res = await fetch('https://api.imgflip.com/get_memes')
     const json = await res.json()
     allTemplates = json.data.memes
     renderTemplates(allTemplates)
   } catch {
-    templateGrid.innerHTML = '<p style="padding:24px;color:#C84B31;font-family:\'DM Sans\',sans-serif;font-size:13px">Failed to load templates. Check your connection and try again.</p>'
+    templateGrid.innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;font-family:\'DM Sans\',sans-serif">Failed to load. Check your connection.</p>'
   }
 }
 closeModal.onclick = () => { templateModal.style.display = 'none' }
 templateModal.onclick = e => { if (e.target === templateModal) templateModal.style.display = 'none' }
-
 templateSearch.oninput = () => {
   const q = templateSearch.value.toLowerCase().trim()
   renderTemplates(q ? allTemplates.filter(m => m.name.toLowerCase().includes(q)) : allTemplates)
@@ -283,10 +290,10 @@ function renderTemplates(list) {
     item.onclick = () => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
-      img.onload = () => { mainImage = img; canvas = null; render(); templateModal.style.display = 'none' }
+      img.onload = () => { mainImage = img; canvas = null; topX=0.5; topY=0.1; botX=0.5; botY=0.9; render(); templateModal.style.display = 'none' }
       img.onerror = () => {
         const img2 = new Image()
-        img2.onload = () => { mainImage = img2; canvas = null; render(); templateModal.style.display = 'none' }
+        img2.onload = () => { mainImage = img2; canvas = null; topX=0.5; topY=0.1; botX=0.5; botY=0.9; render(); templateModal.style.display = 'none' }
         img2.src = item.dataset.url
       }
       img.src = item.dataset.url
@@ -294,6 +301,7 @@ function renderTemplates(list) {
   })
 }
 
+// Render
 function render() {
   if (!mainImage) return
   showControls()
@@ -307,87 +315,127 @@ function render() {
   const ovSize = parseInt(overlaySize.value) / 100
   const W = mainImage.naturalWidth
   const H = mainImage.naturalHeight
-  const padding = fs * 2
 
   if (!canvas) {
     canvas = document.createElement('canvas')
-    canvas.style.maxWidth = '100%'
-    canvas.style.borderRadius = '8px'
+    canvas.style.cssText = 'max-width:100%;border-radius:6px;display:block;cursor:default'
     previewBox.innerHTML = ''
     previewBox.appendChild(canvas)
     setupDrag()
+    if (top || bot) dragHint.style.display = 'block'
   }
 
-  const topPad = textPosition === 'outside' && top ? padding : 0
-  const botPad = textPosition === 'outside' && bot ? padding : 0
+  // Outside text bands
+  const topBand = textPosition === 'outside' && top ? fs * 2.2 : 0
+  const botBand = textPosition === 'outside' && bot ? fs * 2.2 : 0
 
   canvas.width = W
-  canvas.height = H + topPad + botPad
+  canvas.height = H + topBand + botBand
   ctx = canvas.getContext('2d')
 
-  if (topPad || botPad) {
-    ctx.fillStyle = '#fff'
-    ctx.fillRect(0, 0, W, canvas.height)
-  }
+  // Background
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(0, 0, W, canvas.height)
 
-  ctx.drawImage(mainImage, 0, topPad, W, H)
+  // Main image
+  ctx.drawImage(mainImage, 0, topBand, W, H)
 
-  ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
-  ctx.textAlign = 'center'
-  ctx.lineWidth = fs / 8
-  ctx.strokeStyle = sc
-  ctx.fillStyle = tc
-
-  if (top) {
-    if (textPosition === 'inside') {
-      ctx.strokeText(top, W / 2, topPad + fs + 10)
-      ctx.fillText(top, W / 2, topPad + fs + 10)
-    } else {
-      ctx.strokeText(top, W / 2, fs + 8)
-      ctx.fillText(top, W / 2, fs + 8)
+  // Text helper
+  function drawText(text, xFrac, yFrac) {
+    if (!text) return
+    const x = xFrac * W
+    const y = yFrac * canvas.height
+    ctx.font = `900 ${fs}px Impact, Arial Black, sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.lineWidth = Math.max(1, fs / 10)
+    ctx.strokeStyle = sc
+    ctx.fillStyle = tc
+    // word wrap
+    const words = text.split(' ')
+    const maxW = W * 0.9
+    const lines = []
+    let line = ''
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w
+      if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w } else line = test
     }
-  }
-  if (bot) {
-    if (textPosition === 'inside') {
-      ctx.strokeText(bot, W / 2, topPad + H - 12)
-      ctx.fillText(bot, W / 2, topPad + H - 12)
-    } else {
-      ctx.strokeText(bot, W / 2, topPad + H + botPad - 8)
-      ctx.fillText(bot, W / 2, topPad + H + botPad - 8)
-    }
+    lines.push(line)
+    const lineH = fs * 1.2
+    const totalH = lines.length * lineH
+    lines.forEach((l, i) => {
+      const ly = y - totalH / 2 + i * lineH + lineH / 2
+      ctx.strokeText(l, x, ly)
+      ctx.fillText(l, x, ly)
+    })
   }
 
+  if (textPosition === 'inside') {
+    drawText(top, topX, topY)
+    drawText(bot, botX, botY)
+  } else {
+    if (top) drawText(top, 0.5, topBand / 2 / canvas.height)
+    if (bot) drawText(bot, 0.5, (topBand + H + botBand / 2) / canvas.height)
+  }
+
+  // Overlay
   if (overlayImage) {
     const ow = W * ovSize
     const oh = (overlayImage.naturalHeight / overlayImage.naturalWidth) * ow
-    const ox = overlayX * W - ow / 2
-    const oy = overlayY * canvas.height - oh / 2
-    ctx.drawImage(overlayImage, ox, oy, ow, oh)
+    ctx.drawImage(overlayImage, overlayX * W - ow / 2, overlayY * canvas.height - oh / 2, ow, oh)
+  }
+
+  // Show drag hint when text exists
+  dragHint.style.display = (top || bot) ? 'block' : 'none'
+}
+
+// Drag logic
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect()
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY
+  return {
+    x: (clientX - rect.left) / rect.width,
+    y: (clientY - rect.top) / rect.height
   }
 }
 
-function setupDrag() {
-  canvas.addEventListener('mousedown', () => { if (overlayImage) isDraggingOverlay = true })
-  window.addEventListener('mousemove', e => {
-    if (!isDraggingOverlay) return
-    const rect = canvas.getBoundingClientRect()
-    overlayX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    overlayY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
-    render()
-  })
-  window.addEventListener('mouseup', () => { isDraggingOverlay = false })
-  canvas.addEventListener('touchstart', e => { if (overlayImage) { isDraggingOverlay = true; e.preventDefault() } }, { passive: false })
-  window.addEventListener('touchmove', e => {
-    if (!isDraggingOverlay) return
-    const rect = canvas.getBoundingClientRect()
-    const touch = e.touches[0]
-    overlayX = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width))
-    overlayY = Math.max(0, Math.min(1, (touch.clientY - rect.top) / rect.height))
-    render()
-  }, { passive: true })
-  window.addEventListener('touchend', () => { isDraggingOverlay = false })
+function hitTest(px, py, fx, fy, threshold = 0.15) {
+  return Math.abs(px - fx) < threshold && Math.abs(py - fy) < threshold
 }
 
+function setupDrag() {
+  function onStart(e) {
+    const p = getCanvasPos(e)
+    const top = topText.value.trim()
+    const bot = bottomText.value.trim()
+    if (overlayImage && hitTest(p.x, p.y, overlayX, overlayY)) { dragging = 'overlay' }
+    else if (top && hitTest(p.x, p.y, topX, topY)) { dragging = 'top' }
+    else if (bot && hitTest(p.x, p.y, botX, botY)) { dragging = 'bot' }
+    if (dragging) { e.preventDefault(); canvas.style.cursor = 'grabbing' }
+  }
+  function onMove(e) {
+    if (!dragging) return
+    e.preventDefault()
+    const p = getCanvasPos(e)
+    const x = Math.max(0, Math.min(1, p.x))
+    const y = Math.max(0, Math.min(1, p.y))
+    if (dragging === 'top') { topX = x; topY = y }
+    else if (dragging === 'bot') { botX = x; botY = y }
+    else if (dragging === 'overlay') { overlayX = x; overlayY = y }
+    render()
+  }
+  function onEnd() { dragging = null; canvas.style.cursor = 'default' }
+
+  canvas.addEventListener('mousedown', onStart)
+  window.addEventListener('mousemove', onMove)
+  window.addEventListener('mouseup', onEnd)
+  canvas.addEventListener('touchstart', onStart, { passive: false })
+  window.addEventListener('touchmove', onMove, { passive: false })
+  window.addEventListener('touchend', onEnd)
+}
+
+// Download
 downloadBtn.onclick = () => {
   if (!canvas) return
   const mime = downloadFmt === 'png' ? 'image/png' : 'image/jpeg'
@@ -396,16 +444,15 @@ downloadBtn.onclick = () => {
       if (!blob) return
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url
-      a.download = `meme.${downloadFmt}`
-      a.click()
+      a.href = url; a.download = `meme.${downloadFmt}`; a.click()
       setTimeout(() => URL.revokeObjectURL(url), 10000)
     }, mime, 0.92)
   } catch {
-    alert('To save this meme: right-click the preview and choose "Save image as…"\n\nOr upload the template from your device to enable direct download.')
+    alert('To save: right-click the preview → "Save image as…"\n\nOr upload the template from your device to enable direct download.')
   }
 }
 
+// SEO
 ;(function injectSEO() {
   const s = t.seo?.['meme-generator']
   if (!s) return
@@ -414,10 +461,8 @@ downloadBtn.onclick = () => {
   sec.innerHTML = `
     <h2>${s.h2a}</h2>
     <ol>${(s.steps||[]).map(st=>`<li>${st}</li>`).join('')}</ol>
-    <h2>${s.h2b}</h2>
-    ${s.body||''}
-    <h3>${s.h3why||''}</h3>
-    <p>${s.why||''}</p>
+    <h2>${s.h2b}</h2>${s.body||''}
+    <h3>${s.h3why||''}</h3><p>${s.why||''}</p>
     <h3>Frequently Asked Questions</h3>
     ${(s.faqs||[]).map(f=>`<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}
     <div class="seo-links">${(s.links||[]).map(l=>`<a href="${l.href}">${l.label}</a>`).join('')}</div>
