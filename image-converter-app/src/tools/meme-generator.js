@@ -407,8 +407,8 @@ function render() {
     drawFixedText(topVal, W/2, topBand + ST.size*0.7 + blockH(topVal, W*0.92, ST.size, ST)/2, W*0.92, ST.size, ST)
     drawFixedText(botVal, W/2, topBand + H - SB.size*0.7 - blockH(botVal, W*0.92, SB.size, SB)/2, W*0.92, SB.size, SB)
   } else {
-    if (topVal) drawFixedText(topVal, W/2, topBand/2, W*0.92, ST.size, ST, 'center', '#000', '#fff')
-    if (botVal) drawFixedText(botVal, W/2, topBand+H+botBand/2, W*0.92, SB.size, SB, 'center', '#000', '#fff')
+    if (topVal) drawFixedText(topVal, W/2, topBand/2, W*0.92, ST.size, ST, 'center')
+    if (botVal) drawFixedText(botVal, W/2, topBand+H+botBand/2, W*0.92, SB.size, SB, 'center')
   }
 
   // overlay image
