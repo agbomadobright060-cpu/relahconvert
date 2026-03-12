@@ -309,12 +309,14 @@ injectHeader()
 
 // ── State ──
 const S = {
-  font: FONTS[0].val, size: 40,
-  bold: false, italic: false, underline: false,
-  align: 'center',
-  textColor: '#000000', strokeColor: '#ffffff',
   position: 'inside', bandColor: '#ffffff', fmt: 'jpg'
 }
+// separate style per text slot
+function defaultStyle() {
+  return { font: FONTS[0].val, size: 40, bold: false, italic: false, underline: false, align: 'center', textColor: '#000000', strokeColor: '#ffffff' }
+}
+const ST = defaultStyle()  // top text style
+const SB = defaultStyle()  // bottom text style
 
 // draggable text layers
 let layers = []        // { id, text, x, y, ...style props }
@@ -337,11 +339,14 @@ const ftb = $('ftb'), canvasWrap = $('canvasWrap')
 // ── Toolbar state sync ──
 function getActiveStyle() {
   if (selectedLayer) return selectedLayer
-  return S
+  if (activeInput === 'top') return ST
+  if (activeInput === 'bottom') return SB
+  return ST  // fallback
 }
 function applyStyle(key, val) {
   if (selectedLayer) { selectedLayer[key] = val }
-  else { S[key] = val }
+  else if (activeInput === 'top') { ST[key] = val }
+  else if (activeInput === 'bottom') { SB[key] = val }
   render()
 }
 
@@ -350,14 +355,13 @@ function showToolbar() { ftb.classList.add('show') }
 function hideToolbar() { ftb.classList.remove('show') }
 
 function syncToolbarToState(src) {
-  // src = S or a layer
-  $('ftbFont').value = src.font || S.font
-  $('ftbSize').value = src.size || S.size
-  $('ftbB').classList.toggle('on', !!(src.bold ?? S.bold))
-  $('ftbI').classList.toggle('on', !!(src.italic ?? S.italic))
-  $('ftbU').classList.toggle('on', !!(src.underline ?? S.underline))
-  const tc = src.textColor || S.textColor
-  const sc = src.strokeColor || S.strokeColor
+  $('ftbFont').value = src.font || FONTS[0].val
+  $('ftbSize').value = src.size || 40
+  $('ftbB').classList.toggle('on', !!(src.bold))
+  $('ftbI').classList.toggle('on', !!(src.italic))
+  $('ftbU').classList.toggle('on', !!(src.underline))
+  const tc = src.textColor || '#000000'
+  const sc = src.strokeColor || '#ffffff'
   $('tcBar').style.background = tc
   $('scBar').style.background = sc
   const align = src.align || S.align
@@ -380,7 +384,7 @@ function render() {
   const W = mainImage.naturalWidth, H = mainImage.naturalHeight
   const topVal = topText.value.trim().toUpperCase()
   const botVal = bottomText.value.trim().toUpperCase()
-  const fs = S.size
+  const fs = ST.size  // top text drives overall font size for layout
 
   if (!canvas) {
     canvas = document.createElement('canvas')
@@ -392,8 +396,8 @@ function render() {
 
   let topBand = 0, botBand = 0
   if (S.position === 'outside') {
-    if (topVal) topBand = blockH(topVal, W * 0.92, fs, S) + fs
-    if (botVal) botBand = blockH(botVal, W * 0.92, fs, S) + fs
+    if (topVal) topBand = blockH(topVal, W * 0.92, ST.size, ST) + ST.size
+    if (botVal) botBand = blockH(botVal, W * 0.92, SB.size, SB) + SB.size
   }
 
   canvas.width = W
@@ -410,11 +414,11 @@ function render() {
 
   // top/bottom text
   if (S.position === 'inside') {
-    drawFixedText(topVal, W/2, topBand + fs*0.7 + blockH(topVal, W*0.92, fs, S)/2, W*0.92, fs, S)
-    drawFixedText(botVal, W/2, topBand + H - fs*0.7 - blockH(botVal, W*0.92, fs, S)/2, W*0.92, fs, S)
+    drawFixedText(topVal, W/2, topBand + ST.size*0.7 + blockH(topVal, W*0.92, ST.size, ST)/2, W*0.92, ST.size, ST)
+    drawFixedText(botVal, W/2, topBand + H - SB.size*0.7 - blockH(botVal, W*0.92, SB.size, SB)/2, W*0.92, SB.size, SB)
   } else {
-    if (topVal) drawFixedText(topVal, W/2, topBand/2, W*0.92, fs, S, 'center', '#000', '#fff')
-    if (botVal) drawFixedText(botVal, W/2, topBand+H+botBand/2, W*0.92, fs, S, 'center', '#000', '#fff')
+    if (topVal) drawFixedText(topVal, W/2, topBand/2, W*0.92, ST.size, ST, 'center', '#000', '#fff')
+    if (botVal) drawFixedText(botVal, W/2, topBand+H+botBand/2, W*0.92, SB.size, SB, 'center', '#000', '#fff')
   }
 
   // overlay image
@@ -583,7 +587,7 @@ function setupCanvasDrag() {
       selectedLayer = null
       dragging = null
       if (activeInput) {
-        syncToolbarToState(S)
+        syncToolbarToState(ST)
         showToolbar()
       } else {
         hideToolbar()
@@ -624,11 +628,11 @@ function setupCanvasDrag() {
 // ── Top/Bottom text inputs ──
 topText.addEventListener('focus', () => {
   activeInput = 'top'; selectedLayer = null
-  syncToolbarToState(S); showToolbar()
+  syncToolbarToState(ST); showToolbar()
 })
 bottomText.addEventListener('focus', () => {
   activeInput = 'bottom'; selectedLayer = null
-  syncToolbarToState(S); showToolbar()
+  syncToolbarToState(SB); showToolbar()
 })
 topText.addEventListener('blur', () => { setTimeout(() => { if (!selectedLayer) { activeInput = null; if (!ftb.matches(':focus-within')) hideToolbar() } }, 200) })
 bottomText.addEventListener('blur', () => { setTimeout(() => { if (!selectedLayer) { activeInput = null; if (!ftb.matches(':focus-within')) hideToolbar() } }, 200) })
@@ -698,7 +702,7 @@ $('addTextBtn').onclick = () => {
     id: ++textIdCounter,
     text: 'Text',
     x: 0.5, y: 0.5,
-    font: S.font, size: S.size,
+    font: ST.font, size: ST.size,
     bold: false, italic: false, underline: false,
     align: 'center', textColor: '#ffffff', strokeColor: '#000000'
   }
