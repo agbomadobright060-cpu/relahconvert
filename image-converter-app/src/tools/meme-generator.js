@@ -5,38 +5,7 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 
-const IMGFLIP_TEMPLATES = [
-  { id: '181913649', name: 'Drake Pointing', keywords: ['drake','approve','disapprove','pointing'] },
-  { id: '112126428', name: 'Distracted Boyfriend', keywords: ['distracted','boyfriend','girlfriend','looking'] },
-  { id: '55311130', name: 'This Is Fine', keywords: ['this is fine','dog','fire','okay'] },
-  { id: '87743020', name: 'Two Buttons', keywords: ['two buttons','buttons','choice','decision'] },
-  { id: '129242436', name: 'Change My Mind', keywords: ['change my mind','crowder','table','debate'] },
-  { id: '93895088', name: 'Expanding Brain', keywords: ['expanding brain','brain','galaxy','evolving'] },
-  { id: '131087935', name: "Gru's Plan", keywords: ['gru','plan','minions','steps'] },
-  { id: '61579', name: 'One Does Not Simply', keywords: ['one does not simply','boromir','lord of the rings','mordor'] },
-  { id: '155067746', name: 'Surprised Pikachu', keywords: ['surprised pikachu','shock','pokemon','surprised'] },
-  { id: '188390779', name: 'Woman Yelling at Cat', keywords: ['woman yelling','cat','real housewives','table'] },
-  { id: '8072786', name: 'Doge', keywords: ['doge','dog','shibe','wow','such'] },
-  { id: '101470', name: 'Ancient Aliens', keywords: ['ancient aliens','guy','hair','aliens'] },
-  { id: '61544', name: 'Bad Luck Brian', keywords: ['bad luck brian','unlucky','fail'] },
-  { id: '61585', name: 'First World Problems', keywords: ['first world problems','crying','rain'] },
-  { id: '61532', name: 'The Most Interesting Man', keywords: ['most interesting man','dos equis','interesting','i dont always'] },
-  { id: '4087833', name: 'Waiting Skeleton', keywords: ['waiting','skeleton','still waiting','patience'] },
-  { id: '124822590', name: 'Left Exit 12', keywords: ['left exit','car','highway','turn'] },
-  { id: '134797956', name: 'Batman Slapping Robin', keywords: ['batman','robin','slapping','stop'] },
-  { id: '217743513', name: 'UNO Draw 25', keywords: ['uno','draw','cards','why not both'] },
-  { id: '178591752', name: 'Tuxedo Winnie The Pooh', keywords: ['winnie','pooh','fancy','tuxedo','classy'] },
-  { id: '196652226', name: 'Spongebob Ight Imma Head Out', keywords: ['spongebob','leaving','imma head out','bye'] },
-  { id: '102156234', name: 'Mocking Spongebob', keywords: ['mocking','spongebob','alternating','caps'] },
-  { id: '135256802', name: 'Epic Handshake', keywords: ['handshake','agree','both','epic'] },
-  { id: '91538330', name: 'Bike Fall', keywords: ['bike','fall','stick figure','own goal'] },
-  { id: '148909805', name: 'Monkey Puppet', keywords: ['monkey','puppet','side eye','awkward'] },
-  { id: '247375501', name: 'Buff Doge vs Cheems', keywords: ['buff doge','cheems','strong','weak','vs'] },
-  { id: '222403160', name: 'The Scroll Of Truth', keywords: ['scroll','truth','monk','running away'] },
-  { id: '119139145', name: 'Blinking White Guy', keywords: ['blinking','white guy','drew scanlon','surprised'] },
-  { id: '252600902', name: 'Always Has Been', keywords: ['always has been','astronaut','gun','earth'] },
-  { id: '161865971', name: 'Masked Bane', keywords: ['bane','batman','mask','no','nobody cared'] },
-]
+let allTemplates = []
 
 if (document.head) {
   document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
@@ -221,10 +190,8 @@ document.getElementById('app').innerHTML = `
     </div>
 
     <!-- RIGHT: preview -->
-    <div class="meme-preview-wrap">
-      <div class="meme-preview-box" id="previewBox">
-        <p class="meme-placeholder">Select an image or template to get started</p>
-      </div>
+    <div class="meme-preview-wrap" id="previewWrap" style="display:none">
+      <div class="meme-preview-box" id="previewBox"></div>
     </div>
   </div>
 
@@ -330,45 +297,46 @@ strokeColor.oninput = render
 overlaySize.oninput = () => { overlaySizeVal.textContent = overlaySize.value; render() }
 
 // Template modal
-templateBtn.onclick = () => { renderTemplates(IMGFLIP_TEMPLATES); templateModal.style.display = 'flex' }
+templateBtn.onclick = async () => {
+  templateModal.style.display = 'flex'
+  if (allTemplates.length) { renderTemplates(allTemplates); return }
+  templateGrid.innerHTML = '<p style="padding:24px;color:#9A8A7A;font-family:\'DM Sans\',sans-serif;font-size:13px">Loading templates…</p>'
+  try {
+    const res = await fetch('https://api.imgflip.com/get_memes')
+    const json = await res.json()
+    allTemplates = json.data.memes
+    renderTemplates(allTemplates)
+  } catch {
+    templateGrid.innerHTML = '<p style="padding:24px;color:#C84B31;font-family:\'DM Sans\',sans-serif;font-size:13px">Failed to load templates. Check your connection and try again.</p>'
+  }
+}
 closeModal.onclick = () => { templateModal.style.display = 'none' }
 templateModal.onclick = e => { if (e.target === templateModal) templateModal.style.display = 'none' }
 
 templateSearch.oninput = () => {
   const q = templateSearch.value.toLowerCase().trim()
-  if (!q) { renderTemplates(IMGFLIP_TEMPLATES); return }
-  const filtered = IMGFLIP_TEMPLATES.filter(t =>
-    t.name.toLowerCase().includes(q) ||
-    t.keywords.some(k => k.includes(q) || q.includes(k.split(' ')[0]))
-  )
-  renderTemplates(filtered.length ? filtered : IMGFLIP_TEMPLATES.filter(t =>
-    t.keywords.some(k => k.split(' ').some(w => w.startsWith(q[0])))
-  ).slice(0, 8))
+  renderTemplates(q ? allTemplates.filter(m => m.name.toLowerCase().includes(q)) : allTemplates)
 }
 
 function renderTemplates(list) {
-  templateGrid.innerHTML = list.map(t => `
-    <div class="meme-template-item" data-id="${t.id}" data-name="${t.name}">
-      <img src="https://i.imgflip.com/${t.id}/template.jpg" alt="${t.name}" loading="lazy" onerror="this.src='https://i.imgflip.com/${t.id}s.jpg'">
-      <span>${t.name}</span>
+  templateGrid.innerHTML = list.map(m => `
+    <div class="meme-template-item" data-url="${m.url}" data-name="${m.name}">
+      <img src="${m.url}" alt="${m.name}" loading="lazy">
+      <span>${m.name}</span>
     </div>
   `).join('')
   templateGrid.querySelectorAll('.meme-template-item').forEach(item => {
     item.onclick = () => {
       const img = new Image()
       img.onload = () => { mainImage = img; render(); templateModal.style.display = 'none' }
-      img.onerror = () => {
-        const img2 = new Image()
-        img2.onload = () => { mainImage = img2; render(); templateModal.style.display = 'none' }
-        img2.src = `https://i.imgflip.com/${item.dataset.id}s.jpg`
-      }
-      img.src = `https://i.imgflip.com/${item.dataset.id}/template.jpg`
+      img.src = item.dataset.url
     }
   })
 }
 
 // Show controls once an image is loaded
 function showControls() {
+  document.getElementById('previewWrap').style.display = ''
   document.querySelectorAll('.meme-extra').forEach(el => {
     el.style.display = ''
   })
