@@ -199,18 +199,18 @@ document.getElementById('app').innerHTML = `
         <div class="ftb-div"></div>
 
         <!-- text color -->
-        <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0" title="Text color" onclick="document.getElementById('tcInput').click()">
+        <label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0;position:relative;width:30px;height:30px;justify-content:center;border:1.5px solid #DDD5C8;border-radius:6px;background:#fff" title="Text color">
           <span style="font-size:13px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">A</span>
           <div id="tcBar" style="width:16px;height:3px;border-radius:1px;background:#000000;pointer-events:none"></div>
-          <input type="color" id="tcInput" value="#000000" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-        </div>
+          <input type="color" id="tcInput" value="#000000" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0">
+        </label>
 
         <!-- stroke color -->
-        <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0" title="Stroke color" onclick="document.getElementById('scInput').click()">
+        <label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0;position:relative;width:30px;height:30px;justify-content:center;border:1.5px solid #DDD5C8;border-radius:6px;background:#fff" title="Stroke color">
           <span style="font-size:9px;font-weight:700;color:#888;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">STR</span>
-          <div id="scBar" style="width:16px;height:3px;border-radius:1px;background:#ffffff;pointer-events:none"></div>
-          <input type="color" id="scInput" value="#ffffff" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-        </div>
+          <div id="scBar" style="width:16px;height:3px;border-radius:1px;background:#ffffff;border:1px solid #ddd;pointer-events:none"></div>
+          <input type="color" id="scInput" value="#ffffff" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0">
+        </label>
       </div>
 
       <!-- canvas -->
