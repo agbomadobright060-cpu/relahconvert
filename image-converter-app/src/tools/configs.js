@@ -195,4 +195,11 @@ export const tools = {
     outputFormat: null,
     slug: 'meme-generator'
   },
+  'blur-face': {
+    title: 'Blur Face',
+    description: 'Blur faces in photos free. Auto-detect or manual. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'blur-face'
+  },
 }
