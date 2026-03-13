@@ -656,7 +656,7 @@ function setupCanvasDrag() {
       selectedLayer = hit
       syncToolbarToState(hit)
       showToolbar()
-      dragging = { layer: hit, startX: e.clientX, startY: e.clientY, origX: hit.x, origY: hit.y }
+      dragging = { layer: hit, startX: cx, startY: cy, origX: hit.x, origY: hit.y }
       render()
       e.preventDefault()
     } else {
@@ -678,11 +678,26 @@ function setupCanvasDrag() {
     const rect = canvas.getBoundingClientRect()
     const scaleX = canvas.width / rect.width
     const scaleY = canvas.height / rect.height
-    const dx = (e.clientX - dragging.startX) * scaleX / canvas.width
-    const dy = (e.clientY - dragging.startY) * scaleY / canvas.height
-    dragging.layer.x = Math.max(0, Math.min(1, dragging.origX + dx))
-    dragging.layer.y = Math.max(0, Math.min(1, dragging.origY + dy))
-    render()
+    const mx = (e.clientX - rect.left) * scaleX
+    const my = (e.clientY - rect.top) * scaleY
+
+    if (dragging.imageLayer) {
+      const il = dragging.imageLayer
+      if (dragging.resizing) {
+        const dx = mx - dragging.startX
+        il.w = Math.max(0.05, Math.min(1, dragging.origW + dx / canvas.width))
+      } else {
+        il.x = Math.max(0, Math.min(1, dragging.origX + (mx - dragging.startX) / canvas.width))
+        il.y = Math.max(0, Math.min(1, dragging.origY + (my - dragging.startY) / canvas.height))
+      }
+      render(); return
+    }
+
+    if (dragging.layer) {
+      dragging.layer.x = Math.max(0, Math.min(1, dragging.origX + (mx - dragging.startX) / canvas.width))
+      dragging.layer.y = Math.max(0, Math.min(1, dragging.origY + (my - dragging.startY) / canvas.height))
+      render()
+    }
   })
 
   window.addEventListener('mouseup', () => { dragging = null })
