@@ -296,6 +296,10 @@ document.getElementById('app').innerHTML = `
           <button class="fmt-btn" id="fmtPng">PNG</button>
         </div>
         <button class="download-btn" id="downloadBtn">⬇ ${ui.download}</button>
+        <div id="nextSteps" style="display:none;margin-top:14px">
+          <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'DM Sans',sans-serif">${t.whats_next||"What's Next?"}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px" id="nextStepsButtons"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -337,8 +341,9 @@ let layers = []        // { id, text, x, y, ...style props }
 let selectedLayer = null   // which layer is active
 let activeInput = null     // 'top' | 'bottom' | null
 
-let mainImage = null, overlayImage = null
-let overlayX = 0.5, overlayY = 0.5
+let mainImage = null
+let imageLayers = []   // { id, img, x, y, w, _xBtn, _resizeBtn, selected }
+let selectedImageLayer = null
 let canvas = null, ctx = null
 let filteredTemplates = []
 
@@ -436,11 +441,38 @@ function render() {
     if (botVal) drawFixedText(botVal, W/2, topBand+H+botBand/2, W*0.92, SB.size, SB)
   }
 
-  // overlay image
-  if (overlayImage) {
-    const ow = W * 0.3, oh = (overlayImage.naturalHeight / overlayImage.naturalWidth) * ow
-    ctx.drawImage(overlayImage, overlayX*W - ow/2, overlayY*canvas.height - oh/2, ow, oh)
-  }
+  // image layers
+  imageLayers.forEach(il => {
+    const iw = il.w * W
+    const ih = (il.img.naturalHeight / il.img.naturalWidth) * iw
+    const ix = il.x * W - iw/2
+    const iy = il.y * canvas.height - ih/2
+    ctx.drawImage(il.img, ix, iy, iw, ih)
+    if (il.selected) {
+      ctx.save()
+      ctx.strokeStyle = '#4488ff'; ctx.lineWidth = 2; ctx.setLineDash([4,3])
+      ctx.strokeRect(ix, iy, iw, ih)
+      ctx.setLineDash([])
+      // X delete button top-right
+      const xr = 10
+      const xcx = ix + iw + xr + 2, xcy = iy - xr - 2
+      ctx.fillStyle = '#ff3333'
+      ctx.beginPath(); ctx.arc(xcx, xcy, xr, 0, Math.PI*2); ctx.fill()
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2
+      ctx.beginPath(); ctx.moveTo(xcx-5,xcy-5); ctx.lineTo(xcx+5,xcy+5); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(xcx+5,xcy-5); ctx.lineTo(xcx-5,xcy+5); ctx.stroke()
+      il._xBtn = { cx: xcx, cy: xcy, r: xr }
+      // resize handle bottom-right
+      const rcx = ix + iw, rcy = iy + ih
+      ctx.fillStyle = '#4488ff'
+      ctx.fillRect(rcx - 8, rcy - 8, 16, 16)
+      il._resizeBtn = { x: rcx - 8, y: rcy - 8, w: 16, h: 16 }
+      il._bounds = { ix, iy, iw, ih }
+      ctx.restore()
+    } else {
+      il._xBtn = null; il._resizeBtn = null; il._bounds = { ix, iy, iw, ih }
+    }
+  })
 
   // draggable text layers
   layers.forEach(layer => {
@@ -566,7 +598,37 @@ function setupCanvasDrag() {
     const cx = (e.clientX - rect.left) * scaleX
     const cy = (e.clientY - rect.top) * scaleY
 
-    // check X delete button first
+    // check image layer X delete button
+    for (const il of [...imageLayers].reverse()) {
+      if (il._xBtn) {
+        const { cx: xcx, cy: xcy, r } = il._xBtn
+        if (Math.hypot(cx - xcx, cy - xcy) <= r + 4) {
+          imageLayers = imageLayers.filter(x => x !== il)
+          if (selectedImageLayer === il) selectedImageLayer = null
+          render(); e.preventDefault(); return
+        }
+      }
+      // check resize handle
+      if (il._resizeBtn) {
+        const rb = il._resizeBtn
+        if (cx >= rb.x && cx <= rb.x+rb.w && cy >= rb.y && cy <= rb.y+rb.h) {
+          dragging = { imageLayer: il, resizing: true, startX: cx, startY: cy, origW: il.w }
+          e.preventDefault(); return
+        }
+      }
+      // check image body for drag
+      if (il._bounds) {
+        const { ix, iy, iw, ih } = il._bounds
+        if (cx >= ix && cx <= ix+iw && cy >= iy && cy <= iy+ih) {
+          imageLayers.forEach(x => x.selected = false)
+          il.selected = true; selectedImageLayer = il
+          dragging = { imageLayer: il, resizing: false, startX: cx, startY: cy, origX: il.x, origY: il.y }
+          render(); e.preventDefault(); return
+        }
+      }
+    }
+
+    // check text layer X delete button first
     if (selectedLayer && selectedLayer._xBtn) {
       const { cx: xcx, cy: xcy, r } = selectedLayer._xBtn
       if (Math.hypot(cx - xcx, cy - xcy) <= r + 4) {
@@ -861,7 +923,15 @@ $('overlayInput').onchange = e => {
   const r = new FileReader()
   r.onload = ev => {
     const img = new Image()
-    img.onload = () => { overlayImage = img; render() }
+    img.onload = () => {
+      // deselect all
+      imageLayers.forEach(il => il.selected = false)
+      selectedImageLayer = null
+      const il = { id: Date.now(), img, x: 0.5, y: 0.5, w: 0.3, selected: true, _xBtn: null, _resizeBtn: null, _bounds: null }
+      selectedImageLayer = il
+      imageLayers.push(il)
+      render()
+    }
     img.src = ev.target.result
   }
   r.readAsDataURL(f)
@@ -870,6 +940,56 @@ $('overlayInput').onchange = e => {
 // ── Format + download ──
 $('fmtJpg').onclick = () => { S.fmt='jpg'; $('fmtJpg').classList.add('active'); $('fmtPng').classList.remove('active') }
 $('fmtPng').onclick = () => { S.fmt='png'; $('fmtPng').classList.add('active'); $('fmtJpg').classList.remove('active') }
+// ── IDB helpers for passing meme to next tool ──
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IDB open failed'))
+  })
+}
+async function saveToIDB(blob, name, type) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    store.put({ id: 0, blob, name, type })
+    tx.oncomplete = resolve
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+
+function buildNextSteps(blob, mime) {
+  const ext = mime === 'image/png' ? 'png' : 'jpg'
+  const buttons = [
+    { label: t.nav_short?.compress  || 'Compress',  href: '/compress' },
+    { label: t.nav_short?.resize    || 'Resize',    href: '/resize' },
+    { label: t.nav_short?.crop      || 'Crop',      href: '/crop' },
+    { label: t.nav_short?.rotate    || 'Rotate',    href: '/rotate' },
+    { label: t.nav_short?.watermark || 'Watermark', href: '/watermark' },
+  ]
+  const container = $('nextStepsButtons')
+  container.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.style.cssText = 'padding:7px 13px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:12px;font-weight:600;color:#2C1810;background:#fff;cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.15s'
+    btn.textContent = b.label
+    btn.onmouseover = () => { btn.style.borderColor='#C84B31'; btn.style.color='#C84B31' }
+    btn.onmouseout  = () => { btn.style.borderColor='#DDD5C8'; btn.style.color='#2C1810' }
+    btn.onclick = async () => {
+      try {
+        await saveToIDB(blob, `meme.${ext}`, mime)
+        sessionStorage.setItem('pendingFromIDB', '1')
+      } catch(e) {}
+      window.location.href = b.href
+    }
+    container.appendChild(btn)
+  })
+  $('nextSteps').style.display = 'block'
+}
+
 $('downloadBtn').onclick = () => {
   if (!canvas) return
   const mime = S.fmt === 'png' ? 'image/png' : 'image/jpeg'
@@ -877,6 +997,7 @@ $('downloadBtn').onclick = () => {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `meme.${S.fmt}`; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
+    buildNextSteps(blob, mime)
   }, mime, 0.92)
 }
 
