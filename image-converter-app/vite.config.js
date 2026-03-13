@@ -30,6 +30,7 @@ export default defineConfig({
         'watermark':         resolve(__dirname, 'watermark.html'),
         'round-corners':     resolve(__dirname, 'round-corners.html'),
         'meme-generator':    resolve(__dirname, 'meme-generator.html'),
+        'blur-face':         resolve(__dirname, 'blur-face.html'),
         'remove-background': resolve(__dirname, 'remove-background.html'),
         'heic-to-jpg':       resolve(__dirname, 'heic-to-jpg.html'),
         'image-to-ico':      resolve(__dirname, 'image-to-ico.html'),
