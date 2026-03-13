@@ -127,11 +127,19 @@ if (document.head) {
     .meme-page-btn:disabled{opacity:0.4;cursor:not-allowed}
     .meme-page-info{font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif}
 
-    .seo-section{max-width:700px;margin:40px auto 0;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
+    .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px}
-    .seo-section p,.seo-section li{font-size:13px;color:#5A4A3A;line-height:1.6}
-    .faq-item{border-top:1px solid #E8E0D5;padding:10px 0}
-    .faq-item h4{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px}
+    .seo-section ol{padding-left:20px;margin:0 0 12px}
+    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px}
+    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px}
+    .seo-faq{border-top:1px solid #E8E0D5;padding:10px 0}
+    .seo-faq:last-child{border-bottom:1px solid #E8E0D5}
+    .seo-faq-q{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif}
+    .seo-faq-a{font-size:13px;color:#5A4A3A;margin:0;line-height:1.6}
+    .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+    .seo-link:hover{border-color:#C84B31;color:#C84B31}
   `
   document.head.appendChild(style)
 }
@@ -901,9 +909,51 @@ function showPage(page) {
 }
 
 // ── SEO ──
-;(function() {
-  const s = t.seo?.['meme-generator']; if (!s) return
-  const sec = document.createElement('section'); sec.className = 'seo-section'
-  sec.innerHTML = `<h2>${s.h2a||''}</h2><p>${s.body||''}</p>${(s.faqs||[]).map(f=>`<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}`
-  document.getElementById('app').appendChild(sec)
+;(function injectSEO() {
+  const seo = (t.seo && t.seo['meme-generator']) || {}
+  const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
+  const alsoTry  = t.seo_also_try  || 'Also Try'
+
+  const h2a   = seo.h2a   || 'How to Make a Meme Free — No Upload Required'
+  const h2b   = seo.h2b   || "The Best Free Meme Generator That Doesn't Upload Your Files"
+  const body  = seo.body  || 'RelahConvert lets you create memes directly in your browser. No upload, no account, no watermark. Choose from 100+ viral meme templates or use your own photo. Add text inside or outside the image, drag it anywhere, and customize every detail.'
+  const h3why = seo.h3why || 'Why Make Memes Online?'
+  const why   = seo.why   || 'Memes are the fastest way to share a joke, make a point, or go viral. A good meme generator gives you full control over text placement, font, and style — without installing anything or giving up your photos.'
+  const steps = seo.steps || [
+    'Upload your image or choose a template — click Upload Image or pick from 100+ popular meme templates.',
+    'Add your text — type in the Top Text and Bottom Text fields, or click Add Text to place custom text anywhere on the image.',
+    'Style your text — change font, size, color, stroke, bold, italic, and alignment using the toolbar.',
+    'Download your meme — click JPG or PNG to save instantly to your device.'
+  ]
+  const faqs = seo.faqs || [
+    { q: 'Will my image be uploaded to a server?', a: 'No. Everything runs in your browser. Your files never leave your device.' },
+    { q: 'Can I use my own image?', a: 'Yes — upload any JPG, PNG, or WebP image.' },
+    { q: 'Is there a watermark?', a: 'No watermark, ever.' },
+    { q: 'Can I add multiple text layers?', a: 'Yes — click Add Text to add as many draggable text layers as you want.' },
+    { q: 'What fonts are available?', a: 'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New, and Comic Sans.' },
+    { q: 'Can I download as PNG?', a: 'Yes — choose JPG or PNG before downloading.' }
+  ]
+  const links = seo.links || [
+    { href: '/compress', label: 'Compress Image' },
+    { href: '/resize', label: 'Resize Image' },
+    { href: '/crop', label: 'Crop Image' },
+    { href: '/watermark', label: 'Add Watermark' },
+    { href: '/jpg-to-png', label: 'JPG to PNG' }
+  ]
+
+  const div = document.createElement('div')
+  div.className = 'seo-section'
+  div.innerHTML = `
+    <h2>${h2a}</h2>
+    <ol>${steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <h2>${h2b}</h2>
+    <p>${body}</p>
+    <h3>${h3why}</h3>
+    <p>${why}</p>
+    <h3>${faqTitle}</h3>
+    ${faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}
+    <h3>${alsoTry}</h3>
+    <div class="seo-links">${links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>
+  `
+  document.querySelector('#app').appendChild(div)
 })()
