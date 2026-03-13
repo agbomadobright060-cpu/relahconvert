@@ -942,9 +942,9 @@ $('overlayInput').onchange = e => {
       // deselect all
       imageLayers.forEach(il => il.selected = false)
       selectedImageLayer = null
-      const il = { id: Date.now(), img, x: 0.5, y: 0.5, w: 0.3, selected: true, _xBtn: null, _resizeBtn: null, _bounds: null }
-      selectedImageLayer = il
+      const il = { id: Date.now(), img, x: 0.5, y: 0.5, w: 0.3, selected: false, _xBtn: null, _resizeBtn: null, _bounds: null }
       imageLayers.push(il)
+      selectedImageLayer = null
       render()
     }
     img.src = ev.target.result
@@ -1008,11 +1008,23 @@ function buildNextSteps(blob, mime) {
 $('downloadBtn').onclick = () => {
   if (!canvas) return
   const mime = S.fmt === 'png' ? 'image/png' : 'image/jpeg'
+  // deselect all for clean download
+  const prevSelected = selectedLayer
+  const prevImageSelected = selectedImageLayer
+  selectedLayer = null
+  selectedImageLayer = null
+  imageLayers.forEach(il => il.selected = false)
+  render()
   canvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `meme.${S.fmt}`; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
     buildNextSteps(blob, mime)
+    // restore selection
+    selectedLayer = prevSelected
+    selectedImageLayer = prevImageSelected
+    if (prevImageSelected) prevImageSelected.selected = true
+    render()
   }, mime, 0.92)
 }
 
