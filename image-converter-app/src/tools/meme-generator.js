@@ -2,6 +2,23 @@ import { injectHeader } from '../core/header.js'
 import { getT } from '../core/i18n.js'
 
 const t = getT()
+const ui = {
+  title:       t.meme_title        || 'Meme',
+  titleEm:     t.meme_title_em     || 'Generator',
+  sub:         t.meme_sub          || 'Create memes online. Choose a template or upload your own image. Private — runs in your browser.',
+  uploadBtn:   t.meme_upload_btn   || 'Upload Image',
+  templateBtn: t.meme_template_btn || 'Choose Template',
+  editor:      t.meme_editor       || 'Meme Editor',
+  textInside:  t.meme_text_inside  || 'Text inside',
+  textOutside: t.meme_text_outside || 'Text outside',
+  bandColor:   t.meme_band_color   || 'Band color:',
+  topText:     t.meme_top_text     || 'Top text (optional)',
+  bottomText:  t.meme_bottom_text  || 'Bottom text (optional)',
+  addText:     t.meme_add_text     || 'ADD TEXT',
+  addImage:    t.meme_add_image    || 'ADD IMAGE',
+  download:    t.meme_download     || 'Download Meme',
+  chooseTempl: t.meme_choose_templ || 'Choose a Meme Template',
+}
 let allTemplates = [], templatePage = 0
 const PER_PAGE = 20
 
@@ -164,14 +181,14 @@ const COLORS = [
 document.getElementById('app').innerHTML = `
 <div class="tool-wrap">
   <div class="tool-hero">
-    <h1 class="tool-title">Meme <em class="brand-em">Generator</em></h1>
-    <p class="tool-sub">Create memes online. Choose a template or upload your own image. Private — runs in your browser.</p>
+    <h1 class="tool-title">${ui.title} <em class="brand-em">${ui.titleEm}</em></h1>
+    <p class="tool-sub">${ui.sub}</p>
   </div>
 
   <div class="meme-source-row" id="sourceRow">
-    <button class="meme-source-btn" id="uploadBtn">⬆ Upload Image</button>
+    <button class="meme-source-btn" id="uploadBtn">⬆ ${ui.uploadBtn}</button>
     <span class="meme-or">or</span>
-    <button class="meme-source-btn" id="templateBtn">🎭 Choose Template</button>
+    <button class="meme-source-btn" id="templateBtn">🎭 ${ui.templateBtn}</button>
     <input type="file" id="fileInput" accept="image/*" style="display:none">
   </div>
 
@@ -229,23 +246,23 @@ document.getElementById('app').innerHTML = `
 
     <!-- RIGHT PANEL -->
     <div class="meme-panel">
-      <p class="panel-title">Meme Editor</p>
+      <p class="panel-title">${ui.editor}</p>
 
       <!-- text position -->
       <div class="panel-section">
         <div class="pos-toggle">
           <button class="pos-btn active" id="insideBtn">
             <svg width="28" height="22" viewBox="0 0 28 22" fill="none"><rect x="1" y="1" width="26" height="20" rx="3" stroke="#C84B31" stroke-width="1.5"/><text x="14" y="15" text-anchor="middle" font-size="9" fill="#C84B31" font-family="Impact">TEXT</text></svg>
-            Text inside
+            ${ui.textInside}
           </button>
           <button class="pos-btn" id="outsideBtn">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="1" y="9" width="26" height="18" rx="3" stroke="#9A8A7A" stroke-width="1.5"/><text x="14" y="6" text-anchor="middle" font-size="7" fill="#9A8A7A" font-family="Impact">TEXT</text></svg>
-            Text outside
+            ${ui.textOutside}
           </button>
         </div>
         <!-- outside band color — only shown when outside active -->
         <div class="band-color-row" id="bandColorRow" style="display:none">
-          <span class="band-color-label">Band color:</span>
+          <span class="band-color-label">${ui.bandColor}</span>
           <input type="color" id="bandColor" value="#ffffff" class="band-color-pick">
         </div>
       </div>
@@ -253,8 +270,8 @@ document.getElementById('app').innerHTML = `
       <!-- top / bottom text -->
       <div class="panel-section">
         <span class="panel-label">Text</span>
-        <input type="text" id="topText" class="meme-input" placeholder="Top text (optional)">
-        <input type="text" id="bottomText" class="meme-input" placeholder="Bottom text (optional)" style="margin-bottom:0">
+        <input type="text" id="topText" class="meme-input" placeholder="${ui.topText}">
+        <input type="text" id="bottomText" class="meme-input" placeholder="${ui.bottomText}" style="margin-bottom:0">
       </div>
 
       <!-- actions -->
@@ -262,11 +279,11 @@ document.getElementById('app').innerHTML = `
         <span class="panel-label">Add</span>
         <button class="panel-action-btn" id="addTextBtn">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="#C84B31" stroke-width="1.5"/><text x="9" y="13" text-anchor="middle" font-size="10" fill="#C84B31" font-family="Impact,sans-serif">A</text></svg>
-          ADD TEXT
+          ${ui.addText}
         </button>
         <button class="panel-action-btn" id="overlayBtn">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="#C84B31" stroke-width="1.5"/><path d="M1 12l4-4 3 3 4-5 5 6" stroke="#C84B31" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          ADD IMAGE
+          ${ui.addImage}
         </button>
         <input type="file" id="overlayInput" accept="image/*" style="display:none">
       </div>
@@ -278,7 +295,7 @@ document.getElementById('app').innerHTML = `
           <button class="fmt-btn active" id="fmtJpg">JPG</button>
           <button class="fmt-btn" id="fmtPng">PNG</button>
         </div>
-        <button class="download-btn" id="downloadBtn">⬇ Download Meme</button>
+        <button class="download-btn" id="downloadBtn">⬇ ${ui.download}</button>
       </div>
     </div>
   </div>
@@ -287,7 +304,7 @@ document.getElementById('app').innerHTML = `
   <div class="meme-modal-overlay" id="templateModal" style="display:none">
     <div class="meme-modal">
       <div class="meme-modal-header">
-        <h2>Choose a Meme Template</h2>
+        <h2>${ui.chooseTempl}</h2>
         <button class="meme-modal-close" id="closeModal">✕</button>
       </div>
       <input type="text" id="templateSearch" class="meme-search" placeholder="Search... (try 'drake', 'dog', 'brain')">
@@ -909,51 +926,78 @@ function showPage(page) {
 }
 
 // ── SEO ──
-;(function injectSEO() {
-  const seo = (t.seo && t.seo['meme-generator']) || {}
+const seoMeme = {
+  en: {
+    h2a: 'How to Make a Meme Free — No Upload Required',
+    steps: ['Upload your image or choose a template — click Upload Image or pick from 100+ popular meme templates.','Add your text — type in the Top Text and Bottom Text fields, or click Add Text to place custom text anywhere on the image.','Style your text — change font, size, color, stroke, bold, italic, and alignment using the toolbar.','Download your meme — click JPG or PNG to save instantly to your device.'],
+    h2b: "The Best Free Meme Generator That Doesn't Upload Your Files",
+    body: 'RelahConvert lets you create memes directly in your browser. No upload, no account, no watermark. Choose from 100+ viral meme templates or use your own photo. Add text inside or outside the image, drag it anywhere, and customize every detail.',
+    h3why: 'Why Make Memes Online?',
+    why: 'Memes are the fastest way to share a joke, make a point, or go viral. A good meme generator gives you full control over text placement, font, and style — without installing anything or giving up your photos.',
+    faqs: [{q:'Will my image be uploaded to a server?',a:'No. Everything runs in your browser. Your files never leave your device.'},{q:'Can I use my own image?',a:'Yes — upload any JPG, PNG, or WebP image.'},{q:'Is there a watermark?',a:'No watermark, ever.'},{q:'Can I add multiple text layers?',a:'Yes — click Add Text to add as many draggable text layers as you want.'},{q:'What fonts are available?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New, and Comic Sans.'},{q:'Can I download as PNG?',a:'Yes — choose JPG or PNG before downloading.'}],
+    links: [{href:'/compress',label:'Compress Image'},{href:'/resize',label:'Resize Image'},{href:'/crop',label:'Crop Image'},{href:'/watermark',label:'Add Watermark'},{href:'/jpg-to-png',label:'JPG to PNG'}],
+  },
+  fr: {
+    h2a: "Comment créer un mème gratuitement — sans téléchargement",
+    steps: ["Téléversez votre image ou choisissez un modèle — cliquez sur Téléverser une image ou choisissez parmi plus de 100 modèles populaires.","Ajoutez votre texte — tapez dans les champs Texte du haut et Texte du bas, ou cliquez sur Ajouter du texte pour le placer n'importe où.","Stylisez votre texte — modifiez la police, la taille, la couleur, le contour, le gras, l'italique et l'alignement.","Téléchargez votre mème — cliquez sur JPG ou PNG pour enregistrer instantanément."],
+    h2b: "Le meilleur générateur de mèmes gratuit qui ne télécharge pas vos fichiers",
+    body: "RelahConvert vous permet de créer des mèmes directement dans votre navigateur. Aucun téléchargement, aucun compte, aucun filigrane. Choisissez parmi plus de 100 modèles viraux ou utilisez votre propre photo.",
+    h3why: "Pourquoi créer des mèmes en ligne ?",
+    why: "Les mèmes sont le moyen le plus rapide de partager une blague ou de devenir viral. Un bon générateur vous donne un contrôle total sur le texte, la police et le style — sans rien installer.",
+    faqs: [{q:"Mon image sera-t-elle téléchargée sur un serveur ?",a:"Non. Tout s'exécute dans votre navigateur. Vos fichiers ne quittent jamais votre appareil."},{q:"Puis-je utiliser ma propre image ?",a:"Oui — téléversez n'importe quelle image JPG, PNG ou WebP."},{q:"Y a-t-il un filigrane ?",a:"Aucun filigrane, jamais."},{q:"Puis-je ajouter plusieurs calques de texte ?",a:"Oui — cliquez sur Ajouter du texte pour en ajouter autant que vous voulez."},{q:"Quelles polices sont disponibles ?",a:"Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New et Comic Sans."},{q:"Puis-je télécharger en PNG ?",a:"Oui — choisissez JPG ou PNG avant de télécharger."}],
+    links: [{href:"/compress",label:"Compresser l'image"},{href:"/resize",label:"Redimensionner"},{href:"/crop",label:"Recadrer"},{href:"/watermark",label:"Filigrane"},{href:"/jpg-to-png",label:"JPG en PNG"}],
+  },
+  es: {
+    h2a: 'Cómo crear un meme gratis — sin subir archivos',
+    steps: ['Sube tu imagen o elige una plantilla — haz clic en Subir imagen o elige entre más de 100 plantillas populares.','Agrega tu texto — escribe en los campos Texto superior e inferior, o haz clic en Agregar texto para colocarlo en cualquier lugar.','Estiliza tu texto — cambia la fuente, tamaño, color, contorno, negrita, cursiva y alineación.','Descarga tu meme — haz clic en JPG o PNG para guardarlo instantáneamente.'],
+    h2b: 'El mejor generador de memes gratuito que no sube tus archivos',
+    body: 'RelahConvert te permite crear memes directamente en tu navegador. Sin subidas, sin cuenta, sin marca de agua. Elige entre más de 100 plantillas virales o usa tu propia foto.',
+    h3why: '¿Por qué hacer memes en línea?',
+    why: 'Los memes son la forma más rápida de compartir un chiste o volverse viral. Un buen generador te da control total sobre el texto, la fuente y el estilo — sin instalar nada.',
+    faqs: [{q:'¿Mi imagen se subirá a un servidor?',a:'No. Todo se ejecuta en tu navegador. Tus archivos nunca salen de tu dispositivo.'},{q:'¿Puedo usar mi propia imagen?',a:'Sí — sube cualquier imagen JPG, PNG o WebP.'},{q:'¿Hay marca de agua?',a:'Sin marca de agua, nunca.'},{q:'¿Puedo agregar varias capas de texto?',a:'Sí — haz clic en Agregar texto para añadir tantas como desees.'},{q:'¿Qué fuentes están disponibles?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New y Comic Sans.'},{q:'¿Puedo descargar en PNG?',a:'Sí — elige JPG o PNG antes de descargar.'}],
+    links: [{href:'/compress',label:'Comprimir imagen'},{href:'/resize',label:'Redimensionar'},{href:'/crop',label:'Recortar'},{href:'/watermark',label:'Marca de agua'},{href:'/jpg-to-png',label:'JPG a PNG'}],
+  },
+  pt: {
+    h2a: 'Como criar um meme grátis — sem fazer upload',
+    steps: ['Faça upload da sua imagem ou escolha um modelo — clique em Fazer upload ou escolha entre mais de 100 modelos populares.','Adicione seu texto — digite nos campos Texto superior e inferior, ou clique em Adicionar texto para colocá-lo em qualquer lugar.','Estilize seu texto — altere a fonte, tamanho, cor, contorno, negrito, itálico e alinhamento.','Baixe seu meme — clique em JPG ou PNG para salvar instantaneamente.'],
+    h2b: 'O melhor gerador de memes gratuito que não faz upload dos seus arquivos',
+    body: "O RelahConvert permite criar memes diretamente no seu navegador. Sem upload, sem conta, sem marca d'água. Escolha entre mais de 100 modelos virais ou use sua própria foto.",
+    h3why: 'Por que criar memes online?',
+    why: 'Os memes são a forma mais rápida de compartilhar uma piada ou se tornar viral. Um bom gerador oferece controle total sobre o texto, a fonte e o estilo — sem instalar nada.',
+    faqs: [{q:'Minha imagem será enviada para um servidor?',a:'Não. Tudo é executado no seu navegador. Seus arquivos nunca saem do seu dispositivo.'},{q:'Posso usar minha própria imagem?',a:"Sim — faça upload de qualquer imagem JPG, PNG ou WebP."},{q:"Há marca d'água?",a:"Sem marca d'água, nunca."},{q:'Posso adicionar várias camadas de texto?',a:'Sim — clique em Adicionar texto para adicionar quantas quiser.'},{q:'Quais fontes estão disponíveis?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New e Comic Sans.'},{q:'Posso baixar em PNG?',a:'Sim — escolha JPG ou PNG antes de baixar.'}],
+    links: [{href:'/compress',label:'Comprimir imagem'},{href:'/resize',label:'Redimensionar'},{href:'/crop',label:'Cortar'},{href:"/watermark",label:"Marca d'água"},{href:'/jpg-to-png',label:'JPG para PNG'}],
+  },
+  de: {
+    h2a: 'So erstellen Sie ein Meme kostenlos — ohne Upload',
+    steps: ['Laden Sie Ihr Bild hoch oder wählen Sie eine Vorlage — klicken Sie auf Bild hochladen oder wählen Sie aus über 100 beliebten Vorlagen.','Fügen Sie Ihren Text hinzu — geben Sie in die Felder Oberer Text und Unterer Text ein, oder klicken Sie auf Text hinzufügen.','Gestalten Sie Ihren Text — ändern Sie Schriftart, Größe, Farbe, Kontur, Fett, Kursiv und Ausrichtung.','Laden Sie Ihr Meme herunter — klicken Sie auf JPG oder PNG zum sofortigen Speichern.'],
+    h2b: 'Der beste kostenlose Meme-Generator, der Ihre Dateien nicht hochlädt',
+    body: 'RelahConvert ermöglicht es Ihnen, Memes direkt in Ihrem Browser zu erstellen. Kein Upload, kein Konto, kein Wasserzeichen. Wählen Sie aus über 100 viralen Vorlagen oder verwenden Sie Ihr eigenes Foto.',
+    h3why: 'Warum Memes online erstellen?',
+    why: 'Memes sind der schnellste Weg, einen Witz zu teilen oder viral zu gehen. Ein guter Generator gibt Ihnen volle Kontrolle über Text, Schriftart und Stil — ohne Installation.',
+    faqs: [{q:'Wird mein Bild auf einen Server hochgeladen?',a:'Nein. Alles läuft in Ihrem Browser. Ihre Dateien verlassen nie Ihr Gerät.'},{q:'Kann ich mein eigenes Bild verwenden?',a:'Ja — laden Sie ein beliebiges JPG-, PNG- oder WebP-Bild hoch.'},{q:'Gibt es ein Wasserzeichen?',a:'Kein Wasserzeichen, niemals.'},{q:'Kann ich mehrere Textebenen hinzufügen?',a:'Ja — klicken Sie auf Text hinzufügen, um beliebig viele hinzuzufügen.'},{q:'Welche Schriftarten sind verfügbar?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New und Comic Sans.'},{q:'Kann ich als PNG herunterladen?',a:'Ja — wählen Sie vor dem Herunterladen JPG oder PNG.'}],
+    links: [{href:'/compress',label:'Bild komprimieren'},{href:'/resize',label:'Skalieren'},{href:'/crop',label:'Zuschneiden'},{href:'/watermark',label:'Wasserzeichen'},{href:'/jpg-to-png',label:'JPG zu PNG'}],
+  },
+  ar: {
+    h2a: 'كيفية إنشاء ميم مجاناً — بدون رفع الملفات',
+    steps: ['ارفع صورتك أو اختر قالباً — انقر على رفع صورة أو اختر من أكثر من 100 قالب شهير.','أضف نصك — اكتب في حقلي النص العلوي والسفلي، أو انقر على إضافة نص لوضعه في أي مكان.','نسّق نصك — غيّر الخط والحجم واللون والحدود والغامق والمائل والمحاذاة.','نزّل ميمك — انقر على JPG أو PNG للحفظ فوراً.'],
+    h2b: 'أفضل مولّد ميم مجاني لا يرفع ملفاتك',
+    body: 'يتيح لك RelahConvert إنشاء الميمات مباشرةً في متصفحك. بدون رفع، بدون حساب، بدون علامة مائية. اختر من أكثر من 100 قالب رائج أو استخدم صورتك الخاصة.',
+    h3why: 'لماذا تصنع الميمات أونلاين؟',
+    why: 'الميمات هي أسرع طريقة لمشاركة نكتة أو الانتشار الواسع. يمنحك مولّد الميم الجيد تحكماً كاملاً في النص والخط والأسلوب — دون تثبيت أي شيء.',
+    faqs: [{q:'هل سيتم رفع صورتي إلى خادم؟',a:'لا. كل شيء يعمل في متصفحك. ملفاتك لا تغادر جهازك أبداً.'},{q:'هل يمكنني استخدام صورتي الخاصة؟',a:'نعم — ارفع أي صورة بصيغة JPG أو PNG أو WebP.'},{q:'هل توجد علامة مائية؟',a:'لا توجد علامة مائية، أبداً.'},{q:'هل يمكنني إضافة طبقات نص متعددة؟',a:'نعم — انقر على إضافة نص لإضافة أي عدد تريده.'},{q:'ما الخطوط المتاحة؟',a:'Impact وArial Black وArial وVerdana وTimes New Roman وGeorgia وCourier New وComic Sans.'},{q:'هل يمكنني التنزيل بصيغة PNG؟',a:'نعم — اختر JPG أو PNG قبل التنزيل.'}],
+    links: [{href:'/compress',label:'ضغط الصورة'},{href:'/resize',label:'تغيير الحجم'},{href:'/crop',label:'اقتصاص'},{href:'/watermark',label:'علامة مائية'},{href:'/jpg-to-png',label:'JPG إلى PNG'}],
+  },
+}
+
+function getLang() { return localStorage.getItem('rc_lang') || navigator.language?.slice(0,2) || 'en' }
+function buildSeoSection() {
+  const lang = getLang()
+  const seo = seoMeme[lang] || seoMeme['en']
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-
-  const h2a   = seo.h2a   || 'How to Make a Meme Free — No Upload Required'
-  const h2b   = seo.h2b   || "The Best Free Meme Generator That Doesn't Upload Your Files"
-  const body  = seo.body  || 'RelahConvert lets you create memes directly in your browser. No upload, no account, no watermark. Choose from 100+ viral meme templates or use your own photo. Add text inside or outside the image, drag it anywhere, and customize every detail.'
-  const h3why = seo.h3why || 'Why Make Memes Online?'
-  const why   = seo.why   || 'Memes are the fastest way to share a joke, make a point, or go viral. A good meme generator gives you full control over text placement, font, and style — without installing anything or giving up your photos.'
-  const steps = seo.steps || [
-    'Upload your image or choose a template — click Upload Image or pick from 100+ popular meme templates.',
-    'Add your text — type in the Top Text and Bottom Text fields, or click Add Text to place custom text anywhere on the image.',
-    'Style your text — change font, size, color, stroke, bold, italic, and alignment using the toolbar.',
-    'Download your meme — click JPG or PNG to save instantly to your device.'
-  ]
-  const faqs = seo.faqs || [
-    { q: 'Will my image be uploaded to a server?', a: 'No. Everything runs in your browser. Your files never leave your device.' },
-    { q: 'Can I use my own image?', a: 'Yes — upload any JPG, PNG, or WebP image.' },
-    { q: 'Is there a watermark?', a: 'No watermark, ever.' },
-    { q: 'Can I add multiple text layers?', a: 'Yes — click Add Text to add as many draggable text layers as you want.' },
-    { q: 'What fonts are available?', a: 'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New, and Comic Sans.' },
-    { q: 'Can I download as PNG?', a: 'Yes — choose JPG or PNG before downloading.' }
-  ]
-  const links = seo.links || [
-    { href: '/compress', label: 'Compress Image' },
-    { href: '/resize', label: 'Resize Image' },
-    { href: '/crop', label: 'Crop Image' },
-    { href: '/watermark', label: 'Add Watermark' },
-    { href: '/jpg-to-png', label: 'JPG to PNG' }
-  ]
-
   const div = document.createElement('div')
   div.className = 'seo-section'
-  div.innerHTML = `
-    <h2>${h2a}</h2>
-    <ol>${steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-    <h2>${h2b}</h2>
-    <p>${body}</p>
-    <h3>${h3why}</h3>
-    <p>${why}</p>
-    <h3>${faqTitle}</h3>
-    ${faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}
-    <h3>${alsoTry}</h3>
-    <div class="seo-links">${links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>
-  `
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2><p>${seo.body}</p><h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
-})()
+}
+buildSeoSection()
