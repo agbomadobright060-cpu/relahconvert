@@ -662,6 +662,8 @@ function setupCanvasDrag() {
     } else {
       // deselect
       selectedLayer = null
+      selectedImageLayer = null
+      imageLayers.forEach(il => il.selected = false)
       dragging = null
       if (activeInput) {
         syncToolbarToState(ST)
