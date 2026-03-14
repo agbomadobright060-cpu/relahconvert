@@ -43,6 +43,7 @@ export function injectHeader() {
       letter-spacing: -0.02em;
       flex-shrink: 0;
       display: flex;
+      flex-direction: row;
       align-items: center;
       gap: 5px;
       direction: ltr;
