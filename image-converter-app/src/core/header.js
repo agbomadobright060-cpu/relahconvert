@@ -3,6 +3,8 @@ import { getLang, setLang, getT, supportedLangs, langLabels } from './i18n.js'
 
 export function injectHeader() {
   const t = getT()
+  const currentLang = getLang()
+  const isRTL = currentLang === 'ar'
 
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
@@ -30,7 +32,7 @@ export function injectHeader() {
       height: 64px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between;
       gap: 24px;
     }
     #site-header .logo {
@@ -53,7 +55,7 @@ export function injectHeader() {
       align-items: center;
       gap: 0;
       flex: 1;
-      margin-left: auto;
+      justify-content: flex-end;
     }
     #site-header .nav-link {
       padding: 8px 14px;
@@ -181,16 +183,18 @@ export function injectHeader() {
     .lang-bar select:focus { border-color: #C84B31; }
 
     /* ── RTL Arabic ── */
-    [dir="rtl"] #site-header .header-inner { flex-direction: row-reverse; }
-    [dir="rtl"] #site-header .desktop-nav { flex-direction: row-reverse; }
-    [dir="rtl"] #site-header .logo { flex-direction: row-reverse; }
-    [dir="rtl"] #site-header .more-btn { flex-direction: row-reverse; }
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
     [dir="rtl"] .lang-bar { flex-direction: row-reverse; }
   `
   document.head.appendChild(style)
+
+  // Apply RTL to document early
+  if (isRTL) {
+    document.documentElement.setAttribute('dir', 'rtl')
+    document.documentElement.setAttribute('lang', 'ar')
+  }
 
   const currentPath = window.location.pathname.replace(/^\//, '').split('?')[0]
 
@@ -202,25 +206,31 @@ export function injectHeader() {
 
   const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
 
+  const logoHTML = `
+    <a href="/" class="logo">
+      <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;">
+        <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
+        <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
+        <polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/>
+      </svg>
+      <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
+    </a>`
+
+  const navHTML = `
+    <nav class="desktop-nav">
+      ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
+      <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
+    </nav>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>`
+
   const header = document.createElement('header')
   header.id = 'site-header'
+  // For RTL: nav on left, logo on right — swap order in HTML
   header.innerHTML = `
     <div class="header-inner">
-      <a href="/" class="logo">
-        <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;">
-          <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
-          <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
-          <polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/>
-        </svg>
-        <span class="logo-text"><span class="relah">relah</span><span class="convert">convert</span></span>
-      </a>
-      <nav class="desktop-nav">
-        ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
-        <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
-      </nav>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
+      ${isRTL ? navHTML + logoHTML : logoHTML + navHTML}
     </div>
   `
 
@@ -236,7 +246,6 @@ export function injectHeader() {
     </div>
   `
 
-  const currentLang = getLang()
   const footer = document.createElement('footer')
   footer.id = 'site-footer'
   footer.innerHTML = `
@@ -278,17 +287,4 @@ export function injectHeader() {
     if (moreBtn) moreBtn.classList.remove('open')
   })
   dropdown.addEventListener('click', e => e.stopPropagation())
-
-  // RTL support for Arabic
-  if (currentLang === 'ar') {
-    document.documentElement.setAttribute('dir', 'rtl')
-    document.documentElement.setAttribute('lang', 'ar')
-    const headerInner = header.querySelector('.header-inner')
-    if (headerInner) {
-      headerInner.style.flexDirection = 'row-reverse'
-      headerInner.style.justifyContent = 'flex-start'
-      const nav = headerInner.querySelector('.desktop-nav')
-      if (nav) { nav.style.marginLeft = '0'; nav.style.marginRight = 'auto' }
-    }
-  }
 }
