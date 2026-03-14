@@ -185,8 +185,7 @@ export function injectHeader() {
     .lang-bar select:focus { border-color: #C84B31; }
 
     /* ── RTL Arabic ── */
-    [dir="rtl"] #site-header .header-inner { flex-direction: row-reverse; }
-    [dir="rtl"] #site-header .desktop-nav { margin-left: 0; margin-right: auto; }
+    [dir="rtl"] #site-header .desktop-nav { justify-content: flex-start; }
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
@@ -247,7 +246,7 @@ export function injectHeader() {
     </a>`
 
   const navHTML = `
-    <nav class="desktop-nav" ${isRTL ? 'style="margin-left:0;margin-right:auto;"' : ''}>
+    <nav class="desktop-nav">
       ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
       <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
     </nav>
@@ -258,7 +257,7 @@ export function injectHeader() {
   const header = document.createElement('header')
   header.id = 'site-header'
   header.innerHTML = `
-    <div class="header-inner" ${isRTL ? 'style="flex-direction:row-reverse;"' : ''}>
+    <div class="header-inner">
       ${logoHTML + navHTML}
     </div>
   `
