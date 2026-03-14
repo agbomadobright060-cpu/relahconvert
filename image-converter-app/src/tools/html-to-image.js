@@ -78,24 +78,24 @@ document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:24px;">
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:#C84B31;">${titlePart2}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0;">Capture any website as an image. Enter a URL and download the screenshot.</p>
+      <p style="font-size:13px;color:#7A6A5A;margin:0;">${t.hti_desc || 'Capture any website as an image. Enter a URL and download the screenshot.'}</p>
     </div>
     <div style="margin-bottom:16px;">
-      <label class="opt-label" for="urlInput">Website URL</label>
+      <label class="opt-label" for="urlInput">${t.hti_url_label || 'Website URL'}</label>
       <input class="url-input" id="urlInput" type="url" placeholder="https://example.com" />
     </div>
     <div class="opt-row">
       <div class="opt-group">
-        <label class="opt-label" for="screenSize">Screen Size</label>
+        <label class="opt-label" for="screenSize">${t.hti_screen_size || 'Screen Size'}</label>
         <select class="opt-select" id="screenSize">
-          <option value="375">Mobile (375px)</option>
-          <option value="768">Tablet (768px)</option>
-          <option value="1366" selected>Desktop (1366px)</option>
-          <option value="1920">Full HD (1920px)</option>
+          <option value="375">${t.hti_mobile || 'Mobile'} (375px)</option>
+          <option value="768">${t.hti_tablet || 'Tablet'} (768px)</option>
+          <option value="1366" selected>${t.hti_desktop || 'Desktop'} (1366px)</option>
+          <option value="1920">${t.hti_fullhd || 'Full HD'} (1920px)</option>
         </select>
       </div>
       <div class="opt-group">
-        <label class="opt-label" for="formatSelect">Format</label>
+        <label class="opt-label" for="formatSelect">${t.hti_format || 'Format'}</label>
         <select class="opt-select" id="formatSelect">
           <option value="jpeg">JPG</option>
           <option value="png">PNG</option>
@@ -103,15 +103,15 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
     <div class="error-msg" id="errorMsg"></div>
-    <button class="capture-btn" id="captureBtn">📸 Capture Screenshot</button>
+    <button class="capture-btn" id="captureBtn">📸 ${t.hti_btn || 'Capture Screenshot'}</button>
     <div class="loading-overlay" id="loadingOverlay">
       <span class="spinner"></span>
-      <div>Capturing screenshot…</div>
+      <div>${t.hti_loading || 'Capturing screenshot…'}</div>
     </div>
     <div class="preview-box" id="previewBox">
       <img id="previewImg" src="" alt="Screenshot preview" />
     </div>
-    <a class="download-btn" id="downloadBtn" href="#" download="screenshot.jpg">⬇ Download Screenshot</a>
+    <a class="download-btn" id="downloadBtn" href="#" download="screenshot.jpg">⬇ ${t.hti_download || 'Download Screenshot'}</a>
   </div>
 `
 
@@ -134,7 +134,7 @@ function showError(msg) {
 
 captureBtn.addEventListener('click', async () => {
   let url = urlInput.value.trim()
-  if (!url) { showError('Please enter a website URL.'); return }
+  if (!url) { showError(t.hti_url_error || 'Please enter a website URL.'); return }
   if (!url.startsWith('http')) url = 'https://' + url
 
   const width  = screenSize.value
@@ -161,7 +161,7 @@ captureBtn.addEventListener('click', async () => {
     downloadBtn.download = `screenshot.${ext}`
     downloadBtn.style.display = 'block'
   } catch {
-    showError('Could not capture screenshot. Please check the URL and try again.')
+    showError(t.hti_error || 'Could not capture screenshot. Please check the URL and try again.')
   } finally {
     captureBtn.disabled   = false
     loadingEl.style.display = 'none'
