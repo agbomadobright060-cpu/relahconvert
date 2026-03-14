@@ -3,17 +3,30 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 const ui = {
-  title:      t.blur_face_title    || 'Blur',
-  titleEm:    t.blur_face_title_em || 'Face',
-  sub:        t.blur_face_sub      || 'Blur faces in photos. Auto-detect or draw manually. Batch up to 25 images. Private — runs in your browser.',
-  uploadBtn:  t.blur_face_upload   || 'Upload Image',
-  download:   t.blur_face_download || 'Download Image',
-  blurAmount: t.blur_face_amount   || 'Blur Amount',
-  detecting:  t.blur_face_detecting|| 'Detecting faces…',
-  noFaces:    t.blur_face_none     || 'No faces detected. Try a clearer photo or use Add Blur.',
-  facesFound: t.blur_face_found    || 'face(s) detected',
-  addBlur:    'Add Blur',
-  autoDetect: 'Auto Detect',
+  title:      t.blur_face_title      || 'Blur',
+  titleEm:    t.blur_face_title_em   || 'Face',
+  sub:        t.blur_face_sub        || 'Blur faces in photos. Auto-detect or draw manually. Batch up to 25 images. Private — runs in your browser.',
+  uploadBtn:  t.blur_face_upload     || 'Upload Image',
+  download:   t.blur_face_download   || 'Download Image',
+  blurAmount: t.blur_face_amount     || 'Blur Amount',
+  detecting:  t.blur_face_detecting  || 'Detecting faces…',
+  noFaces:    t.blur_face_none       || 'No faces detected. Try a clearer photo or use Add Blur.',
+  facesFound: t.blur_face_found      || 'face(s) detected',
+  addBlur:    t.blur_face_manual     || 'Add Blur',
+  autoDetect: t.blur_face_auto       || 'Auto Detect',
+  mode:       t.blur_face_mode       || 'Mode',
+  selectMode: t.blur_face_select_mode|| '${ui.selectMode}',
+  draw:       t.blur_face_draw       || '${ui.draw}',
+  editor:     t.blur_face_editor     || '${ui.editor}',
+  regions:    t.blur_face_regions    || 'Blurred Regions',
+  downloadZip:t.blur_face_download_zip|| 'Download All as ZIP',
+  reset:      t.blur_face_reset      || 'Upload New Image',
+  imagesLabel:t.blur_face_images_label|| 'Images',
+  drop:       t.blur_face_drop       || '${ui.drop}',
+  dropSub:    t.blur_face_drop_sub   || '${ui.dropSub}',
+  processing: t.blur_face_processing || 'Processing',
+  creatingZip:t.blur_face_creating_zip|| 'Creating ZIP…',
+  batchFailed:t.blur_face_batch_failed|| 'Batch download failed',
 }
 
 const MAX_FILES = 25
@@ -96,8 +109,8 @@ document.querySelector('#app').innerHTML = `
   </div>
   <div class="bf-upload-area" id="uploadArea">
     <div class="bf-upload-icon">🫥</div>
-    <p class="bf-upload-text">Drop images here or click to upload</p>
-    <p class="bf-upload-sub">JPG, PNG, WebP · Up to 25 images · Max 200MB total</p>
+    <p class="bf-upload-text">${ui.drop}</p>
+    <p class="bf-upload-sub">${ui.dropSub}</p>
     <button class="bf-upload-btn" id="uploadBtn">${ui.uploadBtn}</button>
     <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
   </div>
@@ -110,9 +123,9 @@ document.querySelector('#app').innerHTML = `
       <canvas id="bfCanvas"></canvas>
     </div>
     <div class="bf-panel">
-      <p class="bf-panel-title">Blur Editor</p>
+      <p class="bf-panel-title">${ui.editor}</p>
       <div>
-        <p class="bf-label">Mode</p>
+        <p class="bf-label">${ui.mode}</p>
         <div class="bf-mode-row">
           <button class="bf-mode-btn" id="autoBtn">${ui.autoDetect}</button>
           <button class="bf-mode-btn" id="manualBtn">${ui.addBlur}</button>
@@ -122,15 +135,15 @@ document.querySelector('#app').innerHTML = `
         <p class="bf-label">${ui.blurAmount}: <span id="blurVal">18</span>px</p>
         <input type="range" class="bf-slider" id="blurSlider" min="4" max="40" value="18">
       </div>
-      <div class="bf-status" id="bfStatus">Select a mode to begin.</div>
+      <div class="bf-status" id="bfStatus">${ui.selectMode}</div>
       <div id="regionsList" style="display:none">
-        <p class="bf-label">Blurred Regions</p>
+        <p class="bf-label">${ui.regions}</p>
         <div class="bf-regions" id="regionsContainer"></div>
       </div>
       <div class="bf-action-row">
         <button class="bf-download-btn" id="downloadBtn">⬇ ${ui.download}</button>
-        <button class="bf-download-btn" id="batchDownloadBtn" style="display:none;background:#2C1810">⬇ Download All as ZIP</button>
-        <button class="bf-reset-btn" id="resetBtn">↺ Upload New Image</button>
+        <button class="bf-download-btn" id="batchDownloadBtn" style="display:none;background:#2C1810">⬇ ${ui.downloadZip}</button>
+        <button class="bf-reset-btn" id="resetBtn">↺ ${ui.reset}</button>
         <div id="nextSteps" style="display:none">
           <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">${t.whats_next||"What's Next?"}</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px" id="nextStepsButtons"></div>
@@ -160,7 +173,7 @@ document.addEventListener('drop', e => { e.preventDefault(); const files = Array
 function addFiles(files) {
   let totalBytes = images.reduce((s,im)=>s+im.file.size,0)
   for (const f of files) {
-    if (images.length >= MAX_FILES) { setStatus(`Max ${MAX_FILES} images allowed.`,'error'); break }
+    if (images.length >= MAX_FILES) { setStatus(`${ui.imagesLabel}: Max ${MAX_FILES}`,'error'); break }
     if (totalBytes + f.size > MAX_BYTES) { setStatus('Total size exceeds 200MB limit.','error'); break }
     totalBytes += f.size
     images.push({ file:f, img:null, blurRegions:[], processed:false })
@@ -318,7 +331,7 @@ function resetMode(){
   mode=null
   $('autoBtn').classList.remove('active')
   $('manualBtn').classList.remove('active')
-  setStatus('Select a mode to begin.','')
+  setStatus('${ui.selectMode}','')
 }
 
 $('autoBtn').onclick=()=>{
@@ -331,7 +344,7 @@ $('manualBtn').onclick=()=>{
   mode='manual'
   $('manualBtn').classList.add('active')
   $('autoBtn').classList.remove('active')
-  setStatus('Click and drag on the image to blur a region.','')
+  setStatus('${ui.draw}','')
 }
 
 async function runAutoDetect(){
@@ -434,24 +447,24 @@ $('downloadBtn').onclick=async()=>{
 
 $('batchDownloadBtn').onclick=async()=>{
   const btn=$('batchDownloadBtn')
-  btn.disabled=true;btn.textContent='Processing…'
+  btn.disabled=true;btn.textContent=ui.processing+'…'
   try{
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js')
     const zip=new JSZip()
     for(let i=0;i<images.length;i++){
       const entry=images[i];if(!entry.img)continue
-      btn.textContent=`Processing ${i+1}/${images.length}…`
+      btn.textContent=`${ui.processing} ${i+1}/${images.length}…`
       const tc=renderClean(entry)
       const blob=await canvasToBlob(tc)
       zip.file(entry.file.name.replace(/\.[^.]+$/,'')+'-blurred.jpg',blob)
     }
-    btn.textContent='Creating ZIP…'
+    btn.textContent=ui.creatingZip
     const zipBlob=await zip.generateAsync({type:'blob'})
     const url=URL.createObjectURL(zipBlob)
     const a=document.createElement('a');a.href=url;a.download='blurred-faces.zip';a.click()
     setTimeout(()=>URL.revokeObjectURL(url),10000)
-  }catch(e){alert('Batch download failed: '+e.message)}
-  btn.disabled=false;btn.textContent='⬇ Download All as ZIP'
+  }catch(e){alert(ui.batchFailed+': '+e.message)}
+  btn.disabled=false;btn.textContent='⬇ ${ui.downloadZip}'
 }
 
 $('resetBtn').onclick=resetAll
@@ -465,7 +478,7 @@ function resetAll(){
   $('batchDownloadBtn').style.display='none'
   $('autoBtn').classList.remove('active')
   $('manualBtn').classList.remove('active')
-  setStatus('Select a mode to begin.','')
+  setStatus('${ui.selectMode}','')
 }
 
 async function loadFromIDB(){
