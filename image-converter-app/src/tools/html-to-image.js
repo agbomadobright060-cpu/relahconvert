@@ -71,6 +71,19 @@ style.textContent = `
     margin-bottom: 12px; padding: 10px 14px; background: #FDE8E3;
     border-radius: 8px; display: none;
   }
+  .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
+  .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
+  .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
+  .seo-section ol { padding-left:20px; margin:0 0 12px; }
+  .seo-section ol li { font-size:13px; color:#5A4A3A; line-height:1.6; margin-bottom:6px; }
+  .seo-section p { font-size:13px; color:#5A4A3A; line-height:1.6; margin:0 0 12px; }
+  .seo-faq { border-top:1px solid #E8E0D5; padding:10px 0; }
+  .seo-faq:last-child { border-bottom:1px solid #E8E0D5; }
+  .seo-faq-q { font-size:13px; font-weight:700; color:#2C1810; margin:0 0 4px; font-family:'DM Sans',sans-serif; }
+  .seo-faq-a { font-size:13px; color:#5A4A3A; margin:0; line-height:1.6; }
+  .seo-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .seo-link { padding:7px 14px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+  .seo-link:hover { border-color:#C84B31; color:#C84B31; }
 `
 document.head.appendChild(style)
 
@@ -167,3 +180,15 @@ captureBtn.addEventListener('click', async () => {
     loadingEl.style.display = 'none'
   }
 })
+
+// ── SEO ────────────────────────────────────────────────────────────────────
+;(function injectSEO() {
+  const seo = t.seo && t.seo['html-to-image']
+  if (!seo) return
+  const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
+  const alsoTry  = t.seo_also_try  || 'Also Try'
+  const div = document.createElement('div')
+  div.className = 'seo-section'
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
+  document.querySelector('#app').appendChild(div)
+})()
