@@ -178,6 +178,16 @@ export function injectHeader() {
       outline: none;
     }
     .lang-bar select:focus { border-color: #C84B31; }
+
+    /* ── RTL Arabic ── */
+    [dir="rtl"] #site-header .header-inner { flex-direction: row-reverse; }
+    [dir="rtl"] #site-header .desktop-nav { flex-direction: row-reverse; }
+    [dir="rtl"] #site-header .logo { flex-direction: row-reverse; }
+    [dir="rtl"] #site-header .more-btn { flex-direction: row-reverse; }
+    [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
+    [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
+    [dir="rtl"] #site-footer { direction: rtl; }
+    [dir="rtl"] .lang-bar { flex-direction: row-reverse; }
   `
   document.head.appendChild(style)
 
@@ -267,4 +277,10 @@ export function injectHeader() {
     if (moreBtn) moreBtn.classList.remove('open')
   })
   dropdown.addEventListener('click', e => e.stopPropagation())
+
+  // RTL support for Arabic
+  if (currentLang === 'ar') {
+    document.documentElement.setAttribute('dir', 'rtl')
+    document.documentElement.setAttribute('lang', 'ar')
+  }
 }
