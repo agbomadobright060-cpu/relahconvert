@@ -45,6 +45,7 @@ export function injectHeader() {
       display: flex;
       align-items: center;
       gap: 5px;
+      direction: ltr;
       line-height: 1;
     }
     #site-header .logo .logo-text { display: flex; align-items: baseline; }
