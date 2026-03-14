@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -94,6 +94,19 @@
         .filter-bar { gap: 6px; }
         .filter-btn { padding: 7px 14px; font-size: 12px; }
       }
+      [dir="rtl"] { direction: rtl; text-align: right; }
+      [dir="rtl"] .header-inner { flex-direction: row-reverse; }
+      [dir="rtl"] .desktop-nav { flex-direction: row-reverse; }
+      [dir="rtl"] .filter-bar { direction: rtl; }
+      [dir="rtl"] .tool-card { text-align: right; }
+      [dir="rtl"] .tool-card .icon { margin-left: 0; }
+      [dir="rtl"] .dropdown-inner { direction: rtl; }
+      [dir="rtl"] .dropdown-inner a { flex-direction: row-reverse; }
+      [dir="rtl"] .hero { direction: rtl; text-align: center; }
+      [dir="rtl"] .footer-top { direction: rtl; }
+      [dir="rtl"] .footer-bottom { flex-direction: row-reverse; }
+      [dir="rtl"] .footer-col ul { text-align: right; }
+      [dir="rtl"] .more-btn { flex-direction: row-reverse; }
     </style>
   </head>
   <body>
@@ -169,6 +182,10 @@
       import { getLang, setLang, getT, supportedLangs, langLabels } from '/src/core/i18n.js'
       const t = getT()
       const currentLang = getLang()
+      if (currentLang === 'ar') {
+        document.getElementById('htmlRoot').setAttribute('dir', 'rtl')
+        document.getElementById('htmlRoot').setAttribute('lang', 'ar')
+      }
 
       // ── Filter bar ────────────────────────────────────────────────────────
       const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create' }
