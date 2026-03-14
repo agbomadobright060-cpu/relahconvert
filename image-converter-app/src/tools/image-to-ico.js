@@ -65,13 +65,13 @@ document.querySelector('#app').innerHTML = `
         <div id="icoPreviews" class="ico-preview"></div>
       </div>
       <div style="margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">ICO Sizes (select all you need)</div>
+        <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.ico_sizes_label || 'ICO Sizes (select all you need)'}</div>
         <div class="size-grid" id="sizeGrid">
           ${SIZES.map(s => `<button class="size-btn${selectedSizes.includes(s)?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
         </div>
       </div>
     </div>
-    <button class="opt-btn" id="convertBtn" disabled>Convert to ICO</button>
+    <button class="opt-btn" id="convertBtn" disabled>${t.convert_to_ico || 'Convert to ICO'}</button>
     <a class="download-btn" id="downloadLink">${dlBtn}</a>
   </div>
 `

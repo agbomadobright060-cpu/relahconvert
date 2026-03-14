@@ -57,11 +57,11 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div style="margin-bottom:16px;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint} — up to 25 files</span>
+      <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint} — ${t.up_to_25_files || 'up to 25 files'}</span>
     </div>
     <input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple style="display:none;" />
     <div id="fileGrid" class="file-grid"></div>
-    <button class="opt-btn" id="convertBtn" disabled>Convert to JPG</button>
+    <button class="opt-btn" id="convertBtn" disabled>${t.next_to_jpg || 'Convert to JPG'}</button>
     <div id="singleDl" style="display:none;margin-bottom:10px;"></div>
     <div id="zipWrap" style="display:none;margin-bottom:10px;">
       <a id="zipBtn" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:#2C1810;color:#F5F0E8;">⬇ ${dlZipBtn}</a>

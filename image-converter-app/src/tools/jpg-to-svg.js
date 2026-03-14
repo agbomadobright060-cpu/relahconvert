@@ -60,7 +60,7 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">JPG <em style="font-style:italic;color:#C84B31;">to SVG</em></h1>
       <p style="font-size:13px;color:#7A6A5A;margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">ℹ️ This tool embeds your image inside an SVG wrapper — making it infinitely scalable. For full vector tracing, use a dedicated app like Inkscape.</div>
+    <div class="notice">ℹ️ ${t.svg_notice || 'This tool embeds your image inside an SVG wrapper — making it infinitely scalable. For full vector tracing, use a dedicated app like Inkscape.'}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:#9A8A7A;">${dropHint}</span>
