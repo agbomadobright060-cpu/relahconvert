@@ -34,7 +34,8 @@ export default defineConfig({
         'remove-background': resolve(__dirname, 'remove-background.html'),
         'heic-to-jpg':       resolve(__dirname, 'heic-to-jpg.html'),
         'image-to-ico':      resolve(__dirname, 'image-to-ico.html'),
-        'jpg-to-svg':        resolve(__dirname, 'jpg-to-svg.html'),
+        'jpg-to-svg':           resolve(__dirname, 'jpg-to-svg.html'),
+        'website-screenshot':   resolve(__dirname, 'website-screenshot.html'),
       }
     }
   }

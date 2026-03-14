@@ -202,4 +202,11 @@ export const tools = {
     outputFormat: null,
     slug: 'blur-face'
   },
+  'website-screenshot': {
+    title: 'Website Screenshot',
+    description: 'Capture any website as a JPG or PNG image. Enter a URL and download.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'website-screenshot'
+  },
 }
