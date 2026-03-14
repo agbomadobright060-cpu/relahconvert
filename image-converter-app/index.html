@@ -97,10 +97,6 @@
 
       /* ── RTL Arabic ── */
       [dir="rtl"] { direction: rtl; }
-      [dir="rtl"] .header-inner { flex-direction: row-reverse; }
-      [dir="rtl"] .desktop-nav { flex-direction: row-reverse; }
-      [dir="rtl"] .logo { flex-direction: row-reverse; }
-      [dir="rtl"] .more-btn { flex-direction: row-reverse; }
       [dir="rtl"] .hero { direction: rtl; text-align: center; }
       [dir="rtl"] .filter-bar { direction: rtl; }
       [dir="rtl"] .tool-card { text-align: right; }
@@ -191,6 +187,14 @@
       if (currentLang === 'ar') {
         document.getElementById('htmlRoot').setAttribute('dir', 'rtl')
         document.getElementById('htmlRoot').setAttribute('lang', 'ar')
+        // swap logo and nav in DOM so logo is on right, nav on left
+        const headerInner = document.querySelector('.header-inner')
+        const logo = document.querySelector('.logo')
+        const hamburger = document.getElementById('hamburgerBtn')
+        if (headerInner && logo) {
+          // move logo to end — with space-between it will go to the right
+          headerInner.appendChild(logo)
+        }
       }
 
       // ── Filter bar ────────────────────────────────────────────────────────
