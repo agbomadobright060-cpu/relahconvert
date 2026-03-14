@@ -176,6 +176,7 @@ document.querySelector('#app').innerHTML = `
 
 let images = [], activeIdx = 0, canvas = null, ctx = null
 let mode = null, drawing = null, blurAmount = 18, nextRegionId = 1, faceApiLoaded = false
+let selectedRegion = null
 
 const $ = id => document.getElementById(id)
 
@@ -194,8 +195,7 @@ function addFiles(files) {
   let totalBytes = images.reduce((s,im)=>s+im.file.size,0)
   const startLen = images.length
   for (const f of files) {
-    // deduplicate by name+size
-    if (images.some(im => im.file.name === f.name && im.file.size === f.size)) continue
+
     if (images.length >= MAX_FILES) { setStatus(`${ui.imagesLabel}: Max ${MAX_FILES}`,'error'); break }
     if (totalBytes + f.size > MAX_BYTES) { setStatus('Total size exceeds 200MB limit.','error'); break }
     totalBytes += f.size
@@ -249,6 +249,7 @@ function loadImageAtIndex(startIdx) {
 
 function activateImage(idx) {
   activeIdx = idx
+  selectedRegion = null
   $('uploadArea').style.display = 'none'
   $('bfLayout').classList.add('visible')
   renderQueue()
@@ -304,17 +305,19 @@ function render() {
   const entry = images[activeIdx]
   ctx.clearRect(0,0,canvas.width,canvas.height)
   ctx.drawImage(entry.img,0,0)
-  entry.blurRegions.forEach(r => applyBlurRegion(r.x,r.y,r.w,r.h,blurAmount))
+  entry.blurRegions.forEach(r => applyBlurRegion(r.x,r.y,r.w,r.h,r.amount||blurAmount))
   entry.blurRegions.forEach(r => {
+    r._xBtn = null
+    if (r !== selectedRegion) return // only draw outline for selected region
     ctx.save()
-    ctx.strokeStyle='rgba(200,75,49,0.7)';ctx.lineWidth=2;ctx.setLineDash([5,3])
+    ctx.strokeStyle='rgba(200,75,49,0.9)';ctx.lineWidth=Math.max(2,canvas.width/300);ctx.setLineDash([5,3])
     ctx.strokeRect(r.x,r.y,r.w,r.h);ctx.setLineDash([])
-    const xr=10,xcx=r.x+r.w+xr+2,xcy=r.y-xr-2
+    const xr=Math.max(10,canvas.width/80),xcx=r.x+r.w+xr+2,xcy=r.y-xr-2
     ctx.fillStyle='#ff3333';ctx.beginPath();ctx.arc(xcx,xcy,xr,0,Math.PI*2);ctx.fill()
     ctx.strokeStyle='#fff';ctx.lineWidth=2
     ctx.beginPath();ctx.moveTo(xcx-5,xcy-5);ctx.lineTo(xcx+5,xcy+5);ctx.stroke()
     ctx.beginPath();ctx.moveTo(xcx+5,xcy-5);ctx.lineTo(xcx-5,xcy+5);ctx.stroke()
-    r._xBtn={cx:xcx,cy:xcy};ctx.restore()
+    r._xBtn={cx:xcx,cy:xcy,r:xr};ctx.restore()
   })
   if (drawing) {
     ctx.save();ctx.strokeStyle='#C84B31';ctx.lineWidth=Math.max(2, canvas.width/200);ctx.setLineDash([5,3])
@@ -348,13 +351,30 @@ function setupCanvasEvents() {
 
   canvas.addEventListener('mousedown',e=>{
     const {cx,cy}=coords(e)
-    for(const r of images[activeIdx].blurRegions){
-      if(r._xBtn&&Math.hypot(cx-r._xBtn.cx,cy-r._xBtn.cy)<=12){
-        images[activeIdx].blurRegions=images[activeIdx].blurRegions.filter(x=>x!==r)
-        updateRegionsList();render();e.preventDefault();return
+    // check X delete on selected region
+    if(selectedRegion&&selectedRegion._xBtn){
+      const {cx:xcx,cy:xcy,r:xr}=selectedRegion._xBtn
+      if(Math.hypot(cx-xcx,cy-xcy)<=xr+4){
+        images[activeIdx].blurRegions=images[activeIdx].blurRegions.filter(x=>x!==selectedRegion)
+        selectedRegion=null;updateRegionsList();render();e.preventDefault();return
       }
     }
-    if(mode!=='manual')return
+    // check if clicking inside an existing blur region to select it
+    const entry=images[activeIdx]
+    for(let i=entry.blurRegions.length-1;i>=0;i--){
+      const r=entry.blurRegions[i]
+      if(cx>=r.x&&cx<=r.x+r.w&&cy>=r.y&&cy<=r.y+r.h){
+        selectedRegion=r
+        // sync slider to this region's blur amount
+        blurAmount=r.amount||blurAmount
+        $('blurSlider').value=blurAmount
+        $('blurVal').textContent=blurAmount
+        render();e.preventDefault();return
+      }
+    }
+    // clicked empty area — deselect
+    selectedRegion=null
+    if(mode!=='manual'){render();return}
     drawing={startX:cx,startY:cy,curX:cx,curY:cy};e.preventDefault()
   })
   canvas.addEventListener('mousemove',e=>{
@@ -365,7 +385,13 @@ function setupCanvasEvents() {
     const x=Math.min(drawing.startX,cx),y=Math.min(drawing.startY,cy)
     const w=Math.abs(cx-drawing.startX),h=Math.abs(cy-drawing.startY)
     drawing=null
-    if(w>10&&h>10){images[activeIdx].blurRegions.push({id:nextRegionId++,x,y,w,h,label:`Region ${nextRegionId-1}`});updateRegionsList()}
+    if(w>10&&h>10){
+      const newRegion={id:nextRegionId++,x,y,w,h,label:`Region ${nextRegionId-1}`,amount:blurAmount}
+      // deselect all existing regions
+      selectedRegion=newRegion
+      images[activeIdx].blurRegions.push(newRegion)
+      updateRegionsList()
+    }
     render()
   })
   canvas.addEventListener('touchstart',e=>{const t=e.touches[0];canvas.dispatchEvent(new MouseEvent('mousedown',{clientX:t.clientX,clientY:t.clientY}))},{passive:false})
@@ -377,9 +403,10 @@ function coords(e){const r=canvas.getBoundingClientRect();return{cx:(e.clientX-r
 
 function resetMode(){
   mode=null
+  selectedRegion=null
   $('autoBtn').classList.remove('active')
   $('manualBtn').classList.remove('active')
-  setStatus('${ui.selectMode}','')
+  setStatus(ui.selectMode,'')
 }
 
 $('autoBtn').onclick=()=>{
@@ -392,7 +419,7 @@ $('manualBtn').onclick=()=>{
   mode='manual'
   $('manualBtn').classList.add('active')
   $('autoBtn').classList.remove('active')
-  setStatus('${ui.draw}','')
+  setStatus(ui.draw,'')
 }
 
 async function runAutoDetect(){
@@ -408,7 +435,7 @@ async function runAutoDetect(){
     if(!detections.length){setStatus(ui.noFaces,'error');return}
     detections.forEach((d,i)=>{
       const box=d.box
-      entry.blurRegions.push({id:nextRegionId++,x:box.x,y:box.y,w:box.width,h:box.height,label:`Face ${i+1}`})
+      entry.blurRegions.push({id:nextRegionId++,x:box.x,y:box.y,w:box.width,h:box.height,label:`Face ${i+1}`,amount:blurAmount})
     })
     setStatus(`✓ ${detections.length} ${ui.facesFound}`,'success')
     updateRegionsList();render()
@@ -422,7 +449,13 @@ function loadScript(src){
   })
 }
 
-$('blurSlider').oninput=()=>{blurAmount=parseInt($('blurSlider').value);$('blurVal').textContent=blurAmount;render()}
+$('blurSlider').oninput=()=>{
+  blurAmount=parseInt($('blurSlider').value)
+  $('blurVal').textContent=blurAmount
+  // if a region is selected, update only that region's blur
+  if(selectedRegion) selectedRegion.amount=blurAmount
+  render()
+}
 
 function updateRegionsList(){
   if(!images.length)return
@@ -453,7 +486,7 @@ function renderClean(entry){
     const ix=Math.max(0,Math.round(rx)),iy=Math.max(0,Math.round(ry))
     const iw=Math.min(tc.width-ix,Math.round(rw)),ih=Math.min(tc.height-iy,Math.round(rh))
     if(iw<2||ih<2)return
-    const bs=Math.max(4,Math.round(blurAmount*0.8))
+    const bs=Math.max(4,Math.round((r.amount||blurAmount)*0.8))
     const id=tctx.getImageData(ix,iy,iw,ih),d=id.data
     for(let by=0;by<ih;by+=bs)for(let bx=0;bx<iw;bx+=bs){
       const bw=Math.min(bs,iw-bx),bh=Math.min(bs,ih-by)
