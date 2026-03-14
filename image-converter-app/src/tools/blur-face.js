@@ -186,7 +186,7 @@ $('fileInput').onchange = e => { addFiles(Array.from(e.target.files||[])); $('fi
 const uploadArea = $('uploadArea')
 uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag') })
 uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag'))
-uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'))) })
+uploadArea.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'))) })
 // also allow drag/drop anywhere on page after upload
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); const files = Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')); if(files.length) addFiles(files) })
