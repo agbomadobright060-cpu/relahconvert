@@ -35,7 +35,7 @@ export default defineConfig({
         'heic-to-jpg':       resolve(__dirname, 'heic-to-jpg.html'),
         'image-to-ico':      resolve(__dirname, 'image-to-ico.html'),
         'jpg-to-svg':           resolve(__dirname, 'jpg-to-svg.html'),
-        'website-screenshot':   resolve(__dirname, 'website-screenshot.html'),
+        'html-to-image':        resolve(__dirname, 'html-to-image.html'),
       }
     }
   }

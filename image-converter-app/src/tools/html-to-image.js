@@ -3,7 +3,7 @@ import { getT } from '../core/i18n.js'
 
 const t = getT()
 const API_KEY = 'cecb9e03ead844aeb7f6e24e6a6f6824'
-const toolName = (t.nav_short && t.nav_short['website-screenshot']) || 'Website Screenshot'
+const toolName = (t.nav_short && t.nav_short['html-to-image']) || 'HTML to Image'
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')
