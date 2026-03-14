@@ -171,11 +171,12 @@
       const currentLang = getLang()
 
       // ── Filter bar ────────────────────────────────────────────────────────
-      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert' }
+      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create' }
       document.getElementById('filterBar').innerHTML = [
         { key: 'all',      label: f.all      },
         { key: 'optimize', label: f.optimize },
         { key: 'edit',     label: f.edit     },
+        { key: 'create',   label: f.create || 'Create' },
         { key: 'convert',  label: f.convert  },
       ].map(({key, label}) =>
         `<button class="filter-btn${key === 'all' ? ' active' : ''}" data-filter="${key}">${label}</button>`
@@ -202,8 +203,8 @@
         'grayscale':         'edit',
         'watermark':         'edit',
         'round-corners':     'edit',
-        'meme-generator':    'edit',
-        'blur-face':         'edit',
+        'meme-generator':    'create',
+        'blur-face':         'create',
         'jpg-to-png':        'convert',
         'png-to-jpg':        'convert',
         'jpg-to-webp':       'convert',
@@ -290,8 +291,8 @@
         { href: '/grayscale',         title: t.nav_short['grayscale']    || 'Grayscale',               desc: cardDesc('grayscale',         'Convert image to black & white free.'),      cat: 'edit' },
         { href: '/watermark',         title: t.nav_short['watermark']    || 'Add Watermark',           desc: cardDesc('watermark',         'Add watermark to any image free.'),          cat: 'edit' },
         { href: '/round-corners',     title: t.round_corners_title_1 + ' ' + t.round_corners_title_em, desc: cardDesc('round-corners',     'Round image corners free. PNG output.'),     cat: 'edit' },
-        { href: '/meme-generator',    title: t.nav_short?.['meme-generator']    || 'Meme Generator',   desc: cardDesc('meme-generator',    'Add text to any image and create memes free.'), cat: 'edit' },
-        { href: '/blur-face',         title: t.nav_short?.['blur-face']         || 'Blur Face',        desc: cardDesc('blur-face',         'Blur faces in photos free. Auto-detect or manual.'), cat: 'edit' },
+        { href: '/meme-generator',    title: t.nav_short?.['meme-generator']    || 'Meme Generator',   desc: cardDesc('meme-generator',    'Add text to any image and create memes free.'), cat: 'create' },
+        { href: '/blur-face',         title: t.nav_short?.['blur-face']         || 'Blur Face',        desc: cardDesc('blur-face',         'Blur faces in photos free. Auto-detect or manual.'), cat: 'create' },
         { href: '/jpg-to-png',        title: t.nav_short['jpg-to-png'],                                desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.'),                  cat: 'convert' },
         { href: '/png-to-jpg',        title: t.nav_short['png-to-jpg'],                                desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.'),                  cat: 'convert' },
         { href: '/jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                               desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.'),                 cat: 'convert' },
