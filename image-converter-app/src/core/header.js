@@ -247,7 +247,7 @@ export function injectHeader() {
     </a>`
 
   const navHTML = `
-    <nav class="desktop-nav">
+    <nav class="desktop-nav" ${isRTL ? 'style="margin-left:0;margin-right:auto;"' : ''}>
       ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
       <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
     </nav>
@@ -258,7 +258,7 @@ export function injectHeader() {
   const header = document.createElement('header')
   header.id = 'site-header'
   header.innerHTML = `
-    <div class="header-inner">
+    <div class="header-inner" ${isRTL ? 'style="flex-direction:row-reverse;"' : ''}>
       ${logoHTML + navHTML}
     </div>
   `
@@ -293,15 +293,6 @@ export function injectHeader() {
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
-
-  if (isRTL) {
-    const headerInner = header.querySelector('.header-inner')
-    if (headerInner) {
-      headerInner.style.flexDirection = 'row-reverse'
-      const nav = headerInner.querySelector('.desktop-nav')
-      if (nav) { nav.style.marginLeft = '0'; nav.style.marginRight = 'auto' }
-    }
-  }
 
   const langSelect = footer.querySelector('#langSelect')
   if (langSelect) {
