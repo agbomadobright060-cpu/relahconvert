@@ -108,6 +108,8 @@
       [dir="rtl"] .footer-col ul { text-align: right; }
       [dir="rtl"] .footer-bottom { flex-direction: row-reverse; }
       [dir="rtl"] .footer-lang { flex-direction: row-reverse; }
+      [dir="rtl"] .desktop-nav { margin-right: 0; margin-left: 0; justify-content: flex-start; }
+      [dir="rtl"] .more-btn svg, [dir="rtl"] .more-btn .arrow { order: -1; }
     </style>
   </head>
   <body>
@@ -187,14 +189,6 @@
       if (currentLang === 'ar') {
         document.getElementById('htmlRoot').setAttribute('dir', 'rtl')
         document.getElementById('htmlRoot').setAttribute('lang', 'ar')
-        // swap logo and nav in DOM so logo is on right, nav on left
-        const headerInner = document.querySelector('.header-inner')
-        const logo = document.querySelector('.logo')
-        const hamburger = document.getElementById('hamburgerBtn')
-        if (headerInner && logo) {
-          // move logo to end — with space-between it will go to the right
-          headerInner.appendChild(logo)
-        }
       }
 
       // ── Filter bar ────────────────────────────────────────────────────────
