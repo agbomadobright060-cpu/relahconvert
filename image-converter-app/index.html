@@ -145,7 +145,6 @@
       <div class="dropdown-inner" id="dropdownInner"></div>
     </div>
     <section class="hero">
-      <div class="hero-badge" id="heroBadge"></div>
       <h1 id="heroTitle"></h1>
       <p id="heroDesc"></p>
     </section>
@@ -250,7 +249,6 @@
       document.getElementById('desktopNav').innerHTML =
         mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
         `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
-      document.getElementById('heroBadge').textContent = t.hero_badge
       document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
       document.getElementById('heroDesc').innerHTML = t.hero_desc
 
