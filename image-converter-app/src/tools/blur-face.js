@@ -15,15 +15,15 @@ const ui = {
   addBlur:    t.blur_face_manual     || 'Add Blur',
   autoDetect: t.blur_face_auto       || 'Auto Detect',
   mode:       t.blur_face_mode       || 'Mode',
-  selectMode: t.blur_face_select_mode|| '${ui.selectMode}',
-  draw:       t.blur_face_draw       || '${ui.draw}',
-  editor:     t.blur_face_editor     || '${ui.editor}',
+  selectMode: t.blur_face_select_mode|| 'Select a mode to begin.',
+  draw:       t.blur_face_draw       || 'Click and drag on the image to blur a region.',
+  editor:     t.blur_face_editor     || 'Blur Editor',
   regions:    t.blur_face_regions    || 'Blurred Regions',
   downloadZip:t.blur_face_download_zip|| 'Download All as ZIP',
   reset:      t.blur_face_reset      || 'Upload New Image',
   imagesLabel:t.blur_face_images_label|| 'Images',
-  drop:       t.blur_face_drop       || '${ui.drop}',
-  dropSub:    t.blur_face_drop_sub   || '${ui.dropSub}',
+  drop:       t.blur_face_drop       || 'Drop images here or click to upload',
+  dropSub:    t.blur_face_drop_sub   || 'JPG, PNG, WebP · Up to 25 images · Max 200MB total',
   processing: t.blur_face_processing || 'Processing',
   creatingZip:t.blur_face_creating_zip|| 'Creating ZIP…',
   batchFailed:t.blur_face_batch_failed|| 'Batch download failed',
@@ -63,7 +63,7 @@ if (document.head) {
     .bf-layout.visible{display:grid;grid-template-columns:1fr 270px}
     @media(max-width:700px){.bf-layout.visible{grid-template-columns:1fr}}
     .bf-canvas-wrap{position:relative;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
-    .bf-canvas-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair}
+    .bf-canvas-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair;touch-action:none}
     .bf-panel{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:14px}
     .bf-panel-title{font-size:14px;font-weight:700;color:#2C1810;margin:0;font-family:'Fraunces',serif}
     .bf-mode-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -95,6 +95,16 @@ if (document.head) {
     .also-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
     .also-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:12px;font-weight:600;color:#2C1810;text-decoration:none;transition:all 0.15s}
     .also-link:hover{border-color:#C84B31;color:#C84B31}
+    @media(max-width:700px){
+      .bf-mode-btn{padding:14px 8px;font-size:13px}
+      .bf-download-btn{padding:16px;font-size:15px}
+      .bf-reset-btn{padding:14px;font-size:14px}
+      .bf-slider{height:6px}
+      .bf-queue-item{width:64px;height:64px}
+      .bf-queue-add{width:64px;height:64px}
+      .bf-panel{padding:16px}
+      .bf-upload-area{padding:32px 16px}
+    }
   `
   document.head.appendChild(style)
 }
@@ -108,7 +118,17 @@ document.querySelector('#app').innerHTML = `
     <p class="tool-sub">${ui.sub}</p>
   </div>
   <div class="bf-upload-area" id="uploadArea">
-    <div class="bf-upload-icon">🫥</div>
+    <div class="bf-upload-icon">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="40" height="40" rx="8" fill="#F5EDE8" stroke="#DDD5C8" stroke-width="2"/>
+        <circle cx="24" cy="18" r="7" fill="#C84B31" opacity="0.25" stroke="#C84B31" stroke-width="1.5"/>
+        <path d="M10 38c0-7.732 6.268-14 14-14s14 6.268 14 14" fill="#C84B31" opacity="0.15" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="16" y="14" width="16" height="8" rx="3" fill="#C84B31" opacity="0.3"/>
+        <line x1="15" y1="16" x2="33" y2="16" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+        <line x1="15" y1="19" x2="33" y2="19" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+        <line x1="15" y1="22" x2="33" y2="22" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
     <p class="bf-upload-text">${ui.drop}</p>
     <p class="bf-upload-sub">${ui.dropSub}</p>
     <button class="bf-upload-btn" id="uploadBtn">${ui.uploadBtn}</button>
@@ -172,14 +192,19 @@ document.addEventListener('drop', e => { e.preventDefault(); const files = Array
 
 function addFiles(files) {
   let totalBytes = images.reduce((s,im)=>s+im.file.size,0)
+  const startLen = images.length
   for (const f of files) {
+    // deduplicate by name+size
+    if (images.some(im => im.file.name === f.name && im.file.size === f.size)) continue
     if (images.length >= MAX_FILES) { setStatus(`${ui.imagesLabel}: Max ${MAX_FILES}`,'error'); break }
     if (totalBytes + f.size > MAX_BYTES) { setStatus('Total size exceeds 200MB limit.','error'); break }
     totalBytes += f.size
     images.push({ file:f, img:null, blurRegions:[], processed:false })
   }
-  loadImageAtIndex(images.length - files.length < 0 ? 0 : images.length - files.length)
+  loadImageAtIndex(startLen > 0 ? startLen : 0)
 }
+
+const MAX_PREVIEW_PX = 1600 // cap preview resolution for performance
 
 function loadImageAtIndex(startIdx) {
   const idx = Math.max(0, startIdx)
@@ -190,9 +215,32 @@ function loadImageAtIndex(startIdx) {
   reader.onload = ev => {
     const img = new Image()
     img.onload = () => {
-      entry.img = img
-      if (idx === startIdx) activateImage(idx)
-      if (idx+1 < images.length && !images[idx+1].img) loadImageAtIndex(idx+1)
+      // downscale large images for preview/editing — keep original file for download
+      const maxPx = MAX_PREVIEW_PX
+      if (img.naturalWidth > maxPx || img.naturalHeight > maxPx) {
+        const scale = Math.min(maxPx / img.naturalWidth, maxPx / img.naturalHeight)
+        const oc = document.createElement('canvas')
+        oc.width = Math.round(img.naturalWidth * scale)
+        oc.height = Math.round(img.naturalHeight * scale)
+        oc.getContext('2d').drawImage(img, 0, 0, oc.width, oc.height)
+        const scaled = new Image()
+        scaled.onload = () => {
+          entry.img = scaled
+          entry.previewScale = scale
+          // revoke original data URL to free memory
+          URL.revokeObjectURL && img.src.startsWith('blob:') && URL.revokeObjectURL(img.src)
+          if (idx === startIdx) activateImage(idx)
+          if (idx+1 < images.length && !images[idx+1].img) loadImageAtIndex(idx+1)
+        }
+        oc.toBlob(blob => {
+          scaled.src = URL.createObjectURL(blob)
+        }, 'image/jpeg', 0.85)
+      } else {
+        entry.img = img
+        entry.previewScale = 1
+        if (idx === startIdx) activateImage(idx)
+        if (idx+1 < images.length && !images[idx+1].img) loadImageAtIndex(idx+1)
+      }
     }
     img.src = ev.target.result
   }
@@ -269,7 +317,7 @@ function render() {
     r._xBtn={cx:xcx,cy:xcy};ctx.restore()
   })
   if (drawing) {
-    ctx.save();ctx.strokeStyle='#C84B31';ctx.lineWidth=2;ctx.setLineDash([5,3])
+    ctx.save();ctx.strokeStyle='#C84B31';ctx.lineWidth=Math.max(2, canvas.width/200);ctx.setLineDash([5,3])
     const x=Math.min(drawing.startX,drawing.curX),y=Math.min(drawing.startY,drawing.curY)
     ctx.strokeRect(x,y,Math.abs(drawing.curX-drawing.startX),Math.abs(drawing.curY-drawing.startY))
     ctx.setLineDash([]);ctx.restore()
@@ -394,12 +442,16 @@ function updateRegionsList(){
 function setStatus(msg,type){const el=$('bfStatus');el.textContent=msg;el.className='bf-status'+(type?` ${type}`:'')}
 
 function renderClean(entry){
+  // scale blur regions back up if preview was downscaled
+  const scale = entry.previewScale || 1
   const tc=document.createElement('canvas')
   tc.width=entry.img.naturalWidth;tc.height=entry.img.naturalHeight
   const tctx=tc.getContext('2d');tctx.drawImage(entry.img,0,0)
   entry.blurRegions.forEach(r=>{
-    const ix=Math.max(0,Math.round(r.x)),iy=Math.max(0,Math.round(r.y))
-    const iw=Math.min(tc.width-ix,Math.round(r.w)),ih=Math.min(tc.height-iy,Math.round(r.h))
+    // if preview was downscaled, scale coordinates back to full res
+    const rx = r.x / scale, ry = r.y / scale, rw = r.w / scale, rh = r.h / scale
+    const ix=Math.max(0,Math.round(rx)),iy=Math.max(0,Math.round(ry))
+    const iw=Math.min(tc.width-ix,Math.round(rw)),ih=Math.min(tc.height-iy,Math.round(rh))
     if(iw<2||ih<2)return
     const bs=Math.max(4,Math.round(blurAmount*0.8))
     const id=tctx.getImageData(ix,iy,iw,ih),d=id.data
@@ -456,7 +508,9 @@ $('batchDownloadBtn').onclick=async()=>{
       btn.textContent=`${ui.processing} ${i+1}/${images.length}…`
       const tc=renderClean(entry)
       const blob=await canvasToBlob(tc)
-      zip.file(entry.file.name.replace(/\.[^.]+$/,'')+'-blurred.jpg',blob)
+      zip.file(`${String(i+1).padStart(2,'0')}-${entry.file.name.replace(/\.[^.]+$/,'')}-blurred.jpg`,blob)
+      // free canvas memory
+      tc.width=1; tc.height=1
     }
     btn.textContent=ui.creatingZip
     const zipBlob=await zip.generateAsync({type:'blob'})
