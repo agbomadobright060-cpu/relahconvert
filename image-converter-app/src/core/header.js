@@ -30,7 +30,7 @@ export function injectHeader() {
       height: 64px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 24px;
     }
     #site-header .logo {
@@ -53,6 +53,7 @@ export function injectHeader() {
       align-items: center;
       gap: 0;
       flex: 1;
+      margin-left: auto;
     }
     #site-header .nav-link {
       padding: 8px 14px;
@@ -285,8 +286,9 @@ export function injectHeader() {
     const headerInner = header.querySelector('.header-inner')
     if (headerInner) {
       headerInner.style.flexDirection = 'row-reverse'
+      headerInner.style.justifyContent = 'flex-start'
       const nav = headerInner.querySelector('.desktop-nav')
-      if (nav) nav.style.justifyContent = 'flex-end'
+      if (nav) { nav.style.marginLeft = '0'; nav.style.marginRight = 'auto' }
     }
   }
 }
