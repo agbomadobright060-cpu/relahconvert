@@ -184,6 +184,8 @@ export function injectHeader() {
     .lang-bar select:focus { border-color: #C84B31; }
 
     /* ── RTL Arabic ── */
+    [dir="rtl"] #site-header .header-inner { flex-direction: row-reverse; }
+    [dir="rtl"] #site-header .desktop-nav { margin-left: 0; margin-right: auto; }
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
@@ -228,10 +230,9 @@ export function injectHeader() {
 
   const header = document.createElement('header')
   header.id = 'site-header'
-  // For RTL: nav on left, logo on right — swap order in HTML
   header.innerHTML = `
     <div class="header-inner">
-      ${isRTL ? navHTML + logoHTML : logoHTML + navHTML}
+      ${logoHTML + navHTML}
     </div>
   `
 
