@@ -277,7 +277,8 @@
       function cardDesc(slug, fallback) {
         const key = 'card_' + slug.replace(/-/g,'_') + '_desc'
         if (t[key]) return t[key]
-        if (t.seo && t.seo[slug] && t.seo[slug].h2a) return t.seo[slug].h2a
+        const seoSlug = slug.replace(/_/g, '-')
+        if (t.seo && t.seo[seoSlug] && t.seo[seoSlug].h2a) return t.seo[seoSlug].h2a
         return fallback
       }
 
