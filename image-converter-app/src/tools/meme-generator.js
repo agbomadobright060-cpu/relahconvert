@@ -1140,6 +1140,39 @@ const seoMeme = {
 }
 
 function getLang() { return localStorage.getItem('rc_lang') || navigator.language?.slice(0,2) || 'en' }
+
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const rec = records[0]
+    if (!rec?.blob) return
+    const img = new Image()
+    img.onload = () => {
+      mainImage = img
+      canvas = null
+      layers = []
+      selectedLayer = null
+      showLayout()
+      render()
+    }
+    img.src = URL.createObjectURL(rec.blob)
+  } catch(e) {}
+}
+
 function buildSeoSection() {
   const lang = getLang()
   const seo = seoMeme[lang] || seoMeme['en']
@@ -1151,3 +1184,4 @@ function buildSeoSection() {
   document.querySelector('#app').appendChild(div)
 }
 buildSeoSection()
+loadPendingFiles()
