@@ -282,5 +282,11 @@ export function injectHeader() {
   if (currentLang === 'ar') {
     document.documentElement.setAttribute('dir', 'rtl')
     document.documentElement.setAttribute('lang', 'ar')
+    const headerInner = header.querySelector('.header-inner')
+    if (headerInner) {
+      headerInner.style.flexDirection = 'row-reverse'
+      const nav = headerInner.querySelector('.desktop-nav')
+      if (nav) nav.style.justifyContent = 'flex-end'
+    }
   }
 }
