@@ -29,7 +29,7 @@
       .bg-fade { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(ellipse 50% 65% at 50% 40%, rgba(238,241,248,0) 5%, rgba(238,241,248,0.45) 45%, rgba(238,241,248,0.80) 68%); }
       #site-header { background: #fff; border-bottom: 1px solid #E8E0D5; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
       .header-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-      .logo { font-family: 'Fraunces', serif; font-size: 24px; color: #2C1810; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; align-items: center; gap: 7px; line-height: 1; }
+      .logo { font-family: 'Fraunces', serif; font-size: 24px; color: #2C1810; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; flex-direction: row; align-items: center; gap: 7px; line-height: 1; direction: ltr; }
       .logo .relah { font-weight: 400; color: #2C1810; }
       .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
       .desktop-nav { display: flex; align-items: center; gap: 0; }
@@ -129,11 +129,11 @@
     <header id="site-header">
       <div class="header-inner">
         <a href="/" class="logo">
-          <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;">
+          <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;order:0;">
             <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
             <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
           </svg>
-          <span><span class="relah">relah</span><span class="convert">convert</span></span>
+          <span style="order:1;"><span class="relah">relah</span><span class="convert">convert</span></span>
         </a>
         <nav class="desktop-nav" id="desktopNav"></nav>
         <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
