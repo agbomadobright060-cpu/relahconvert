@@ -191,13 +191,14 @@
       }
 
       // ── Filter bar ────────────────────────────────────────────────────────
-      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create' }
+      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create', privacy: 'Privacy' }
       document.getElementById('filterBar').innerHTML = [
         { key: 'all',      label: f.all      },
         { key: 'optimize', label: f.optimize },
         { key: 'edit',     label: f.edit     },
         { key: 'create',   label: f.create || 'Create' },
         { key: 'convert',  label: f.convert  },
+        { key: 'privacy',  label: f.privacy || 'Privacy' },
       ].map(({key, label}) =>
         `<button class="filter-btn${key === 'all' ? ' active' : ''}" data-filter="${key}">${label}</button>`
       ).join('')
@@ -221,10 +222,10 @@
         'rotate':            'edit',
         'flip':              'edit',
         'grayscale':         'edit',
-        'watermark':         'edit',
+        'watermark':         'privacy',
         'round-corners':     'edit',
         'meme-generator':    'create',
-        'blur-face':         'create',
+        'blur-face':         'privacy',
         'jpg-to-png':        'convert',
         'png-to-jpg':        'convert',
         'jpg-to-webp':       'convert',
@@ -243,7 +244,7 @@
         'heic-to-jpg':       'convert',
         'image-to-ico':        'convert',
         'jpg-to-svg':          'convert',
-        'html-to-image':  'create',
+        'html-to-image':  'convert',
       }
 
       document.getElementById('desktopNav').innerHTML =
@@ -311,10 +312,10 @@
         { href: '/rotate',            title: t.nav_short['rotate']       || 'Rotate Image',            desc: cardDesc('rotate',            'Rotate any image free.'),                    cat: 'edit' },
         { href: '/flip',              title: t.nav_short['flip']         || 'Flip Image',              desc: cardDesc('flip',              'Flip any image free.'),                      cat: 'edit' },
         { href: '/grayscale',         title: t.nav_short['grayscale']    || 'Grayscale',               desc: cardDesc('grayscale',         'Convert image to black & white free.'),      cat: 'edit' },
-        { href: '/watermark',         title: t.nav_short['watermark']    || 'Add Watermark',           desc: cardDesc('watermark',         'Add watermark to any image free.'),          cat: 'edit' },
+        { href: '/watermark',         title: t.nav_short['watermark']    || 'Add Watermark',           desc: cardDesc('watermark',         'Add watermark to any image free.'),          cat: 'privacy' },
         { href: '/round-corners',     title: t.round_corners_title_1 + ' ' + t.round_corners_title_em, desc: cardDesc('round-corners',     'Round image corners free. PNG output.'),     cat: 'edit' },
         { href: '/meme-generator',    title: t.nav_short?.['meme-generator']    || 'Meme Generator',   desc: cardDesc('meme-generator',    'Add text to any image and create memes free.'), cat: 'create' },
-        { href: '/blur-face',         title: t.nav_short?.['blur-face']         || 'Blur Face',        desc: cardDesc('blur-face',         'Blur faces in photos free. Auto-detect or manual.'), cat: 'create' },
+        { href: '/blur-face',         title: t.nav_short?.['blur-face']         || 'Blur Face',        desc: cardDesc('blur-face',         'Blur faces in photos free. Auto-detect or manual.'), cat: 'privacy' },
         { href: '/jpg-to-png',        title: t.nav_short['jpg-to-png'],                                desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.'),                  cat: 'convert' },
         { href: '/png-to-jpg',        title: t.nav_short['png-to-jpg'],                                desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.'),                  cat: 'convert' },
         { href: '/jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                               desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.'),                 cat: 'convert' },
@@ -333,7 +334,7 @@
         { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']  || 'HEIC to JPG',            desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.'),          cat: 'convert' },
         { href: '/image-to-ico',      title: t.nav_short['image-to-ico'] || 'Image to ICO',           desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.'),        cat: 'convert' },
         { href: '/jpg-to-svg',          title: t.nav_short['jpg-to-svg']           || 'JPG to SVG',           desc: cardDesc('jpg-to-svg',         'Convert JPG to SVG free.'),            cat: 'convert' },
-        { href: '/html-to-image',  title: t.nav_short?.['html-to-image'] || 'HTML to Image',        desc: t.hti_desc || 'Capture any website as a JPG or PNG image.',              cat: 'create' },
+        { href: '/html-to-image',  title: t.nav_short?.['html-to-image'] || 'HTML to Image',        desc: t.hti_desc || 'Capture any website as a JPG or PNG image.',              cat: 'convert' },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
