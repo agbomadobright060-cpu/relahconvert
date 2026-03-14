@@ -335,7 +335,7 @@
         { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']  || 'HEIC to JPG',            desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.'),          cat: 'convert' },
         { href: '/image-to-ico',      title: t.nav_short['image-to-ico'] || 'Image to ICO',           desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.'),        cat: 'convert' },
         { href: '/jpg-to-svg',          title: t.nav_short['jpg-to-svg']           || 'JPG to SVG',           desc: cardDesc('jpg-to-svg',         'Convert JPG to SVG free.'),            cat: 'convert' },
-        { href: '/html-to-image',  title: t.nav_short?.['html-to-image'] || 'Website Screenshot',   desc: 'Capture any website as a JPG or PNG image.',                            cat: 'create' },
+        { href: '/html-to-image',  title: t.nav_short?.['html-to-image'] || 'HTML to Image',        desc: t.hti_desc || 'Capture any website as a JPG or PNG image.',              cat: 'create' },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
