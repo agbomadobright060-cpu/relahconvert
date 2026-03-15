@@ -215,16 +215,17 @@ export function injectHeader() {
     .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
     .lang-grid-wrap {
       display: none;
-      position: fixed;
-      bottom: 48px;
-      right: 16px;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       padding: 12px;
       z-index: 200;
-      width: 480px;
+      width: 420px;
       max-width: calc(100vw - 32px);
       max-height: 60vh;
       overflow-y: auto;
@@ -247,7 +248,6 @@ export function injectHeader() {
       text-decoration: none;
       font-family: 'DM Sans', sans-serif;
       transition: background 0.12s;
-      white-space: nowrap;
       cursor: pointer;
     }
     .lang-grid a:hover { background: #F5F0E8; color: #2C1810; }
@@ -402,6 +402,20 @@ export function injectHeader() {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
+      if (isOpen) {
+        // Reset position then adjust if it overflows the viewport
+        langGridWrap.style.left = '50%'
+        langGridWrap.style.transform = 'translateX(-50%)'
+        const rect = langGridWrap.getBoundingClientRect()
+        if (rect.right > window.innerWidth) {
+          const overflow = rect.right - window.innerWidth + 16
+          langGridWrap.style.left = `calc(50% - ${overflow}px)`
+        }
+        if (rect.left < 0) {
+          langGridWrap.style.left = '0'
+          langGridWrap.style.transform = 'none'
+        }
+      }
     })
     langGridWrap.addEventListener('click', (e) => {
       e.stopPropagation()
