@@ -217,8 +217,8 @@ export function injectHeader() {
       display: none;
       position: absolute;
       bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
+      right: 0;
+      transform: none;
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
