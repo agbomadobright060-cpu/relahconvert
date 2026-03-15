@@ -190,10 +190,10 @@ export function injectHeader() {
     .lang-bar {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       margin-top: 8px;
       position: relative;
-      padding-left: 24px;
     }
     .lang-toggle {
       background: #fff;
@@ -217,13 +217,15 @@ export function injectHeader() {
       display: none;
       position: absolute;
       bottom: calc(100% + 8px);
-      left: 0;
+      left: 50%;
+      transform: translateX(-50%);
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      padding: 16px 20px;
+      padding: 12px;
       z-index: 200;
+      width: 480px;
       max-height: 60vh;
       overflow-y: auto;
     }
@@ -245,6 +247,7 @@ export function injectHeader() {
       text-decoration: none;
       font-family: 'DM Sans', sans-serif;
       transition: background 0.12s;
+      white-space: nowrap;
       cursor: pointer;
     }
     .lang-grid a:hover { background: #F5F0E8; color: #2C1810; }
@@ -257,19 +260,7 @@ export function injectHeader() {
       text-align: center;
     }
     @media (max-width: 600px) {
-      .lang-grid-wrap {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        top: auto;
-        transform: none;
-        width: 100%;
-        max-height: 70vh;
-        border-radius: 16px 16px 0 0;
-        padding: 16px 12px 24px;
-        box-sizing: border-box;
-      }
+      .lang-grid-wrap { width: calc(100vw - 32px); min-width: 0; left: 50%; }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
@@ -281,8 +272,7 @@ export function injectHeader() {
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
-    [dir="rtl"] .lang-bar { flex-direction: row-reverse; padding-left: 0; padding-right: 24px; }
-    [dir="rtl"] .lang-grid-wrap { left: auto; right: 0; }
+    [dir="rtl"] .lang-bar { flex-direction: row-reverse; }
     [dir="rtl"] .lang-grid a { flex-direction: row-reverse; }
     [dir="rtl"] .lang-grid-wrap { direction: rtl; }
   `
