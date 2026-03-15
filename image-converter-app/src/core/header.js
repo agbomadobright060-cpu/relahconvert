@@ -170,19 +170,79 @@ export function injectHeader() {
       justify-content: center;
       gap: 8px;
       margin-top: 8px;
+      position: relative;
     }
-    .lang-bar select {
+    .lang-toggle {
       background: #fff;
       border: 1px solid #DDD5C8;
       color: #5A4A3A;
       font-size: 12px;
       font-family: 'DM Sans', sans-serif;
-      padding: 5px 10px;
+      padding: 5px 12px;
       border-radius: 6px;
       cursor: pointer;
       outline: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.15s;
     }
-    .lang-bar select:focus { border-color: #C84B31; }
+    .lang-toggle:hover { border-color: #C84B31; }
+    .lang-toggle .lang-arrow { font-size: 9px; transition: transform 0.15s; display: inline-block; }
+    .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
+    .lang-grid-wrap {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 1px solid #E8E0D5;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      padding: 12px;
+      z-index: 200;
+      width: 480px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .lang-grid-wrap.open { display: block; }
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .lang-grid a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 400;
+      color: #5A4A3A;
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.12s;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .lang-grid a:hover { background: #F5F0E8; color: #2C1810; }
+    .lang-grid a.active { font-weight: 600; color: #C84B31; }
+    .lang-grid a .lang-check {
+      width: 16px;
+      flex-shrink: 0;
+      font-size: 13px;
+      color: #C84B31;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      .lang-grid-wrap { width: calc(100vw - 32px); min-width: 0; left: 50%; }
+      .lang-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 360px) {
+      .lang-grid { grid-template-columns: 1fr; }
+    }
 
     /* ── RTL Arabic ── */
     [dir="rtl"] #site-header .desktop-nav { justify-content: flex-start; }
@@ -190,6 +250,8 @@ export function injectHeader() {
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
     [dir="rtl"] .lang-bar { flex-direction: row-reverse; }
+    [dir="rtl"] .lang-grid a { flex-direction: row-reverse; }
+    [dir="rtl"] .lang-grid-wrap { direction: rtl; }
   `
   document.head.appendChild(style)
 
@@ -283,10 +345,16 @@ export function injectHeader() {
   footer.innerHTML = `
     <p class="footer-copy">${t.footer_copy}</p>
     <div class="lang-bar">
-      <span>🌐</span>
-      <select id="langSelect">
-        ${supportedLangs.map(l => `<option value="${l}" ${l === currentLang ? 'selected' : ''}>${langLabels[l]}</option>`).join('')}
-      </select>
+      <button class="lang-toggle" id="langToggle">
+        <span>🌐</span>
+        <span>${langLabels[currentLang]}</span>
+        <span class="lang-arrow">▲</span>
+      </button>
+      <div class="lang-grid-wrap" id="langGridWrap">
+        <div class="lang-grid">
+          ${supportedLangs.map(l => `<a href="#" data-lang="${l}" class="${l === currentLang ? 'active' : ''}"><span class="lang-check">${l === currentLang ? '✓' : ''}</span>${langLabels[l]}</a>`).join('')}
+        </div>
+      </div>
     </div>
   `
 
@@ -294,11 +362,26 @@ export function injectHeader() {
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
 
-  const langSelect = footer.querySelector('#langSelect')
-  if (langSelect) {
-    langSelect.addEventListener('change', () => {
-      setLang(langSelect.value)
-      window.location.reload()
+  const langToggle = document.getElementById('langToggle')
+  const langGridWrap = document.getElementById('langGridWrap')
+  if (langToggle && langGridWrap) {
+    langToggle.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const isOpen = langGridWrap.classList.toggle('open')
+      langToggle.classList.toggle('open', isOpen)
+    })
+    langGridWrap.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const link = e.target.closest('a[data-lang]')
+      if (link) {
+        e.preventDefault()
+        setLang(link.dataset.lang)
+        window.location.reload()
+      }
+    })
+    document.addEventListener('click', () => {
+      langGridWrap.classList.remove('open')
+      langToggle.classList.remove('open')
     })
   }
 
