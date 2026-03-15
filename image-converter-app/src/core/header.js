@@ -260,7 +260,19 @@ export function injectHeader() {
       text-align: center;
     }
     @media (max-width: 600px) {
-      .lang-grid-wrap { width: calc(100vw - 32px); min-width: 0; left: 50%; }
+      .lang-grid-wrap {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        transform: none;
+        width: 100%;
+        max-height: 70vh;
+        border-radius: 16px 16px 0 0;
+        padding: 16px 12px 24px;
+        box-sizing: border-box;
+      }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
