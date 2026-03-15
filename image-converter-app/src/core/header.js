@@ -215,17 +215,15 @@ export function injectHeader() {
     .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
     .lang-grid-wrap {
       display: none;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
+      position: fixed;
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       padding: 12px;
-      z-index: 200;
+      z-index: 9999;
       width: 480px;
+      max-width: calc(100vw - 32px);
       max-height: 60vh;
       overflow-y: auto;
     }
@@ -260,7 +258,7 @@ export function injectHeader() {
       text-align: center;
     }
     @media (max-width: 600px) {
-      .lang-grid-wrap { width: calc(100vw - 32px); min-width: 0; left: 50%; }
+      .lang-grid-wrap { left: 16px !important; right: 16px; width: auto; max-width: none; }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
@@ -371,25 +369,43 @@ export function injectHeader() {
         <span>${langLabels[currentLang]}</span>
         <span class="lang-arrow">▲</span>
       </button>
-      <div class="lang-grid-wrap" id="langGridWrap">
-        <div class="lang-grid">
-          ${supportedLangs.map(l => `<a href="#" data-lang="${l}" class="${l === currentLang ? 'active' : ''}"><span class="lang-check">${l === currentLang ? '✓' : ''}</span>${langLabels[l]}</a>`).join('')}
-        </div>
-      </div>
+    </div>
+  `
+
+  // Create dropdown as a direct child of body so overflow-x:hidden on body/parents won't clip it
+  const langDropdown = document.createElement('div')
+  langDropdown.className = 'lang-grid-wrap'
+  langDropdown.id = 'langGridWrap'
+  langDropdown.innerHTML = `
+    <div class="lang-grid">
+      ${supportedLangs.map(l => `<a href="#" data-lang="${l}" class="${l === currentLang ? 'active' : ''}"><span class="lang-check">${l === currentLang ? '✓' : ''}</span>${langLabels[l]}</a>`).join('')}
     </div>
   `
 
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
+  document.body.appendChild(langDropdown)
 
   const langToggle = document.getElementById('langToggle')
   const langGridWrap = document.getElementById('langGridWrap')
   if (langToggle && langGridWrap) {
+    function positionDropdown() {
+      const btn = langToggle.getBoundingClientRect()
+      const dw = langGridWrap.offsetWidth
+      // Center dropdown on the toggle button
+      let left = btn.left + btn.width / 2 - dw / 2
+      // Clamp so it stays within viewport with 16px padding
+      if (left + dw > window.innerWidth - 16) left = window.innerWidth - 16 - dw
+      if (left < 16) left = 16
+      langGridWrap.style.left = left + 'px'
+      langGridWrap.style.bottom = (window.innerHeight - btn.top + 8) + 'px'
+    }
     langToggle.addEventListener('click', (e) => {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
+      if (isOpen) positionDropdown()
     })
     langGridWrap.addEventListener('click', (e) => {
       e.stopPropagation()
