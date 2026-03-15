@@ -6543,8 +6543,66 @@ const translations = {
   },
 }
 
+// ── Detect language from URL at import time ──
+// Works with both:
+//   - Netlify _redirects: /fr/compresser-image → /compress?lang=fr (200 rewrite)
+//   - Vite dev server: URL stays as /fr/compresser-image (middleware rewrite)
+;(function(){
+  const codes=['en','fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
+
+  // Method 1: ?lang= query param (Netlify rewrites)
+  const params = new URLSearchParams(window.location.search)
+  const langParam = params.get('lang')
+  if (langParam && codes.includes(langParam)) {
+    localStorage.setItem('rc_lang', langParam)
+    // Clean the ?lang= param from the URL
+    params.delete('lang')
+    const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
+    window.history.replaceState(null, '', clean)
+    return
+  }
+
+  // Method 2: /{lang}/... path prefix (Vite dev server, or direct URL)
+  const segs = window.location.pathname.replace(/^\/|\/$/g, '').split('/')
+  if (segs[0]) {
+    const match = codes.find(c => c.toLowerCase() === segs[0].toLowerCase())
+    if (match) {
+      localStorage.setItem('rc_lang', match)
+    }
+  }
+})()
+
 export function getLang(){return localStorage.getItem('rc_lang')||'en'}
 export function setLang(lang){localStorage.setItem('rc_lang',lang)}
 export function getT(){const lang=getLang();return translations[lang]||translations['en']}
 export const supportedLangs=['en','fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
 export const langLabels={en:'English',fr:'Français',es:'Español',pt:'Português',de:'Deutsch',ar:'العربية',it:'Italiano',ja:'日本語',ru:'Русский',ko:'한국어',zh:'简体中文','zh-TW':'繁體中文',bg:'Български',ca:'Català',nl:'Nederlands',el:'Ελληνικά',hi:'हिन्दी',id:'Bahasa Indonesia',ms:'Bahasa Melayu',pl:'Polski',sv:'Svenska',th:'ไทย',tr:'Türkçe',uk:'Українська',vi:'Tiếng Việt'}
+
+// Slug helpers for translated URLs
+export function getSlugs(lang) {
+  const t = translations[lang]
+  return (t && t.slugs) || null
+}
+
+// Given a language and a translated slug, return the English tool key
+export function englishKeyFromSlug(lang, translatedSlug) {
+  const slugs = getSlugs(lang)
+  if (!slugs) return translatedSlug
+  for (const [enKey, locSlug] of Object.entries(slugs)) {
+    if (locSlug === translatedSlug) return enKey
+  }
+  return translatedSlug
+}
+
+// Given a language and an English tool key, return the translated slug
+export function translatedSlug(lang, englishKey) {
+  const slugs = getSlugs(lang)
+  return (slugs && slugs[englishKey]) || englishKey
+}
+
+// Build a localized href for a given English tool slug
+export function localHref(englishSlug) {
+  const lang = getLang()
+  if (lang === 'en') return '/' + englishSlug
+  return '/' + lang + '/' + translatedSlug(lang, englishSlug)
+}

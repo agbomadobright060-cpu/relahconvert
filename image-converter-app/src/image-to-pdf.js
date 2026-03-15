@@ -1,12 +1,13 @@
 import { injectHeader } from './core/header.js'
 import { formatSize, totalBytes, sanitizeBaseName, LIMITS } from './core/utils.js'
-import { getT } from './core/i18n.js'
+import { getT , getLang, localHref} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
 
 export function initImageToPdf({ slug: _slug } = {}) {
   const bg = '#F2F2F2'
   const t = getT()
+
 
   const isPng = (_slug || window.location.pathname).includes('png-to-pdf')
   const inputMime = isPng ? 'image/png' : 'image/jpeg'
@@ -271,12 +272,12 @@ export function initImageToPdf({ slug: _slug } = {}) {
     },
   }
 
-  function getLang() { return localStorage.getItem('rc_lang') || 'en' }
+
   function buildSeoSection() {
     const lang = getLang()
     const langSeo = seoPdf[lang] || seoPdf['en']
     const seo = langSeo[slug] || seoPdf['en'][slug]
-    return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}</div></div>`
+    return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div></div>`
   }
 
   const pdfTitles = { en: { jpg: 'JPG to PDF', png: 'PNG to PDF' }, fr: { jpg: 'JPG en PDF', png: 'PNG en PDF' }, es: { jpg: 'JPG a PDF', png: 'PNG a PDF' }, pt: { jpg: 'JPG para PDF', png: 'PNG para PDF' }, de: { jpg: 'JPG zu PDF', png: 'PNG zu PDF' }, ar: { jpg: 'JPG إلى PDF', png: 'PNG إلى PDF' }, it: { jpg: 'JPG in PDF', png: 'PNG in PDF' }, ja: { jpg: 'JPGからPDF', png: 'PNGからPDF' }, ru: { jpg: 'JPG в PDF', png: 'PNG в PDF' }, ko: { jpg: 'JPG를 PDF로', png: 'PNG를 PDF로' }, zh: { jpg: 'JPG转PDF', png: 'PNG转PDF' }, 'zh-TW': { jpg: 'JPG轉PDF', png: 'PNG轉PDF' }, bg: { jpg: 'JPG към PDF', png: 'PNG към PDF' }, ca: { jpg: 'JPG a PDF', png: 'PNG a PDF' }, nl: { jpg: 'JPG naar PDF', png: 'PNG naar PDF' }, el: { jpg: 'JPG σε PDF', png: 'PNG σε PDF' }, hi: { jpg: 'JPG से PDF', png: 'PNG से PDF' }, id: { jpg: 'JPG ke PDF', png: 'PNG ke PDF' }, ms: { jpg: 'JPG ke PDF', png: 'PNG ke PDF' }, pl: { jpg: 'JPG do PDF', png: 'PNG do PDF' }, sv: { jpg: 'JPG till PDF', png: 'PNG till PDF' }, th: { jpg: 'JPG เป็น PDF', png: 'PNG เป็น PDF' }, tr: { jpg: 'JPG\'den PDF\'e', png: 'PNG\'den PDF\'e' }, uk: { jpg: 'JPG в PDF', png: 'PNG в PDF' }, vi: { jpg: 'JPG sang PDF', png: 'PNG sang PDF' } }

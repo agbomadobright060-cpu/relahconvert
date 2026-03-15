@@ -1,7 +1,40 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
+import { readFileSync } from 'fs'
+
+function langRedirectPlugin() {
+  const rulesMap = new Map()
+  return {
+    name: 'lang-redirect',
+    configureServer(server) {
+      try {
+        const text = readFileSync(resolve(__dirname, 'public/_redirects'), 'utf8')
+        for (const line of text.split('\n')) {
+          const trimmed = line.trim()
+          if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('/*')) continue
+          const parts = trimmed.split(/\s+/)
+          if (parts.length >= 2) rulesMap.set(parts[0], parts[1])
+        }
+      } catch (e) {}
+
+      server.middlewares.use((req, res, next) => {
+        const urlPath = (req.url || '').split('?')[0]
+        const target = rulesMap.get(urlPath)
+        if (target) {
+          const u = new URL(target, 'http://x')
+          // Homepage: / → /index.html, tool pages: /compress → /compress.html
+          const file = u.pathname === '/' ? '/index.html' : u.pathname + '.html'
+          req.url = file + u.search
+        }
+        next()
+      })
+    }
+  }
+}
 
 export default defineConfig({
+  plugins: [langRedirectPlugin()],
+  appType: 'mpa',
   build: {
     rollupOptions: {
       input: {
@@ -34,8 +67,8 @@ export default defineConfig({
         'remove-background': resolve(__dirname, 'remove-background.html'),
         'heic-to-jpg':       resolve(__dirname, 'heic-to-jpg.html'),
         'image-to-ico':      resolve(__dirname, 'image-to-ico.html'),
-        'jpg-to-svg':           resolve(__dirname, 'jpg-to-svg.html'),
-        'html-to-image':        resolve(__dirname, 'html-to-image.html'),
+        'jpg-to-svg':        resolve(__dirname, 'jpg-to-svg.html'),
+        'html-to-image':     resolve(__dirname, 'html-to-image.html'),
       }
     }
   }

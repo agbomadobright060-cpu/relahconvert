@@ -1,10 +1,33 @@
 import { tools } from '../tools/configs.js'
-import { getLang, setLang, getT, supportedLangs, langLabels } from './i18n.js'
+import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug, englishKeyFromSlug } from './i18n.js'
 
 export function injectHeader() {
   const t = getT()
   const currentLang = getLang()
   const isRTL = currentLang === 'ar'
+
+  // Detect the current English tool key from the URL
+  // Handles both /compress and /fr/compresser-image
+  const activeToolKey = (function() {
+    const path = window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0]
+    if (!path) return null
+    if (tools[path]) return path
+    const segs = path.split('/')
+    if (segs.length === 2) {
+      const lang = supportedLangs.find(l => l.toLowerCase() === segs[0].toLowerCase())
+      if (lang) {
+        const ek = englishKeyFromSlug(lang, segs[1])
+        if (ek && tools[ek]) return ek
+      }
+    }
+    return null
+  })()
+
+  // Build a localized href: English → /slug, other → /{lang}/{translatedSlug}
+  function localHref(englishSlug) {
+    if (currentLang === 'en') return '/' + englishSlug
+    return '/' + currentLang + '/' + translatedSlug(currentLang, englishSlug)
+  }
 
   const fontLink = document.createElement('link')
   fontLink.rel = 'stylesheet'
@@ -261,8 +284,6 @@ export function injectHeader() {
     document.documentElement.setAttribute('lang', 'ar')
   }
 
-  const currentPath = window.location.pathname.replace(/^\//, '').split('?')[0]
-
   const svgIcons = {
     'compress':          { bg: '#E8F4FB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="#3B9ECC" opacity="0.2"/><path d="M20 12v8M20 20l-4 4M20 20l4 4" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 28h14" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round"/><path d="M16 14h-4v-4M24 14h4v-4" stroke="#3B9ECC" stroke-width="2" stroke-linecap="round"/></svg>` },
     'resize':            { bg: '#FEF3E6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="12" width="24" height="16" rx="3" fill="#F59E0B" opacity="0.2"/><rect x="12" y="16" width="16" height="8" rx="2" fill="#F59E0B" opacity="0.3"/><path d="M10 20h6M30 20h-6M13 17l-3 3 3 3M27 17l3 3-3 3" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
@@ -299,7 +320,7 @@ export function injectHeader() {
   const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
 
   const logoHTML = `
-    <a href="/" class="logo">
+    <a href="${currentLang === 'en' ? '/' : '/' + currentLang}" class="logo">
       <svg width="22" height="18" viewBox="0 0 26 20" style="flex-shrink:0;order:0;">
         <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
         <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
@@ -310,7 +331,7 @@ export function injectHeader() {
 
   const navHTML = `
     <nav class="desktop-nav">
-      ${mainLinks.map(slug => `<a href="/${slug}" class="nav-link ${currentPath === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
+      ${mainLinks.map(slug => `<a href="${localHref(slug)}" class="nav-link ${activeToolKey === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
       <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
     </nav>
     <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
@@ -332,7 +353,7 @@ export function injectHeader() {
       ${Object.values(tools).map(tool => {
         const ic = svgIcons[tool.slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
         const svgSmall = ic.svg.replace('viewBox="0 0 40 40"', 'viewBox="0 0 40 40" width="18" height="18"')
-        return `<a href="/${tool.slug}" class="${currentPath === tool.slug ? 'active' : ''}">
+        return `<a href="${localHref(tool.slug)}" class="${activeToolKey === tool.slug ? 'active' : ''}">
           <span style="width:24px;height:24px;border-radius:6px;background:${ic.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${svgSmall}</span>
           ${t.nav_short[tool.slug] || tool.title}
         </a>`
@@ -375,8 +396,19 @@ export function injectHeader() {
       const link = e.target.closest('a[data-lang]')
       if (link) {
         e.preventDefault()
-        setLang(link.dataset.lang)
-        window.location.reload()
+        const newLang = link.dataset.lang
+        setLang(newLang)
+        // Navigate to the translated URL for the current tool
+        if (activeToolKey && tools[activeToolKey]) {
+          if (newLang === 'en') {
+            window.location.href = '/' + activeToolKey
+          } else {
+            window.location.href = '/' + newLang + '/' + translatedSlug(newLang, activeToolKey)
+          }
+        } else {
+          // Homepage — navigate to /{lang} or / for English
+          window.location.href = newLang === 'en' ? '/' : '/' + newLang
+        }
       }
     })
     document.addEventListener('click', () => {

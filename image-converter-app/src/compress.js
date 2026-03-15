@@ -1,10 +1,11 @@
 import { injectHeader } from './core/header.js'
 import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS } from './core/utils.js'
-import { getT } from './core/i18n.js'
+import { getT , getLang, localHref} from './core/i18n.js'
 
 const bg = '#F2F2F2'
 const t = getT()
+
 
 if (document.head) {
   const fontLink = document.createElement('link')
@@ -289,11 +290,11 @@ const seoCompress = {
   },
 }
 
-function getLang() { return localStorage.getItem('rc_lang') || 'en' }
+
 function buildSeoSection() {
   const lang = getLang()
   const seo = seoCompress[lang] || seoCompress['en']
-  return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}</div></div>`
+  return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div></div>`
 }
 
 document.querySelector('#app').innerHTML = `
@@ -385,16 +386,16 @@ function buildNextSteps() {
 
   const buttons = []
   // Optimization tools (never show compress = current tool)
-  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
-  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
-  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
-  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
-  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: '/grayscale' })
-  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: localHref('resize') })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: localHref('crop') })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: localHref('rotate') })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: localHref('flip') })
+  buttons.push({ label: t.nav_short?.grayscale || 'Black & White', href: localHref('grayscale') })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: localHref('watermark') })
   // Format conversions — filter out current output format
-  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
-  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
-  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: localHref('png-to-jpg') })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: localHref('jpg-to-png') })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: localHref('jpg-to-webp') })
 
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {

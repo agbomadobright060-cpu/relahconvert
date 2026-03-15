@@ -193,9 +193,15 @@
       </div>
     </footer>
     <script type="module">
-      import { getLang, setLang, getT, supportedLangs, langLabels } from '/src/core/i18n.js'
+      import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug as getTranslatedSlug } from '/src/core/i18n.js'
       const t = getT()
       const currentLang = getLang()
+
+      // Single helper for building localized URLs
+      function localHref(englishSlug) {
+        if (currentLang === 'en') return '/' + englishSlug
+        return '/' + currentLang + '/' + getTranslatedSlug(currentLang, englishSlug)
+      }
 
       if (currentLang === 'ar') {
         document.getElementById('htmlRoot').setAttribute('dir', 'rtl')
@@ -259,8 +265,9 @@
         'html-to-image':  'convert',
       }
 
+      document.querySelector('.logo').href = currentLang === 'en' ? '/' : '/' + currentLang
       document.getElementById('desktopNav').innerHTML =
-        mainLinks.map(slug => `<a href="/${slug}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
+        mainLinks.map(slug => `<a href="${localHref(slug)}" class="nav-link">${t.nav_short[slug]}</a>`).join('') +
         `<button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>`
       document.getElementById('heroTitle').innerHTML = `${t.hero_title_1}<br>${t.hero_title_2} <em>${t.hero_title_em}</em>`
       document.getElementById('heroDesc').innerHTML = t.hero_desc
@@ -302,7 +309,7 @@
         allSlugs.map(slug => {
           const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
           const svgSmall = ic.svg.replace('viewBox="0 0 40 40"', 'viewBox="0 0 40 40" width="18" height="18"')
-          return `<a href="/${slug}">
+          return `<a href="${localHref(slug)}">
             <span style="width:24px;height:24px;border-radius:6px;background:${ic.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${svgSmall}</span>
             ${t.nav_short[slug] || slug}
           </a>`
@@ -317,42 +324,41 @@
       }
 
       const cardData = [
-        { href: '/compress',          title: t.nav_short['compress'],                                  desc: cardDesc('compress',          'Reduce image file size free.'),              cat: 'optimize' },
-        { href: '/resize',            title: t.nav_short['resize'],                                    desc: cardDesc('resize',            'Resize images free.'),                       cat: 'optimize' },
-        { href: '/remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: cardDesc('remove-background', 'Remove image background free. AI-powered.'), cat: 'optimize' },
-        { href: '/crop',              title: t.nav_short['crop']         || 'Crop Image',              desc: cardDesc('crop',              'Crop any image free.'),                      cat: 'edit' },
-        { href: '/rotate',            title: t.nav_short['rotate']       || 'Rotate Image',            desc: cardDesc('rotate',            'Rotate any image free.'),                    cat: 'edit' },
-        { href: '/flip',              title: t.nav_short['flip']         || 'Flip Image',              desc: cardDesc('flip',              'Flip any image free.'),                      cat: 'edit' },
-        { href: '/grayscale',         title: t.nav_short['grayscale']    || 'Grayscale',               desc: cardDesc('grayscale',         'Convert image to black & white free.'),      cat: 'edit' },
-        { href: '/watermark',         title: t.nav_short['watermark']    || 'Add Watermark',           desc: cardDesc('watermark',         'Add watermark to any image free.'),          cat: 'privacy' },
-        { href: '/round-corners',     title: t.round_corners_title_1 + ' ' + t.round_corners_title_em, desc: cardDesc('round-corners',     'Round image corners free. PNG output.'),     cat: 'edit' },
-        { href: '/meme-generator',    title: t.nav_short?.['meme-generator']    || 'Meme Generator',   desc: cardDesc('meme-generator',    'Add text to any image and create memes free.'), cat: 'create' },
-        { href: '/blur-face',         title: t.nav_short?.['blur-face']         || 'Blur Face',        desc: cardDesc('blur-face',         'Blur faces in photos free. Auto-detect or manual.'), cat: 'privacy' },
-        { href: '/jpg-to-png',        title: t.nav_short['jpg-to-png'],                                desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.'),                  cat: 'convert' },
-        { href: '/png-to-jpg',        title: t.nav_short['png-to-jpg'],                                desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.'),                  cat: 'convert' },
-        { href: '/jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                               desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.'),                 cat: 'convert' },
-        { href: '/webp-to-jpg',       title: t.nav_short['webp-to-jpg'],                               desc: cardDesc('webp_to_jpg',       'Convert WebP to JPG free.'),                 cat: 'convert' },
-        { href: '/png-to-webp',       title: t.nav_short['png-to-webp'],                               desc: cardDesc('png_to_webp',       'Convert PNG to WebP free.'),                 cat: 'convert' },
-        { href: '/webp-to-png',       title: t.nav_short['webp-to-png'],                               desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.'),                 cat: 'convert' },
-        { href: '/jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                                desc: cardDesc('jpg_to_pdf',        'Turn photos and camera images into PDF documents.'), cat: 'convert' },
-        { href: '/png-to-pdf',        title: t.nav_short['png-to-pdf'],                                desc: cardDesc('png_to_pdf',        'Convert screenshots, logos, and graphics to PDF.'), cat: 'convert' },
-        { href: '/gif-to-jpg',        title: t.nav_short['gif-to-jpg']   || 'GIF to JPG',             desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.'),                  cat: 'convert' },
-        { href: '/gif-to-png',        title: t.nav_short['gif-to-png']   || 'GIF to PNG',             desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.'),                  cat: 'convert' },
-        { href: '/bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']   || 'BMP to JPG',             desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.'),                  cat: 'convert' },
-        { href: '/bmp-to-png',        title: t.nav_short['bmp-to-png']   || 'BMP to PNG',             desc: cardDesc('bmp-to-png',        'Convert BMP to PNG free.'),                  cat: 'convert' },
-        { href: '/tiff-to-jpg',       title: t.nav_short['tiff-to-jpg']  || 'TIFF to JPG',            desc: cardDesc('tiff-to-jpg',       'Convert TIFF to JPG free.'),                 cat: 'convert' },
-        { href: '/jpg-to-gif',        title: t.nav_short['jpg-to-gif']   || 'JPG to GIF',             desc: cardDesc('jpg-to-gif',        'Convert JPG to GIF free.'),                  cat: 'convert' },
-        { href: '/png-to-gif',        title: t.nav_short['png-to-gif']   || 'PNG to GIF',             desc: cardDesc('png-to-gif',        'Convert PNG to GIF free.'),                  cat: 'convert' },
-        { href: '/heic-to-jpg',       title: t.nav_short['heic-to-jpg']  || 'HEIC to JPG',            desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.'),          cat: 'convert' },
-        { href: '/image-to-ico',      title: t.nav_short['image-to-ico'] || 'Image to ICO',           desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.'),        cat: 'convert' },
-        { href: '/jpg-to-svg',          title: t.nav_short['jpg-to-svg']           || 'JPG to SVG',           desc: cardDesc('jpg-to-svg',         'Convert JPG to SVG free.'),            cat: 'convert' },
-        { href: '/html-to-image',  title: t.nav_short?.['html-to-image'] || 'HTML to Image',        desc: t.hti_desc || 'Capture any website as a JPG or PNG image.',              cat: 'convert' },
+        { slug: 'compress',          title: t.nav_short['compress'],                                  desc: cardDesc('compress',          'Reduce image file size free.'),              cat: 'optimize' },
+        { slug: 'resize',            title: t.nav_short['resize'],                                    desc: cardDesc('resize',            'Resize images free.'),                       cat: 'optimize' },
+        { slug: 'remove-background', title: t.nav_short['remove-background'] || 'Remove Background', desc: cardDesc('remove-background', 'Remove image background free. AI-powered.'), cat: 'optimize' },
+        { slug: 'crop',              title: t.nav_short['crop']         || 'Crop Image',              desc: cardDesc('crop',              'Crop any image free.'),                      cat: 'edit' },
+        { slug: 'rotate',            title: t.nav_short['rotate']       || 'Rotate Image',            desc: cardDesc('rotate',            'Rotate any image free.'),                    cat: 'edit' },
+        { slug: 'flip',              title: t.nav_short['flip']         || 'Flip Image',              desc: cardDesc('flip',              'Flip any image free.'),                      cat: 'edit' },
+        { slug: 'grayscale',         title: t.nav_short['grayscale']    || 'Grayscale',               desc: cardDesc('grayscale',         'Convert image to black & white free.'),      cat: 'edit' },
+        { slug: 'watermark',         title: t.nav_short['watermark']    || 'Add Watermark',           desc: cardDesc('watermark',         'Add watermark to any image free.'),          cat: 'privacy' },
+        { slug: 'round-corners',     title: t.round_corners_title_1 + ' ' + t.round_corners_title_em, desc: cardDesc('round-corners',     'Round image corners free. PNG output.'),     cat: 'edit' },
+        { slug: 'meme-generator',    title: t.nav_short?.['meme-generator']    || 'Meme Generator',   desc: cardDesc('meme-generator',    'Add text to any image and create memes free.'), cat: 'create' },
+        { slug: 'blur-face',         title: t.nav_short?.['blur-face']         || 'Blur Face',        desc: cardDesc('blur-face',         'Blur faces in photos free. Auto-detect or manual.'), cat: 'privacy' },
+        { slug: 'jpg-to-png',        title: t.nav_short['jpg-to-png'],                                desc: cardDesc('jpg_to_png',        'Convert JPG to PNG free.'),                  cat: 'convert' },
+        { slug: 'png-to-jpg',        title: t.nav_short['png-to-jpg'],                                desc: cardDesc('png_to_jpg',        'Convert PNG to JPG free.'),                  cat: 'convert' },
+        { slug: 'jpg-to-webp',       title: t.nav_short['jpg-to-webp'],                               desc: cardDesc('jpg_to_webp',       'Convert JPG to WebP free.'),                 cat: 'convert' },
+        { slug: 'webp-to-jpg',       title: t.nav_short['webp-to-jpg'],                               desc: cardDesc('webp_to_jpg',       'Convert WebP to JPG free.'),                 cat: 'convert' },
+        { slug: 'png-to-webp',       title: t.nav_short['png-to-webp'],                               desc: cardDesc('png_to_webp',       'Convert PNG to WebP free.'),                 cat: 'convert' },
+        { slug: 'webp-to-png',       title: t.nav_short['webp-to-png'],                               desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.'),                 cat: 'convert' },
+        { slug: 'jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                                desc: cardDesc('jpg_to_pdf',        'Turn photos and camera images into PDF documents.'), cat: 'convert' },
+        { slug: 'png-to-pdf',        title: t.nav_short['png-to-pdf'],                                desc: cardDesc('png_to_pdf',        'Convert screenshots, logos, and graphics to PDF.'), cat: 'convert' },
+        { slug: 'gif-to-jpg',        title: t.nav_short['gif-to-jpg']   || 'GIF to JPG',             desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.'),                  cat: 'convert' },
+        { slug: 'gif-to-png',        title: t.nav_short['gif-to-png']   || 'GIF to PNG',             desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.'),                  cat: 'convert' },
+        { slug: 'bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']   || 'BMP to JPG',             desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.'),                  cat: 'convert' },
+        { slug: 'bmp-to-png',        title: t.nav_short['bmp-to-png']   || 'BMP to PNG',             desc: cardDesc('bmp-to-png',        'Convert BMP to PNG free.'),                  cat: 'convert' },
+        { slug: 'tiff-to-jpg',       title: t.nav_short['tiff-to-jpg']  || 'TIFF to JPG',            desc: cardDesc('tiff-to-jpg',       'Convert TIFF to JPG free.'),                 cat: 'convert' },
+        { slug: 'jpg-to-gif',        title: t.nav_short['jpg-to-gif']   || 'JPG to GIF',             desc: cardDesc('jpg-to-gif',        'Convert JPG to GIF free.'),                  cat: 'convert' },
+        { slug: 'png-to-gif',        title: t.nav_short['png-to-gif']   || 'PNG to GIF',             desc: cardDesc('png-to-gif',        'Convert PNG to GIF free.'),                  cat: 'convert' },
+        { slug: 'heic-to-jpg',       title: t.nav_short['heic-to-jpg']  || 'HEIC to JPG',            desc: cardDesc('heic-to-jpg',       'Convert HEIC photos to JPG free.'),          cat: 'convert' },
+        { slug: 'image-to-ico',      title: t.nav_short['image-to-ico'] || 'Image to ICO',           desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.'),        cat: 'convert' },
+        { slug: 'jpg-to-svg',        title: t.nav_short['jpg-to-svg']   || 'JPG to SVG',             desc: cardDesc('jpg-to-svg',        'Convert JPG to SVG free.'),                  cat: 'convert' },
+        { slug: 'html-to-image',     title: t.nav_short?.['html-to-image'] || 'HTML to Image',       desc: t.hti_desc || 'Capture any website as a JPG or PNG image.',              cat: 'convert' },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
-        const slug = c.href.replace('/', '')
-        const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '' }
-        return `<a href="${c.href}" class="tool-card" data-category="${c.cat}">
+        const ic = svgIcons[c.slug] || { bg: '#F5F5F5', svg: '' }
+        return `<a href="${localHref(c.slug)}" class="tool-card" data-category="${c.cat}">
           <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
           <h2>${c.title}</h2>
           <p>${c.desc}</p>
@@ -389,7 +395,7 @@
       ).join('')
       langLabel.textContent = langLabels[currentLang]
       langToggle.addEventListener('click', (e) => { e.stopPropagation(); const isOpen = langGridWrap.classList.toggle('open'); langToggle.classList.toggle('open', isOpen) })
-      langGridWrap.addEventListener('click', (e) => { e.stopPropagation(); const link = e.target.closest('a[data-lang]'); if (link) { e.preventDefault(); setLang(link.dataset.lang); window.location.reload() } })
+      langGridWrap.addEventListener('click', (e) => { e.stopPropagation(); const link = e.target.closest('a[data-lang]'); if (link) { e.preventDefault(); const newLang = link.dataset.lang; setLang(newLang); window.location.href = newLang === 'en' ? '/' : '/' + newLang } })
       document.addEventListener('click', () => { langGridWrap.classList.remove('open'); langToggle.classList.remove('open') })
 
       const moreBtn      = document.getElementById('moreBtn')

@@ -1,8 +1,9 @@
 import { injectHeader } from '../core/header.js'
 // JSZip loaded dynamically
-import { getT } from '../core/i18n.js'
+import { getT, localHref} from '../core/i18n.js'
 
 const t = getT()
+
 const toolName  = (t.nav_short && t.nav_short['grayscale']) || 'Black & White'
 const seoData   = t.seo && t.seo['grayscale']
 const descText  = seoData ? seoData.h2a : 'Convert image to grayscale (black & white) free. Files never leave your device.'
@@ -144,15 +145,15 @@ function buildNextSteps() {
   const isPng = mime === 'image/png'
   const isWebp = mime === 'image/webp'
   const buttons = []
-  buttons.push({ label: t.nav_short?.compress || 'Compress', href: '/compress' })
-  buttons.push({ label: t.nav_short?.resize || 'Resize', href: '/resize' })
-  buttons.push({ label: t.nav_short?.crop || 'Crop', href: '/crop' })
-  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: '/rotate' })
-  buttons.push({ label: t.nav_short?.flip || 'Flip', href: '/flip' })
-  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: '/watermark' })
-  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: '/png-to-jpg' })
-  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: '/jpg-to-png' })
-  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: '/jpg-to-webp' })
+  buttons.push({ label: t.nav_short?.compress || 'Compress', href: localHref('compress') })
+  buttons.push({ label: t.nav_short?.resize || 'Resize', href: localHref('resize') })
+  buttons.push({ label: t.nav_short?.crop || 'Crop', href: localHref('crop') })
+  buttons.push({ label: t.nav_short?.rotate || 'Rotate', href: localHref('rotate') })
+  buttons.push({ label: t.nav_short?.flip || 'Flip', href: localHref('flip') })
+  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: localHref('watermark') })
+  if (!isJpg)  buttons.push({ label: t.next_to_jpg  || 'Convert to JPG',  href: localHref('png-to-jpg') })
+  if (!isPng)  buttons.push({ label: t.next_to_png  || 'Convert to PNG',  href: localHref('jpg-to-png') })
+  if (!isWebp) buttons.push({ label: t.next_to_webp || 'Convert to WebP', href: localHref('jpg-to-webp') })
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {
     const btn = document.createElement('button')
@@ -347,7 +348,7 @@ applyBtn.addEventListener('click', async () => {
   const alsoTry  = t.seo_also_try  || 'Also Try'
   const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
   const faqsHtml  = seo.faqs.map(f => `<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')
-  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')
+  const linksHtml = seo.links.map(l => `<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')
   const div = document.createElement('div')
   div.className = 'seo-section'
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${stepsHtml}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${faqsHtml}<h3>${alsoTry}</h3><div class="seo-links">${linksHtml}</div>`

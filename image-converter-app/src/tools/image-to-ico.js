@@ -1,7 +1,8 @@
 import { injectHeader } from '../core/header.js'
-import { getT } from '../core/i18n.js'
+import { getT, localHref} from '../core/i18n.js'
 
 const t = getT()
+
 const bg = '#F2F2F2'
 const toolName  = (t.nav_short && t.nav_short['image-to-ico']) || 'Image to ICO'
 const seoData   = t.seo && t.seo['image-to-ico']
@@ -183,6 +184,6 @@ convertBtn.addEventListener('click', () => {
   const alsoTry  = t.seo_also_try  || 'Also Try'
   const div = document.createElement('div')
   div.className = 'seo-section'
-  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()

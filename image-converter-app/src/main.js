@@ -2,17 +2,23 @@ import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool } from './app/router.js'
 import { injectHeader } from './core/header.js'
-import { getT } from './core/i18n.js'
+import { getT, getLang, translatedSlug as getTranslatedSlug } from './core/i18n.js'
 
 const currentTool = getCurrentTool()
 const bg = '#F2F2F2'
 const t = getT()
+const currentLang = getLang()
 const slug = currentTool ? currentTool.slug : ''
 
+function localHref(englishSlug) {
+  if (currentLang === 'en') return '/' + englishSlug
+  return '/' + currentLang + '/' + getTranslatedSlug(currentLang, englishSlug)
+}
+
 const nextStepsMap = {
-  'image/png':  [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/crop', label:'Crop' },{ href:'/rotate', label:'Rotate' },{ href:'/flip', label:'Flip' },{ href:'/grayscale', label:'Grayscale' },{ href:'/watermark', label:'Watermark' }],
-  'image/jpeg': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/crop', label:'Crop' },{ href:'/rotate', label:'Rotate' },{ href:'/flip', label:'Flip' },{ href:'/grayscale', label:'Grayscale' },{ href:'/watermark', label:'Watermark' }],
-  'image/webp': [{ href:'/compress', label:t.next_compress },{ href:'/resize', label:t.next_resize },{ href:'/crop', label:'Crop' },{ href:'/rotate', label:'Rotate' },{ href:'/flip', label:'Flip' },{ href:'/grayscale', label:'Grayscale' },{ href:'/watermark', label:'Watermark' }],
+  'image/png':  [{ href:localHref('compress'), label:t.next_compress },{ href:localHref('resize'), label:t.next_resize },{ href:localHref('crop'), label:t.nav_short?.crop||'Crop' },{ href:localHref('rotate'), label:t.nav_short?.rotate||'Rotate' },{ href:localHref('flip'), label:t.nav_short?.flip||'Flip' },{ href:localHref('grayscale'), label:t.nav_short?.grayscale||'Grayscale' },{ href:localHref('watermark'), label:t.nav_short?.watermark||'Watermark' }],
+  'image/jpeg': [{ href:localHref('compress'), label:t.next_compress },{ href:localHref('resize'), label:t.next_resize },{ href:localHref('crop'), label:t.nav_short?.crop||'Crop' },{ href:localHref('rotate'), label:t.nav_short?.rotate||'Rotate' },{ href:localHref('flip'), label:t.nav_short?.flip||'Flip' },{ href:localHref('grayscale'), label:t.nav_short?.grayscale||'Grayscale' },{ href:localHref('watermark'), label:t.nav_short?.watermark||'Watermark' }],
+  'image/webp': [{ href:localHref('compress'), label:t.next_compress },{ href:localHref('resize'), label:t.next_resize },{ href:localHref('crop'), label:t.nav_short?.crop||'Crop' },{ href:localHref('rotate'), label:t.nav_short?.rotate||'Rotate' },{ href:localHref('flip'), label:t.nav_short?.flip||'Flip' },{ href:localHref('grayscale'), label:t.nav_short?.grayscale||'Grayscale' },{ href:localHref('watermark'), label:t.nav_short?.watermark||'Watermark' }],
 }
 
 if (document.head) {
@@ -92,7 +98,7 @@ const relatedLinksMap = {
 const relatedRaw = relatedLinksMap[slug] || []
 const relatedHTML = relatedRaw.length ? `
   <div style="margin-top:8px; font-size:13px; color:#9A8A7A;">
-    ${t.also_convert} ${relatedRaw.map(r => `<a href="${r.href}" class="related-link">${t.nav_short[r.slug]}</a>`).join(' · ')}
+    ${t.also_convert} ${relatedRaw.map(r => `<a href="${localHref(r.slug)}" class="related-link">${t.nav_short[r.slug]}</a>`).join(' · ')}
   </div>` : ''
 
 const formatSelectorHTML = currentTool
@@ -122,7 +128,7 @@ function buildSeoSection() {
       ${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}
       <h3>${t.seo_also_try}</h3>
       <div class="internal-links">
-        ${seo.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
+        ${seo.links.map(l => `<a href="${localHref(l.href.replace(/^\//,''))}">${l.label}</a>`).join('')}
       </div>
     </div>
   `

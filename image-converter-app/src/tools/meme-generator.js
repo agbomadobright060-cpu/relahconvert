@@ -1,7 +1,8 @@
 import { injectHeader } from '../core/header.js'
-import { getT } from '../core/i18n.js'
+import { getT , getLang, localHref} from '../core/i18n.js'
 
 const t = getT()
+
 const ui = {
   title:       t.meme_title        || 'Meme',
   titleEm:     t.meme_title_em     || 'Generator',
@@ -981,11 +982,11 @@ async function saveToIDB(blob, name, type) {
 function buildNextSteps(blob, mime) {
   const ext = mime === 'image/png' ? 'png' : 'jpg'
   const buttons = [
-    { label: t.nav_short?.compress  || 'Compress',  href: '/compress' },
-    { label: t.nav_short?.resize    || 'Resize',    href: '/resize' },
-    { label: t.nav_short?.crop      || 'Crop',      href: '/crop' },
-    { label: t.nav_short?.rotate    || 'Rotate',    href: '/rotate' },
-    { label: t.nav_short?.watermark || 'Watermark', href: '/watermark' },
+    { label: t.nav_short?.compress  || 'Compress',  href: localHref('compress') },
+    { label: t.nav_short?.resize    || 'Resize',    href: localHref('resize') },
+    { label: t.nav_short?.crop      || 'Crop',      href: localHref('crop') },
+    { label: t.nav_short?.rotate    || 'Rotate',    href: localHref('rotate') },
+    { label: t.nav_short?.watermark || 'Watermark', href: localHref('watermark') },
   ]
   const container = $('nextStepsButtons')
   container.innerHTML = ''
@@ -1085,7 +1086,7 @@ const seoMeme = {
     h3why: 'Why Make Memes Online?',
     why: 'Memes are the fastest way to share a joke, make a point, or go viral. A good meme generator gives you full control over text placement, font, and style — without installing anything or giving up your photos.',
     faqs: [{q:'Will my image be uploaded to a server?',a:'No. Everything runs in your browser. Your files never leave your device.'},{q:'Can I use my own image?',a:'Yes — upload any JPG, PNG, or WebP image.'},{q:'Is there a watermark?',a:'No watermark, ever.'},{q:'Can I add multiple text layers?',a:'Yes — click Add Text to add as many draggable text layers as you want.'},{q:'What fonts are available?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New, and Comic Sans.'},{q:'Can I download as PNG?',a:'Yes — choose JPG or PNG before downloading.'}],
-    links: [{href:'/compress',label:'Compress Image'},{href:'/resize',label:'Resize Image'},{href:'/crop',label:'Crop Image'},{href:'/watermark',label:'Add Watermark'},{href:'/jpg-to-png',label:'JPG to PNG'}],
+    links: [{href: '/compress',label:'Compress Image'},{href: '/resize',label:'Resize Image'},{href: '/crop',label:'Crop Image'},{href: '/watermark',label:'Add Watermark'},{href: '/jpg-to-png',label:'JPG to PNG'}],
   },
   fr: {
     h2a: "Comment créer un mème gratuitement — sans téléchargement",
@@ -1105,7 +1106,7 @@ const seoMeme = {
     h3why: '¿Por qué hacer memes en línea?',
     why: 'Los memes son la forma más rápida de compartir un chiste o volverse viral. Un buen generador te da control total sobre el texto, la fuente y el estilo — sin instalar nada.',
     faqs: [{q:'¿Mi imagen se subirá a un servidor?',a:'No. Todo se ejecuta en tu navegador. Tus archivos nunca salen de tu dispositivo.'},{q:'¿Puedo usar mi propia imagen?',a:'Sí — sube cualquier imagen JPG, PNG o WebP.'},{q:'¿Hay marca de agua?',a:'Sin marca de agua, nunca.'},{q:'¿Puedo agregar varias capas de texto?',a:'Sí — haz clic en Agregar texto para añadir tantas como desees.'},{q:'¿Qué fuentes están disponibles?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New y Comic Sans.'},{q:'¿Puedo descargar en PNG?',a:'Sí — elige JPG o PNG antes de descargar.'}],
-    links: [{href:'/compress',label:'Comprimir imagen'},{href:'/resize',label:'Redimensionar'},{href:'/crop',label:'Recortar'},{href:'/watermark',label:'Marca de agua'},{href:'/jpg-to-png',label:'JPG a PNG'}],
+    links: [{href: '/compress',label:'Comprimir imagen'},{href: '/resize',label:'Redimensionar'},{href: '/crop',label:'Recortar'},{href: '/watermark',label:'Marca de agua'},{href: '/jpg-to-png',label:'JPG a PNG'}],
   },
   pt: {
     h2a: 'Como criar um meme grátis — sem fazer upload',
@@ -1115,7 +1116,7 @@ const seoMeme = {
     h3why: 'Por que criar memes online?',
     why: 'Os memes são a forma mais rápida de compartilhar uma piada ou se tornar viral. Um bom gerador oferece controle total sobre o texto, a fonte e o estilo — sem instalar nada.',
     faqs: [{q:'Minha imagem será enviada para um servidor?',a:'Não. Tudo é executado no seu navegador. Seus arquivos nunca saem do seu dispositivo.'},{q:'Posso usar minha própria imagem?',a:"Sim — faça upload de qualquer imagem JPG, PNG ou WebP."},{q:"Há marca d'água?",a:"Sem marca d'água, nunca."},{q:'Posso adicionar várias camadas de texto?',a:'Sim — clique em Adicionar texto para adicionar quantas quiser.'},{q:'Quais fontes estão disponíveis?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New e Comic Sans.'},{q:'Posso baixar em PNG?',a:'Sim — escolha JPG ou PNG antes de baixar.'}],
-    links: [{href:'/compress',label:'Comprimir imagem'},{href:'/resize',label:'Redimensionar'},{href:'/crop',label:'Cortar'},{href:"/watermark",label:"Marca d'água"},{href:'/jpg-to-png',label:'JPG para PNG'}],
+    links: [{href: '/compress',label:'Comprimir imagem'},{href: '/resize',label:'Redimensionar'},{href: '/crop',label:'Cortar'},{href:"/watermark",label:"Marca d'água"},{href: '/jpg-to-png',label:'JPG para PNG'}],
   },
   de: {
     h2a: 'So erstellen Sie ein Meme kostenlos — ohne Upload',
@@ -1125,7 +1126,7 @@ const seoMeme = {
     h3why: 'Warum Memes online erstellen?',
     why: 'Memes sind der schnellste Weg, einen Witz zu teilen oder viral zu gehen. Ein guter Generator gibt Ihnen volle Kontrolle über Text, Schriftart und Stil — ohne Installation.',
     faqs: [{q:'Wird mein Bild auf einen Server hochgeladen?',a:'Nein. Alles läuft in Ihrem Browser. Ihre Dateien verlassen nie Ihr Gerät.'},{q:'Kann ich mein eigenes Bild verwenden?',a:'Ja — laden Sie ein beliebiges JPG-, PNG- oder WebP-Bild hoch.'},{q:'Gibt es ein Wasserzeichen?',a:'Kein Wasserzeichen, niemals.'},{q:'Kann ich mehrere Textebenen hinzufügen?',a:'Ja — klicken Sie auf Text hinzufügen, um beliebig viele hinzuzufügen.'},{q:'Welche Schriftarten sind verfügbar?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New und Comic Sans.'},{q:'Kann ich als PNG herunterladen?',a:'Ja — wählen Sie vor dem Herunterladen JPG oder PNG.'}],
-    links: [{href:'/compress',label:'Bild komprimieren'},{href:'/resize',label:'Skalieren'},{href:'/crop',label:'Zuschneiden'},{href:'/watermark',label:'Wasserzeichen'},{href:'/jpg-to-png',label:'JPG zu PNG'}],
+    links: [{href: '/compress',label:'Bild komprimieren'},{href: '/resize',label:'Skalieren'},{href: '/crop',label:'Zuschneiden'},{href: '/watermark',label:'Wasserzeichen'},{href: '/jpg-to-png',label:'JPG zu PNG'}],
   },
   ar: {
     h2a: 'كيفية إنشاء ميم مجاناً — بدون رفع الملفات',
@@ -1135,7 +1136,7 @@ const seoMeme = {
     h3why: 'لماذا تصنع الميمات أونلاين؟',
     why: 'الميمات هي أسرع طريقة لمشاركة نكتة أو الانتشار الواسع. يمنحك مولّد الميم الجيد تحكماً كاملاً في النص والخط والأسلوب — دون تثبيت أي شيء.',
     faqs: [{q:'هل سيتم رفع صورتي إلى خادم؟',a:'لا. كل شيء يعمل في متصفحك. ملفاتك لا تغادر جهازك أبداً.'},{q:'هل يمكنني استخدام صورتي الخاصة؟',a:'نعم — ارفع أي صورة بصيغة JPG أو PNG أو WebP.'},{q:'هل توجد علامة مائية؟',a:'لا توجد علامة مائية، أبداً.'},{q:'هل يمكنني إضافة طبقات نص متعددة؟',a:'نعم — انقر على إضافة نص لإضافة أي عدد تريده.'},{q:'ما الخطوط المتاحة؟',a:'Impact وArial Black وArial وVerdana وTimes New Roman وGeorgia وCourier New وComic Sans.'},{q:'هل يمكنني التنزيل بصيغة PNG؟',a:'نعم — اختر JPG أو PNG قبل التنزيل.'}],
-    links: [{href:'/compress',label:'ضغط الصورة'},{href:'/resize',label:'تغيير الحجم'},{href:'/crop',label:'اقتصاص'},{href:'/watermark',label:'علامة مائية'},{href:'/jpg-to-png',label:'JPG إلى PNG'}],
+    links: [{href: '/compress',label:'ضغط الصورة'},{href: '/resize',label:'تغيير الحجم'},{href: '/crop',label:'اقتصاص'},{href: '/watermark',label:'علامة مائية'},{href: '/jpg-to-png',label:'JPG إلى PNG'}],
   },
   it: {
     h2a: 'Come creare un meme gratis — senza caricare file',
@@ -1145,7 +1146,7 @@ const seoMeme = {
     h3why: 'Perché creare meme online?',
     why: 'I meme sono il modo più veloce per condividere una battuta o diventare virali. Un buon generatore ti dà il controllo completo su testo, font e stile — senza installare nulla.',
     faqs: [{q:'La mia immagine viene caricata su un server?',a:'No. Tutto funziona nel tuo browser. I tuoi file non lasciano mai il dispositivo.'},{q:'Posso usare la mia immagine?',a:'Sì — carica qualsiasi immagine JPG, PNG o WebP.'},{q:'C\'è un watermark?',a:'Nessun watermark, mai.'},{q:'Posso aggiungere più livelli di testo?',a:'Sì — clicca su Aggiungi testo per aggiungerne quanti ne vuoi.'},{q:'Quali font sono disponibili?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New e Comic Sans.'},{q:'Posso scaricare in PNG?',a:'Sì — scegli JPG o PNG prima di scaricare.'}],
-    links: [{href:'/compress',label:'Comprimi immagine'},{href:'/resize',label:'Ridimensiona'},{href:'/crop',label:'Ritaglia'},{href:'/watermark',label:'Watermark'},{href:'/jpg-to-png',label:'JPG in PNG'}],
+    links: [{href: '/compress',label:'Comprimi immagine'},{href: '/resize',label:'Ridimensiona'},{href: '/crop',label:'Ritaglia'},{href: '/watermark',label:'Watermark'},{href: '/jpg-to-png',label:'JPG in PNG'}],
   },
   ja: {
     h2a: 'ミームを無料で作成する方法 — アップロード不要',
@@ -1155,7 +1156,7 @@ const seoMeme = {
     h3why: 'なぜオンラインでミームを作るのか？',
     why: 'ミームはジョークを共有したりバイラルになる最速の方法です。優れたジェネレーターはテキスト、フォント、スタイルを完全にコントロールできます。',
     faqs: [{q:'画像はサーバーにアップロードされますか？',a:'いいえ。すべてブラウザで動作します。ファイルはデバイスから離れません。'},{q:'自分の画像を使えますか？',a:'はい — JPG、PNG、WebP画像をアップロードできます。'},{q:'透かしはありますか？',a:'透かしは一切ありません。'},{q:'複数のテキストレイヤーを追加できますか？',a:'はい — テキスト追加をクリックして好きなだけ追加できます。'},{q:'どのフォントが使えますか？',a:'Impact、Arial Black、Arial、Verdana、Times New Roman、Georgia、Courier New、Comic Sans。'},{q:'PNGでダウンロードできますか？',a:'はい — ダウンロード前にJPGまたはPNGを選択できます。'}],
-    links: [{href:'/compress',label:'画像圧縮'},{href:'/resize',label:'リサイズ'},{href:'/crop',label:'トリミング'},{href:'/watermark',label:'透かし'},{href:'/jpg-to-png',label:'JPGからPNG'}],
+    links: [{href: '/compress',label:'画像圧縮'},{href: '/resize',label:'リサイズ'},{href: '/crop',label:'トリミング'},{href: '/watermark',label:'透かし'},{href: '/jpg-to-png',label:'JPGからPNG'}],
   },
   ru: {
     h2a: 'Как создать мем бесплатно — без загрузки файлов',
@@ -1165,7 +1166,7 @@ const seoMeme = {
     h3why: 'Зачем создавать мемы онлайн?',
     why: 'Мемы — самый быстрый способ поделиться шуткой или стать вирусным. Хороший генератор даёт полный контроль над текстом, шрифтом и стилем.',
     faqs: [{q:'Моё изображение загружается на сервер?',a:'Нет. Всё работает в вашем браузере. Файлы никогда не покидают ваше устройство.'},{q:'Можно ли использовать своё изображение?',a:'Да — загрузите любое изображение JPG, PNG или WebP.'},{q:'Есть водяной знак?',a:'Водяного знака нет, никогда.'},{q:'Можно добавить несколько текстовых слоёв?',a:'Да — нажмите «Добавить текст», чтобы добавить сколько угодно.'},{q:'Какие шрифты доступны?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New и Comic Sans.'},{q:'Можно скачать в PNG?',a:'Да — выберите JPG или PNG перед скачиванием.'}],
-    links: [{href:'/compress',label:'Сжать изображение'},{href:'/resize',label:'Изменить размер'},{href:'/crop',label:'Обрезать'},{href:'/watermark',label:'Водяной знак'},{href:'/jpg-to-png',label:'JPG в PNG'}],
+    links: [{href: '/compress',label:'Сжать изображение'},{href: '/resize',label:'Изменить размер'},{href: '/crop',label:'Обрезать'},{href: '/watermark',label:'Водяной знак'},{href: '/jpg-to-png',label:'JPG в PNG'}],
   },
   ko: {
     h2a: '무료로 밈 만드는 방법 — 업로드 불필요',
@@ -1175,7 +1176,7 @@ const seoMeme = {
     h3why: '왜 온라인에서 밈을 만들까요?',
     why: '밈은 농담을 공유하거나 바이럴이 되는 가장 빠른 방법입니다. 좋은 생성기는 텍스트, 글꼴, 스타일을 완전히 제어할 수 있게 해줍니다.',
     faqs: [{q:'이미지가 서버에 업로드되나요?',a:'아닙니다. 모든 것이 브라우저에서 작동합니다. 파일은 기기를 떠나지 않습니다.'},{q:'내 이미지를 사용할 수 있나요?',a:'네 — JPG, PNG 또는 WebP 이미지를 업로드하세요.'},{q:'워터마크가 있나요?',a:'워터마크는 절대 없습니다.'},{q:'여러 텍스트 레이어를 추가할 수 있나요?',a:'네 — 텍스트 추가를 클릭하여 원하는 만큼 추가하세요.'},{q:'어떤 글꼴을 사용할 수 있나요?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New, Comic Sans.'},{q:'PNG로 다운로드할 수 있나요?',a:'네 — 다운로드 전에 JPG 또는 PNG를 선택하세요.'}],
-    links: [{href:'/compress',label:'이미지 압축'},{href:'/resize',label:'크기 조정'},{href:'/crop',label:'자르기'},{href:'/watermark',label:'워터마크'},{href:'/jpg-to-png',label:'JPG를 PNG로'}],
+    links: [{href: '/compress',label:'이미지 압축'},{href: '/resize',label:'크기 조정'},{href: '/crop',label:'자르기'},{href: '/watermark',label:'워터마크'},{href: '/jpg-to-png',label:'JPG를 PNG로'}],
   },
   zh: {
     h2a: '如何免费制作表情包 — 无需上传',
@@ -1185,7 +1186,7 @@ const seoMeme = {
     h3why: '为什么要在线制作表情包？',
     why: '表情包是分享笑话或走红的最快方式。好的生成器让你完全控制文字、字体和样式 — 无需安装任何东西。',
     faqs: [{q:'我的图片会上传到服务器吗？',a:'不会。一切都在浏览器中运行。文件永远不会离开你的设备。'},{q:'可以使用自己的图片吗？',a:'可以 — 上传任何JPG、PNG或WebP图片。'},{q:'有水印吗？',a:'永远没有水印。'},{q:'可以添加多个文字层吗？',a:'可以 — 点击"添加文字"添加任意数量。'},{q:'有哪些字体可用？',a:'Impact、Arial Black、Arial、Verdana、Times New Roman、Georgia、Courier New和Comic Sans。'},{q:'可以下载PNG格式吗？',a:'可以 — 下载前选择JPG或PNG。'}],
-    links: [{href:'/compress',label:'压缩图片'},{href:'/resize',label:'调整大小'},{href:'/crop',label:'裁剪'},{href:'/watermark',label:'水印'},{href:'/jpg-to-png',label:'JPG转PNG'}],
+    links: [{href: '/compress',label:'压缩图片'},{href: '/resize',label:'调整大小'},{href: '/crop',label:'裁剪'},{href: '/watermark',label:'水印'},{href: '/jpg-to-png',label:'JPG转PNG'}],
   },
   'zh-TW': {
     h2a: '如何免費製作迷因 — 無需上傳',
@@ -1195,7 +1196,7 @@ const seoMeme = {
     h3why: '為什麼要線上製作迷因？',
     why: '迷因是分享笑話或爆紅的最快方式。好的產生器讓你完全控制文字、字型和樣式 — 無需安裝任何東西。',
     faqs: [{q:'我的圖片會上傳到伺服器嗎？',a:'不會。一切都在瀏覽器中運行。檔案永遠不會離開你的裝置。'},{q:'可以使用自己的圖片嗎？',a:'可以 — 上傳任何JPG、PNG或WebP圖片。'},{q:'有浮水印嗎？',a:'永遠沒有浮水印。'},{q:'可以新增多個文字層嗎？',a:'可以 — 點擊「新增文字」新增任意數量。'},{q:'有哪些字型可用？',a:'Impact、Arial Black、Arial、Verdana、Times New Roman、Georgia、Courier New和Comic Sans。'},{q:'可以下載PNG格式嗎？',a:'可以 — 下載前選擇JPG或PNG。'}],
-    links: [{href:'/compress',label:'壓縮圖片'},{href:'/resize',label:'調整大小'},{href:'/crop',label:'裁切'},{href:'/watermark',label:'浮水印'},{href:'/jpg-to-png',label:'JPG轉PNG'}],
+    links: [{href: '/compress',label:'壓縮圖片'},{href: '/resize',label:'調整大小'},{href: '/crop',label:'裁切'},{href: '/watermark',label:'浮水印'},{href: '/jpg-to-png',label:'JPG轉PNG'}],
   },
   bg: {
     h2a: 'Как да създадете мийм безплатно — без качване',
@@ -1205,7 +1206,7 @@ const seoMeme = {
     h3why: 'Защо да правите миймове онлайн?',
     why: 'Миймовете са най-бързият начин да споделите шега или да станете вирусни. Добрият генератор дава пълен контрол върху текст, шрифт и стил.',
     faqs: [{q:'Изображението ми ще бъде качено на сървър?',a:'Не. Всичко работи в браузъра ви. Файловете никога не напускат устройството.'},{q:'Мога ли да използвам собствено изображение?',a:'Да — качете всяко JPG, PNG или WebP изображение.'},{q:'Има ли воден знак?',a:'Никога няма воден знак.'},{q:'Мога ли да добавя множество текстови слоеве?',a:'Да — щракнете „Добави текст" за добавяне на колкото искате.'},{q:'Какви шрифтове са налични?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New и Comic Sans.'},{q:'Мога ли да изтегля като PNG?',a:'Да — изберете JPG или PNG преди изтегляне.'}],
-    links: [{href:'/compress',label:'Компресиране'},{href:'/resize',label:'Преоразмеряване'},{href:'/crop',label:'Изрязване'},{href:'/watermark',label:'Воден знак'},{href:'/jpg-to-png',label:'JPG към PNG'}],
+    links: [{href: '/compress',label:'Компресиране'},{href: '/resize',label:'Преоразмеряване'},{href: '/crop',label:'Изрязване'},{href: '/watermark',label:'Воден знак'},{href: '/jpg-to-png',label:'JPG към PNG'}],
   },
   ca: {
     h2a: 'Com crear un meme gratis — sense pujar fitxers',
@@ -1215,7 +1216,7 @@ const seoMeme = {
     h3why: 'Per què crear memes en línia?',
     why: 'Els memes són la manera més ràpida de compartir un acudit o fer-se viral. Un bon generador dóna control total sobre text, font i estil.',
     faqs: [{q:'La meva imatge es pujarà a un servidor?',a:'No. Tot funciona al vostre navegador. Els fitxers no surten mai del dispositiu.'},{q:'Puc usar la meva pròpia imatge?',a:'Sí — pugeu qualsevol imatge JPG, PNG o WebP.'},{q:'Hi ha marca d\'aigua?',a:'Mai cap marca d\'aigua.'},{q:'Puc afegir múltiples capes de text?',a:'Sí — feu clic a «Afegir text» per afegir-ne tantes com vulgueu.'},{q:'Quines fonts estan disponibles?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New i Comic Sans.'},{q:'Puc descarregar en PNG?',a:'Sí — trieu JPG o PNG abans de descarregar.'}],
-    links: [{href:'/compress',label:'Comprimir imatge'},{href:'/resize',label:'Redimensionar'},{href:'/crop',label:'Retallar'},{href:'/watermark',label:'Marca d\'aigua'},{href:'/jpg-to-png',label:'JPG a PNG'}],
+    links: [{href: '/compress',label:'Comprimir imatge'},{href: '/resize',label:'Redimensionar'},{href: '/crop',label:'Retallar'},{href: '/watermark',label:'Marca d\'aigua'},{href: '/jpg-to-png',label:'JPG a PNG'}],
   },
   nl: {
     h2a: 'Hoe maak je gratis een meme — zonder uploaden',
@@ -1225,7 +1226,7 @@ const seoMeme = {
     h3why: 'Waarom online memes maken?',
     why: 'Memes zijn de snelste manier om een grap te delen of viraal te gaan. Een goede generator geeft volledige controle over tekst, lettertype en stijl.',
     faqs: [{q:'Wordt mijn afbeelding geüpload naar een server?',a:'Nee. Alles draait in je browser. Je bestanden verlaten nooit je apparaat.'},{q:'Kan ik mijn eigen afbeelding gebruiken?',a:'Ja — upload elke JPG-, PNG- of WebP-afbeelding.'},{q:'Is er een watermerk?',a:'Nooit een watermerk.'},{q:'Kan ik meerdere tekstlagen toevoegen?',a:'Ja — klik op "Tekst toevoegen" om er zoveel toe te voegen als je wilt.'},{q:'Welke lettertypen zijn beschikbaar?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New en Comic Sans.'},{q:'Kan ik downloaden als PNG?',a:'Ja — kies JPG of PNG voor het downloaden.'}],
-    links: [{href:'/compress',label:'Afbeelding comprimeren'},{href:'/resize',label:'Formaat wijzigen'},{href:'/crop',label:'Bijsnijden'},{href:'/watermark',label:'Watermerk'},{href:'/jpg-to-png',label:'JPG naar PNG'}],
+    links: [{href: '/compress',label:'Afbeelding comprimeren'},{href: '/resize',label:'Formaat wijzigen'},{href: '/crop',label:'Bijsnijden'},{href: '/watermark',label:'Watermerk'},{href: '/jpg-to-png',label:'JPG naar PNG'}],
   },
   el: {
     h2a: 'Πώς να δημιουργήσετε meme δωρεάν — χωρίς μεταφόρτωση',
@@ -1235,7 +1236,7 @@ const seoMeme = {
     h3why: 'Γιατί να φτιάξετε memes online;',
     why: 'Τα memes είναι ο πιο γρήγορος τρόπος να μοιραστείτε ένα αστείο ή να γίνετε viral. Μια καλή γεννήτρια δίνει πλήρη έλεγχο κειμένου, γραμματοσειράς και στυλ.',
     faqs: [{q:'Η εικόνα μου θα ανέβει σε server;',a:'Όχι. Όλα τρέχουν στο πρόγραμμα περιήγησής σας.'},{q:'Μπορώ να χρησιμοποιήσω τη δική μου εικόνα;',a:'Ναι — ανεβάστε οποιαδήποτε εικόνα JPG, PNG ή WebP.'},{q:'Υπάρχει υδατογράφημα;',a:'Ποτέ κανένα υδατογράφημα.'},{q:'Μπορώ να προσθέσω πολλαπλά επίπεδα κειμένου;',a:'Ναι — κάντε κλικ «Προσθήκη κειμένου» για να προσθέσετε όσα θέλετε.'},{q:'Ποιες γραμματοσειρές είναι διαθέσιμες;',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New και Comic Sans.'},{q:'Μπορώ να κατεβάσω σε PNG;',a:'Ναι — επιλέξτε JPG ή PNG πριν την λήψη.'}],
-    links: [{href:'/compress',label:'Συμπίεση εικόνας'},{href:'/resize',label:'Αλλαγή μεγέθους'},{href:'/crop',label:'Περικοπή'},{href:'/watermark',label:'Υδατογράφημα'},{href:'/jpg-to-png',label:'JPG σε PNG'}],
+    links: [{href: '/compress',label:'Συμπίεση εικόνας'},{href: '/resize',label:'Αλλαγή μεγέθους'},{href: '/crop',label:'Περικοπή'},{href: '/watermark',label:'Υδατογράφημα'},{href: '/jpg-to-png',label:'JPG σε PNG'}],
   },
   hi: {
     h2a: 'मुफ्त में मीम कैसे बनाएं — अपलोड की जरूरत नहीं',
@@ -1245,7 +1246,7 @@ const seoMeme = {
     h3why: 'ऑनलाइन मीम क्यों बनाएं?',
     why: 'मीम किसी मज़ाक को साझा करने या वायरल होने का सबसे तेज़ तरीका है। एक अच्छा जनरेटर टेक्स्ट, फ़ॉन्ट और स्टाइल पर पूरा नियंत्रण देता है।',
     faqs: [{q:'क्या मेरी छवि सर्वर पर अपलोड होगी?',a:'नहीं। सब कुछ ब्राउज़र में चलता है। फ़ाइलें डिवाइस से कभी नहीं जातीं।'},{q:'क्या मैं अपनी खुद की छवि इस्तेमाल कर सकता हूँ?',a:'हाँ — कोई भी JPG, PNG या WebP छवि अपलोड करें।'},{q:'क्या वॉटरमार्क है?',a:'कभी कोई वॉटरमार्क नहीं।'},{q:'क्या मैं कई टेक्स्ट लेयर जोड़ सकता हूँ?',a:'हाँ — "टेक्स्ट जोड़ें" पर क्लिक करके जितने चाहें उतने जोड़ें।'},{q:'कौन से फ़ॉन्ट उपलब्ध हैं?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New और Comic Sans।'},{q:'क्या PNG में डाउनलोड कर सकता हूँ?',a:'हाँ — डाउनलोड से पहले JPG या PNG चुनें।'}],
-    links: [{href:'/compress',label:'छवि संपीड़ित करें'},{href:'/resize',label:'आकार बदलें'},{href:'/crop',label:'काटें'},{href:'/watermark',label:'वॉटरमार्क'},{href:'/jpg-to-png',label:'JPG से PNG'}],
+    links: [{href: '/compress',label:'छवि संपीड़ित करें'},{href: '/resize',label:'आकार बदलें'},{href: '/crop',label:'काटें'},{href: '/watermark',label:'वॉटरमार्क'},{href: '/jpg-to-png',label:'JPG से PNG'}],
   },
   id: {
     h2a: 'Cara membuat meme gratis — tanpa upload',
@@ -1255,7 +1256,7 @@ const seoMeme = {
     h3why: 'Mengapa membuat meme online?',
     why: 'Meme adalah cara tercepat untuk berbagi lelucon atau menjadi viral. Generator yang baik memberikan kontrol penuh atas teks, font, dan gaya.',
     faqs: [{q:'Apakah gambar saya diupload ke server?',a:'Tidak. Semuanya berjalan di browser Anda. File tidak pernah meninggalkan perangkat.'},{q:'Bisakah saya menggunakan gambar sendiri?',a:'Ya — upload gambar JPG, PNG, atau WebP apa pun.'},{q:'Apakah ada watermark?',a:'Tidak ada watermark, selamanya.'},{q:'Bisakah menambah banyak lapisan teks?',a:'Ya — klik "Tambah Teks" untuk menambahkan sebanyak yang Anda mau.'},{q:'Font apa saja yang tersedia?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New, dan Comic Sans.'},{q:'Bisakah download dalam PNG?',a:'Ya — pilih JPG atau PNG sebelum mengunduh.'}],
-    links: [{href:'/compress',label:'Kompres Gambar'},{href:'/resize',label:'Ubah Ukuran'},{href:'/crop',label:'Potong'},{href:'/watermark',label:'Watermark'},{href:'/jpg-to-png',label:'JPG ke PNG'}],
+    links: [{href: '/compress',label:'Kompres Gambar'},{href: '/resize',label:'Ubah Ukuran'},{href: '/crop',label:'Potong'},{href: '/watermark',label:'Watermark'},{href: '/jpg-to-png',label:'JPG ke PNG'}],
   },
   ms: {
     h2a: 'Cara membuat meme percuma — tanpa muat naik',
@@ -1265,7 +1266,7 @@ const seoMeme = {
     h3why: 'Mengapa membuat meme dalam talian?',
     why: 'Meme ialah cara terpantas untuk berkongsi jenaka atau menjadi viral. Penjana yang baik memberi kawalan penuh terhadap teks, fon dan gaya.',
     faqs: [{q:'Adakah imej saya dimuat naik ke pelayan?',a:'Tidak. Semuanya berjalan dalam pelayar anda. Fail tidak pernah meninggalkan peranti.'},{q:'Bolehkah saya guna imej sendiri?',a:'Ya — muat naik sebarang imej JPG, PNG atau WebP.'},{q:'Adakah tera air?',a:'Tiada tera air, selamanya.'},{q:'Boleh tambah banyak lapisan teks?',a:'Ya — klik "Tambah Teks" untuk tambah seberapa banyak yang anda mahu.'},{q:'Fon apa yang ada?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New dan Comic Sans.'},{q:'Boleh muat turun sebagai PNG?',a:'Ya — pilih JPG atau PNG sebelum memuat turun.'}],
-    links: [{href:'/compress',label:'Mampat Imej'},{href:'/resize',label:'Ubah Saiz'},{href:'/crop',label:'Pangkas'},{href:'/watermark',label:'Tera Air'},{href:'/jpg-to-png',label:'JPG ke PNG'}],
+    links: [{href: '/compress',label:'Mampat Imej'},{href: '/resize',label:'Ubah Saiz'},{href: '/crop',label:'Pangkas'},{href: '/watermark',label:'Tera Air'},{href: '/jpg-to-png',label:'JPG ke PNG'}],
   },
   pl: {
     h2a: 'Jak stworzyć mema za darmo — bez przesyłania',
@@ -1275,7 +1276,7 @@ const seoMeme = {
     h3why: 'Dlaczego tworzyć memy online?',
     why: 'Memy to najszybszy sposób na podzielenie się żartem lub stanie się viralem. Dobry generator daje pełną kontrolę nad tekstem, czcionką i stylem.',
     faqs: [{q:'Czy mój obraz zostanie przesłany na serwer?',a:'Nie. Wszystko działa w przeglądarce. Pliki nigdy nie opuszczają urządzenia.'},{q:'Czy mogę użyć własnego obrazu?',a:'Tak — prześlij dowolny obraz JPG, PNG lub WebP.'},{q:'Czy jest znak wodny?',a:'Nigdy żadnego znaku wodnego.'},{q:'Czy mogę dodać wiele warstw tekstu?',a:'Tak — kliknij „Dodaj tekst", aby dodać ile chcesz.'},{q:'Jakie czcionki są dostępne?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New i Comic Sans.'},{q:'Czy mogę pobrać jako PNG?',a:'Tak — wybierz JPG lub PNG przed pobraniem.'}],
-    links: [{href:'/compress',label:'Kompresja obrazu'},{href:'/resize',label:'Zmień rozmiar'},{href:'/crop',label:'Przytnij'},{href:'/watermark',label:'Znak wodny'},{href:'/jpg-to-png',label:'JPG do PNG'}],
+    links: [{href: '/compress',label:'Kompresja obrazu'},{href: '/resize',label:'Zmień rozmiar'},{href: '/crop',label:'Przytnij'},{href: '/watermark',label:'Znak wodny'},{href: '/jpg-to-png',label:'JPG do PNG'}],
   },
   sv: {
     h2a: 'Hur man skapar en meme gratis — ingen uppladdning krävs',
@@ -1285,7 +1286,7 @@ const seoMeme = {
     h3why: 'Varför skapa memes online?',
     why: 'Memes är det snabbaste sättet att dela ett skämt eller bli viral. En bra generator ger full kontroll över text, typsnitt och stil.',
     faqs: [{q:'Laddas min bild upp till en server?',a:'Nej. Allt körs i din webbläsare. Dina filer lämnar aldrig din enhet.'},{q:'Kan jag använda min egen bild?',a:'Ja — ladda upp vilken JPG-, PNG- eller WebP-bild som helst.'},{q:'Finns det en vattenstämpel?',a:'Aldrig någon vattenstämpel.'},{q:'Kan jag lägga till flera textlager?',a:'Ja — klicka "Lägg till text" för att lägga till hur många du vill.'},{q:'Vilka typsnitt finns tillgängliga?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New och Comic Sans.'},{q:'Kan jag ladda ner som PNG?',a:'Ja — välj JPG eller PNG innan du laddar ner.'}],
-    links: [{href:'/compress',label:'Komprimera bild'},{href:'/resize',label:'Ändra storlek'},{href:'/crop',label:'Beskär'},{href:'/watermark',label:'Vattenstämpel'},{href:'/jpg-to-png',label:'JPG till PNG'}],
+    links: [{href: '/compress',label:'Komprimera bild'},{href: '/resize',label:'Ändra storlek'},{href: '/crop',label:'Beskär'},{href: '/watermark',label:'Vattenstämpel'},{href: '/jpg-to-png',label:'JPG till PNG'}],
   },
   th: {
     h2a: 'วิธีสร้างมีมฟรี — ไม่ต้องอัปโหลด',
@@ -1295,7 +1296,7 @@ const seoMeme = {
     h3why: 'ทำไมต้องสร้างมีมออนไลน์?',
     why: 'มีมเป็นวิธีที่เร็วที่สุดในการแชร์มุกตลกหรือเป็นไวรัล เครื่องมือสร้างที่ดีให้การควบคุมข้อความ ฟอนต์ และสไตล์อย่างสมบูรณ์',
     faqs: [{q:'รูปภาพจะถูกอัปโหลดไปยังเซิร์ฟเวอร์ไหม?',a:'ไม่ ทุกอย่างทำงานในเบราว์เซอร์ ไฟล์ไม่เคยออกจากอุปกรณ์'},{q:'ใช้รูปภาพของตัวเองได้ไหม?',a:'ได้ — อัปโหลดรูปภาพ JPG, PNG หรือ WebP ใดก็ได้'},{q:'มีลายน้ำไหม?',a:'ไม่มีลายน้ำเลย'},{q:'เพิ่มเลเยอร์ข้อความหลายชั้นได้ไหม?',a:'ได้ — คลิก "เพิ่มข้อความ" เพื่อเพิ่มได้ไม่จำกัด'},{q:'มีฟอนต์อะไรบ้าง?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New และ Comic Sans'},{q:'ดาวน์โหลดเป็น PNG ได้ไหม?',a:'ได้ — เลือก JPG หรือ PNG ก่อนดาวน์โหลด'}],
-    links: [{href:'/compress',label:'บีบอัดรูปภาพ'},{href:'/resize',label:'ปรับขนาด'},{href:'/crop',label:'ครอป'},{href:'/watermark',label:'ลายน้ำ'},{href:'/jpg-to-png',label:'JPG เป็น PNG'}],
+    links: [{href: '/compress',label:'บีบอัดรูปภาพ'},{href: '/resize',label:'ปรับขนาด'},{href: '/crop',label:'ครอป'},{href: '/watermark',label:'ลายน้ำ'},{href: '/jpg-to-png',label:'JPG เป็น PNG'}],
   },
   tr: {
     h2a: 'Ücretsiz meme nasıl yapılır — yükleme gerekmez',
@@ -1305,7 +1306,7 @@ const seoMeme = {
     h3why: 'Neden çevrimiçi meme yapmalısınız?',
     why: 'Memeler bir şakayı paylaşmanın veya viral olmanın en hızlı yoludur. İyi bir oluşturucu metin, yazı tipi ve stil üzerinde tam kontrol sağlar.',
     faqs: [{q:'Görselim bir sunucuya yüklenir mi?',a:'Hayır. Her şey tarayıcınızda çalışır. Dosyalarınız cihazınızdan asla ayrılmaz.'},{q:'Kendi görselimi kullanabilir miyim?',a:'Evet — herhangi bir JPG, PNG veya WebP görseli yükleyin.'},{q:'Filigran var mı?',a:'Asla filigran yok.'},{q:'Birden fazla metin katmanı ekleyebilir miyim?',a:'Evet — istediğiniz kadar eklemek için "Metin Ekle"ye tıklayın.'},{q:'Hangi yazı tipleri mevcut?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New ve Comic Sans.'},{q:'PNG olarak indirebilir miyim?',a:'Evet — indirmeden önce JPG veya PNG seçin.'}],
-    links: [{href:'/compress',label:'Görsel Sıkıştır'},{href:'/resize',label:'Boyutlandır'},{href:'/crop',label:'Kırp'},{href:'/watermark',label:'Filigran'},{href:'/jpg-to-png',label:'JPG\'den PNG\'ye'}],
+    links: [{href: '/compress',label:'Görsel Sıkıştır'},{href: '/resize',label:'Boyutlandır'},{href: '/crop',label:'Kırp'},{href: '/watermark',label:'Filigran'},{href: '/jpg-to-png',label:'JPG\'den PNG\'ye'}],
   },
   uk: {
     h2a: 'Як створити мем безкоштовно — без завантаження',
@@ -1315,7 +1316,7 @@ const seoMeme = {
     h3why: 'Навіщо створювати меми онлайн?',
     why: 'Меми — найшвидший спосіб поділитися жартом або стати вірусним. Хороший генератор дає повний контроль над текстом, шрифтом і стилем.',
     faqs: [{q:'Моє зображення завантажується на сервер?',a:'Ні. Все працює у вашому браузері. Файли ніколи не залишають ваш пристрій.'},{q:'Чи можу я використати своє зображення?',a:'Так — завантажте будь-яке зображення JPG, PNG або WebP.'},{q:'Чи є водяний знак?',a:'Водяного знаку ніколи немає.'},{q:'Чи можу додати кілька текстових шарів?',a:'Так — натисніть «Додати текст», щоб додати скільки завгодно.'},{q:'Які шрифти доступні?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New і Comic Sans.'},{q:'Чи можу завантажити у PNG?',a:'Так — виберіть JPG або PNG перед завантаженням.'}],
-    links: [{href:'/compress',label:'Стиснути зображення'},{href:'/resize',label:'Змінити розмір'},{href:'/crop',label:'Обрізати'},{href:'/watermark',label:'Водяний знак'},{href:'/jpg-to-png',label:'JPG в PNG'}],
+    links: [{href: '/compress',label:'Стиснути зображення'},{href: '/resize',label:'Змінити розмір'},{href: '/crop',label:'Обрізати'},{href: '/watermark',label:'Водяний знак'},{href: '/jpg-to-png',label:'JPG в PNG'}],
   },
   vi: {
     h2a: 'Cách tạo meme miễn phí — không cần tải lên',
@@ -1325,11 +1326,11 @@ const seoMeme = {
     h3why: 'Tại sao tạo meme trực tuyến?',
     why: 'Meme là cách nhanh nhất để chia sẻ một trò đùa hoặc trở nên viral. Một trình tạo tốt cho bạn toàn quyền kiểm soát văn bản, phông chữ và phong cách.',
     faqs: [{q:'Ảnh của tôi có được tải lên máy chủ không?',a:'Không. Mọi thứ chạy trong trình duyệt. Tệp không bao giờ rời khỏi thiết bị.'},{q:'Tôi có thể dùng ảnh riêng không?',a:'Có — tải lên bất kỳ ảnh JPG, PNG hoặc WebP nào.'},{q:'Có watermark không?',a:'Không bao giờ có watermark.'},{q:'Có thể thêm nhiều lớp văn bản không?',a:'Có — nhấp "Thêm văn bản" để thêm bao nhiêu tùy thích.'},{q:'Có phông chữ nào?',a:'Impact, Arial Black, Arial, Verdana, Times New Roman, Georgia, Courier New và Comic Sans.'},{q:'Có thể tải về dạng PNG không?',a:'Có — chọn JPG hoặc PNG trước khi tải về.'}],
-    links: [{href:'/compress',label:'Nén ảnh'},{href:'/resize',label:'Đổi kích thước'},{href:'/crop',label:'Cắt ảnh'},{href:'/watermark',label:'Watermark'},{href:'/jpg-to-png',label:'JPG sang PNG'}],
+    links: [{href: '/compress',label:'Nén ảnh'},{href: '/resize',label:'Đổi kích thước'},{href: '/crop',label:'Cắt ảnh'},{href: '/watermark',label:'Watermark'},{href: '/jpg-to-png',label:'JPG sang PNG'}],
   },
 }
 
-function getLang() { return localStorage.getItem('rc_lang') || navigator.language?.slice(0,2) || 'en' }
+
 
 async function loadFilesFromIDB() {
   const db = await openDB()
@@ -1370,7 +1371,7 @@ function buildSeoSection() {
   const alsoTry  = t.seo_also_try  || 'Also Try'
   const div = document.createElement('div')
   div.className = 'seo-section'
-  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2><p>${seo.body}</p><h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${l.href}">${l.label}</a>`).join('')}</div>`
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2><p>${seo.body}</p><h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 }
 buildSeoSection()
