@@ -190,10 +190,10 @@ export function injectHeader() {
     .lang-bar {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
       margin-top: 8px;
       position: relative;
+      padding-left: 24px;
     }
     .lang-toggle {
       background: #fff;
@@ -217,16 +217,13 @@ export function injectHeader() {
       display: none;
       position: absolute;
       bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      padding: 12px;
+      padding: 16px 20px;
       z-index: 200;
-      width: 420px;
-      max-width: calc(100vw - 32px);
       max-height: 60vh;
       overflow-y: auto;
     }
@@ -284,7 +281,8 @@ export function injectHeader() {
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
-    [dir="rtl"] .lang-bar { flex-direction: row-reverse; }
+    [dir="rtl"] .lang-bar { flex-direction: row-reverse; padding-left: 0; padding-right: 24px; }
+    [dir="rtl"] .lang-grid-wrap { left: auto; right: 0; }
     [dir="rtl"] .lang-grid a { flex-direction: row-reverse; }
     [dir="rtl"] .lang-grid-wrap { direction: rtl; }
   `
@@ -402,20 +400,6 @@ export function injectHeader() {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
-      if (isOpen) {
-        // Reset position then adjust if it overflows the viewport
-        langGridWrap.style.left = '50%'
-        langGridWrap.style.transform = 'translateX(-50%)'
-        const rect = langGridWrap.getBoundingClientRect()
-        if (rect.right > window.innerWidth) {
-          const overflow = rect.right - window.innerWidth + 16
-          langGridWrap.style.left = `calc(50% - ${overflow}px)`
-        }
-        if (rect.left < 0) {
-          langGridWrap.style.left = '0'
-          langGridWrap.style.transform = 'none'
-        }
-      }
     })
     langGridWrap.addEventListener('click', (e) => {
       e.stopPropagation()
