@@ -215,10 +215,9 @@ export function injectHeader() {
     .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
     .lang-grid-wrap {
       display: none;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      right: 0;
-      transform: none;
+      position: fixed;
+      bottom: 48px;
+      right: 16px;
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
@@ -226,6 +225,7 @@ export function injectHeader() {
       padding: 12px;
       z-index: 200;
       width: 480px;
+      max-width: calc(100vw - 32px);
       max-height: 60vh;
       overflow-y: auto;
     }
