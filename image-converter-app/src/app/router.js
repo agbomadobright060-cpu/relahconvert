@@ -1,26 +1,38 @@
 import { tools } from '../tools/configs.js'
-import { getLang, supportedLangs, englishKeyFromSlug } from '../core/i18n.js'
+import { getLang, supportedLangs, setLang, englishKeyFromSlug } from '../core/i18n.js'
+
+// Parse URL segments once
+const _path = window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0]
+const _segments = _path.split('/')
+
+// Check if first segment is a language code
+const _urlLang = _segments[0]
+  ? supportedLangs.find(l => l.toLowerCase() === _segments[0].toLowerCase())
+  : null
+
+// If URL has a language prefix, save it and redirect to the English tool URL.
+// e.g. /fr/compresser-image → saves 'fr' to localStorage → redirects to /compress
+// e.g. /fr (homepage) → saves 'fr' → redirects to /
+if (_urlLang) {
+  setLang(_urlLang)
+
+  if (_segments[1]) {
+    // Tool page: /fr/compresser-image → /compress
+    const englishKey = englishKeyFromSlug(_urlLang, _segments[1])
+    if (englishKey) {
+      window.location.replace('/' + englishKey)
+    }
+  } else {
+    // Homepage: /fr → /
+    window.location.replace('/')
+  }
+}
 
 export function getCurrentTool() {
-  const path = window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0]
-  if (!path) return null
-
-  // Direct English slug match (e.g. /jpg-to-png)
-  if (tools[path]) return tools[path]
-
-  // Translated URL: /{lang}/{translatedSlug} (e.g. /fr/jpg-vers-png)
-  const segments = path.split('/')
-  if (segments.length === 2) {
-    const lang = supportedLangs.find(l => l.toLowerCase() === segments[0].toLowerCase())
-    if (lang) {
-      const englishKey = englishKeyFromSlug(lang, segments[1])
-      if (englishKey && tools[englishKey]) return tools[englishKey]
-    }
-  }
-
-  return null
+  if (!_path || _urlLang) return null
+  return tools[_path] || null
 }
 
 export function getCurrentLangFromURL() {
-  return getLang()
+  return _urlLang || getLang()
 }

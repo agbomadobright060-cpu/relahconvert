@@ -1,6 +1,8 @@
 import { injectHeader } from '../core/header.js'
+import { injectHreflang } from '../core/utils.js'
 import { getT, localHref} from '../core/i18n.js'
 import { GIFEncoder, quantize, applyPalette } from 'gifenc'
+injectHreflang('png-to-gif')
 
 const t = getT()
 

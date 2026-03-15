@@ -1,30 +1,19 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import { readFileSync } from 'fs'
+
+const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-tw','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
 
 function langRedirectPlugin() {
-  const rulesMap = new Map()
   return {
     name: 'lang-redirect',
     configureServer(server) {
-      try {
-        const text = readFileSync(resolve(__dirname, 'public/_redirects'), 'utf8')
-        for (const line of text.split('\n')) {
-          const trimmed = line.trim()
-          if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('/*')) continue
-          const parts = trimmed.split(/\s+/)
-          if (parts.length >= 2) rulesMap.set(parts[0], parts[1])
-        }
-      } catch (e) {}
-
       server.middlewares.use((req, res, next) => {
         const urlPath = (req.url || '').split('?')[0]
-        const target = rulesMap.get(urlPath)
-        if (target) {
-          const u = new URL(target, 'http://x')
-          // Homepage: / → /index.html, tool pages: /compress → /compress.html
-          const file = u.pathname === '/' ? '/index.html' : u.pathname + '.html'
-          req.url = file + u.search
+        const segs = urlPath.replace(/^\/|\/$/g, '').split('/')
+
+        // Match /{lang} or /{lang}/{slug} — serve index.html so main.js can handle routing
+        if (segs[0] && supportedLangs.includes(segs[0].toLowerCase())) {
+          req.url = '/index.html'
         }
         next()
       })

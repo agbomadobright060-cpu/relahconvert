@@ -193,7 +193,24 @@
       </div>
     </footer>
     <script type="module">
-      import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug as getTranslatedSlug } from '/src/core/i18n.js'
+      import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug as getTranslatedSlug, englishKeyFromSlug } from '/src/core/i18n.js'
+      import { injectHreflang } from '/src/core/utils.js'
+      injectHreflang('home')
+
+      // Handle translated URLs: /fr/compresser-image → save lang, redirect to /compress
+      ;(function(){
+        const segs = window.location.pathname.replace(/^\/|\/$/g, '').split('/')
+        if (!segs[0]) return
+        const lang = supportedLangs.find(l => l.toLowerCase() === segs[0].toLowerCase())
+        if (!lang) return
+        setLang(lang)
+        if (segs[1]) {
+          const enKey = englishKeyFromSlug(lang, segs[1])
+          if (enKey) { window.location.replace('/' + enKey); return }
+        }
+        // Bare /{lang} homepage — just continue rendering, lang is saved
+      })()
+
       const t = getT()
       const currentLang = getLang()
 

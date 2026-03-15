@@ -1,5 +1,5 @@
 import { convertFile, convertFilesToZip } from './core/converter.js'
-import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
+import { LIMITS, formatSize, fileKey, totalBytes, injectHreflang } from './core/utils.js'
 import { getCurrentTool } from './app/router.js'
 import { injectHeader } from './core/header.js'
 import { getT, getLang, translatedSlug as getTranslatedSlug } from './core/i18n.js'
@@ -9,6 +9,7 @@ const bg = '#F2F2F2'
 const t = getT()
 const currentLang = getLang()
 const slug = currentTool ? currentTool.slug : ''
+if (slug) injectHreflang(slug)
 
 function localHref(englishSlug) {
   if (currentLang === 'en') return '/' + englishSlug

@@ -6543,32 +6543,16 @@ const translations = {
   },
 }
 
-// ── Detect language from URL at import time ──
-// Works with both:
-//   - Netlify _redirects: /fr/compresser-image → /compress?lang=fr (200 rewrite)
-//   - Vite dev server: URL stays as /fr/compresser-image (middleware rewrite)
+// ── Detect language from URL path prefix at import time ──
+// When /fr/compresser-image is visited, the catch-all serves index.html.
+// This IIFE detects 'fr' and saves it to localStorage before any getT() call.
+// router.js then redirects to /compress so the correct HTML page loads.
 ;(function(){
   const codes=['en','fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
-
-  // Method 1: ?lang= query param (Netlify rewrites)
-  const params = new URLSearchParams(window.location.search)
-  const langParam = params.get('lang')
-  if (langParam && codes.includes(langParam)) {
-    localStorage.setItem('rc_lang', langParam)
-    // Clean the ?lang= param from the URL
-    params.delete('lang')
-    const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
-    window.history.replaceState(null, '', clean)
-    return
-  }
-
-  // Method 2: /{lang}/... path prefix (Vite dev server, or direct URL)
   const segs = window.location.pathname.replace(/^\/|\/$/g, '').split('/')
   if (segs[0]) {
     const match = codes.find(c => c.toLowerCase() === segs[0].toLowerCase())
-    if (match) {
-      localStorage.setItem('rc_lang', match)
-    }
+    if (match) localStorage.setItem('rc_lang', match)
   }
 })()
 

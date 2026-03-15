@@ -1,5 +1,7 @@
 import { injectHeader } from '../core/header.js'
+import { injectHreflang } from '../core/utils.js'
 import { getT, localHref} from '../core/i18n.js'
+injectHreflang('html-to-image')
 
 const t = getT()
 const API_KEY = 'cecb9e03ead844aeb7f6e24e6a6f6824'
