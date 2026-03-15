@@ -3,15 +3,12 @@ import { formatSize, totalBytes, sanitizeBaseName, LIMITS} from './core/utils.js
 import { getT , getLang, localHref, injectHreflang} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
-injectHreflang(window.location.pathname.includes('png') ? 'png-to-pdf' : 'jpg-to-pdf')
-
 export function initImageToPdf({ slug: _slug } = {}) {
   const bg = '#F2F2F2'
   const t = getT()
 
-
+  const isPng = (_slug || window.location.pathname).includes('png')
   injectHreflang(isPng ? 'png-to-pdf' : 'jpg-to-pdf')
-  const isPng = (_slug || window.location.pathname).includes('png-to-pdf')
   const inputMime = isPng ? 'image/png' : 'image/jpeg'
   const inputLabel = isPng ? 'PNG' : 'JPG'
   const slug = isPng ? 'png-to-pdf' : 'jpg-to-pdf'

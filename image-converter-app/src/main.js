@@ -1,9 +1,16 @@
 import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
-import { getCurrentTool } from './app/router.js'
+import { getCurrentTool, isStandaloneRoute } from './app/router.js'
 import { injectHeader } from './core/header.js'
 import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang} from './core/i18n.js'
 
+// If a standalone tool was loaded via dynamic import (translated URL), stop here.
+// The dynamically imported module will render its own UI into #app.
+if (!isStandaloneRoute) {
+mainInit()
+}
+
+function mainInit() {
 const currentTool = getCurrentTool()
 const bg = '#F2F2F2'
 const t = getT()
@@ -343,3 +350,4 @@ convertBtn.addEventListener('click', async () => {
     if (selectedFiles.length) setIdleEnabled(); else setDisabled()
   }
 })
+} // end mainInit

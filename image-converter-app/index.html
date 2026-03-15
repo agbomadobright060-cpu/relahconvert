@@ -197,20 +197,38 @@
       import { injectHreflang } from '/src/core/i18n.js'
       injectHreflang('home')
 
-      // Handle translated URLs: /fr/compresser-image → save lang, redirect to /compress
-      ;(function(){
-        const segs = window.location.pathname.replace(/^\/|\/$/g, '').split('/')
-        if (!segs[0]) return
-        const lang = supportedLangs.find(l => l.toLowerCase() === segs[0].toLowerCase())
-        if (!lang) return
-        setLang(lang)
-        if (segs[1]) {
-          const enKey = englishKeyFromSlug(lang, segs[1])
-          if (enKey) { window.location.replace('/' + enKey); return }
+      // Handle translated URLs served via catch-all
+      let __isToolRoute = false
+      const __segs = window.location.pathname.replace(/^\/|\/$/g, '').split('/')
+      const __lang = __segs[0] ? supportedLangs.find(l => l.toLowerCase() === __segs[0].toLowerCase()) : null
+      if (__lang) {
+        setLang(__lang)
+        if (__segs[1]) {
+          const __enKey = englishKeyFromSlug(__lang, __segs[1])
+          if (__enKey) {
+            __isToolRoute = true
+            const __modules = {
+              'compress':()=>import('/src/compress.js'),'resize':()=>import('/src/resize.js'),
+              'crop':()=>import('/src/tools/crop.js'),'rotate':()=>import('/src/tools/rotate.js'),
+              'flip':()=>import('/src/tools/flip.js'),'grayscale':()=>import('/src/tools/grayscale.js'),
+              'watermark':()=>import('/src/tools/watermark.js'),'round-corners':()=>import('/src/tools/round-corners.js'),
+              'meme-generator':()=>import('/src/tools/meme-generator.js'),'blur-face':()=>import('/src/tools/blur-face.js'),
+              'remove-background':()=>import('/src/tools/remove-background.js'),'heic-to-jpg':()=>import('/src/tools/heic-to-jpg.js'),
+              'image-to-ico':()=>import('/src/tools/image-to-ico.js'),'jpg-to-svg':()=>import('/src/tools/jpg-to-svg.js'),
+              'html-to-image':()=>import('/src/tools/html-to-image.js'),'jpg-to-gif':()=>import('/src/tools/jpg-to-gif.js'),
+              'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'jpg-to-pdf':()=>import('/src/jpg-to-pdf.js'),
+              'png-to-pdf':()=>import('/src/png-to-pdf.js'),
+            }
+            // Clear the homepage HTML and set up a clean page for the tool
+            document.body.innerHTML = '<div id="app"></div>'
+            document.body.style.margin = '0'
+            document.body.style.padding = '0'
+            if (__modules[__enKey]) { __modules[__enKey]() }
+            else { import('/src/main.js') } // format converters
+          }
         }
-        // Bare /{lang} homepage — just continue rendering, lang is saved
-      })()
-
+      }
+      if (!__isToolRoute) { // Only render homepage if not a tool route
       const t = getT()
       const currentLang = getLang()
 
@@ -430,6 +448,7 @@
         if (moreBtn) moreBtn.classList.remove('open')
       })
       dropdown.addEventListener('click', e => e.stopPropagation())
+      } // end !__isToolRoute
     </script>
   </body>
 </html>
