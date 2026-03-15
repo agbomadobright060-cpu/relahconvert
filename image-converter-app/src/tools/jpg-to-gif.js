@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
-import { injectHreflang } from '../core/utils.js'
-import { getT, localHref} from '../core/i18n.js'
+
+import { getT, localHref, injectHreflang} from '../core/i18n.js'
 import { GIFEncoder, quantize, applyPalette } from 'gifenc'
 injectHreflang('jpg-to-gif')
 

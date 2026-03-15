@@ -6590,3 +6590,27 @@ export function localHref(englishSlug) {
   if (lang === 'en') return '/' + englishSlug
   return '/' + lang + '/' + translatedSlug(lang, englishSlug)
 }
+
+// Inject hreflang link tags into <head> for multilingual SEO
+export function injectHreflang(toolKey) {
+  const base = 'https://relahconvert.com'
+  const isHome = !toolKey || toolKey === 'home'
+  for (const lang of supportedLangs) {
+    let href
+    if (isHome) {
+      href = lang === 'en' ? base + '/' : base + '/' + lang
+    } else {
+      href = lang === 'en' ? base + '/' + toolKey : base + '/' + lang + '/' + translatedSlug(lang, toolKey)
+    }
+    const link = document.createElement('link')
+    link.rel = 'alternate'
+    link.hreflang = lang
+    link.href = href
+    document.head.appendChild(link)
+  }
+  const xdef = document.createElement('link')
+  xdef.rel = 'alternate'
+  xdef.hreflang = 'x-default'
+  xdef.href = isHome ? base + '/' : base + '/' + toolKey
+  document.head.appendChild(xdef)
+}

@@ -1,7 +1,7 @@
 import { injectHeader } from '../core/header.js'
-import { injectHreflang } from '../core/utils.js'
+
 // JSZip loaded dynamically
-import { getT, localHref} from '../core/i18n.js'
+import { getT, localHref, injectHreflang} from '../core/i18n.js'
 injectHreflang('round-corners')
 
 const t = getT()

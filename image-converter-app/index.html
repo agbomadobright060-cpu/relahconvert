@@ -194,7 +194,7 @@
     </footer>
     <script type="module">
       import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug as getTranslatedSlug, englishKeyFromSlug } from '/src/core/i18n.js'
-      import { injectHreflang } from '/src/core/utils.js'
+      import { injectHreflang } from '/src/core/i18n.js'
       injectHreflang('home')
 
       // Handle translated URLs: /fr/compresser-image → save lang, redirect to /compress

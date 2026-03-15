@@ -1,6 +1,6 @@
 import { injectHeader } from './core/header.js'
-import { formatSize, totalBytes, sanitizeBaseName, LIMITS, injectHreflang} from './core/utils.js'
-import { getT , getLang, localHref} from './core/i18n.js'
+import { formatSize, totalBytes, sanitizeBaseName, LIMITS} from './core/utils.js'
+import { getT , getLang, localHref, injectHreflang} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
 injectHreflang(window.location.pathname.includes('png') ? 'png-to-pdf' : 'jpg-to-pdf')

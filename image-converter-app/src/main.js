@@ -1,8 +1,8 @@
 import { convertFile, convertFilesToZip } from './core/converter.js'
-import { LIMITS, formatSize, fileKey, totalBytes, injectHreflang } from './core/utils.js'
+import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool } from './app/router.js'
 import { injectHeader } from './core/header.js'
-import { getT, getLang, translatedSlug as getTranslatedSlug } from './core/i18n.js'
+import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang} from './core/i18n.js'
 
 const currentTool = getCurrentTool()
 const bg = '#F2F2F2'
