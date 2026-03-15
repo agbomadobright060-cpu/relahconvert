@@ -22,8 +22,8 @@ function langRedirectPlugin() {
         const target = rulesMap.get(urlPath)
         if (target) {
           const u = new URL(target, 'http://x')
-          // Homepage: / → /index.html, tool pages: /compress → /compress.html
-          const file = u.pathname === '/' ? '/index.html' : u.pathname + '.html'
+          // Target already has .html for tools, homepage is /
+          const file = u.pathname === '/' ? '/index.html' : u.pathname
           req.url = file + u.search
         }
         next()
