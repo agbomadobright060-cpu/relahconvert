@@ -230,11 +230,6 @@ export function injectHeader() {
       overflow-y: auto;
     }
     .lang-grid-wrap.open { display: block; }
-    .lang-grid-wrap.lang-fixed {
-      position: fixed;
-      z-index: 9999;
-      max-width: calc(100vw - 32px);
-    }
     .lang-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -266,7 +261,6 @@ export function injectHeader() {
     }
     @media (max-width: 600px) {
       .lang-grid-wrap { width: calc(100vw - 32px); min-width: 0; left: 50%; }
-      .lang-grid-wrap.lang-fixed { left: 16px !important; right: 16px; width: auto; max-width: none; transform: none; }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
@@ -367,15 +361,6 @@ export function injectHeader() {
     </div>
   `
 
-  const isHomepage = !activeToolKey
-  const langGridHTML = `
-    <div class="lang-grid-wrap${isHomepage ? ' lang-fixed' : ''}" id="langGridWrap">
-      <div class="lang-grid">
-        ${supportedLangs.map(l => `<a href="#" data-lang="${l}" class="${l === currentLang ? 'active' : ''}"><span class="lang-check">${l === currentLang ? '✓' : ''}</span>${langLabels[l]}</a>`).join('')}
-      </div>
-    </div>
-  `
-
   const footer = document.createElement('footer')
   footer.id = 'site-footer'
   footer.innerHTML = `
@@ -386,39 +371,25 @@ export function injectHeader() {
         <span>${langLabels[currentLang]}</span>
         <span class="lang-arrow">▲</span>
       </button>
-      ${isHomepage ? '' : langGridHTML}
+      <div class="lang-grid-wrap" id="langGridWrap">
+        <div class="lang-grid">
+          ${supportedLangs.map(l => `<a href="#" data-lang="${l}" class="${l === currentLang ? 'active' : ''}"><span class="lang-check">${l === currentLang ? '✓' : ''}</span>${langLabels[l]}</a>`).join('')}
+        </div>
+      </div>
     </div>
   `
-
-  // On homepage, append dropdown to body so overflow-x:hidden won't clip it
-  const langDropdownEl = isHomepage ? (() => {
-    const el = document.createElement('div')
-    el.innerHTML = langGridHTML
-    return el.firstElementChild
-  })() : null
 
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
-  if (langDropdownEl) document.body.appendChild(langDropdownEl)
 
   const langToggle = document.getElementById('langToggle')
   const langGridWrap = document.getElementById('langGridWrap')
   if (langToggle && langGridWrap) {
-    function positionDropdown() {
-      const btn = langToggle.getBoundingClientRect()
-      const dw = langGridWrap.offsetWidth
-      let left = btn.left + btn.width / 2 - dw / 2
-      if (left + dw > window.innerWidth - 16) left = window.innerWidth - 16 - dw
-      if (left < 16) left = 16
-      langGridWrap.style.left = left + 'px'
-      langGridWrap.style.bottom = (window.innerHeight - btn.top + 8) + 'px'
-    }
     langToggle.addEventListener('click', (e) => {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
-      if (isOpen && isHomepage) positionDropdown()
     })
     langGridWrap.addEventListener('click', (e) => {
       e.stopPropagation()
