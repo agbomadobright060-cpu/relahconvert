@@ -326,7 +326,7 @@ export function injectHeader() {
         <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
         <polygon points="17,1 25,10 17,10" fill="#2C1810" opacity="0.18"/>
       </svg>
-      <span class="logo-text" style="order:1;"><span class="relah">Relah</span><span class="convert">convert</span></span>
+      <span class="logo-text" style="order:1;"><span class="relah" translate="no">Relah</span><span class="convert" translate="no">convert</span></span>
     </a>`
 
   const navHTML = `
