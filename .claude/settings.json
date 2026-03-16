@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const m = require\\(''''./image-converter-app/src/core/i18n.js''''\\); console.log\\(''''Module loaded OK''''\\)\")"
+    ]
+  }
+}
