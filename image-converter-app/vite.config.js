@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
+import { mkdirSync, copyFileSync, existsSync } from 'fs'
 
 const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-tw','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
 
@@ -21,8 +22,26 @@ function langRedirectPlugin() {
   }
 }
 
+// After build, copy index.html into each lang folder so Cloudflare serves
+// actual files instead of relying on _redirects (which gets aggressively cached)
+function langCopyPlugin() {
+  return {
+    name: 'lang-copy',
+    closeBundle() {
+      const distDir = resolve(__dirname, 'dist')
+      const src = resolve(distDir, 'index.html')
+      if (!existsSync(src)) return
+      for (const lang of supportedLangs) {
+        const langDir = resolve(distDir, lang)
+        mkdirSync(langDir, { recursive: true })
+        copyFileSync(src, resolve(langDir, 'index.html'))
+      }
+    }
+  }
+}
+
 export default defineConfig({
-  plugins: [langRedirectPlugin()],
+  plugins: [langRedirectPlugin(), langCopyPlugin()],
   appType: 'mpa',
   build: {
     rollupOptions: {
