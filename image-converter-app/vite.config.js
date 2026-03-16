@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import { mkdirSync, copyFileSync, existsSync, readFileSync } from 'fs'
+import { mkdirSync, copyFileSync, writeFileSync, existsSync, readFileSync } from 'fs'
 
 const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-tw','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
 
@@ -50,18 +50,23 @@ function langCopyPlugin() {
         }).filter(Boolean)
       })
 
+      const baseHtml = readFileSync(src, 'utf-8')
+
       for (const lang of supportedLangs) {
+        // Replace lang="en" with the correct language in the html tag
+        const langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
+
         // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
         mkdirSync(langDir, { recursive: true })
-        copyFileSync(src, resolve(langDir, 'index.html'))
+        writeFileSync(resolve(langDir, 'index.html'), langHtml)
 
         // Create {lang}/{slug}/index.html for each tool page
         const slugs = slugsByLang[lang] || []
         for (const slug of slugs) {
           const slugDir = resolve(distDir, lang, slug)
           mkdirSync(slugDir, { recursive: true })
-          copyFileSync(src, resolve(slugDir, 'index.html'))
+          writeFileSync(resolve(slugDir, 'index.html'), langHtml)
         }
       }
     }
