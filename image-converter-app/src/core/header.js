@@ -278,8 +278,18 @@ export function injectHeader() {
   `
   document.head.appendChild(style)
 
-  // Set correct lang attribute for the document
+  // Prevent Chrome auto-translate from modifying page content
+  if (!document.querySelector('meta[name="google"][content="notranslate"]')) {
+    const noTranslate = document.createElement('meta')
+    noTranslate.name = 'google'
+    noTranslate.content = 'notranslate'
+    document.head.appendChild(noTranslate)
+  }
+
+  // Set correct lang attribute and prevent Chrome auto-translate
   document.documentElement.setAttribute('lang', currentLang)
+  document.documentElement.classList.add('notranslate')
+  document.documentElement.setAttribute('translate', 'no')
   if (isRTL) {
     document.documentElement.setAttribute('dir', 'rtl')
   }
