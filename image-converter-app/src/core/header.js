@@ -259,8 +259,8 @@ export function injectHeader() {
       color: #C84B31;
       text-align: center;
     }
-    @media (max-width: 600px) {
-      .lang-grid-wrap { width: calc(100vw - 32px); min-width: 0; left: 50%; }
+    @media (max-width: 768px) {
+      .lang-grid-wrap { position: fixed; left: 50%; transform: translateX(-50%); width: 90vw; max-width: 400px; bottom: auto; z-index: 9999; }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
@@ -390,6 +390,10 @@ export function injectHeader() {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
+      if (isOpen && window.innerWidth <= 768) {
+        const btn = langToggle.getBoundingClientRect()
+        langGridWrap.style.bottom = (window.innerHeight - btn.top + 8) + 'px'
+      }
     })
     langGridWrap.addEventListener('click', (e) => {
       e.stopPropagation()
