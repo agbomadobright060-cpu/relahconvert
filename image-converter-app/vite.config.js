@@ -79,6 +79,24 @@ function langCopyPlugin() {
       const enHomeHtml = baseHtml.replace('</head>', hreflangTags(null) + '  </head>')
       writeFileSync(src, enHomeHtml)
 
+      // Inject hreflang into English tool HTML files (e.g. dist/jpg-to-pdf.html)
+      const enToolSlugs = [
+        'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
+        'compress','resize','jpg-to-pdf','png-to-pdf',
+        'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
+        'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
+        'round-corners','meme-generator','blur-face','remove-background',
+        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image'
+      ]
+      for (const slug of enToolSlugs) {
+        const toolFile = resolve(distDir, slug + '.html')
+        if (existsSync(toolFile)) {
+          const toolHtml = readFileSync(toolFile, 'utf-8')
+          const updated = toolHtml.replace('</head>', hreflangTags(slug) + '  </head>')
+          writeFileSync(toolFile, updated)
+        }
+      }
+
       for (const lang of supportedLangs) {
         // Replace lang="en" with the correct language
         let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
