@@ -278,10 +278,10 @@ export function injectHeader() {
   `
   document.head.appendChild(style)
 
-  // Apply RTL to document early
+  // Set correct lang attribute for the document
+  document.documentElement.setAttribute('lang', currentLang)
   if (isRTL) {
     document.documentElement.setAttribute('dir', 'rtl')
-    document.documentElement.setAttribute('lang', 'ar')
   }
 
   const svgIcons = {

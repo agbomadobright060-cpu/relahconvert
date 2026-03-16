@@ -239,9 +239,9 @@
         return '/' + currentLang + '/' + getTranslatedSlug(currentLang, englishSlug)
       }
 
+      document.getElementById('htmlRoot').setAttribute('lang', currentLang)
       if (currentLang === 'ar') {
         document.getElementById('htmlRoot').setAttribute('dir', 'rtl')
-        document.getElementById('htmlRoot').setAttribute('lang', 'ar')
       }
 
       // ── Filter bar ────────────────────────────────────────────────────────
