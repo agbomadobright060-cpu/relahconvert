@@ -35,38 +35,69 @@ function langCopyPlugin() {
       // Read i18n.js to extract translated slugs per language
       const i18nPath = resolve(__dirname, 'src/core/i18n.js')
       const i18nSrc = readFileSync(i18nPath, 'utf-8')
-      const slugsByLang = {}
-      // Match each slugs:{...} block in order of language definitions
+      // Extract slug mappings: { fr: { compress: 'compresser-image', ... }, ... }
+      const slugMapByLang = {}
       const slugBlocks = i18nSrc.match(/slugs:\{[^}]+\}/g) || []
-      // Languages with slugs appear in same order as supportedLangs (minus 'en')
       const langsWithSlugs = supportedLangs.filter(l => l !== 'en')
       slugBlocks.forEach((block, i) => {
         if (i >= langsWithSlugs.length) return
         const lang = langsWithSlugs[i]
-        const pairs = block.replace('slugs:{', '').replace('}', '').split(',')
-        slugsByLang[lang] = pairs.map(p => {
-          const val = p.split(':')[1]
-          return val ? val.replace(/'/g, '').trim() : null
-        }).filter(Boolean)
+        const map = {}
+        const inner = block.replace('slugs:{', '').replace('}', '')
+        inner.split(',').forEach(pair => {
+          const [k, v] = pair.split(':').map(s => s ? s.replace(/'/g, '').trim() : '')
+          if (k && v) map[k] = v
+        })
+        slugMapByLang[lang] = map
       })
 
+      const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
+      // Helper: build hreflang tags for a given English tool key (or null for homepage)
+      function hreflangTags(enToolKey) {
+        const isHome = !enToolKey
+        let tags = ''
+        const allLangs = ['en', ...supportedLangs]
+        for (const l of allLangs) {
+          let href
+          if (isHome) {
+            href = l === 'en' ? base + '/' : base + '/' + l
+          } else {
+            const slug = (slugMapByLang[l] && slugMapByLang[l][enToolKey]) || enToolKey
+            href = l === 'en' ? base + '/' + enToolKey : base + '/' + l + '/' + slug
+          }
+          tags += `    <link rel="alternate" hreflang="${l}" href="${href}" />\n`
+        }
+        // x-default points to English
+        const xHref = isHome ? base + '/' : base + '/' + enToolKey
+        tags += `    <link rel="alternate" hreflang="x-default" href="${xHref}" />\n`
+        return tags
+      }
+
+      // Inject hreflang into root index.html (English homepage)
+      const enHomeHtml = baseHtml.replace('</head>', hreflangTags(null) + '  </head>')
+      writeFileSync(src, enHomeHtml)
+
       for (const lang of supportedLangs) {
-        // Replace lang="en" with the correct language in the html tag
-        const langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
+        // Replace lang="en" with the correct language
+        let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
+
+        // Inject homepage hreflang tags into <head>
+        const homeHtml = langHtml.replace('</head>', hreflangTags(null) + '  </head>')
 
         // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
         mkdirSync(langDir, { recursive: true })
-        writeFileSync(resolve(langDir, 'index.html'), langHtml)
+        writeFileSync(resolve(langDir, 'index.html'), homeHtml)
 
         // Create {lang}/{slug}/index.html for each tool page
-        const slugs = slugsByLang[lang] || []
-        for (const slug of slugs) {
-          const slugDir = resolve(distDir, lang, slug)
+        const slugMap = slugMapByLang[lang] || {}
+        for (const [enKey, localSlug] of Object.entries(slugMap)) {
+          const toolHtml = langHtml.replace('</head>', hreflangTags(enKey) + '  </head>')
+          const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
-          writeFileSync(resolve(slugDir, 'index.html'), langHtml)
+          writeFileSync(resolve(slugDir, 'index.html'), toolHtml)
         }
       }
     }
