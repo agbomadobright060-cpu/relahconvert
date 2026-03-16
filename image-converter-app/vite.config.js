@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import { mkdirSync, copyFileSync, existsSync } from 'fs'
+import { mkdirSync, copyFileSync, existsSync, readFileSync } from 'fs'
 
 const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-tw','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
 
@@ -31,10 +31,38 @@ function langCopyPlugin() {
       const distDir = resolve(__dirname, 'dist')
       const src = resolve(distDir, 'index.html')
       if (!existsSync(src)) return
+
+      // Read i18n.js to extract translated slugs per language
+      const i18nPath = resolve(__dirname, 'src/core/i18n.js')
+      const i18nSrc = readFileSync(i18nPath, 'utf-8')
+      const slugsByLang = {}
+      // Match each slugs:{...} block in order of language definitions
+      const slugBlocks = i18nSrc.match(/slugs:\{[^}]+\}/g) || []
+      // Languages with slugs appear in same order as supportedLangs (minus 'en')
+      const langsWithSlugs = supportedLangs.filter(l => l !== 'en')
+      slugBlocks.forEach((block, i) => {
+        if (i >= langsWithSlugs.length) return
+        const lang = langsWithSlugs[i]
+        const pairs = block.replace('slugs:{', '').replace('}', '').split(',')
+        slugsByLang[lang] = pairs.map(p => {
+          const val = p.split(':')[1]
+          return val ? val.replace(/'/g, '').trim() : null
+        }).filter(Boolean)
+      })
+
       for (const lang of supportedLangs) {
+        // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
         mkdirSync(langDir, { recursive: true })
         copyFileSync(src, resolve(langDir, 'index.html'))
+
+        // Create {lang}/{slug}/index.html for each tool page
+        const slugs = slugsByLang[lang] || []
+        for (const slug of slugs) {
+          const slugDir = resolve(distDir, lang, slug)
+          mkdirSync(slugDir, { recursive: true })
+          copyFileSync(src, resolve(slugDir, 'index.html'))
+        }
       }
     }
   }
