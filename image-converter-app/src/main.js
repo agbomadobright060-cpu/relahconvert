@@ -2,7 +2,7 @@ import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool, isStandaloneRoute } from './app/router.js'
 import { injectHeader } from './core/header.js'
-import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang} from './core/i18n.js'
+import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang, injectFaqSchema} from './core/i18n.js'
 
 // If a standalone tool was loaded via dynamic import (translated URL), stop here.
 // The dynamically imported module will render its own UI into #app.
@@ -123,6 +123,7 @@ const formatSelectorHTML = currentTool
 function buildSeoSection() {
   const seo = t.seo && t.seo[slug]
   if (!seo) return ''
+  injectFaqSchema(seo.faqs)
   return `
     <hr class="seo-divider" />
     <div class="seo-section">

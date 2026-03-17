@@ -1,6 +1,6 @@
 import { injectHeader } from './core/header.js'
 import { formatSize, totalBytes, sanitizeBaseName, LIMITS} from './core/utils.js'
-import { getT , getLang, localHref, injectHreflang} from './core/i18n.js'
+import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
 export function initImageToPdf({ slug: _slug } = {}) {
@@ -276,6 +276,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
     const lang = getLang()
     const langSeo = seoPdf[lang] || seoPdf['en']
     const seo = langSeo[slug] || seoPdf['en'][slug]
+    injectFaqSchema(seo.faqs)
     return `<hr class="seo-divider" /><div class="seo-section"><h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${t.seo_faq_title}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${t.seo_also_try}</h3><div class="internal-links">${seo.links.map(l => `<a href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div></div>`
   }
 

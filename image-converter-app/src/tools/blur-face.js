@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT , getLang, localHref, injectHreflang} from '../core/i18n.js'
+import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('blur-face')
 
 const t = getT()
@@ -615,6 +615,7 @@ function buildSeoSection(){
   const lang=getLang(),seo=seoBlur[lang]||seoBlur['en']
   const faqTitle=t.seo_faq_title||'Frequently Asked Questions',alsoTry=t.seo_also_try||'Also Try'
   const div=document.createElement('div');div.className='seo-section'
+  injectFaqSchema(seo.faqs)
   div.innerHTML=`
     <h2 class="seo-h2-large">${seo.h2a}</h2>
     <ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol>

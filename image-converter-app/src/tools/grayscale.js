@@ -1,7 +1,7 @@
 import { injectHeader } from '../core/header.js'
 
 // JSZip loaded dynamically
-import { getT, localHref, injectHreflang} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('grayscale')
 
 const t = getT()
@@ -349,6 +349,7 @@ applyBtn.addEventListener('click', async () => {
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
   const stepsHtml = seo.steps.map(s => `<li>${s}</li>`).join('')
+  injectFaqSchema(seo.faqs)
   const faqsHtml  = seo.faqs.map(f => `<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')
   const linksHtml = seo.links.map(l => `<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')
   const div = document.createElement('div')

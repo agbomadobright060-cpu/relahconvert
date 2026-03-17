@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('rotate')
 
 const t = getT()
@@ -337,6 +337,7 @@ zipBtn.addEventListener('click', async () => {
   const alsoTry  = t.seo_also_try  || 'Also Try'
   const div = document.createElement('div')
   div.className = 'seo-section'
+  injectFaqSchema(seo.faqs)
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
