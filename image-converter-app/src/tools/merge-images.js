@@ -130,9 +130,12 @@ const formatSelect = document.getElementById('formatSelect')
 const nextSteps    = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
 
+const MAX_FILES = 25
+const MAX_TOTAL_BYTES = 200 * 1024 * 1024 // 200MB
+
 let files = []
 let direction = 'horizontal'
-let lastBlob = null
+let lastBlobUrl = null
 
 dirH.addEventListener('click', () => { direction = 'horizontal'; dirH.classList.add('active'); dirV.classList.remove('active') })
 dirV.addEventListener('click', () => { direction = 'vertical'; dirV.classList.add('active'); dirH.classList.remove('active') })
@@ -151,6 +154,8 @@ function updateUI() {
     actionRow.classList.remove('on')
     statusText.textContent = ''
   }
+  // Revoke previous result when UI resets
+  if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null }
   previewWrap.style.display = 'none'
   dlRow.style.display = 'none'
 }
@@ -182,11 +187,21 @@ function renderCards() {
   })
 }
 
+function getTotalBytes() {
+  return files.reduce((sum, e) => sum + e.file.size, 0)
+}
+
 function addFiles(newFiles) {
+  let skipped = 0
   Array.from(newFiles).forEach(file => {
     if (!file.type.startsWith('image/')) return
+    if (files.length >= MAX_FILES) { skipped++; return }
+    if (getTotalBytes() + file.size > MAX_TOTAL_BYTES) { skipped++; return }
     files.push({ file })
   })
+  if (skipped > 0) {
+    statusText.textContent = `${skipped} file(s) skipped. Limit: ${MAX_FILES} images, 200MB total.`
+  }
   renderCards()
   updateUI()
 }
@@ -248,13 +263,16 @@ mergeBtn.addEventListener('click', async () => {
     }
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, 0.92))
-    lastBlob = blob
+    // Revoke previous result URL to free memory
+    if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null }
     const ext = mime === 'image/png' ? 'png' : 'jpg'
     const url = URL.createObjectURL(blob)
+    lastBlobUrl = url
     previewImg.src = url
     previewWrap.style.display = 'block'
     dlLink.href = url
     dlLink.download = `merged-image.${ext}`
+    dlLink.onclick = () => setTimeout(() => { URL.revokeObjectURL(url); lastBlobUrl = null }, 10000)
     dlRow.style.display = 'block'
     statusText.textContent = 'Merge complete! Preview below.'
     buildNextSteps()
