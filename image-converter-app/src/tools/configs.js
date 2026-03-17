@@ -209,4 +209,11 @@ export const tools = {
     outputFormat: null,
     slug: 'html-to-image'
   },
+  'merge-images': {
+    title: 'Merge Images',
+    description: 'Merge multiple images side by side or stacked vertically free. No upload required.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'merge-images'
+  },
 }

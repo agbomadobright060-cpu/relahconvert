@@ -218,7 +218,8 @@
               'remove-background':()=>import('/src/tools/remove-background.js'),'heic-to-jpg':()=>import('/src/tools/heic-to-jpg.js'),
               'image-to-ico':()=>import('/src/tools/image-to-ico.js'),'jpg-to-svg':()=>import('/src/tools/jpg-to-svg.js'),
               'html-to-image':()=>import('/src/tools/html-to-image.js'),'jpg-to-gif':()=>import('/src/tools/jpg-to-gif.js'),
-              'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'jpg-to-pdf':()=>import('/src/jpg-to-pdf.js'),
+              'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'merge-images':()=>import('/src/tools/merge-images.js'),
+              'jpg-to-pdf':()=>import('/src/jpg-to-pdf.js'),
               'png-to-pdf':()=>import('/src/png-to-pdf.js'),
             }
             // Clear the homepage HTML and set up a clean page for the tool
@@ -265,7 +266,7 @@
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif',
         'crop','rotate','flip','grayscale','watermark','round-corners','meme-generator','blur-face',
-        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image'
+        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images'
       ]
 
       // ── Category map ──────────────────────────────────────────────────────
@@ -300,6 +301,7 @@
         'image-to-ico':        'convert',
         'jpg-to-svg':          'convert',
         'html-to-image':  'convert',
+        'merge-images':   'edit',
       }
 
       document.querySelector('.logo').href = currentLang === 'en' ? '/' : '/' + currentLang
@@ -340,6 +342,7 @@
         'image-to-ico':      { bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="#7C3AED" opacity="0.15" stroke="#7C3AED" stroke-width="1.5"/><rect x="13" y="13" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.5"/><rect x="21" y="13" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.3"/><rect x="13" y="21" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.3"/><rect x="21" y="21" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.6"/></svg>` },
         'jpg-to-svg':           { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">SVG</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'html-to-image':   { bg: '#E0F2FE', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="3" fill="#0EA5E9" opacity="0.2" stroke="#0EA5E9" stroke-width="1.5"/><rect x="4" y="8" width="32" height="7" rx="3" fill="#0EA5E9" opacity="0.35"/><circle cx="9" cy="11.5" r="1.5" fill="#fff"/><circle cx="14" cy="11.5" r="1.5" fill="#fff"/><circle cx="19" cy="11.5" r="1.5" fill="#fff"/><rect x="8" y="19" width="24" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/><rect x="8" y="24" width="16" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/></svg>` },
+        'merge-images':    { bg: '#FEF3C7', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="10" width="14" height="20" rx="3" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1.5"/><rect x="22" y="10" width="14" height="20" rx="3" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1.5"/><path d="M18 17l2 3-2 3" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 17l-2 3 2 3" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
       }
 
       document.getElementById('dropdownInner').innerHTML =
@@ -391,6 +394,7 @@
         { slug: 'image-to-ico',      title: t.nav_short['image-to-ico'] || 'Image to ICO',           desc: cardDesc('image-to-ico',      'Convert image to ICO favicon free.'),        cat: 'convert' },
         { slug: 'jpg-to-svg',        title: t.nav_short['jpg-to-svg']   || 'JPG to SVG',             desc: cardDesc('jpg-to-svg',        'Convert JPG to SVG free.'),                  cat: 'convert' },
         { slug: 'html-to-image',     title: t.nav_short?.['html-to-image'] || 'HTML to Image',       desc: t.hti_desc || 'Capture any website as a JPG or PNG image.',              cat: 'convert' },
+        { slug: 'merge-images',      title: t.nav_short?.['merge-images']  || 'Merge Images',        desc: cardDesc('merge_images',      'Merge multiple images side by side or stacked.'), cat: 'edit' },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {

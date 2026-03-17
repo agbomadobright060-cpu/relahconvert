@@ -86,7 +86,7 @@ function langCopyPlugin() {
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
         'round-corners','meme-generator','blur-face','remove-background',
-        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image'
+        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
@@ -159,6 +159,7 @@ export default defineConfig({
         'image-to-ico':      resolve(__dirname, 'image-to-ico.html'),
         'jpg-to-svg':        resolve(__dirname, 'jpg-to-svg.html'),
         'html-to-image':     resolve(__dirname, 'html-to-image.html'),
+        'merge-images':      resolve(__dirname, 'merge-images.html'),
       }
     }
   }
