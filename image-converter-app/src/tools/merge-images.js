@@ -7,7 +7,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['merge-images']) || 'Merge Images'
 const seoData   = t.seo && t.seo['merge-images']
-const descText  = seoData ? seoData.h2a : 'Merge multiple images side by side or stacked vertically. Files never leave your device.'
+const descText  = seoData ? seoData.h2a : 'Merge multiple images side by side or stacked vertically. Free and private — files never leave your device.'
 const selectLbl = t.select_images || 'Select Images'
 const dlBtn     = t.download || 'Download'
 const parts     = toolName.split(' ')
@@ -76,7 +76,7 @@ style.textContent = `
   .seo-link:hover{border-color:#C84B31;color:#C84B31;}
 `
 document.head.appendChild(style)
-document.title = `${toolName} Free | No Upload — RelahConvert`
+document.title = `${toolName} Free & Private | RelahConvert`
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
