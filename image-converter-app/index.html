@@ -246,6 +246,15 @@
         document.getElementById('htmlRoot').setAttribute('dir', 'rtl')
       }
 
+      // Dynamic title and meta description per language
+      if (t.home_title) { document.title = t.home_title }
+      if (t.home_meta_description) {
+        const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta')
+        metaDesc.name = 'description'
+        metaDesc.content = t.home_meta_description
+        if (!metaDesc.parentNode) document.head.appendChild(metaDesc)
+      }
+
       // ── Filter bar ────────────────────────────────────────────────────────
       const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create', privacy: 'Privacy' }
       document.getElementById('filterBar').innerHTML = [
