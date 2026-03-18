@@ -9,7 +9,7 @@ export function injectHeader() {
   // Detect the current English tool key from the URL
   // Handles both /compress and /fr/compresser-image
   const activeToolKey = (function() {
-    const path = window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0]
+    const path = decodeURIComponent(window.location.pathname).replace(/^\/|\/$/g, '').split('?')[0]
     if (!path) return null
     if (tools[path]) return path
     const segs = path.split('/')

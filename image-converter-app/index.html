@@ -201,7 +201,7 @@
 
       // Handle translated URLs served via catch-all
       let __isToolRoute = false
-      const __segs = window.location.pathname.replace(/^\/|\/$/g, '').split('/')
+      const __segs = decodeURIComponent(window.location.pathname).replace(/^\/|\/$/g, '').split('/')
       const __lang = __segs[0] ? supportedLangs.find(l => l.toLowerCase() === __segs[0].toLowerCase()) : null
       if (__lang) {
         setLang(__lang)
