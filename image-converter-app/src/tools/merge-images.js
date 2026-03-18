@@ -269,6 +269,15 @@ function safeMax(arr) {
   var m = arr[0]; for (var i = 1; i < arr.length; i++) { if (arr[i] > m) m = arr[i] } return m
 }
 
+// Older iOS Safari has canvas size limits (~16MP). Cap dimensions to stay safe.
+var MAX_CANVAS_AREA = 16777216 // 4096*4096
+function clampCanvas(w, h) {
+  var area = w * h
+  if (area <= MAX_CANVAS_AREA) return { w: w, h: h }
+  var ratio = Math.sqrt(MAX_CANVAS_AREA / area)
+  return { w: Math.floor(w * ratio), h: Math.floor(h * ratio) }
+}
+
 // canvas.toBlob polyfill for older iOS Safari
 function dataURLtoBlob(dataURL) {
   if (!dataURL || typeof dataURL !== 'string') throw new Error('Invalid dataURL')
@@ -321,30 +330,36 @@ mergeBtn.addEventListener('click', function () {
     var ctx = canvas.getContext('2d')
     var mime = formatSelect.value
     var sizing = sizingSelect.value
-    var i
+    var i, clamped, scaleDown
 
     if (sizing === 'fit') {
       if (direction === 'horizontal') {
         var maxH = safeMax(images.map(function (img) { return img.naturalHeight }))
         var totalW = images.reduce(function (sum, img) { return sum + img.naturalWidth }, 0)
-        canvas.width = totalW
-        canvas.height = maxH
-        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
+        clamped = clampCanvas(totalW, maxH)
+        scaleDown = clamped.w / totalW
+        canvas.width = clamped.w
+        canvas.height = clamped.h
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, clamped.w, clamped.h) }
         var x = 0
         for (i = 0; i < images.length; i++) {
-          ctx.drawImage(images[i], x, 0)
-          x += images[i].naturalWidth
+          var dw = Math.round(images[i].naturalWidth * scaleDown)
+          ctx.drawImage(images[i], x, 0, dw, clamped.h)
+          x += dw
         }
       } else {
         var maxW = safeMax(images.map(function (img) { return img.naturalWidth }))
         var totalH = images.reduce(function (sum, img) { return sum + img.naturalHeight }, 0)
-        canvas.width = maxW
-        canvas.height = totalH
-        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
+        clamped = clampCanvas(maxW, totalH)
+        scaleDown = clamped.h / totalH
+        canvas.width = clamped.w
+        canvas.height = clamped.h
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, clamped.w, clamped.h) }
         var y = 0
         for (i = 0; i < images.length; i++) {
-          ctx.drawImage(images[i], 0, y)
-          y += images[i].naturalHeight
+          var dh = Math.round(images[i].naturalHeight * scaleDown)
+          ctx.drawImage(images[i], 0, y, clamped.w, dh)
+          y += dh
         }
       }
     } else {
@@ -354,14 +369,16 @@ mergeBtn.addEventListener('click', function () {
           var scale = maxH2 / img.naturalHeight
           return sum + Math.round(img.naturalWidth * scale)
         }, 0)
-        canvas.width = totalW2
-        canvas.height = maxH2
-        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW2, maxH2) }
+        clamped = clampCanvas(totalW2, maxH2)
+        scaleDown = clamped.w / totalW2
+        canvas.width = clamped.w
+        canvas.height = clamped.h
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, clamped.w, clamped.h) }
         var x2 = 0
         for (i = 0; i < images.length; i++) {
-          var scale = maxH2 / images[i].naturalHeight
-          var w = Math.round(images[i].naturalWidth * scale)
-          ctx.drawImage(images[i], x2, 0, w, maxH2)
+          var s = maxH2 / images[i].naturalHeight
+          var w = Math.round(images[i].naturalWidth * s * scaleDown)
+          ctx.drawImage(images[i], x2, 0, w, clamped.h)
           x2 += w
         }
       } else {
@@ -370,14 +387,16 @@ mergeBtn.addEventListener('click', function () {
           var scale2 = maxW2 / img.naturalWidth
           return sum + Math.round(img.naturalHeight * scale2)
         }, 0)
-        canvas.width = maxW2
-        canvas.height = totalH2
-        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW2, totalH2) }
+        clamped = clampCanvas(maxW2, totalH2)
+        scaleDown = clamped.h / totalH2
+        canvas.width = clamped.w
+        canvas.height = clamped.h
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, clamped.w, clamped.h) }
         var y2 = 0
         for (i = 0; i < images.length; i++) {
-          var scale3 = maxW2 / images[i].naturalWidth
-          var h = Math.round(images[i].naturalHeight * scale3)
-          ctx.drawImage(images[i], 0, y2, maxW2, h)
+          var s2 = maxW2 / images[i].naturalWidth
+          var h = Math.round(images[i].naturalHeight * s2 * scaleDown)
+          ctx.drawImage(images[i], 0, y2, clamped.w, h)
           y2 += h
         }
       }
@@ -386,7 +405,8 @@ mergeBtn.addEventListener('click', function () {
     // Revoke previous result URL to free memory
     if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null }
 
-    var blobPromise
+    // Generate data URL for preview and download (works on all iOS versions)
+    var ext, dataURL, dlHref
     if (mime === 'application/pdf') {
       var pxToMm = 25.4 / 96
       var wMm = canvas.width * pxToMm
@@ -396,28 +416,35 @@ mergeBtn.addEventListener('click', function () {
       var imgData = canvas.toDataURL('image/jpeg', 0.92)
       pdf.addImage(imgData, 'JPEG', 0, 0, wMm, hMm)
       var pdfBlob = pdf.output('blob')
-      blobPromise = Promise.resolve({ blob: pdfBlob, ext: 'pdf', previewSrc: canvas.toDataURL('image/png') })
+      dlHref = URL.createObjectURL(pdfBlob)
+      dataURL = canvas.toDataURL('image/png')
+      ext = 'pdf'
     } else {
-      var ext = mime === 'image/png' ? 'png' : 'jpg'
-      blobPromise = canvasToBlob(canvas, mime, 0.92).then(function (blob) {
-        var url = URL.createObjectURL(blob)
-        return { blob: blob, ext: ext, previewSrc: url }
-      })
+      ext = mime === 'image/png' ? 'png' : 'jpg'
+      dataURL = canvas.toDataURL(mime, 0.92)
+      dlHref = dataURL
     }
 
-    return blobPromise.then(function (result) {
-      var url = result.previewSrc
-      if (result.ext === 'pdf') url = URL.createObjectURL(result.blob)
-      lastBlobUrl = url
-      previewImg.src = result.previewSrc
-      previewWrap.style.display = 'block'
-      dlLink.href = url
-      dlLink.download = 'merged-image.' + result.ext
-      dlLink.onclick = function () { setTimeout(function () { URL.revokeObjectURL(url); lastBlobUrl = null }, 10000) }
-      dlRow.style.display = 'block'
-      statusText.textContent = 'Merge complete! Preview below.'
-      buildNextSteps()
-    })
+    lastBlobUrl = dlHref
+    previewImg.src = dataURL
+    previewWrap.style.display = 'block'
+    dlLink.href = dlHref
+    dlLink.download = 'merged-image.' + ext
+    dlLink.onclick = function (e) {
+      // Older iOS Safari doesn't support download attr on blob/data URLs — open in new tab
+      if (/iP(hone|od|ad)/.test(navigator.userAgent)) {
+        e.preventDefault()
+        var win = window.open()
+        if (win) { win.document.write('<img src="' + dataURL + '" style="max-width:100%">'); win.document.title = 'merged-image.' + ext }
+      } else {
+        setTimeout(function () { if (lastBlobUrl && lastBlobUrl.indexOf('blob:') === 0) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null } }, 10000)
+      }
+    }
+    dlRow.style.display = 'block'
+    statusText.textContent = 'Merge complete! Preview below.'
+    buildNextSteps()
+
+    return Promise.resolve()
   }).catch(function (e) {
     statusText.textContent = 'Merge failed: ' + (e.message || 'Unknown error')
   }).then(function () {
