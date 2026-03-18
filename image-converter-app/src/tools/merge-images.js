@@ -252,25 +252,37 @@ function safeMax(arr) {
 }
 
 // canvas.toBlob polyfill for older iOS Safari
+function dataURLtoBlob(dataURL) {
+  var parts = dataURL.split(',')
+  var byteString = atob(parts[1])
+  var mimeType = parts[0].match(/:(.*?);/)[1]
+  var ab = new ArrayBuffer(byteString.length)
+  var ia = new Uint8Array(ab)
+  for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i)
+  return new Blob([ab], { type: mimeType })
+}
+
 function canvasToBlob(canvas, mime, quality) {
   return new Promise(function (resolve, reject) {
     try {
       if (canvas.toBlob) {
         canvas.toBlob(function (blob) {
-          if (blob) resolve(blob); else reject(new Error('toBlob returned null'))
+          if (blob) {
+            resolve(blob)
+          } else {
+            // toBlob returned null — fallback to dataURL (older iOS Safari)
+            resolve(dataURLtoBlob(canvas.toDataURL(mime, quality)))
+          }
         }, mime, quality)
       } else {
-        // Fallback: convert dataURL to Blob manually
-        var dataURL = canvas.toDataURL(mime, quality)
-        var parts = dataURL.split(',')
-        var byteString = atob(parts[1])
-        var mimeType = parts[0].match(/:(.*?);/)[1]
-        var ab = new ArrayBuffer(byteString.length)
-        var ia = new Uint8Array(ab)
-        for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i)
-        resolve(new Blob([ab], { type: mimeType }))
+        // No toBlob support — fallback to dataURL
+        resolve(dataURLtoBlob(canvas.toDataURL(mime, quality)))
       }
-    } catch (e) { reject(e) }
+    } catch (e) {
+      // toBlob threw — fallback to dataURL
+      try { resolve(dataURLtoBlob(canvas.toDataURL(mime, quality))) }
+      catch (e2) { reject(e2) }
+    }
   })
 }
 
