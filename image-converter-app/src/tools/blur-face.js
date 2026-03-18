@@ -494,7 +494,7 @@ function renderClean(entry){
         const ix=Math.max(0,Math.round(rx)),iy=Math.max(0,Math.round(ry))
         const iw=Math.min(tc.width-ix,Math.round(rw)),ih=Math.min(tc.height-iy,Math.round(rh))
         if(iw<2||ih<2)return
-        const bs=Math.max(4,Math.round((r.amount||blurAmount)*0.8))
+        const bs=Math.max(4,Math.round((r.amount||blurAmount)*0.8/scale))
         const id=tctx.getImageData(ix,iy,iw,ih),d=id.data
         for(let by=0;by<ih;by+=bs)for(let bx=0;bx<iw;bx+=bs){
           const bw=Math.min(bs,iw-bx),bh=Math.min(bs,ih-by)
