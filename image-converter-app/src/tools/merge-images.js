@@ -236,32 +236,28 @@ function addFiles(newFiles) {
   updateUI()
 }
 
+// Track blob URLs so we can revoke AFTER drawImage, not before
+var _imgBlobUrls = []
 function loadImage(file) {
   return new Promise(function (resolve, reject) {
     var img = new Image()
     var url = URL.createObjectURL(file)
+    _imgBlobUrls.push(url)
     img.onload = function () {
-      // Use decode() if available to ensure image is fully decoded (older iOS Safari fix)
+      // Do NOT revoke blob URL here — older iOS loses pixel data if revoked before drawImage
       if (img.decode) {
-        img.decode().then(function () {
-          URL.revokeObjectURL(url)
-          resolve(img)
-        }).catch(function () {
-          // decode() failed but image loaded — still usable
-          URL.revokeObjectURL(url)
-          resolve(img)
-        })
-      } else if (img.naturalWidth === 0) {
-        // Image not yet decoded — wait a frame for older iOS
-        setTimeout(function () { URL.revokeObjectURL(url); resolve(img) }, 50)
+        img.decode().then(function () { resolve(img) }).catch(function () { resolve(img) })
       } else {
-        URL.revokeObjectURL(url)
-        resolve(img)
+        setTimeout(function () { resolve(img) }, 50)
       }
     }
     img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Failed to load image')) }
     img.src = url
   })
+}
+function revokeImageUrls() {
+  _imgBlobUrls.forEach(function (u) { try { URL.revokeObjectURL(u) } catch (e) {} })
+  _imgBlobUrls = []
 }
 
 // Safe max — avoids call stack overflow with spread on older engines
@@ -269,8 +265,8 @@ function safeMax(arr) {
   var m = arr[0]; for (var i = 1; i < arr.length; i++) { if (arr[i] > m) m = arr[i] } return m
 }
 
-// Older iOS Safari has canvas size limits (~16MP). Cap dimensions to stay safe.
-var MAX_CANVAS_AREA = 16777216 // 4096*4096
+// Older iOS Safari has canvas size limits. iPhone 8 (2GB) can fail above ~5MP.
+var MAX_CANVAS_AREA = 4194304 // 2048*2048 — safe for all iOS devices
 function clampCanvas(w, h) {
   var area = w * h
   if (area <= MAX_CANVAS_AREA) return { w: w, h: h }
@@ -328,6 +324,7 @@ mergeBtn.addEventListener('click', function () {
   Promise.all(files.map(function (f) { return loadImage(f.file) })).then(function (images) {
     var canvas = document.createElement('canvas')
     var ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas not supported on this device')
     var mime = formatSelect.value
     var sizing = sizingSelect.value
     var i, clamped, scaleDown
@@ -402,6 +399,9 @@ mergeBtn.addEventListener('click', function () {
       }
     }
 
+    // Now that all drawImage calls are done, revoke the source blob URLs
+    revokeImageUrls()
+
     // Revoke previous result URL to free memory
     if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null }
 
@@ -430,15 +430,9 @@ mergeBtn.addEventListener('click', function () {
     previewWrap.style.display = 'block'
     dlLink.href = dlHref
     dlLink.download = 'merged-image.' + ext
-    dlLink.onclick = function (e) {
-      // Older iOS Safari doesn't support download attr on blob/data URLs — open in new tab
-      if (/iP(hone|od|ad)/.test(navigator.userAgent)) {
-        e.preventDefault()
-        var win = window.open()
-        if (win) { win.document.write('<img src="' + dataURL + '" style="max-width:100%">'); win.document.title = 'merged-image.' + ext }
-      } else {
-        setTimeout(function () { if (lastBlobUrl && lastBlobUrl.indexOf('blob:') === 0) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null } }, 10000)
-      }
+    // For iOS: create a temporary <a> and click it programmatically if needed
+    dlLink.onclick = function () {
+      setTimeout(function () { if (lastBlobUrl && lastBlobUrl.indexOf('blob:') === 0) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null } }, 10000)
     }
     dlRow.style.display = 'block'
     statusText.textContent = 'Merge complete! Preview below.'
