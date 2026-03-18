@@ -1,5 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { jsPDF } from 'jspdf'
 injectHreflang('merge-images')
 
 const t = getT()
@@ -94,6 +95,7 @@ document.querySelector('#app').innerHTML = `
         <select id="formatSelect">
           <option value="image/png">PNG</option>
           <option value="image/jpeg">JPG</option>
+          <option value="application/pdf">PDF</option>
         </select>
       </div>
     </div>
@@ -236,7 +238,7 @@ mergeBtn.addEventListener('click', async () => {
       }, 0)
       canvas.width = totalW
       canvas.height = maxH
-      if (mime === 'image/jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
+      if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
       let x = 0
       for (const img of images) {
         const scale = maxH / img.naturalHeight
@@ -252,7 +254,7 @@ mergeBtn.addEventListener('click', async () => {
       }, 0)
       canvas.width = maxW
       canvas.height = totalH
-      if (mime === 'image/jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
+      if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
       let y = 0
       for (const img of images) {
         const scale = maxW / img.naturalWidth
@@ -262,13 +264,29 @@ mergeBtn.addEventListener('click', async () => {
       }
     }
 
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, 0.92))
     // Revoke previous result URL to free memory
     if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null }
-    const ext = mime === 'image/png' ? 'png' : 'jpg'
-    const url = URL.createObjectURL(blob)
+
+    let url, ext
+    if (mime === 'application/pdf') {
+      const pxToMm = 25.4 / 96
+      const wMm = canvas.width * pxToMm
+      const hMm = canvas.height * pxToMm
+      const orientation = wMm >= hMm ? 'l' : 'p'
+      const pdf = new jsPDF({ orientation, unit: 'mm', format: [wMm, hMm] })
+      const imgData = canvas.toDataURL('image/jpeg', 0.92)
+      pdf.addImage(imgData, 'JPEG', 0, 0, wMm, hMm)
+      const blob = pdf.output('blob')
+      url = URL.createObjectURL(blob)
+      ext = 'pdf'
+    } else {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, 0.92))
+      url = URL.createObjectURL(blob)
+      ext = mime === 'image/png' ? 'png' : 'jpg'
+    }
+
     lastBlobUrl = url
-    previewImg.src = url
+    previewImg.src = mime === 'application/pdf' ? canvas.toDataURL('image/png') : url
     previewWrap.style.display = 'block'
     dlLink.href = url
     dlLink.download = `merged-image.${ext}`

@@ -211,7 +211,7 @@ export const tools = {
   },
   'merge-images': {
     title: 'Merge Images',
-    description: 'Merge multiple images side by side or stacked vertically free. No upload required.',
+    description: 'Merge multiple images side by side or stacked vertically. Save as PNG, JPG, or PDF. No upload required.',
     inputFormats: [],
     outputFormat: null,
     slug: 'merge-images'
