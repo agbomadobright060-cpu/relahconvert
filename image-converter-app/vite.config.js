@@ -51,6 +51,34 @@ function langCopyPlugin() {
         slugMapByLang[lang] = map
       })
 
+      // Extract home_title and home_meta_description per language
+      const homeTitleByLang = {}
+      const homeDescByLang = {}
+      const allLangsForMeta = ['en', ...supportedLangs]
+      for (const lang of allLangsForMeta) {
+        const langKey = lang.includes('-') ? `'${lang}'` : lang
+        // Find start of this lang's top-level object (anchored to line start with 2-space indent)
+        const prefix = '\n  '
+        let startIdx = i18nSrc.indexOf(prefix + langKey + ':{')
+        if (startIdx === -1) startIdx = i18nSrc.indexOf(prefix + langKey + ': {')
+        if (startIdx === -1) continue
+        // Find start of next lang's object to bound search
+        let endIdx = i18nSrc.length
+        for (const other of allLangsForMeta) {
+          if (other === lang) continue
+          const otherKey = other.includes('-') ? `'${other}'` : other
+          let otherIdx = i18nSrc.indexOf(prefix + otherKey + ':{', startIdx + 1)
+          if (otherIdx === -1) otherIdx = i18nSrc.indexOf(prefix + otherKey + ': {', startIdx + 1)
+          if (otherIdx > startIdx && otherIdx < endIdx) endIdx = otherIdx
+        }
+        const block = i18nSrc.substring(startIdx, endIdx)
+        // Extract values handling both quote styles
+        const titleM = block.match(/home_title:'([^']*)'/) || block.match(/home_title:"([^"]*)"/)
+        const descM = block.match(/home_meta_description:'([^']*)'/) || block.match(/home_meta_description:"([^"]*)"/)
+        if (titleM) homeTitleByLang[lang] = titleM[1]
+        if (descM) homeDescByLang[lang] = descM[1]
+      }
+
       const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
@@ -75,8 +103,11 @@ function langCopyPlugin() {
         return tags
       }
 
-      // Inject hreflang into root index.html (English homepage)
-      const enHomeHtml = baseHtml.replace('</head>', hreflangTags(null) + '  </head>')
+      // Inject meta description and hreflang into root index.html (English homepage)
+      const enDescTag = homeDescByLang['en']
+        ? `    <meta name="description" content="${homeDescByLang['en']}" />\n`
+        : ''
+      const enHomeHtml = baseHtml.replace('</head>', enDescTag + hreflangTags(null) + '  </head>')
       writeFileSync(src, enHomeHtml)
 
       // Inject hreflang into English tool HTML files (e.g. dist/jpg-to-pdf.html)
@@ -101,8 +132,16 @@ function langCopyPlugin() {
         // Replace lang="en" with the correct language
         let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
 
-        // Inject homepage hreflang tags into <head>
-        const homeHtml = langHtml.replace('</head>', hreflangTags(null) + '  </head>')
+        // Inject translated title and meta description into homepage
+        let homeHtml = langHtml
+        if (homeTitleByLang[lang]) {
+          homeHtml = homeHtml.replace(/<title>[^<]*<\/title>/, `<title>${homeTitleByLang[lang]}</title>`)
+        }
+        const descTag = homeDescByLang[lang]
+          ? `    <meta name="description" content="${homeDescByLang[lang]}" />\n`
+          : ''
+        // Inject hreflang tags and meta description into <head>
+        homeHtml = homeHtml.replace('</head>', descTag + hreflangTags(null) + '  </head>')
 
         // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
