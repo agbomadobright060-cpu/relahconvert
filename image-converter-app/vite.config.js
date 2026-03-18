@@ -62,10 +62,10 @@ function langCopyPlugin() {
         for (const l of allLangs) {
           let href
           if (isHome) {
-            href = l === 'en' ? base + '/' : base + '/' + l
+            href = l === 'en' ? base + '/' : base + '/' + l + '/'
           } else {
             const slug = (slugMapByLang[l] && slugMapByLang[l][enToolKey]) || enToolKey
-            href = l === 'en' ? base + '/' + enToolKey : base + '/' + l + '/' + slug
+            href = l === 'en' ? base + '/' + enToolKey : base + '/' + l + '/' + slug + '/'
           }
           tags += `    <link rel="alternate" hreflang="${l}" href="${href}" />\n`
         }

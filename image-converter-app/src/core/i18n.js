@@ -6639,9 +6639,9 @@ export function injectHreflang(toolKey) {
   for (const lang of supportedLangs) {
     let href
     if (isHome) {
-      href = lang === 'en' ? base + '/' : base + '/' + lang
+      href = lang === 'en' ? base + '/' : base + '/' + lang + '/'
     } else {
-      href = lang === 'en' ? base + '/' + toolKey : base + '/' + lang + '/' + translatedSlug(lang, toolKey)
+      href = lang === 'en' ? base + '/' + toolKey : base + '/' + lang + '/' + translatedSlug(lang, toolKey) + '/'
     }
     const link = document.createElement('link')
     link.rel = 'alternate'
