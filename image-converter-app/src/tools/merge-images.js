@@ -30,6 +30,13 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:#A63D26;}
+  .drop-zone{border:2px dashed #DDD5C8;border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:18px;background:#FAFAF8;}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:#C84B31;background:#FDE8E3;}
+  .drop-zone svg{margin-bottom:6px;color:#C4B8A8;transition:color 0.2s;}
+  .drop-zone:hover svg,.drop-zone.drag-over svg{color:#C84B31;}
+  .drop-zone p{margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#9A8A7A;}
+  .drop-zone p span{color:#C84B31;font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+  .drop-zone:hover p span,.drop-zone.drag-over p span{color:#A63D26;}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
   .file-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:visible;position:relative;padding-bottom:8px;}
   .card-img-wrap{position:relative;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:#F5F0E8;border-radius:10px 10px 0 0;overflow:hidden;}
@@ -80,8 +87,11 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:#C84B31;">${h1Em}</em></h1>
       <p style="font-size:13px;color:#7A6A5A;margin:0 0 16px;">${descText}</p>
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint}</span>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
+    </div>
+    <div class="drop-zone" id="dropZone">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <p>${dropHint} <span>${selectLbl}</span></p>
     </div>
     <div id="fileGrid"></div>
     <div class="options-row" id="optionsRow" style="display:none;">
@@ -321,6 +331,12 @@ function buildNextSteps() {
 }
 
 fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = '' })
+
+const dropZone = document.getElementById('dropZone')
+dropZone.addEventListener('click', () => fileInput.click())
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over') })
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'))
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
