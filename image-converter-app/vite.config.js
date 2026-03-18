@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { mkdirSync, copyFileSync, writeFileSync, existsSync, readFileSync } from 'fs'
 
-const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-tw','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
+const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
 
 function langRedirectPlugin() {
   return {

@@ -80,7 +80,11 @@ if (document.head) {
 }
 
 function buildTitleHTML() {
-  if (!currentTool) return 'Image <em style="font-style:italic; color:#C84B31;">Converter</em>'
+  if (!currentTool) {
+    const t1 = t.converter_title || 'Image'
+    const t2 = t.converter_title_em || 'Converter'
+    return t1 + ' <em style="font-style:italic; color:#C84B31;">' + t2 + '</em>'
+  }
   const translatedTitle = t.tool_title && t.tool_title[slug]
   if (translatedTitle) {
     const words = translatedTitle.split(' ')
@@ -93,7 +97,7 @@ function buildTitleHTML() {
 }
 
 const titleHTML = buildTitleHTML()
-const descText = (t.tool_desc && t.tool_desc[slug]) || (currentTool ? currentTool.description : 'Convert images instantly. Files never leave your device.')
+const descText = (t.tool_desc && t.tool_desc[slug]) || (currentTool ? currentTool.description : (t.converter_desc || 'Convert images instantly. Files never leave your device.'))
 
 const relatedLinksMap = {
   'jpg-to-png':  [{ href:'/webp-to-png', slug:'webp-to-png' }],
