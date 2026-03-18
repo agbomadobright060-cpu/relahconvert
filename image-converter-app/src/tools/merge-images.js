@@ -253,9 +253,11 @@ function safeMax(arr) {
 
 // canvas.toBlob polyfill for older iOS Safari
 function dataURLtoBlob(dataURL) {
+  if (!dataURL || typeof dataURL !== 'string') throw new Error('Invalid dataURL')
   var parts = dataURL.split(',')
-  var byteString = atob(parts[1])
-  var mimeType = parts[0].match(/:(.*?);/)[1]
+  var byteString = parts[1] ? atob(parts[1]) : ''
+  var mimeMatch = parts[0] && parts[0].match(/:(.*?);/)
+  var mimeType = mimeMatch ? mimeMatch[1] : 'image/png'
   var ab = new ArrayBuffer(byteString.length)
   var ia = new Uint8Array(ab)
   for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i)
