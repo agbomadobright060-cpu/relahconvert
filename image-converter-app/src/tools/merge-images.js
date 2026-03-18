@@ -264,24 +264,28 @@ function dataURLtoBlob(dataURL) {
 
 function canvasToBlob(canvas, mime, quality) {
   return new Promise(function (resolve, reject) {
+    function fallback() {
+      try { resolve(dataURLtoBlob(canvas.toDataURL(mime, quality))) }
+      catch (e) { reject(e) }
+    }
     try {
       if (canvas.toBlob) {
+        var done = false
+        // Timeout: if toBlob callback never fires (older iOS Safari), fallback
+        var timer = setTimeout(function () {
+          if (!done) { done = true; fallback() }
+        }, 2000)
         canvas.toBlob(function (blob) {
-          if (blob) {
-            resolve(blob)
-          } else {
-            // toBlob returned null — fallback to dataURL (older iOS Safari)
-            resolve(dataURLtoBlob(canvas.toDataURL(mime, quality)))
-          }
+          if (done) return
+          done = true
+          clearTimeout(timer)
+          if (blob) { resolve(blob) } else { fallback() }
         }, mime, quality)
       } else {
-        // No toBlob support — fallback to dataURL
-        resolve(dataURLtoBlob(canvas.toDataURL(mime, quality)))
+        fallback()
       }
     } catch (e) {
-      // toBlob threw — fallback to dataURL
-      try { resolve(dataURLtoBlob(canvas.toDataURL(mime, quality))) }
-      catch (e2) { reject(e2) }
+      fallback()
     }
   })
 }
