@@ -12,11 +12,17 @@ mainInit()
 
 function mainInit() {
 const currentTool = getCurrentTool()
+// No generic converter — redirect to homepage if no specific tool matched
+if (!currentTool) {
+  const lang = getLang()
+  window.location.href = lang === 'en' ? '/' : '/' + lang
+  return
+}
 const bg = '#F2F2F2'
 const t = getT()
 const currentLang = getLang()
-const slug = currentTool ? currentTool.slug : ''
-if (slug) injectHreflang(slug)
+const slug = currentTool.slug
+injectHreflang(slug)
 
 function localHref(englishSlug) {
   if (currentLang === 'en') return '/' + englishSlug
@@ -80,11 +86,6 @@ if (document.head) {
 }
 
 function buildTitleHTML() {
-  if (!currentTool) {
-    const t1 = t.converter_title || 'Image'
-    const t2 = t.converter_title_em || 'Converter'
-    return t1 + ' <em style="font-style:italic; color:#C84B31;">' + t2 + '</em>'
-  }
   const translatedTitle = t.tool_title && t.tool_title[slug]
   if (translatedTitle) {
     const words = translatedTitle.split(' ')
@@ -97,7 +98,7 @@ function buildTitleHTML() {
 }
 
 const titleHTML = buildTitleHTML()
-const descText = (t.tool_desc && t.tool_desc[slug]) || (currentTool ? currentTool.description : (t.converter_desc || 'Convert images instantly. Files never leave your device.'))
+const descText = (t.tool_desc && t.tool_desc[slug]) || currentTool.description
 
 const relatedLinksMap = {
   'jpg-to-png':  [{ href:'/webp-to-png', slug:'webp-to-png' }],
@@ -113,16 +114,7 @@ const relatedHTML = relatedRaw.length ? `
     ${t.also_convert} ${relatedRaw.map(r => `<a href="${localHref(r.slug)}" class="related-link">${t.nav_short[r.slug]}</a>`).join(' · ')}
   </div>` : ''
 
-const formatSelectorHTML = currentTool
-  ? `<input type="hidden" id="formatSelect" value="${currentTool.outputFormat}" />`
-  : `<div style="background:#ffffff; border:1px solid #DDD5C8; border-radius:12px; padding:16px; margin-bottom:12px;">
-      <div style="font-size:10px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;">${t.convert_output_format}</div>
-      <select id="formatSelect" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500; background:#FAF6EF; color:#2C1810; outline:none; cursor:pointer; transition:all 0.15s;">
-        <option value="image/jpeg">${t.convert_to_jpg}</option>
-        <option value="image/png">${t.convert_to_png}</option>
-        <option value="image/webp">${t.convert_to_webp}</option>
-      </select>
-    </div>`
+const formatSelectorHTML = `<input type="hidden" id="formatSelect" value="${currentTool.outputFormat}" />`
 
 function buildSeoSection() {
   const seo = t.seo && t.seo[slug]
