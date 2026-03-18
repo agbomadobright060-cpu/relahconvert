@@ -19,6 +19,9 @@ const mergeHorizontalLbl = t.merge_horizontal || 'Horizontal'
 const mergeVerticalLbl   = t.merge_vertical || 'Vertical'
 const mergeDirectionLbl  = t.merge_direction || 'Direction'
 const mergeFormatLbl     = t.merge_format || 'Format'
+const mergeSizingLbl     = t.merge_sizing || 'Sizing'
+const autoAdjustLbl      = t.merge_auto_adjust || 'Auto Adjust'
+const fitContentLbl      = t.merge_fit_content || 'Fit to Content'
 const mergeBtnLbl        = t.merge_btn || 'Merge Images'
 const mergeBtnLoadingLbl = t.merge_btn_loading || 'Merging...'
 
@@ -111,6 +114,13 @@ document.querySelector('#app').innerHTML = `
           <option value="application/pdf">PDF</option>
         </select>
       </div>
+      <div class="opt-group">
+        <label>${mergeSizingLbl}:</label>
+        <select id="sizingSelect">
+          <option value="auto">${autoAdjustLbl}</option>
+          <option value="fit">${fitContentLbl}</option>
+        </select>
+      </div>
     </div>
     <div class="status-text" id="statusText"></div>
     <div id="actionRow">
@@ -142,6 +152,7 @@ const dlLink       = document.getElementById('dlLink')
 const dirH         = document.getElementById('dirH')
 const dirV         = document.getElementById('dirV')
 const formatSelect = document.getElementById('formatSelect')
+const sizingSelect = document.getElementById('sizingSelect')
 const nextSteps    = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
 
@@ -247,37 +258,67 @@ mergeBtn.addEventListener('click', async () => {
     const ctx = canvas.getContext('2d')
     const mime = formatSelect.value
 
-    if (direction === 'horizontal') {
-      const maxH = Math.max(...images.map(img => img.naturalHeight))
-      const totalW = images.reduce((sum, img) => {
-        const scale = maxH / img.naturalHeight
-        return sum + Math.round(img.naturalWidth * scale)
-      }, 0)
-      canvas.width = totalW
-      canvas.height = maxH
-      if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
-      let x = 0
-      for (const img of images) {
-        const scale = maxH / img.naturalHeight
-        const w = Math.round(img.naturalWidth * scale)
-        ctx.drawImage(img, x, 0, w, maxH)
-        x += w
+    const sizing = sizingSelect.value
+
+    if (sizing === 'fit') {
+      // Fit to content — no scaling, use original dimensions
+      if (direction === 'horizontal') {
+        const maxH = Math.max(...images.map(img => img.naturalHeight))
+        const totalW = images.reduce((sum, img) => sum + img.naturalWidth, 0)
+        canvas.width = totalW
+        canvas.height = maxH
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
+        let x = 0
+        for (const img of images) {
+          ctx.drawImage(img, x, 0)
+          x += img.naturalWidth
+        }
+      } else {
+        const maxW = Math.max(...images.map(img => img.naturalWidth))
+        const totalH = images.reduce((sum, img) => sum + img.naturalHeight, 0)
+        canvas.width = maxW
+        canvas.height = totalH
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
+        let y = 0
+        for (const img of images) {
+          ctx.drawImage(img, 0, y)
+          y += img.naturalHeight
+        }
       }
     } else {
-      const maxW = Math.max(...images.map(img => img.naturalWidth))
-      const totalH = images.reduce((sum, img) => {
-        const scale = maxW / img.naturalWidth
-        return sum + Math.round(img.naturalHeight * scale)
-      }, 0)
-      canvas.width = maxW
-      canvas.height = totalH
-      if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
-      let y = 0
-      for (const img of images) {
-        const scale = maxW / img.naturalWidth
-        const h = Math.round(img.naturalHeight * scale)
-        ctx.drawImage(img, 0, y, maxW, h)
-        y += h
+      // Auto adjust — scale images to uniform height/width
+      if (direction === 'horizontal') {
+        const maxH = Math.max(...images.map(img => img.naturalHeight))
+        const totalW = images.reduce((sum, img) => {
+          const scale = maxH / img.naturalHeight
+          return sum + Math.round(img.naturalWidth * scale)
+        }, 0)
+        canvas.width = totalW
+        canvas.height = maxH
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
+        let x = 0
+        for (const img of images) {
+          const scale = maxH / img.naturalHeight
+          const w = Math.round(img.naturalWidth * scale)
+          ctx.drawImage(img, x, 0, w, maxH)
+          x += w
+        }
+      } else {
+        const maxW = Math.max(...images.map(img => img.naturalWidth))
+        const totalH = images.reduce((sum, img) => {
+          const scale = maxW / img.naturalWidth
+          return sum + Math.round(img.naturalHeight * scale)
+        }, 0)
+        canvas.width = maxW
+        canvas.height = totalH
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
+        let y = 0
+        for (const img of images) {
+          const scale = maxW / img.naturalWidth
+          const h = Math.round(img.naturalHeight * scale)
+          ctx.drawImage(img, 0, y, maxW, h)
+          y += h
+        }
       }
     }
 
