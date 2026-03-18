@@ -237,11 +237,29 @@ function addFiles(newFiles) {
 }
 
 function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const url = URL.createObjectURL(file)
-    img.onload = () => { URL.revokeObjectURL(url); resolve(img) }
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')) }
+  return new Promise(function (resolve, reject) {
+    var img = new Image()
+    var url = URL.createObjectURL(file)
+    img.onload = function () {
+      // Use decode() if available to ensure image is fully decoded (older iOS Safari fix)
+      if (img.decode) {
+        img.decode().then(function () {
+          URL.revokeObjectURL(url)
+          resolve(img)
+        }).catch(function () {
+          // decode() failed but image loaded — still usable
+          URL.revokeObjectURL(url)
+          resolve(img)
+        })
+      } else if (img.naturalWidth === 0) {
+        // Image not yet decoded — wait a frame for older iOS
+        setTimeout(function () { URL.revokeObjectURL(url); resolve(img) }, 50)
+      } else {
+        URL.revokeObjectURL(url)
+        resolve(img)
+      }
+    }
+    img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Failed to load image')) }
     img.src = url
   })
 }
