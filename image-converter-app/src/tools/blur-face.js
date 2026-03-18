@@ -478,29 +478,60 @@ function updateRegionsList(){
 function setStatus(msg,type){const el=$('bfStatus');el.textContent=msg;el.className='bf-status'+(type?` ${type}`:'')}
 
 function renderClean(entry){
-  // scale blur regions back up if preview was downscaled
-  const scale = entry.previewScale || 1
-  const tc=document.createElement('canvas')
-  tc.width=entry.img.naturalWidth;tc.height=entry.img.naturalHeight
-  const tctx=tc.getContext('2d');tctx.drawImage(entry.img,0,0)
-  entry.blurRegions.forEach(r=>{
-    // if preview was downscaled, scale coordinates back to full res
-    const rx = r.x / scale, ry = r.y / scale, rw = r.w / scale, rh = r.h / scale
-    const ix=Math.max(0,Math.round(rx)),iy=Math.max(0,Math.round(ry))
-    const iw=Math.min(tc.width-ix,Math.round(rw)),ih=Math.min(tc.height-iy,Math.round(rh))
-    if(iw<2||ih<2)return
-    const bs=Math.max(4,Math.round((r.amount||blurAmount)*0.8))
-    const id=tctx.getImageData(ix,iy,iw,ih),d=id.data
-    for(let by=0;by<ih;by+=bs)for(let bx=0;bx<iw;bx+=bs){
-      const bw=Math.min(bs,iw-bx),bh=Math.min(bs,ih-by)
-      let rr=0,g=0,b=0,c=0
-      for(let py=by;py<by+bh;py++)for(let px=bx;px<bx+bw;px++){const i=(py*iw+px)*4;rr+=d[i];g+=d[i+1];b+=d[i+2];c++}
-      rr=Math.round(rr/c);g=Math.round(g/c);b=Math.round(b/c)
-      for(let py=by;py<by+bh;py++)for(let px=bx;px<bx+bw;px++){const i=(py*iw+px)*4;d[i]=rr;d[i+1]=g;d[i+2]=b}
+  return new Promise(resolve => {
+    const scale = entry.previewScale || 1
+    // Load original full-res image from file for download
+    const fullImg = new Image()
+    const url = URL.createObjectURL(entry.file)
+    fullImg.onload = () => {
+      const tc=document.createElement('canvas')
+      tc.width=fullImg.naturalWidth;tc.height=fullImg.naturalHeight
+      const tctx=tc.getContext('2d');tctx.drawImage(fullImg,0,0)
+      URL.revokeObjectURL(url)
+      entry.blurRegions.forEach(r=>{
+        // scale preview coordinates back to full-res coordinates
+        const rx = r.x / scale, ry = r.y / scale, rw = r.w / scale, rh = r.h / scale
+        const ix=Math.max(0,Math.round(rx)),iy=Math.max(0,Math.round(ry))
+        const iw=Math.min(tc.width-ix,Math.round(rw)),ih=Math.min(tc.height-iy,Math.round(rh))
+        if(iw<2||ih<2)return
+        const bs=Math.max(4,Math.round((r.amount||blurAmount)*0.8))
+        const id=tctx.getImageData(ix,iy,iw,ih),d=id.data
+        for(let by=0;by<ih;by+=bs)for(let bx=0;bx<iw;bx+=bs){
+          const bw=Math.min(bs,iw-bx),bh=Math.min(bs,ih-by)
+          let rr=0,g=0,b=0,c=0
+          for(let py=by;py<by+bh;py++)for(let px=bx;px<bx+bw;px++){const i=(py*iw+px)*4;rr+=d[i];g+=d[i+1];b+=d[i+2];c++}
+          rr=Math.round(rr/c);g=Math.round(g/c);b=Math.round(b/c)
+          for(let py=by;py<by+bh;py++)for(let px=bx;px<bx+bw;px++){const i=(py*iw+px)*4;d[i]=rr;d[i+1]=g;d[i+2]=b}
+        }
+        tctx.putImageData(id,ix,iy)
+      })
+      resolve(tc)
     }
-    tctx.putImageData(id,ix,iy)
+    fullImg.onerror = () => {
+      URL.revokeObjectURL(url)
+      // Fallback: use the preview image if original can't load
+      const tc=document.createElement('canvas')
+      tc.width=entry.img.naturalWidth;tc.height=entry.img.naturalHeight
+      const tctx=tc.getContext('2d');tctx.drawImage(entry.img,0,0)
+      entry.blurRegions.forEach(r=>{
+        const ix=Math.max(0,Math.round(r.x)),iy=Math.max(0,Math.round(r.y))
+        const iw=Math.min(tc.width-ix,Math.round(r.w)),ih=Math.min(tc.height-iy,Math.round(r.h))
+        if(iw<2||ih<2)return
+        const bs=Math.max(4,Math.round((r.amount||blurAmount)*0.8))
+        const id=tctx.getImageData(ix,iy,iw,ih),d=id.data
+        for(let by=0;by<ih;by+=bs)for(let bx=0;bx<iw;bx+=bs){
+          const bw=Math.min(bs,iw-bx),bh=Math.min(bs,ih-by)
+          let rr=0,g=0,b=0,c=0
+          for(let py=by;py<by+bh;py++)for(let px=bx;px<bx+bw;px++){const i=(py*iw+px)*4;rr+=d[i];g+=d[i+1];b+=d[i+2];c++}
+          rr=Math.round(rr/c);g=Math.round(g/c);b=Math.round(b/c)
+          for(let py=by;py<by+bh;py++)for(let px=bx;px<bx+bw;px++){const i=(py*iw+px)*4;d[i]=rr;d[i+1]=g;d[i+2]=b}
+        }
+        tctx.putImageData(id,ix,iy)
+      })
+      resolve(tc)
+    }
+    fullImg.src = url
   })
-  return tc
 }
 
 function canvasToBlob(tc){return new Promise(resolve=>tc.toBlob(blob=>resolve(blob),'image/jpeg',0.92))}
@@ -525,7 +556,7 @@ function buildNextSteps(blob){
 
 $('downloadBtn').onclick=async()=>{
   if(!images.length)return
-  const tc=renderClean(images[activeIdx])
+  const tc=await renderClean(images[activeIdx])
   const blob=await canvasToBlob(tc)
   const url=URL.createObjectURL(blob)
   const a=document.createElement('a');a.href=url;a.download='blurred-face.jpg';a.click()
@@ -542,7 +573,7 @@ $('batchDownloadBtn').onclick=async()=>{
     for(let i=0;i<images.length;i++){
       const entry=images[i];if(!entry.img)continue
       btn.textContent=`${ui.processing} ${i+1}/${images.length}…`
-      const tc=renderClean(entry)
+      const tc=await renderClean(entry)
       const blob=await canvasToBlob(tc)
       zip.file(`${String(i+1).padStart(2,'0')}-${entry.file.name.replace(/\.[^.]+$/,'')}-blurred.jpg`,blob)
       // free canvas memory
