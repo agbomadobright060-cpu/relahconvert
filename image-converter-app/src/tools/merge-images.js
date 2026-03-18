@@ -9,7 +9,6 @@ const toolName  = (t.nav_short && t.nav_short['merge-images']) || 'Merge Images'
 const seoData   = t.seo && t.seo['merge-images']
 const descText  = seoData ? seoData.h2a : 'Merge multiple images side by side or stacked vertically. Files never leave your device.'
 const selectLbl = t.select_images || 'Select Images'
-const dropHint  = t.drop_hint || 'or drop images anywhere'
 const dlBtn     = t.download || 'Download'
 const parts     = toolName.split(' ')
 const h1Main    = parts[0]
@@ -35,8 +34,6 @@ style.textContent = `
   .drop-zone svg{margin-bottom:6px;color:#C4B8A8;transition:color 0.2s;}
   .drop-zone:hover svg,.drop-zone.drag-over svg{color:#C84B31;}
   .drop-zone p{margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#9A8A7A;}
-  .drop-zone p span{color:#C84B31;font-weight:600;text-decoration:underline;text-underline-offset:2px;}
-  .drop-zone:hover p span,.drop-zone.drag-over p span{color:#A63D26;}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
   .file-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:visible;position:relative;padding-bottom:8px;}
   .card-img-wrap{position:relative;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:#F5F0E8;border-radius:10px 10px 0 0;overflow:hidden;}
@@ -91,7 +88,7 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div class="drop-zone" id="dropZone">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <p>${dropHint} <span>${selectLbl}</span></p>
+      <p>${t.drop_images_here || 'Drop images here'}</p>
     </div>
     <div id="fileGrid"></div>
     <div class="options-row" id="optionsRow" style="display:none;">
@@ -153,15 +150,19 @@ dirH.addEventListener('click', () => { direction = 'horizontal'; dirH.classList.
 dirV.addEventListener('click', () => { direction = 'vertical'; dirV.classList.add('active'); dirH.classList.remove('active') })
 
 function updateUI() {
+  const dz = document.getElementById('dropZone')
   if (files.length >= 2) {
+    dz.style.display = 'none'
     optionsRow.style.display = 'flex'
     actionRow.classList.add('on')
     statusText.textContent = `${files.length} images selected. Choose direction and merge.`
   } else if (files.length === 1) {
+    dz.style.display = 'none'
     optionsRow.style.display = 'none'
     actionRow.classList.remove('on')
     statusText.textContent = 'Add at least 2 images to merge.'
   } else {
+    dz.style.display = ''
     optionsRow.style.display = 'none'
     actionRow.classList.remove('on')
     statusText.textContent = ''
