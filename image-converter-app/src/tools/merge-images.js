@@ -246,78 +246,103 @@ function loadImage(file) {
   })
 }
 
-mergeBtn.addEventListener('click', async () => {
+// Safe max — avoids call stack overflow with spread on older engines
+function safeMax(arr) {
+  var m = arr[0]; for (var i = 1; i < arr.length; i++) { if (arr[i] > m) m = arr[i] } return m
+}
+
+// canvas.toBlob polyfill for older iOS Safari
+function canvasToBlob(canvas, mime, quality) {
+  return new Promise(function (resolve, reject) {
+    try {
+      if (canvas.toBlob) {
+        canvas.toBlob(function (blob) {
+          if (blob) resolve(blob); else reject(new Error('toBlob returned null'))
+        }, mime, quality)
+      } else {
+        // Fallback: convert dataURL to Blob manually
+        var dataURL = canvas.toDataURL(mime, quality)
+        var parts = dataURL.split(',')
+        var byteString = atob(parts[1])
+        var mimeType = parts[0].match(/:(.*?);/)[1]
+        var ab = new ArrayBuffer(byteString.length)
+        var ia = new Uint8Array(ab)
+        for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i)
+        resolve(new Blob([ab], { type: mimeType }))
+      }
+    } catch (e) { reject(e) }
+  })
+}
+
+mergeBtn.addEventListener('click', function () {
   if (files.length < 2) return
   mergeBtn.disabled = true
   mergeBtn.textContent = mergeBtnLoadingLbl
   statusText.textContent = 'Merging...'
 
-  try {
-    const images = await Promise.all(files.map(f => loadImage(f.file)))
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    const mime = formatSelect.value
-
-    const sizing = sizingSelect.value
+  Promise.all(files.map(function (f) { return loadImage(f.file) })).then(function (images) {
+    var canvas = document.createElement('canvas')
+    var ctx = canvas.getContext('2d')
+    var mime = formatSelect.value
+    var sizing = sizingSelect.value
+    var i
 
     if (sizing === 'fit') {
-      // Fit to content — no scaling, use original dimensions
       if (direction === 'horizontal') {
-        const maxH = Math.max(...images.map(img => img.naturalHeight))
-        const totalW = images.reduce((sum, img) => sum + img.naturalWidth, 0)
+        var maxH = safeMax(images.map(function (img) { return img.naturalHeight }))
+        var totalW = images.reduce(function (sum, img) { return sum + img.naturalWidth }, 0)
         canvas.width = totalW
         canvas.height = maxH
         if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
-        let x = 0
-        for (const img of images) {
-          ctx.drawImage(img, x, 0)
-          x += img.naturalWidth
+        var x = 0
+        for (i = 0; i < images.length; i++) {
+          ctx.drawImage(images[i], x, 0)
+          x += images[i].naturalWidth
         }
       } else {
-        const maxW = Math.max(...images.map(img => img.naturalWidth))
-        const totalH = images.reduce((sum, img) => sum + img.naturalHeight, 0)
+        var maxW = safeMax(images.map(function (img) { return img.naturalWidth }))
+        var totalH = images.reduce(function (sum, img) { return sum + img.naturalHeight }, 0)
         canvas.width = maxW
         canvas.height = totalH
         if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
-        let y = 0
-        for (const img of images) {
-          ctx.drawImage(img, 0, y)
-          y += img.naturalHeight
+        var y = 0
+        for (i = 0; i < images.length; i++) {
+          ctx.drawImage(images[i], 0, y)
+          y += images[i].naturalHeight
         }
       }
     } else {
-      // Auto adjust — scale images to uniform height/width
       if (direction === 'horizontal') {
-        const maxH = Math.max(...images.map(img => img.naturalHeight))
-        const totalW = images.reduce((sum, img) => {
-          const scale = maxH / img.naturalHeight
+        var maxH2 = safeMax(images.map(function (img) { return img.naturalHeight }))
+        var totalW2 = images.reduce(function (sum, img) {
+          var scale = maxH2 / img.naturalHeight
           return sum + Math.round(img.naturalWidth * scale)
         }, 0)
-        canvas.width = totalW
-        canvas.height = maxH
-        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW, maxH) }
-        let x = 0
-        for (const img of images) {
-          const scale = maxH / img.naturalHeight
-          const w = Math.round(img.naturalWidth * scale)
-          ctx.drawImage(img, x, 0, w, maxH)
-          x += w
+        canvas.width = totalW2
+        canvas.height = maxH2
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, totalW2, maxH2) }
+        var x2 = 0
+        for (i = 0; i < images.length; i++) {
+          var scale = maxH2 / images[i].naturalHeight
+          var w = Math.round(images[i].naturalWidth * scale)
+          ctx.drawImage(images[i], x2, 0, w, maxH2)
+          x2 += w
         }
       } else {
-        const maxW = Math.max(...images.map(img => img.naturalWidth))
-        const totalH = images.reduce((sum, img) => {
-          const scale = maxW / img.naturalWidth
-          return sum + Math.round(img.naturalHeight * scale)
+        var maxW2 = safeMax(images.map(function (img) { return img.naturalWidth }))
+        var totalH2 = images.reduce(function (sum, img) {
+          var scale2 = maxW2 / img.naturalWidth
+          return sum + Math.round(img.naturalHeight * scale2)
         }, 0)
-        canvas.width = maxW
-        canvas.height = totalH
-        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW, totalH) }
-        let y = 0
-        for (const img of images) {
-          const scale = maxW / img.naturalWidth
-          const h = Math.round(img.naturalHeight * scale)
-          ctx.drawImage(img, 0, y, maxW, h)
-          y += h
+        canvas.width = maxW2
+        canvas.height = totalH2
+        if (mime === 'image/jpeg' || mime === 'application/pdf') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, maxW2, totalH2) }
+        var y2 = 0
+        for (i = 0; i < images.length; i++) {
+          var scale3 = maxW2 / images[i].naturalWidth
+          var h = Math.round(images[i].naturalHeight * scale3)
+          ctx.drawImage(images[i], 0, y2, maxW2, h)
+          y2 += h
         }
       }
     }
@@ -325,48 +350,54 @@ mergeBtn.addEventListener('click', async () => {
     // Revoke previous result URL to free memory
     if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null }
 
-    let url, ext
+    var blobPromise
     if (mime === 'application/pdf') {
-      const pxToMm = 25.4 / 96
-      const wMm = canvas.width * pxToMm
-      const hMm = canvas.height * pxToMm
-      const orientation = wMm >= hMm ? 'l' : 'p'
-      const pdf = new jsPDF({ orientation, unit: 'mm', format: [wMm, hMm] })
-      const imgData = canvas.toDataURL('image/jpeg', 0.92)
+      var pxToMm = 25.4 / 96
+      var wMm = canvas.width * pxToMm
+      var hMm = canvas.height * pxToMm
+      var orientation = wMm >= hMm ? 'l' : 'p'
+      var pdf = new jsPDF({ orientation: orientation, unit: 'mm', format: [wMm, hMm] })
+      var imgData = canvas.toDataURL('image/jpeg', 0.92)
       pdf.addImage(imgData, 'JPEG', 0, 0, wMm, hMm)
-      const blob = pdf.output('blob')
-      url = URL.createObjectURL(blob)
-      ext = 'pdf'
+      var pdfBlob = pdf.output('blob')
+      blobPromise = Promise.resolve({ blob: pdfBlob, ext: 'pdf', previewSrc: canvas.toDataURL('image/png') })
     } else {
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, 0.92))
-      url = URL.createObjectURL(blob)
-      ext = mime === 'image/png' ? 'png' : 'jpg'
+      var ext = mime === 'image/png' ? 'png' : 'jpg'
+      blobPromise = canvasToBlob(canvas, mime, 0.92).then(function (blob) {
+        var url = URL.createObjectURL(blob)
+        return { blob: blob, ext: ext, previewSrc: url }
+      })
     }
 
-    lastBlobUrl = url
-    previewImg.src = mime === 'application/pdf' ? canvas.toDataURL('image/png') : url
-    previewWrap.style.display = 'block'
-    dlLink.href = url
-    dlLink.download = `merged-image.${ext}`
-    dlLink.onclick = () => setTimeout(() => { URL.revokeObjectURL(url); lastBlobUrl = null }, 10000)
-    dlRow.style.display = 'block'
-    statusText.textContent = 'Merge complete! Preview below.'
-    buildNextSteps()
-  } catch (e) {
-    statusText.textContent = 'Merge failed: ' + e.message
-  }
-
-  mergeBtn.disabled = false
-  mergeBtn.textContent = mergeBtnLbl
+    return blobPromise.then(function (result) {
+      var url = result.previewSrc
+      if (result.ext === 'pdf') url = URL.createObjectURL(result.blob)
+      lastBlobUrl = url
+      previewImg.src = result.previewSrc
+      previewWrap.style.display = 'block'
+      dlLink.href = url
+      dlLink.download = 'merged-image.' + result.ext
+      dlLink.onclick = function () { setTimeout(function () { URL.revokeObjectURL(url); lastBlobUrl = null }, 10000) }
+      dlRow.style.display = 'block'
+      statusText.textContent = 'Merge complete! Preview below.'
+      buildNextSteps()
+    })
+  }).catch(function (e) {
+    statusText.textContent = 'Merge failed: ' + (e.message || 'Unknown error')
+  }).then(function () {
+    mergeBtn.disabled = false
+    mergeBtn.textContent = mergeBtnLbl
+  })
 })
 
 function buildNextSteps() {
-  const buttons = []
-  buttons.push({ label: t.nav_short?.compress || 'Compress', href: localHref('compress') })
-  buttons.push({ label: t.nav_short?.resize || 'Resize', href: localHref('resize') })
-  buttons.push({ label: t.nav_short?.crop || 'Crop', href: localHref('crop') })
-  buttons.push({ label: t.nav_short?.watermark || 'Watermark', href: localHref('watermark') })
-  buttons.push({ label: t.nav_short?.['jpg-to-pdf'] || 'JPG to PDF', href: localHref('jpg-to-pdf') })
+  var ns = t.nav_short || {}
+  var buttons = []
+  buttons.push({ label: ns.compress || 'Compress', href: localHref('compress') })
+  buttons.push({ label: ns.resize || 'Resize', href: localHref('resize') })
+  buttons.push({ label: ns.crop || 'Crop', href: localHref('crop') })
+  buttons.push({ label: ns.watermark || 'Watermark', href: localHref('watermark') })
+  buttons.push({ label: ns['jpg-to-pdf'] || 'JPG to PDF', href: localHref('jpg-to-pdf') })
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {
     const btn = document.createElement('button')
