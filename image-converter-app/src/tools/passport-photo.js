@@ -307,9 +307,6 @@ document.querySelector('#app').innerHTML = `
   <div class="pp-wrap">
     <h1 class="pp-h1">${h1Main} <em>${h1Em}</em></h1>
     <p class="pp-desc">${descText}</p>
-    <div class="pp-hero" id="heroSection">
-      <img src="/passport-before-after.jpg" alt="Passport photo before and after example" />
-    </div>
     <div class="pp-grid">
       <div>
         <div class="pp-canvas-area" id="canvasArea">
@@ -321,6 +318,9 @@ document.querySelector('#app').innerHTML = `
         <div id="dropZone" class="pp-dropzone">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
+        </div>
+        <div class="pp-hero" id="heroSection">
+          <img src="/passport-before-after.jpg" alt="Passport photo before and after example" />
         </div>
       </div>
       <div class="pp-panel">
