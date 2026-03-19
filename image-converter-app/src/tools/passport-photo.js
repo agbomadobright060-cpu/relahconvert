@@ -431,8 +431,8 @@ function handleFile(file) {
       }
       ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
       const blob = await removeBgFn(file, {
-        model: 'small',
-        cacheMode: 'cache-first',
+        model: 'isnet_quint8',
+        output: { format: 'image/png' },
       })
       const bgImg = new Image()
       bgImg.onload = () => {
@@ -583,7 +583,7 @@ function renderCanvas() {
   // zoomLevel controls how much of the image height to show.
   // At zoomLevel 1.0 we show the top 45%, higher shows less (more zoomed).
 
-  const visibleFraction = 0.45 / zoomLevel  // fraction of image height to show
+  const visibleFraction = 0.30 / zoomLevel  // fraction of image height to show (head + shoulders only)
   const srcH = Math.min(imgH, imgH * visibleFraction)
   const srcW = srcH * aspect
 
