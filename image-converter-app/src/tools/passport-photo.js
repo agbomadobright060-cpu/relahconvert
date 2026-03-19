@@ -442,7 +442,7 @@ function handleFile(file) {
   processingProgress.textContent = '0%'
   processingFill.style.width = '0%'
   downloadCard.style.display = 'none'
-  dragHint.style.display = 'none'
+
   zoomRow.style.display = 'none'
 
   // Load original image first for preview
@@ -451,7 +451,19 @@ function handleFile(file) {
   origImg.onload = () => {
     uploadedImg = origImg
     processedImg = null
-    zoomLevel = 1.0; zoomSlider.value = '1'; zoomLabel.textContent = '100%'
+    // Auto-zoom: for tall portrait photos, zoom in to frame head/shoulders
+    const imgRatio = origImg.naturalHeight / origImg.naturalWidth
+    if (imgRatio > 1.5) {
+      // Full body shot — zoom in more
+      zoomLevel = Math.min(2.5, imgRatio * 1.2)
+    } else if (imgRatio > 1.2) {
+      // Half body — zoom in a bit
+      zoomLevel = 1.5
+    } else {
+      zoomLevel = 1.0
+    }
+    zoomSlider.value = String(zoomLevel)
+    zoomLabel.textContent = Math.round(zoomLevel * 100) + '%'
     renderCanvas()
 
     // Run background removal
@@ -470,7 +482,7 @@ function handleFile(file) {
         processedImg = bgImg
         isProcessing = false
         processingOverlay.style.display = 'none'
-        dragHint.style.display = ''
+
         zoomRow.style.display = ''
         downloadCard.style.display = ''
         renderCanvas()
@@ -629,11 +641,12 @@ function renderCanvas() {
     srcY = Math.max(0, (imgH - srcH) * 0.15)
   }
 
-  // Apply zoom: zoom into the center of the cropped region
+  // Apply zoom: zoom toward upper portion where face is
   const zSrcW = srcW / zoomLevel
   const zSrcH = srcH / zoomLevel
   const zSrcX = srcX + (srcW - zSrcW) / 2
-  const zSrcY = srcY + (srcH - zSrcH) / 2
+  // Bias toward top 20% of cropped area (face region)
+  const zSrcY = srcY + (srcH - zSrcH) * 0.2
 
   // Draw cropped & zoomed image to fill the entire canvas
   ctx.drawImage(img, zSrcX, zSrcY, zSrcW, zSrcH, 0, 0, dispW, dispH)
@@ -715,7 +728,7 @@ function generatePhoto() {
     const zSrcW = srcW / zoomLevel
     const zSrcH = srcH / zoomLevel
     const zSrcX = srcX + (srcW - zSrcW) / 2
-    const zSrcY = srcY + (srcH - zSrcH) / 2
+    const zSrcY = srcY + (srcH - zSrcH) * 0.2
 
     octx.drawImage(img, zSrcX, zSrcY, zSrcW, zSrcH, 0, 0, wPx, hPx)
   }
