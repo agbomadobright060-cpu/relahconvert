@@ -451,19 +451,9 @@ function handleFile(file) {
   origImg.onload = () => {
     uploadedImg = origImg
     processedImg = null
-    // Auto-zoom: for tall portrait photos, zoom in to frame head/shoulders
-    const imgRatio = origImg.naturalHeight / origImg.naturalWidth
-    if (imgRatio > 1.5) {
-      // Full body shot — zoom in more
-      zoomLevel = Math.min(2.5, imgRatio * 1.2)
-    } else if (imgRatio > 1.2) {
-      // Half body — zoom in a bit
-      zoomLevel = 1.5
-    } else {
-      zoomLevel = 1.0
-    }
-    zoomSlider.value = String(zoomLevel)
-    zoomLabel.textContent = Math.round(zoomLevel * 100) + '%'
+    zoomLevel = 1.0
+    zoomSlider.value = '1'
+    zoomLabel.textContent = '100%'
     renderCanvas()
 
     // Run background removal
@@ -495,7 +485,6 @@ function handleFile(file) {
       processedImg = null
       isProcessing = false
       processingOverlay.style.display = 'none'
-      dragHint.style.display = ''
       zoomRow.style.display = ''
       downloadCard.style.display = ''
       renderCanvas()
@@ -613,7 +602,7 @@ function renderCanvas() {
   ppCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
 
-  // Fill background with selected color
+  // Fill white background
   ctx.fillStyle = bgColorInput.value
   ctx.fillRect(0, 0, dispW, dispH)
 
@@ -622,34 +611,30 @@ function renderCanvas() {
   const img = processedImg || uploadedImg
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
-  const imgAspect = imgW / imgH
 
-  // Crop source region from center of image to match passport aspect ratio
-  let srcX, srcY, srcW, srcH
-  if (imgAspect > aspect) {
-    // Image is wider than passport — crop sides, keep full height
-    srcH = imgH
-    srcW = imgH * aspect
-    srcX = (imgW - srcW) / 2
-    srcY = 0
-  } else {
-    // Image is taller than passport — crop top/bottom, keep full width
-    srcW = imgW
-    srcH = imgW / aspect
-    srcX = 0
-    // Bias crop toward top (face is usually in upper portion)
-    srcY = Math.max(0, (imgH - srcH) * 0.15)
+  // For passport photos, we want to show the top ~45% of the image
+  // (head + shoulders), cropped to the passport aspect ratio.
+  // zoomLevel controls how much of the image height to show.
+  // At zoomLevel 1.0 we show the top 45%, higher shows less (more zoomed).
+
+  const visibleFraction = 0.45 / zoomLevel  // fraction of image height to show
+  const srcH = Math.min(imgH, imgH * visibleFraction)
+  const srcW = srcH * aspect
+
+  // Center horizontally, start from top
+  const srcX = Math.max(0, (imgW - srcW) / 2)
+  const srcY = 0
+
+  // If srcW exceeds image width, recalculate based on width
+  let finalSrcX = srcX, finalSrcY = srcY, finalSrcW = srcW, finalSrcH = srcH
+  if (srcW > imgW) {
+    finalSrcW = imgW
+    finalSrcH = imgW / aspect
+    finalSrcX = 0
+    finalSrcY = 0
   }
 
-  // Apply zoom: zoom toward upper portion where face is
-  const zSrcW = srcW / zoomLevel
-  const zSrcH = srcH / zoomLevel
-  const zSrcX = srcX + (srcW - zSrcW) / 2
-  // Bias toward top 20% of cropped area (face region)
-  const zSrcY = srcY + (srcH - zSrcH) * 0.2
-
-  // Draw cropped & zoomed image to fill the entire canvas
-  ctx.drawImage(img, zSrcX, zSrcY, zSrcW, zSrcH, 0, 0, dispW, dispH)
+  ctx.drawImage(img, finalSrcX, finalSrcY, finalSrcW, finalSrcH, 0, 0, dispW, dispH)
 
   renderGuide()
 }
@@ -714,23 +699,22 @@ function generatePhoto() {
     const aspect = activeW / activeH
     const imgW = img.naturalWidth
     const imgH = img.naturalHeight
-    const imgAspect = imgW / imgH
 
-    let srcX, srcY, srcW, srcH
-    if (imgAspect > aspect) {
-      srcH = imgH; srcW = imgH * aspect
-      srcX = (imgW - srcW) / 2; srcY = 0
-    } else {
-      srcW = imgW; srcH = imgW / aspect
-      srcX = 0; srcY = Math.max(0, (imgH - srcH) * 0.15)
+    const visibleFraction = 0.45 / zoomLevel
+    const srcH = Math.min(imgH, imgH * visibleFraction)
+    const srcW = srcH * aspect
+    const srcX = Math.max(0, (imgW - srcW) / 2)
+    const srcY = 0
+
+    let finalSrcX = srcX, finalSrcY = srcY, finalSrcW = srcW, finalSrcH = srcH
+    if (srcW > imgW) {
+      finalSrcW = imgW
+      finalSrcH = imgW / aspect
+      finalSrcX = 0
+      finalSrcY = 0
     }
 
-    const zSrcW = srcW / zoomLevel
-    const zSrcH = srcH / zoomLevel
-    const zSrcX = srcX + (srcW - zSrcW) / 2
-    const zSrcY = srcY + (srcH - zSrcH) * 0.2
-
-    octx.drawImage(img, zSrcX, zSrcY, zSrcW, zSrcH, 0, 0, wPx, hPx)
+    octx.drawImage(img, finalSrcX, finalSrcY, finalSrcW, finalSrcH, 0, 0, wPx, hPx)
   }
   return outCanvas
 }
