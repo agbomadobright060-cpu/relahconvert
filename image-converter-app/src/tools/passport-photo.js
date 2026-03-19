@@ -1,5 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import imglyRemoveBackground from '@imgly/background-removal'
 injectHreflang('passport-photo')
 
 const t = getT()
@@ -222,6 +223,8 @@ let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States'
 let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
+let processedImg = null  // background-removed version
+let isProcessing = false
 let panOffsetX = 0, panOffsetY = 0
 let zoomLevel = 1.0
 let isDragging = false, dragStartX = 0, dragStartY = 0, dragStartPanX = 0, dragStartPanY = 0
@@ -282,6 +285,11 @@ style.textContent = `
   .pp-guide-toggle{display:flex;align-items:center;gap:6px;margin-top:8px}
   .pp-guide-toggle input{accent-color:#C84B31}
   .pp-guide-toggle label{font-size:12px;color:#5A4A3A;cursor:pointer}
+  .pp-processing{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;border-radius:12px}
+  .pp-processing p{font-size:13px;color:#2C1810;margin:12px 0 0;font-family:'DM Sans',sans-serif}
+  .pp-spinner{width:36px;height:36px;border:3px solid #E8E0D5;border-top-color:#C84B31;border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .pp-progress{font-size:11px;color:#9A8A7A;margin-top:4px}
   .pp-dl-btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;text-align:center;text-decoration:none}
   .pp-dl-primary{background:#C84B31;color:#fff}
   .pp-dl-primary:hover{background:#A63D26}
@@ -321,6 +329,11 @@ document.querySelector('#app').innerHTML = `
         <div class="pp-canvas-area" id="canvasArea">
           <div class="pp-canvas-inner" id="canvasWrap">
             <canvas id="ppCanvas" width="510" height="510"></canvas>
+          </div>
+          <div class="pp-processing" id="processingOverlay" style="display:none">
+            <div class="pp-spinner"></div>
+            <p>${t.pp_removing_bg || 'Removing background...'}</p>
+            <span class="pp-progress" id="processingProgress"></span>
           </div>
           <svg class="pp-guide-overlay" id="guideOverlay" style="display:none"></svg>
           <div class="pp-zoom-row" id="zoomRow" style="display:none">
@@ -415,30 +428,71 @@ const zoomLabel     = document.getElementById('zoomLabel')
 const zoomRow       = document.getElementById('zoomRow')
 const guideOverlay  = document.getElementById('guideOverlay')
 const guideToggle   = document.getElementById('guideToggle')
+const processingOverlay = document.getElementById('processingOverlay')
+const processingProgress = document.getElementById('processingProgress')
 
 // Upload
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
-  const img = new Image()
-  const url = URL.createObjectURL(file)
-  img.onload = () => {
-    uploadedImg = img
-    panOffsetX = 0
-    panOffsetY = 0
-    zoomLevel = 1.0
-    zoomSlider.value = '1'
-    zoomLabel.textContent = '100%'
-    dropZoneEl.style.display = 'none'
-    document.getElementById('heroSection').style.display = 'none'
-    canvasArea.classList.add('visible')
-    dragHint.style.display = ''
-    zoomRow.style.display = ''
-    downloadCard.style.display = ''
+  if (isProcessing) return
+
+  // Show canvas area with loading state
+  dropZoneEl.style.display = 'none'
+  document.getElementById('heroSection').style.display = 'none'
+  canvasArea.classList.add('visible')
+  processingOverlay.style.display = ''
+  processingProgress.textContent = ''
+  downloadCard.style.display = 'none'
+  dragHint.style.display = 'none'
+  zoomRow.style.display = 'none'
+
+  // Load original image first for preview
+  const origImg = new Image()
+  const origUrl = URL.createObjectURL(file)
+  origImg.onload = () => {
+    uploadedImg = origImg
+    processedImg = null
+    panOffsetX = 0; panOffsetY = 0
+    zoomLevel = 1.0; zoomSlider.value = '1'; zoomLabel.textContent = '100%'
     renderCanvas()
-    renderGuide()
-    buildNextSteps()
+
+    // Run background removal
+    isProcessing = true
+    imglyRemoveBackground(file, {
+      progress: (key, current, total) => {
+        if (key === 'compute:inference') {
+          processingProgress.textContent = Math.round((current / total) * 100) + '%'
+        }
+      }
+    }).then(blob => {
+      const bgRemovedUrl = URL.createObjectURL(blob)
+      const bgImg = new Image()
+      bgImg.onload = () => {
+        processedImg = bgImg
+        isProcessing = false
+        processingOverlay.style.display = 'none'
+        dragHint.style.display = ''
+        zoomRow.style.display = ''
+        downloadCard.style.display = ''
+        renderCanvas()
+        renderGuide()
+        buildNextSteps()
+      }
+      bgImg.src = bgRemovedUrl
+    }).catch(err => {
+      console.warn('Background removal failed, using original:', err)
+      processedImg = null
+      isProcessing = false
+      processingOverlay.style.display = 'none'
+      dragHint.style.display = ''
+      zoomRow.style.display = ''
+      downloadCard.style.display = ''
+      renderCanvas()
+      renderGuide()
+      buildNextSteps()
+    })
   }
-  img.src = url
+  origImg.src = origUrl
 }
 uploadBtn.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('click', () => fileInput.click())
@@ -561,8 +615,8 @@ function renderCanvas() {
 
   if (!uploadedImg) return
 
-  // Scale image to fit (contain) then apply zoom
-  const img = uploadedImg
+  // Use background-removed image if available, else original
+  const img = processedImg || uploadedImg
   const imgAspect = img.naturalWidth / img.naturalHeight
   let baseW, baseH
   if (imgAspect > aspect) {
@@ -683,7 +737,7 @@ function generatePhoto() {
   octx.fillRect(0, 0, wPx, hPx)
 
   if (uploadedImg) {
-    const img = uploadedImg
+    const img = processedImg || uploadedImg
     const aspect = activeW / activeH
     const imgAspect = img.naturalWidth / img.naturalHeight
     let baseW, baseH
