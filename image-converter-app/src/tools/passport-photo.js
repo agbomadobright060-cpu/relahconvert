@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
-import imglyRemoveBackground from '@imgly/background-removal'
+import { removeBackground } from '@imgly/background-removal'
 injectHreflang('passport-photo')
 
 const t = getT()
@@ -458,7 +458,8 @@ function handleFile(file) {
 
     // Run background removal
     isProcessing = true
-    imglyRemoveBackground(file, {
+    removeBackground(file, {
+      output: { format: 'image/png' },
       progress: (key, current, total) => {
         if (key === 'compute:inference') {
           processingProgress.textContent = Math.round((current / total) * 100) + '%'
