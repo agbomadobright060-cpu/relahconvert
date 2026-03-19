@@ -237,7 +237,7 @@ style.textContent = `
   .pp-desc{font-size:13px;color:#7A6A5A;margin:0 0 20px}
   .pp-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
   @media(max-width:700px){.pp-grid{grid-template-columns:1fr}}
-  .pp-canvas-area{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:hidden;position:relative;display:none}
+  .pp-canvas-area{background:#fff;border-radius:12px;overflow:hidden;position:relative;display:none}
   .pp-canvas-area.visible{display:block}
   .pp-dropzone{border:2px dashed #DDD5C8;border-radius:12px;padding:48px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#FAFAF8}
   .pp-dropzone:hover{border-color:#C84B31;background:#FDE8E3}
@@ -583,7 +583,7 @@ function renderCanvas() {
   // zoomLevel controls how much of the image height to show.
   // At zoomLevel 1.0 we show the top 45%, higher shows less (more zoomed).
 
-  const visibleFraction = 0.30 / zoomLevel  // fraction of image height to show (head + shoulders only)
+  const visibleFraction = 0.20 / zoomLevel  // tight head + shoulders crop
   const srcH = Math.min(imgH, imgH * visibleFraction)
   const srcW = srcH * aspect
 
