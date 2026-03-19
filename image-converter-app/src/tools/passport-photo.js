@@ -1,6 +1,5 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
-import { removeBackground } from '@imgly/background-removal'
 injectHreflang('passport-photo')
 
 const t = getT()
@@ -223,8 +222,6 @@ let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States'
 let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
-let processedImg = null  // background-removed version
-let isProcessing = false
 let zoomLevel = 1.0
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
@@ -273,22 +270,10 @@ style.textContent = `
   .pp-color-row{display:flex;align-items:center;gap:8px;margin-top:8px}
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
-  .pp-drag-hint{font-size:11px;color:#9A8A7A;text-align:center;padding:6px 0;display:none}
   .pp-zoom-row{display:flex;align-items:center;gap:8px;padding:6px 16px 10px}
   .pp-zoom-row label{font-size:11px;color:#9A8A7A;white-space:nowrap}
   .pp-zoom-row input[type=range]{flex:1;accent-color:#C84B31;height:4px}
   .pp-zoom-row span{font-size:11px;color:#5A4A3A;min-width:32px;text-align:right}
-  .pp-guide-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
-  .pp-guide-toggle{display:flex;align-items:center;gap:6px;margin-top:8px}
-  .pp-guide-toggle input{accent-color:#C84B31}
-  .pp-guide-toggle label{font-size:12px;color:#5A4A3A;cursor:pointer}
-  .pp-processing{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;border-radius:12px}
-  .pp-processing p{font-size:15px;font-weight:600;color:#2C1810;margin:16px 0 0;font-family:'DM Sans',sans-serif}
-  .pp-spinner{width:44px;height:44px;border:3px solid #E8E0D5;border-top-color:#C84B31;border-radius:50%;animation:spin 0.8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .pp-progress{font-size:28px;font-weight:800;color:#C84B31;margin-top:8px;font-family:'Fraunces',serif}
-  .pp-progress-bar{width:180px;height:6px;background:#E8E0D5;border-radius:3px;margin-top:10px;overflow:hidden}
-  .pp-progress-fill{height:100%;background:#C84B31;border-radius:3px;transition:width 0.3s ease;width:0%}
   .pp-dl-btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;text-align:center;text-decoration:none}
   .pp-dl-primary{background:#C84B31;color:#fff}
   .pp-dl-primary:hover{background:#A63D26}
@@ -329,13 +314,6 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-canvas-inner" id="canvasWrap">
             <img id="ppPreview" class="pp-preview-img" draggable="false" alt="" />
           </div>
-          <div class="pp-processing" id="processingOverlay" style="display:none">
-            <div class="pp-spinner"></div>
-            <p>${t.pp_removing_bg || 'Removing background...'}</p>
-            <span class="pp-progress" id="processingProgress">0%</span>
-            <div class="pp-progress-bar"><div class="pp-progress-fill" id="processingFill"></div></div>
-          </div>
-          <svg class="pp-guide-overlay" id="guideOverlay" style="display:none"></svg>
           <div class="pp-zoom-row" id="zoomRow" style="display:none">
             <label>-</label>
             <input type="range" id="zoomSlider" min="0.3" max="3" step="0.05" value="1" />
@@ -376,10 +354,6 @@ document.querySelector('#app').innerHTML = `
           </select>
           <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}×${selectedCountry.h} mm</div>
           <input type="hidden" id="bgColor" value="#ffffff" />
-          <div class="pp-guide-toggle">
-            <input type="checkbox" id="guideToggle" checked />
-            <label for="guideToggle">${t.pp_show_guides || 'Show photo guides'}</label>
-          </div>
         </div>
         <div class="pp-card" id="downloadCard" style="display:none">
           <button class="pp-dl-btn pp-dl-primary" id="dlPhoto">${ppDownloadLbl}</button>
@@ -422,94 +396,26 @@ const triggerFlag   = document.getElementById('triggerFlag')
 const zoomSlider    = document.getElementById('zoomSlider')
 const zoomLabel     = document.getElementById('zoomLabel')
 const zoomRow       = document.getElementById('zoomRow')
-const guideOverlay  = document.getElementById('guideOverlay')
-const guideToggle   = document.getElementById('guideToggle')
-const processingOverlay = document.getElementById('processingOverlay')
-const processingProgress = document.getElementById('processingProgress')
-const processingFill = document.getElementById('processingFill')
 
-// Upload
+// Upload — instant crop, no background removal
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
-  if (isProcessing) return
-
-  // Show canvas area with loading state
-  dropZoneEl.style.display = 'none'
-  document.getElementById('heroSection').style.display = 'none'
-  canvasArea.classList.add('visible')
-  processingOverlay.style.display = ''
-  processingProgress.textContent = '0%'
-  processingFill.style.width = '0%'
-  downloadCard.style.display = 'none'
-
-  zoomRow.style.display = 'none'
-
-  // Load original image first for preview
-  const origImg = new Image()
-  const origUrl = URL.createObjectURL(file)
-  origImg.onload = () => {
-    uploadedImg = origImg
-    processedImg = null
+  const img = new Image()
+  const url = URL.createObjectURL(file)
+  img.onload = () => {
+    uploadedImg = img
     zoomLevel = 1.0
     zoomSlider.value = '1'
     zoomLabel.textContent = '100%'
+    dropZoneEl.style.display = 'none'
+    document.getElementById('heroSection').style.display = 'none'
+    canvasArea.classList.add('visible')
+    zoomRow.style.display = ''
+    downloadCard.style.display = ''
     renderCanvas()
-
-    // Run background removal
-    isProcessing = true
-    let lastStage = ''
-    removeBackground(file, {
-      model: 'isnet_quint8',
-      output: { format: 'image/png' },
-      progress: (key, current, total) => {
-        // Track stage changes to show accurate progress
-        if (key !== lastStage) {
-          lastStage = key
-        }
-        if (total > 0) {
-          const pct = Math.round((current / total) * 100)
-          // Show downloading vs processing status
-          const label = key.includes('fetch') || key.includes('download')
-            ? 'Loading model... ' + pct + '%'
-            : pct + '%'
-          processingProgress.textContent = label
-          processingFill.style.width = pct + '%'
-        }
-      }
-    }).then(blob => {
-      const bgRemovedUrl = URL.createObjectURL(blob)
-      const bgImg = new Image()
-      bgImg.onload = () => {
-        processedImg = bgImg
-        isProcessing = false
-        processingOverlay.style.display = 'none'
-        zoomRow.style.display = ''
-        downloadCard.style.display = ''
-        renderCanvas()
-        renderGuide()
-        buildNextSteps()
-      }
-      bgImg.onerror = () => {
-        finishWithoutBgRemoval()
-      }
-      bgImg.src = bgRemovedUrl
-    }).catch(err => {
-      console.warn('Background removal failed, using original:', err)
-      finishWithoutBgRemoval()
-    })
-
-    function finishWithoutBgRemoval() {
-      processedImg = null
-      isProcessing = false
-      processingOverlay.style.display = 'none'
-      zoomRow.style.display = ''
-      downloadCard.style.display = ''
-      renderCanvas()
-      renderGuide()
-      buildNextSteps()
-    }
+    buildNextSteps()
   }
-  origImg.src = origUrl
+  img.src = url
 }
 uploadBtn.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('click', () => fileInput.click())
@@ -607,9 +513,6 @@ zoomSlider.addEventListener('input', () => {
   renderCanvas()
 })
 
-// Guide toggle
-guideToggle.addEventListener('change', () => renderGuide())
-
 // Canvas rendering — auto-crops image to passport dimensions
 function renderCanvas() {
   const aspect = activeW / activeH
@@ -625,7 +528,7 @@ function renderCanvas() {
 
   if (!uploadedImg) return
 
-  const img = processedImg || uploadedImg
+  const img = uploadedImg
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
@@ -653,54 +556,9 @@ function renderCanvas() {
 
   ctx.drawImage(img, finalSrcX, finalSrcY, finalSrcW, finalSrcH, 0, 0, dispW, dispH)
 
-  // Convert canvas to static image — no drag possible
+  // Convert canvas to static image
   ppPreview.src = ppCanvas.toDataURL('image/png')
-
-  renderGuide()
 }
-
-// Draw passport guide overlay (face oval + measurement lines)
-function renderGuide() {
-  if (!guideToggle.checked || !uploadedImg) {
-    guideOverlay.style.display = 'none'
-    return
-  }
-  guideOverlay.style.display = ''
-  const rect = ppCanvas.getBoundingClientRect()
-  const w = rect.width, h = rect.height
-  guideOverlay.setAttribute('viewBox', '0 0 ' + w + ' ' + h)
-  guideOverlay.style.width = w + 'px'
-  guideOverlay.style.height = h + 'px'
-
-  // Face oval: centered, roughly 60% width, 75% height, positioned in upper portion
-  const ovalCx = w / 2
-  const ovalCy = h * 0.40
-  const ovalRx = w * 0.22
-  const ovalRy = h * 0.30
-
-  // Measurement lines on edges
-  const m = 6 // margin
-  const lineColor = '#6B7B8D'
-  const lineW = 1.2
-
-  guideOverlay.innerHTML =
-    // Face oval
-    '<ellipse cx="' + ovalCx + '" cy="' + ovalCy + '" rx="' + ovalRx + '" ry="' + ovalRy + '" fill="none" stroke="' + lineColor + '" stroke-width="' + lineW + '" stroke-dasharray="6 4" opacity="0.6"/>' +
-    // Top border line
-    '<line x1="' + m + '" y1="' + m + '" x2="' + (w - m) + '" y2="' + m + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
-    // Bottom border line
-    '<line x1="' + m + '" y1="' + (h - m) + '" x2="' + (w - m) + '" y2="' + (h - m) + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
-    // Left border line
-    '<line x1="' + m + '" y1="' + m + '" x2="' + m + '" y2="' + (h - m) + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
-    // Right border line
-    '<line x1="' + (w - m) + '" y1="' + m + '" x2="' + (w - m) + '" y2="' + (h - m) + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
-    // Right dimension label
-    '<text x="' + (w - 2) + '" y="' + (h / 2) + '" fill="' + lineColor + '" font-size="10" font-family="DM Sans,sans-serif" text-anchor="end" transform="rotate(-90,' + (w - 2) + ',' + (h / 2) + ')" opacity="0.7">' + activeH + 'mm</text>' +
-    // Bottom dimension label
-    '<text x="' + (w / 2) + '" y="' + (h - 1) + '" fill="' + lineColor + '" font-size="10" font-family="DM Sans,sans-serif" text-anchor="middle" opacity="0.7">' + activeW + 'mm</text>'
-}
-
-// No drag — image auto-crops to passport dimensions
 
 // Generate high-res single photo
 function generatePhoto() {
@@ -715,7 +573,7 @@ function generatePhoto() {
   octx.fillRect(0, 0, wPx, hPx)
 
   if (uploadedImg) {
-    const img = processedImg || uploadedImg
+    const img = uploadedImg
     const aspect = activeW / activeH
     const imgW = img.naturalWidth
     const imgH = img.naturalHeight
