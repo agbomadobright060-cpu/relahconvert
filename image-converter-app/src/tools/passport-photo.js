@@ -248,7 +248,7 @@ style.textContent = `
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
   .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
-  .pp-canvas-inner canvas{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;user-select:none}
+  .pp-preview-img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -327,7 +327,7 @@ document.querySelector('#app').innerHTML = `
       <div>
         <div class="pp-canvas-area" id="canvasArea">
           <div class="pp-canvas-inner" id="canvasWrap">
-            <canvas id="ppCanvas" width="510" height="510"></canvas>
+            <img id="ppPreview" class="pp-preview-img" draggable="false" alt="" />
           </div>
           <div class="pp-processing" id="processingOverlay" style="display:none">
             <div class="pp-spinner"></div>
@@ -342,7 +342,6 @@ document.querySelector('#app').innerHTML = `
             <span id="zoomLabel">100%</span>
             <label>+</label>
           </div>
-          <div class="pp-drag-hint" id="dragHint" style="display:none">${ppRepositionLbl}</div>
         </div>
         <div id="dropZone" class="pp-dropzone">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -401,7 +400,8 @@ injectHeader()
 const fileInput     = document.getElementById('fileInput')
 const uploadBtn     = document.getElementById('uploadBtn')
 const canvasWrap    = document.getElementById('canvasWrap')
-const ppCanvas      = document.getElementById('ppCanvas')
+const ppPreview     = document.getElementById('ppPreview')
+const ppCanvas      = document.createElement('canvas')  // offscreen, never in DOM
 const ctx           = ppCanvas.getContext('2d')
 const countryTrigger = document.getElementById('countryTrigger')
 const countryDropdown = document.getElementById('countryDropdown')
@@ -413,7 +413,6 @@ const bgColorInput  = document.getElementById('bgColor')
 const downloadCard  = document.getElementById('downloadCard')
 const dlPhoto       = document.getElementById('dlPhoto')
 const dlSheet       = document.getElementById('dlSheet')
-const dragHint      = document.getElementById('dragHint')
 const canvasArea    = document.getElementById('canvasArea')
 const dropZoneEl    = document.getElementById('dropZone')
 const nextSteps     = document.getElementById('nextSteps')
@@ -428,12 +427,6 @@ const guideToggle   = document.getElementById('guideToggle')
 const processingOverlay = document.getElementById('processingOverlay')
 const processingProgress = document.getElementById('processingProgress')
 const processingFill = document.getElementById('processingFill')
-
-// Prevent all drag/select on canvas
-ppCanvas.setAttribute('draggable', 'false')
-canvasWrap.addEventListener('dragstart', e => e.preventDefault())
-canvasWrap.addEventListener('mousedown', e => e.preventDefault())
-canvasWrap.addEventListener('touchstart', e => e.preventDefault(), { passive: false })
 
 // Upload
 function handleFile(file) {
@@ -659,6 +652,9 @@ function renderCanvas() {
   }
 
   ctx.drawImage(img, finalSrcX, finalSrcY, finalSrcW, finalSrcH, 0, 0, dispW, dispH)
+
+  // Convert canvas to static image — no drag possible
+  ppPreview.src = ppCanvas.toDataURL('image/png')
 
   renderGuide()
 }
