@@ -373,10 +373,7 @@ document.querySelector('#app').innerHTML = `
             <option value="passport">${ppPassportLbl} (${selectedCountry.w}×${selectedCountry.h}mm)</option>
           </select>
           <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}×${selectedCountry.h} mm</div>
-          <div class="pp-color-row">
-            <input type="color" class="pp-color-input" id="bgColor" value="${selectedCountry.bg}" />
-            <span class="pp-color-label">${ppBgColorLbl}</span>
-          </div>
+          <input type="hidden" id="bgColor" value="#ffffff" />
           <div class="pp-guide-toggle">
             <input type="checkbox" id="guideToggle" checked />
             <label for="guideToggle">${t.pp_show_guides || 'Show photo guides'}</label>
@@ -557,7 +554,6 @@ function renderCountryList(filter) {
       countryNameEl.textContent = c.country
       triggerFlag.src = flagUrl(c.code, 40)
       triggerFlag.alt = c.code
-      bgColorInput.value = c.bg
       countryDropdown.classList.remove('open')
       updateDocTypes()
       renderCanvas()
@@ -580,8 +576,6 @@ document.addEventListener('click', (e) => {
     countryDropdown.classList.remove('open')
   }
 })
-
-bgColorInput.addEventListener('input', () => renderCanvas())
 
 // Zoom slider
 zoomSlider.addEventListener('input', () => {
