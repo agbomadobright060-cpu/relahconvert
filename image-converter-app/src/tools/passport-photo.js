@@ -236,7 +236,13 @@ style.textContent = `
   .pp-desc{font-size:13px;color:#7A6A5A;margin:0 0 20px}
   .pp-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
   @media(max-width:700px){.pp-grid{grid-template-columns:1fr}}
-  .pp-canvas-area{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:hidden;position:relative}
+  .pp-canvas-area{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:hidden;position:relative;display:none}
+  .pp-canvas-area.visible{display:block}
+  .pp-dropzone{border:2px dashed #DDD5C8;border-radius:12px;padding:48px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#FAFAF8}
+  .pp-dropzone:hover{border-color:#C84B31;background:#FDE8E3}
+  .pp-dropzone svg{margin-bottom:8px;color:#C4B8A8}
+  .pp-dropzone:hover svg{color:#C84B31}
+  .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
   .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:grab;touch-action:none}
   .pp-canvas-inner:active{cursor:grabbing}
   .pp-canvas-inner canvas{display:block;width:100%;height:auto}
@@ -295,78 +301,7 @@ style.textContent = `
 document.head.appendChild(style)
 document.title = toolName + ' Free & Private | RelahConvert'
 
-// Realistic passport photo SVG illustration
-const exampleSVG = `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="skinG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c4a0"/><stop offset="1" stop-color="#d4a574"/></linearGradient>
-    <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1a0e"/><stop offset="1" stop-color="#1a0f06"/></linearGradient>
-    <linearGradient id="shirtG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8a0b0"/><stop offset="1" stop-color="#d4889a"/></linearGradient>
-    <radialGradient id="cheekL" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e8a090" stop-opacity="0.4"/><stop offset="1" stop-color="#e8a090" stop-opacity="0"/></radialGradient>
-    <radialGradient id="cheekR" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e8a090" stop-opacity="0.4"/><stop offset="1" stop-color="#e8a090" stop-opacity="0"/></radialGradient>
-    <clipPath id="photoClip"><rect width="200" height="260" rx="4"/></clipPath>
-  </defs>
-  <g clip-path="url(#photoClip)">
-    <rect width="200" height="260" fill="#f0f0f0"/>
-    <!-- Shoulders / shirt -->
-    <ellipse cx="100" cy="270" rx="80" ry="50" fill="url(#shirtG)"/>
-    <path d="M40 240 Q50 220 70 215 Q85 212 100 210 Q115 212 130 215 Q150 220 160 240 L160 270 L40 270Z" fill="url(#shirtG)"/>
-    <!-- Neck -->
-    <rect x="82" y="165" width="36" height="50" rx="14" fill="url(#skinG)"/>
-    <!-- Neck shadow -->
-    <ellipse cx="100" cy="195" rx="18" ry="6" fill="#c49670" opacity="0.3"/>
-    <!-- V-neckline -->
-    <path d="M70 215 Q85 212 100 230 Q115 212 130 215" fill="none" stroke="#c47888" stroke-width="1"/>
-    <!-- Face -->
-    <ellipse cx="100" cy="120" rx="48" ry="56" fill="url(#skinG)"/>
-    <!-- Ears -->
-    <ellipse cx="52" cy="120" rx="8" ry="12" fill="#dbb08a"/>
-    <ellipse cx="52" cy="120" rx="5" ry="8" fill="#d4a574"/>
-    <ellipse cx="148" cy="120" rx="8" ry="12" fill="#dbb08a"/>
-    <ellipse cx="148" cy="120" rx="5" ry="8" fill="#d4a574"/>
-    <!-- Hair back -->
-    <path d="M48 110 Q48 50 100 42 Q152 50 152 110 Q152 65 100 58 Q48 65 48 110Z" fill="url(#hairG)"/>
-    <!-- Hair top volume -->
-    <ellipse cx="100" cy="62" rx="50" ry="28" fill="url(#hairG)"/>
-    <!-- Hair sides -->
-    <path d="M48 70 Q45 90 50 120 Q48 95 52 75Z" fill="#1a0f06"/>
-    <path d="M152 70 Q155 90 150 120 Q152 95 148 75Z" fill="#1a0f06"/>
-    <!-- Hair strands -->
-    <path d="M65 55 Q80 48 100 46 Q120 48 135 55" fill="none" stroke="#3a2a1e" stroke-width="0.5" opacity="0.4"/>
-    <path d="M60 60 Q80 50 100 48 Q120 50 140 60" fill="none" stroke="#3a2a1e" stroke-width="0.3" opacity="0.3"/>
-    <!-- Eyebrows -->
-    <path d="M72 100 Q80 96 90 98" stroke="#3a2a1e" stroke-width="2" stroke-linecap="round" fill="none"/>
-    <path d="M110 98 Q120 96 128 100" stroke="#3a2a1e" stroke-width="2" stroke-linecap="round" fill="none"/>
-    <!-- Eyes -->
-    <ellipse cx="82" cy="110" rx="9" ry="6" fill="#ffffff"/>
-    <circle cx="82" cy="110" r="4.5" fill="#4a3520"/>
-    <circle cx="82" cy="110" r="2.2" fill="#1a0f06"/>
-    <circle cx="80" cy="108" r="1.2" fill="#ffffff" opacity="0.7"/>
-    <ellipse cx="118" cy="110" rx="9" ry="6" fill="#ffffff"/>
-    <circle cx="118" cy="110" r="4.5" fill="#4a3520"/>
-    <circle cx="118" cy="110" r="2.2" fill="#1a0f06"/>
-    <circle cx="116" cy="108" r="1.2" fill="#ffffff" opacity="0.7"/>
-    <!-- Eyelids -->
-    <path d="M73 107 Q82 104 91 107" stroke="#c49670" stroke-width="0.6" fill="none"/>
-    <path d="M109 107 Q118 104 127 107" stroke="#c49670" stroke-width="0.6" fill="none"/>
-    <!-- Eyelashes -->
-    <path d="M73 110 Q82 105 91 110" stroke="#2a1a0e" stroke-width="0.8" fill="none"/>
-    <path d="M109 110 Q118 105 127 110" stroke="#2a1a0e" stroke-width="0.8" fill="none"/>
-    <!-- Nose -->
-    <path d="M98 108 Q96 120 92 130 Q96 133 100 134 Q104 133 108 130 Q104 120 102 108" fill="none" stroke="#c49670" stroke-width="0.8"/>
-    <ellipse cx="94" cy="130" rx="3.5" ry="2.5" fill="none" stroke="#c49670" stroke-width="0.5"/>
-    <ellipse cx="106" cy="130" rx="3.5" ry="2.5" fill="none" stroke="#c49670" stroke-width="0.5"/>
-    <!-- Cheek blush -->
-    <ellipse cx="70" cy="125" rx="12" ry="8" fill="url(#cheekL)"/>
-    <ellipse cx="130" cy="125" rx="12" ry="8" fill="url(#cheekR)"/>
-    <!-- Lips -->
-    <path d="M88 145 Q94 140 100 142 Q106 140 112 145" fill="#c47070" stroke="#b56060" stroke-width="0.3"/>
-    <path d="M88 145 Q100 153 112 145" fill="#d48080" stroke="#b56060" stroke-width="0.3"/>
-    <!-- Chin definition -->
-    <path d="M80 158 Q100 170 120 158" fill="none" stroke="#c49670" stroke-width="0.4" opacity="0.5"/>
-    <!-- Photo border -->
-    <rect width="200" height="260" rx="4" fill="none" stroke="#e0e0e0" stroke-width="1"/>
-  </g>
-</svg>`
+// No example image — canvas shows clean empty state with upload prompt
 
 document.querySelector('#app').innerHTML = `
   <div class="pp-wrap">
@@ -374,15 +309,15 @@ document.querySelector('#app').innerHTML = `
     <p class="pp-desc">${descText}</p>
     <div class="pp-grid">
       <div>
-        <div class="pp-canvas-area">
+        <div class="pp-canvas-area" id="canvasArea">
           <div class="pp-canvas-inner" id="canvasWrap">
             <canvas id="ppCanvas" width="510" height="510"></canvas>
           </div>
           <div class="pp-drag-hint" id="dragHint" style="display:none">${ppRepositionLbl}</div>
         </div>
-        <div id="exampleArea" class="pp-example">
-          <div class="pp-example-label">${ppExampleLbl}</div>
-          ${exampleSVG}
+        <div id="dropZone" class="pp-dropzone">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
         </div>
       </div>
       <div class="pp-panel">
@@ -446,31 +381,40 @@ const downloadCard  = document.getElementById('downloadCard')
 const dlPhoto       = document.getElementById('dlPhoto')
 const dlSheet       = document.getElementById('dlSheet')
 const dragHint      = document.getElementById('dragHint')
-const exampleArea   = document.getElementById('exampleArea')
+const canvasArea    = document.getElementById('canvasArea')
+const dropZoneEl    = document.getElementById('dropZone')
 const nextSteps     = document.getElementById('nextSteps')
 const nextBtns      = document.getElementById('nextBtns')
 const docTypeSelect = document.getElementById('docTypeSelect')
 const triggerFlag   = document.getElementById('triggerFlag')
 
 // Upload
-uploadBtn.addEventListener('click', () => fileInput.click())
-fileInput.addEventListener('change', () => {
-  if (!fileInput.files.length) return
-  const file = fileInput.files[0]
-  if (!file.type.startsWith('image/')) return
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return
   const img = new Image()
   const url = URL.createObjectURL(file)
   img.onload = () => {
     uploadedImg = img
     panOffsetX = 0
     panOffsetY = 0
-    exampleArea.style.display = 'none'
+    dropZoneEl.style.display = 'none'
+    canvasArea.classList.add('visible')
     dragHint.style.display = ''
     downloadCard.style.display = ''
     renderCanvas()
     buildNextSteps()
   }
   img.src = url
+}
+uploadBtn.addEventListener('click', () => fileInput.click())
+dropZoneEl.addEventListener('click', () => fileInput.click())
+dropZoneEl.addEventListener('dragover', e => { e.preventDefault(); dropZoneEl.style.borderColor = '#C84B31'; dropZoneEl.style.background = '#FDE8E3' })
+dropZoneEl.addEventListener('dragleave', () => { dropZoneEl.style.borderColor = ''; dropZoneEl.style.background = '' })
+dropZoneEl.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); dropZoneEl.style.borderColor = ''; dropZoneEl.style.background = ''; if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]) })
+document.addEventListener('dragover', e => e.preventDefault())
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]) })
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0])
   fileInput.value = ''
 })
 
