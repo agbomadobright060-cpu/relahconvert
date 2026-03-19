@@ -223,7 +223,6 @@ let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let processedImg = null
-let zoomLevel = 1.0
 let removeBgFn = null
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
@@ -273,10 +272,6 @@ style.textContent = `
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
   .pp-status{font-size:13px;color:#7A6A5A;text-align:center;padding:10px 0;font-family:'DM Sans',sans-serif}
-  .pp-zoom-row{display:flex;align-items:center;gap:8px;padding:6px 16px 10px}
-  .pp-zoom-row label{font-size:11px;color:#9A8A7A;white-space:nowrap}
-  .pp-zoom-row input[type=range]{flex:1;accent-color:#C84B31;height:4px}
-  .pp-zoom-row span{font-size:11px;color:#5A4A3A;min-width:32px;text-align:right}
   .pp-dl-btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;text-align:center;text-decoration:none}
   .pp-dl-primary{background:#C84B31;color:#fff}
   .pp-dl-primary:hover{background:#A63D26}
@@ -318,12 +313,6 @@ document.querySelector('#app').innerHTML = `
             <img id="ppPreview" class="pp-preview-img" draggable="false" alt="" />
           </div>
           <div class="pp-status" id="ppStatus" style="display:none"></div>
-          <div class="pp-zoom-row" id="zoomRow" style="display:none">
-            <label>-</label>
-            <input type="range" id="zoomSlider" min="0.3" max="3" step="0.05" value="1" />
-            <span id="zoomLabel">100%</span>
-            <label>+</label>
-          </div>
         </div>
         <div id="dropZone" class="pp-dropzone">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -397,9 +386,6 @@ const nextSteps     = document.getElementById('nextSteps')
 const nextBtns      = document.getElementById('nextBtns')
 const docTypeSelect = document.getElementById('docTypeSelect')
 const triggerFlag   = document.getElementById('triggerFlag')
-const zoomSlider    = document.getElementById('zoomSlider')
-const zoomLabel     = document.getElementById('zoomLabel')
-const zoomRow       = document.getElementById('zoomRow')
 const ppStatus      = document.getElementById('ppStatus')
 
 // Upload with background removal (same approach as remove-background tool)
@@ -410,14 +396,10 @@ function handleFile(file) {
   img.onload = async () => {
     uploadedImg = img
     processedImg = null
-    zoomLevel = 1.0
-    zoomSlider.value = '1'
-    zoomLabel.textContent = '100%'
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
-    zoomRow.style.display = 'none'
     ppStatus.style.display = ''
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
     renderCanvas()
@@ -438,7 +420,6 @@ function handleFile(file) {
       bgImg.onload = () => {
         processedImg = bgImg
         ppStatus.style.display = 'none'
-        zoomRow.style.display = ''
         downloadCard.style.display = ''
         renderCanvas()
         buildNextSteps()
@@ -458,7 +439,6 @@ function handleFile(file) {
 function showWithoutBgRemoval() {
   processedImg = null
   ppStatus.style.display = 'none'
-  zoomRow.style.display = ''
   downloadCard.style.display = ''
   renderCanvas()
   buildNextSteps()
@@ -507,7 +487,6 @@ docTypeSelect.addEventListener('change', () => {
     activeW = s.w; activeH = s.h
   }
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
-  zoomLevel = 1.0; zoomSlider.value = '1'; zoomLabel.textContent = '100%'
   renderCanvas()
 })
 
@@ -552,13 +531,6 @@ document.addEventListener('click', (e) => {
   }
 })
 
-// Zoom slider
-zoomSlider.addEventListener('input', () => {
-  zoomLevel = parseFloat(zoomSlider.value)
-  zoomLabel.textContent = Math.round(zoomLevel * 100) + '%'
-  renderCanvas()
-})
-
 // Canvas rendering — auto-crops image to passport dimensions
 function renderCanvas() {
   const aspect = activeW / activeH
@@ -577,30 +549,25 @@ function renderCanvas() {
   const img = processedImg || uploadedImg
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
+  const imgAspect = imgW / imgH
 
-  // For passport photos, we want to show the top ~45% of the image
-  // (head + shoulders), cropped to the passport aspect ratio.
-  // zoomLevel controls how much of the image height to show.
-  // At zoomLevel 1.0 we show the top 45%, higher shows less (more zoomed).
-
-  const visibleFraction = 0.20 / zoomLevel  // tight head + shoulders crop
-  const srcH = Math.min(imgH, imgH * visibleFraction)
-  const srcW = srcH * aspect
-
-  // Center horizontally, start from top
-  const srcX = Math.max(0, (imgW - srcW) / 2)
-  const srcY = 0
-
-  // If srcW exceeds image width, recalculate based on width
-  let finalSrcX = srcX, finalSrcY = srcY, finalSrcW = srcW, finalSrcH = srcH
-  if (srcW > imgW) {
-    finalSrcW = imgW
-    finalSrcH = imgW / aspect
-    finalSrcX = 0
-    finalSrcY = 0
+  // Crop to passport aspect ratio using cover-fit (fill the frame)
+  let srcX, srcY, srcW, srcH
+  if (imgAspect > aspect) {
+    // Image is wider than passport — match height, crop sides
+    srcH = imgH
+    srcW = imgH * aspect
+    srcX = (imgW - srcW) / 2
+    srcY = 0
+  } else {
+    // Image is taller than passport — match width, crop bottom
+    srcW = imgW
+    srcH = imgW / aspect
+    srcX = 0
+    srcY = 0  // start from top to keep head in frame
   }
 
-  ctx.drawImage(img, finalSrcX, finalSrcY, finalSrcW, finalSrcH, 0, 0, dispW, dispH)
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 
   // Convert canvas to static image
   ppPreview.src = ppCanvas.toDataURL('image/png')
@@ -624,21 +591,17 @@ function generatePhoto() {
     const imgW = img.naturalWidth
     const imgH = img.naturalHeight
 
-    const visibleFraction = 0.45 / zoomLevel
-    const srcH = Math.min(imgH, imgH * visibleFraction)
-    const srcW = srcH * aspect
-    const srcX = Math.max(0, (imgW - srcW) / 2)
-    const srcY = 0
-
-    let finalSrcX = srcX, finalSrcY = srcY, finalSrcW = srcW, finalSrcH = srcH
-    if (srcW > imgW) {
-      finalSrcW = imgW
-      finalSrcH = imgW / aspect
-      finalSrcX = 0
-      finalSrcY = 0
+    const imgAspect = imgW / imgH
+    let srcX, srcY, srcW, srcH
+    if (imgAspect > aspect) {
+      srcH = imgH; srcW = imgH * aspect
+      srcX = (imgW - srcW) / 2; srcY = 0
+    } else {
+      srcW = imgW; srcH = imgW / aspect
+      srcX = 0; srcY = 0
     }
 
-    octx.drawImage(img, finalSrcX, finalSrcY, finalSrcW, finalSrcH, 0, 0, wPx, hPx)
+    octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
   return outCanvas
 }
