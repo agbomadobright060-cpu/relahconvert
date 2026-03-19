@@ -231,6 +231,28 @@
           }
         }
       }
+      // Handle English standalone tool routes served via catch-all (e.g. /passport-photo)
+      if (!__isToolRoute && __segs.length === 1 && __segs[0]) {
+        const __modules2 = {
+          'compress':()=>import('/src/compress.js'),'resize':()=>import('/src/resize.js'),
+          'crop':()=>import('/src/tools/crop.js'),'rotate':()=>import('/src/tools/rotate.js'),
+          'flip':()=>import('/src/tools/flip.js'),'grayscale':()=>import('/src/tools/grayscale.js'),
+          'watermark':()=>import('/src/tools/watermark.js'),'round-corners':()=>import('/src/tools/round-corners.js'),
+          'meme-generator':()=>import('/src/tools/meme-generator.js'),'blur-face':()=>import('/src/tools/blur-face.js'),
+          'remove-background':()=>import('/src/tools/remove-background.js'),'heic-to-jpg':()=>import('/src/tools/heic-to-jpg.js'),
+          'image-to-ico':()=>import('/src/tools/image-to-ico.js'),'jpg-to-svg':()=>import('/src/tools/jpg-to-svg.js'),
+          'html-to-image':()=>import('/src/tools/html-to-image.js'),'jpg-to-gif':()=>import('/src/tools/jpg-to-gif.js'),
+          'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'merge-images':()=>import('/src/tools/merge-images.js'),
+          'passport-photo':()=>import('/src/tools/passport-photo.js'),
+        }
+        if (__modules2[__segs[0]]) {
+          __isToolRoute = true
+          document.body.innerHTML = '<div id="app"></div>'
+          document.body.style.margin = '0'
+          document.body.style.padding = '0'
+          __modules2[__segs[0]]()
+        }
+      }
       if (!__isToolRoute) { // Only render homepage if not a tool route
       const t = getT()
       const currentLang = getLang()
