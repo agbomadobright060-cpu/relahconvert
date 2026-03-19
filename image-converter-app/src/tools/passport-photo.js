@@ -222,7 +222,9 @@ let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States'
 let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
+let processedImg = null
 let zoomLevel = 1.0
+let removeBgFn = null
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -270,6 +272,7 @@ style.textContent = `
   .pp-color-row{display:flex;align-items:center;gap:8px;margin-top:8px}
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
+  .pp-status{font-size:13px;color:#7A6A5A;text-align:center;padding:10px 0;font-family:'DM Sans',sans-serif}
   .pp-zoom-row{display:flex;align-items:center;gap:8px;padding:6px 16px 10px}
   .pp-zoom-row label{font-size:11px;color:#9A8A7A;white-space:nowrap}
   .pp-zoom-row input[type=range]{flex:1;accent-color:#C84B31;height:4px}
@@ -314,6 +317,7 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-canvas-inner" id="canvasWrap">
             <img id="ppPreview" class="pp-preview-img" draggable="false" alt="" />
           </div>
+          <div class="pp-status" id="ppStatus" style="display:none"></div>
           <div class="pp-zoom-row" id="zoomRow" style="display:none">
             <label>-</label>
             <input type="range" id="zoomSlider" min="0.3" max="3" step="0.05" value="1" />
@@ -396,26 +400,66 @@ const triggerFlag   = document.getElementById('triggerFlag')
 const zoomSlider    = document.getElementById('zoomSlider')
 const zoomLabel     = document.getElementById('zoomLabel')
 const zoomRow       = document.getElementById('zoomRow')
+const ppStatus      = document.getElementById('ppStatus')
 
-// Upload — instant crop, no background removal
+// Upload with background removal (same approach as remove-background tool)
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   const img = new Image()
   const url = URL.createObjectURL(file)
-  img.onload = () => {
+  img.onload = async () => {
     uploadedImg = img
+    processedImg = null
     zoomLevel = 1.0
     zoomSlider.value = '1'
     zoomLabel.textContent = '100%'
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
-    zoomRow.style.display = ''
-    downloadCard.style.display = ''
+    downloadCard.style.display = 'none'
+    zoomRow.style.display = 'none'
+    ppStatus.style.display = ''
+    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
     renderCanvas()
-    buildNextSteps()
+
+    try {
+      // Lazy-load the library (same as remove-background tool)
+      if (!removeBgFn) {
+        ppStatus.textContent = t.pp_loading_model || 'Loading AI model...'
+        const mod = await import('@imgly/background-removal')
+        removeBgFn = mod.removeBackground
+      }
+      ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
+      const blob = await removeBgFn(file, {
+        model: 'small',
+        cacheMode: 'cache-first',
+      })
+      const bgImg = new Image()
+      bgImg.onload = () => {
+        processedImg = bgImg
+        ppStatus.style.display = 'none'
+        zoomRow.style.display = ''
+        downloadCard.style.display = ''
+        renderCanvas()
+        buildNextSteps()
+      }
+      bgImg.onerror = () => showWithoutBgRemoval()
+      bgImg.src = URL.createObjectURL(blob)
+    } catch (err) {
+      console.warn('Background removal failed:', err)
+      showWithoutBgRemoval()
+    }
   }
   img.src = url
+}
+
+function showWithoutBgRemoval() {
+  processedImg = null
+  ppStatus.style.display = 'none'
+  zoomRow.style.display = ''
+  downloadCard.style.display = ''
+  renderCanvas()
+  buildNextSteps()
 }
 uploadBtn.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('click', () => fileInput.click())
@@ -528,7 +572,7 @@ function renderCanvas() {
 
   if (!uploadedImg) return
 
-  const img = uploadedImg
+  const img = processedImg || uploadedImg
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
@@ -573,7 +617,7 @@ function generatePhoto() {
   octx.fillRect(0, 0, wPx, hPx)
 
   if (uploadedImg) {
-    const img = uploadedImg
+    const img = processedImg || uploadedImg
     const aspect = activeW / activeH
     const imgW = img.naturalWidth
     const imgH = img.naturalHeight
