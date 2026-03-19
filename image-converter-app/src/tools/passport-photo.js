@@ -243,6 +243,8 @@ style.textContent = `
   .pp-dropzone svg{margin-bottom:8px;color:#C4B8A8}
   .pp-dropzone:hover svg{color:#C84B31}
   .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
+  .pp-hero{text-align:center;margin-bottom:24px}
+  .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
   .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:grab;touch-action:none}
   .pp-canvas-inner:active{cursor:grabbing}
   .pp-canvas-inner canvas{display:block;width:100%;height:auto}
@@ -301,12 +303,13 @@ style.textContent = `
 document.head.appendChild(style)
 document.title = toolName + ' Free & Private | RelahConvert'
 
-// No example image — canvas shows clean empty state with upload prompt
-
 document.querySelector('#app').innerHTML = `
   <div class="pp-wrap">
     <h1 class="pp-h1">${h1Main} <em>${h1Em}</em></h1>
     <p class="pp-desc">${descText}</p>
+    <div class="pp-hero" id="heroSection">
+      <img src="/passport-before-after.jpg" alt="Passport photo before and after example" />
+    </div>
     <div class="pp-grid">
       <div>
         <div class="pp-canvas-area" id="canvasArea">
@@ -398,6 +401,7 @@ function handleFile(file) {
     panOffsetX = 0
     panOffsetY = 0
     dropZoneEl.style.display = 'none'
+    document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     dragHint.style.display = ''
     downloadCard.style.display = ''
