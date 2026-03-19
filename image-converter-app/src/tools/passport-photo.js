@@ -578,29 +578,35 @@ function renderCanvas() {
   const personH = bottomY - topY
   const personCx = leftX + personW / 2
 
-  // Take head+shoulders: top 50% of the person's height
-  const headH = personH * 0.5
-  const headTop = topY
+  // Passport framing: show head + shoulders + upper chest
+  // ~70% of person height from top, with 8% padding above head
+  const contentH = personH * 0.70
+  const padAbove = contentH * 0.08
+  const frameTop = Math.max(0, topY - padAbove)
+  const frameH = contentH + padAbove
 
-  // Crop to passport aspect ratio, centered on person
+  // Calculate crop to passport aspect ratio
   let srcX, srcY, srcW, srcH
-  if (headH * aspect >= personW) {
-    // Need more width than person has — use person width, adjust height
-    srcW = Math.min(personW * 1.4, imgW) // add some padding
-    srcH = srcW / aspect
+  const frameAspect = aspect // passport width/height
+
+  // Width needed for this height at passport aspect ratio
+  const neededW = frameH * frameAspect
+  if (neededW <= imgW) {
+    srcH = frameH
+    srcW = neededW
     srcX = Math.max(0, personCx - srcW / 2)
-    srcY = Math.max(0, headTop - srcH * 0.05)
+    srcY = frameTop
   } else {
-    // Person is wide enough — use head height, calc width from aspect
-    srcH = headH * 1.1 // small padding
-    srcW = srcH * aspect
-    srcX = Math.max(0, personCx - srcW / 2)
-    srcY = Math.max(0, headTop - srcH * 0.05)
+    // Image too narrow — use full width, calc height
+    srcW = imgW
+    srcH = imgW / frameAspect
+    srcX = 0
+    srcY = frameTop
   }
 
   // Clamp to image bounds
   if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-  if (srcY + srcH > imgH) srcH = imgH - srcY
+  if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
 
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 
@@ -642,17 +648,20 @@ function generatePhoto() {
       if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
     }
     const personW = rightX - leftX, personH = bottomY - topY, personCx = leftX + personW / 2
-    const headH = personH * 0.5, headTop = topY
+    const contentH = personH * 0.70
+    const padAbove = contentH * 0.08
+    const frameTop = Math.max(0, topY - padAbove)
+    const frameH = contentH + padAbove
+    const neededW = frameH * aspect
     let srcX, srcY, srcW, srcH
-    if (headH * aspect >= personW) {
-      srcW = Math.min(personW * 1.4, imgW); srcH = srcW / aspect
-      srcX = Math.max(0, personCx - srcW / 2); srcY = Math.max(0, headTop - srcH * 0.05)
+    if (neededW <= imgW) {
+      srcH = frameH; srcW = neededW
+      srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
     } else {
-      srcH = headH * 1.1; srcW = srcH * aspect
-      srcX = Math.max(0, personCx - srcW / 2); srcY = Math.max(0, headTop - srcH * 0.05)
+      srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
     }
     if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    if (srcY + srcH > imgH) srcH = imgH - srcY
+    if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
 
     octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
