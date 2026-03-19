@@ -549,22 +549,25 @@ function renderCanvas() {
   const img = processedImg || uploadedImg
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
-  const imgAspect = imgW / imgH
 
-  // Crop to passport aspect ratio using cover-fit (fill the frame)
+  // Step 1: Define head+shoulders zone (top 40% of image)
+  const headH = imgH * 0.4
+  const headW = imgW
+
+  // Step 2: Crop that zone to the passport aspect ratio
   let srcX, srcY, srcW, srcH
-  if (imgAspect > aspect) {
-    // Image is wider than passport — match height, crop sides
-    srcH = imgH
-    srcW = imgH * aspect
+  if (headW / headH > aspect) {
+    // Head zone is wider — crop sides, keep full head height
+    srcH = headH
+    srcW = headH * aspect
     srcX = (imgW - srcW) / 2
     srcY = 0
   } else {
-    // Image is taller than passport — match width, crop bottom
-    srcW = imgW
-    srcH = imgW / aspect
+    // Head zone is narrower — use full width, adjust height
+    srcW = headW
+    srcH = headW / aspect
     srcX = 0
-    srcY = 0  // start from top to keep head in frame
+    srcY = 0
   }
 
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
@@ -591,13 +594,14 @@ function generatePhoto() {
     const imgW = img.naturalWidth
     const imgH = img.naturalHeight
 
-    const imgAspect = imgW / imgH
+    const headH = imgH * 0.4
+    const headW = imgW
     let srcX, srcY, srcW, srcH
-    if (imgAspect > aspect) {
-      srcH = imgH; srcW = imgH * aspect
+    if (headW / headH > aspect) {
+      srcH = headH; srcW = headH * aspect
       srcX = (imgW - srcW) / 2; srcY = 0
     } else {
-      srcW = imgW; srcH = imgW / aspect
+      srcW = headW; srcH = headW / aspect
       srcX = 0; srcY = 0
     }
 
