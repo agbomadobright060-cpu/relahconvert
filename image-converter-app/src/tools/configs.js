@@ -216,4 +216,11 @@ export const tools = {
     outputFormat: null,
     slug: 'merge-images'
   },
+  'passport-photo': {
+    title: 'Passport Photo',
+    description: 'Create passport photos that meet official requirements. Select country, auto-size, and download. Free and private.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'passport-photo'
+  },
 }

@@ -218,7 +218,7 @@
               'remove-background':()=>import('/src/tools/remove-background.js'),'heic-to-jpg':()=>import('/src/tools/heic-to-jpg.js'),
               'image-to-ico':()=>import('/src/tools/image-to-ico.js'),'jpg-to-svg':()=>import('/src/tools/jpg-to-svg.js'),
               'html-to-image':()=>import('/src/tools/html-to-image.js'),'jpg-to-gif':()=>import('/src/tools/jpg-to-gif.js'),
-              'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'merge-images':()=>import('/src/tools/merge-images.js'),
+              'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'merge-images':()=>import('/src/tools/merge-images.js'),'passport-photo':()=>import('/src/tools/passport-photo.js'),
               'jpg-to-pdf':()=>import('/src/jpg-to-pdf.js'),
               'png-to-pdf':()=>import('/src/png-to-pdf.js'),
             }
@@ -275,7 +275,7 @@
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif',
         'crop','rotate','flip','grayscale','watermark','round-corners','meme-generator','blur-face',
-        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images'
+        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo'
       ]
 
       // ── Category map ──────────────────────────────────────────────────────
@@ -311,6 +311,7 @@
         'jpg-to-svg':          'convert',
         'html-to-image':  'convert',
         'merge-images':   'edit',
+        'passport-photo': 'create',
       }
 
       document.querySelector('.logo').href = currentLang === 'en' ? '/' : '/' + currentLang
