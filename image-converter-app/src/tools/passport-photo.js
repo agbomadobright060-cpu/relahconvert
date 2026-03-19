@@ -246,7 +246,7 @@ style.textContent = `
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
   .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
-  .pp-preview-img{display:block;max-width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none;margin:0 auto}
+  .pp-canvas-inner canvas{display:block;max-width:100%;height:auto;pointer-events:none;user-select:none;margin:0 auto}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -310,7 +310,7 @@ document.querySelector('#app').innerHTML = `
       <div>
         <div class="pp-canvas-area" id="canvasArea">
           <div class="pp-canvas-inner" id="canvasWrap">
-            <img id="ppPreview" class="pp-preview-img" draggable="false" alt="" />
+            <canvas id="ppCanvas"></canvas>
           </div>
           <div class="pp-status" id="ppStatus" style="display:none"></div>
         </div>
@@ -367,8 +367,7 @@ injectHeader()
 const fileInput     = document.getElementById('fileInput')
 const uploadBtn     = document.getElementById('uploadBtn')
 const canvasWrap    = document.getElementById('canvasWrap')
-const ppPreview     = document.getElementById('ppPreview')
-const ppCanvas      = document.createElement('canvas')  // offscreen, never in DOM
+const ppCanvas      = document.getElementById('ppCanvas')
 const ctx           = ppCanvas.getContext('2d')
 const countryTrigger = document.getElementById('countryTrigger')
 const countryDropdown = document.getElementById('countryDropdown')
@@ -605,10 +604,6 @@ function renderCanvas() {
 
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 
-  // Convert canvas to static image with correct dimensions
-  ppPreview.width = dispW
-  ppPreview.height = dispH
-  ppPreview.src = ppCanvas.toDataURL('image/png')
 }
 
 // Generate high-res single photo
