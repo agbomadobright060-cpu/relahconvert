@@ -446,7 +446,9 @@ function handleFile(file) {
       bgImg.onerror = () => showWithoutBgRemoval()
       bgImg.src = URL.createObjectURL(blob)
     } catch (err) {
-      console.warn('Background removal failed:', err)
+      console.error('Background removal failed:', err)
+      ppStatus.textContent = 'Background removal failed. Using original photo.'
+      setTimeout(() => { ppStatus.style.display = 'none' }, 3000)
       showWithoutBgRemoval()
     }
   }
