@@ -531,33 +531,16 @@ document.addEventListener('click', (e) => {
   }
 })
 
-// Canvas rendering — auto-crops image to passport dimensions
-function renderCanvas() {
-  const aspect = activeW / activeH
-  const dispW = 400
-  const dispH = Math.round(dispW / aspect)
-  ppCanvas.width = dispW
-  ppCanvas.height = dispH
-  canvasWrap.style.maxWidth = dispW + 'px'
-
-  // Fill white background
-  ctx.fillStyle = bgColorInput.value
-  ctx.fillRect(0, 0, dispW, dispH)
-
-  if (!uploadedImg) return
-
-  const img = processedImg || uploadedImg
+// Calculate the source crop region for passport framing
+function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // Determine crop region
-  let srcX, srcY, srcW, srcH
-
   if (processedImg) {
-    // Background removed — scan for person bounds
-    const scanCanvas = document.createElement('canvas')
-    scanCanvas.width = imgW; scanCanvas.height = imgH
-    const sctx = scanCanvas.getContext('2d')
+    // Background removed — find person bounds via alpha channel
+    const sc = document.createElement('canvas')
+    sc.width = imgW; sc.height = imgH
+    const sctx = sc.getContext('2d')
     sctx.drawImage(img, 0, 0)
     const data = sctx.getImageData(0, 0, imgW, imgH).data
     let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
@@ -576,91 +559,74 @@ function renderCanvas() {
 
     const personH = bottomY - topY
     const personCx = leftX + (rightX - leftX) / 2
-    // Show 70% of person from top + padding above head
     const showH = personH * 0.70
-    const pad = showH * 0.08
+    const pad = showH * 0.10
     const frameTop = Math.max(0, topY - pad)
     const frameH = showH + pad
     const neededW = frameH * aspect
 
+    let srcX, srcY, srcW, srcH
     if (neededW <= imgW) {
       srcH = frameH; srcW = neededW
       srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
     } else {
       srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
     }
-  } else {
-    // No background removal — simple crop from top, 35% of image height
-    const cropH = imgH * 0.35
-    const neededW = cropH * aspect
-    if (neededW <= imgW) {
-      srcH = cropH; srcW = neededW
-      srcX = (imgW - srcW) / 2; srcY = 0
-    } else {
-      srcW = imgW; srcH = imgW / aspect
-      srcX = 0; srcY = 0
-    }
+    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+    if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
+    return { srcX, srcY, srcW, srcH }
   }
 
-  // Clamp to image bounds
-  if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+  // No background removal — crop top 40% of image to passport aspect ratio
+  const cropH = imgH * 0.40
+  const neededW = cropH * aspect
+  let srcX, srcY, srcW, srcH
+  if (neededW <= imgW) {
+    srcH = cropH; srcW = neededW
+    srcX = (imgW - srcW) / 2; srcY = 0
+  } else {
+    srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = 0
+  }
   if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
-
-  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
-
+  return { srcX, srcY, srcW, srcH }
 }
 
-// Generate high-res single photo
+// Render preview
+function renderCanvas() {
+  const aspect = activeW / activeH
+  // Preview size (display only)
+  const dispW = 400
+  const dispH = Math.round(dispW / aspect)
+  ppCanvas.width = dispW
+  ppCanvas.height = dispH
+  canvasWrap.style.maxWidth = dispW + 'px'
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, dispW, dispH)
+
+  if (!uploadedImg) return
+
+  const img = processedImg || uploadedImg
+  const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
+}
+
+// Generate high-res photo at exact passport dimensions (300 DPI)
 function generatePhoto() {
   const wPx = Math.round(activeW / MM_PER_INCH * DPI)
   const hPx = Math.round(activeH / MM_PER_INCH * DPI)
+  const aspect = activeW / activeH
   const outCanvas = document.createElement('canvas')
   outCanvas.width = wPx
   outCanvas.height = hPx
   const octx = outCanvas.getContext('2d')
 
-  octx.fillStyle = bgColorInput.value
+  octx.fillStyle = '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
 
   if (uploadedImg) {
     const img = processedImg || uploadedImg
-    const aspect = activeW / activeH
-    const imgW = img.naturalWidth
-    const imgH = img.naturalHeight
-
-    // Find person bounds (same logic as renderCanvas)
-    let topY = 0, bottomY = imgH, leftX = 0, rightX = imgW
-    if (processedImg) {
-      const sc = document.createElement('canvas')
-      sc.width = imgW; sc.height = imgH
-      const scx = sc.getContext('2d')
-      scx.drawImage(img, 0, 0)
-      const d = scx.getImageData(0, 0, imgW, imgH).data
-      topY = imgH; bottomY = 0; leftX = imgW; rightX = 0
-      for (let y = 0; y < imgH; y += 4) {
-        for (let x = 0; x < imgW; x += 4) {
-          const i = (y * imgW + x) * 4
-          if (d[i + 3] > 30) { if (y < topY) topY = y; if (y > bottomY) bottomY = y; if (x < leftX) leftX = x; if (x > rightX) rightX = x }
-        }
-      }
-      if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
-    }
-    let srcX, srcY, srcW, srcH
-    if (processedImg) {
-      const personH = bottomY - topY, personCx = leftX + (rightX - leftX) / 2
-      const showH = personH * 0.70, pad = showH * 0.08
-      const frameTop = Math.max(0, topY - pad), frameH = showH + pad
-      const neededW = frameH * aspect
-      if (neededW <= imgW) { srcH = frameH; srcW = neededW; srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop }
-      else { srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop }
-    } else {
-      const cropH = imgH * 0.35, neededW = cropH * aspect
-      if (neededW <= imgW) { srcH = cropH; srcW = neededW; srcX = (imgW - srcW) / 2; srcY = 0 }
-      else { srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = 0 }
-    }
-    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
-
+    const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
     octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
   return outCanvas
