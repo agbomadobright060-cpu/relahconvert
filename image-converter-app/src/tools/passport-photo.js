@@ -427,8 +427,9 @@ function handleFile(file) {
       bgImg.src = URL.createObjectURL(blob)
     } catch (err) {
       console.error('Background removal failed:', err)
-      ppStatus.textContent = 'Background removal failed. Using original photo.'
-      setTimeout(() => { ppStatus.style.display = 'none' }, 3000)
+      ppStatus.textContent = 'Background removal failed — using original photo.'
+      ppStatus.style.color = '#C84B31'
+      setTimeout(() => { ppStatus.style.display = 'none'; ppStatus.style.color = '' }, 5000)
       showWithoutBgRemoval()
     }
   }
@@ -549,20 +550,21 @@ function renderCanvas() {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // Find the person's bounding box by scanning for non-transparent pixels
-  let topY = 0, bottomY = imgH, leftX = 0, rightX = imgW
+  // Determine crop region
+  let srcX, srcY, srcW, srcH
+
   if (processedImg) {
+    // Background removed — scan for person bounds
     const scanCanvas = document.createElement('canvas')
-    scanCanvas.width = imgW
-    scanCanvas.height = imgH
+    scanCanvas.width = imgW; scanCanvas.height = imgH
     const sctx = scanCanvas.getContext('2d')
     sctx.drawImage(img, 0, 0)
     const data = sctx.getImageData(0, 0, imgW, imgH).data
-    topY = imgH; bottomY = 0; leftX = imgW; rightX = 0
+    let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
     for (let y = 0; y < imgH; y += 4) {
       for (let x = 0; x < imgW; x += 4) {
         const i = (y * imgW + x) * 4
-        if (data[i + 3] > 30) { // non-transparent pixel
+        if (data[i + 3] > 30) {
           if (y < topY) topY = y
           if (y > bottomY) bottomY = y
           if (x < leftX) leftX = x
@@ -571,37 +573,33 @@ function renderCanvas() {
       }
     }
     if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
-  }
 
-  // Person dimensions
-  const personW = rightX - leftX
-  const personH = bottomY - topY
-  const personCx = leftX + personW / 2
+    const personH = bottomY - topY
+    const personCx = leftX + (rightX - leftX) / 2
+    // Show 70% of person from top + padding above head
+    const showH = personH * 0.70
+    const pad = showH * 0.08
+    const frameTop = Math.max(0, topY - pad)
+    const frameH = showH + pad
+    const neededW = frameH * aspect
 
-  // Passport framing: show head + shoulders + upper chest
-  // ~70% of person height from top, with 8% padding above head
-  const contentH = personH * 0.70
-  const padAbove = contentH * 0.08
-  const frameTop = Math.max(0, topY - padAbove)
-  const frameH = contentH + padAbove
-
-  // Calculate crop to passport aspect ratio
-  let srcX, srcY, srcW, srcH
-  const frameAspect = aspect // passport width/height
-
-  // Width needed for this height at passport aspect ratio
-  const neededW = frameH * frameAspect
-  if (neededW <= imgW) {
-    srcH = frameH
-    srcW = neededW
-    srcX = Math.max(0, personCx - srcW / 2)
-    srcY = frameTop
+    if (neededW <= imgW) {
+      srcH = frameH; srcW = neededW
+      srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
+    } else {
+      srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
+    }
   } else {
-    // Image too narrow — use full width, calc height
-    srcW = imgW
-    srcH = imgW / frameAspect
-    srcX = 0
-    srcY = frameTop
+    // No background removal — simple crop from top, 35% of image height
+    const cropH = imgH * 0.35
+    const neededW = cropH * aspect
+    if (neededW <= imgW) {
+      srcH = cropH; srcW = neededW
+      srcX = (imgW - srcW) / 2; srcY = 0
+    } else {
+      srcW = imgW; srcH = imgW / aspect
+      srcX = 0; srcY = 0
+    }
   }
 
   // Clamp to image bounds
@@ -647,18 +645,18 @@ function generatePhoto() {
       }
       if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
     }
-    const personW = rightX - leftX, personH = bottomY - topY, personCx = leftX + personW / 2
-    const contentH = personH * 0.70
-    const padAbove = contentH * 0.08
-    const frameTop = Math.max(0, topY - padAbove)
-    const frameH = contentH + padAbove
-    const neededW = frameH * aspect
     let srcX, srcY, srcW, srcH
-    if (neededW <= imgW) {
-      srcH = frameH; srcW = neededW
-      srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
+    if (processedImg) {
+      const personH = bottomY - topY, personCx = leftX + (rightX - leftX) / 2
+      const showH = personH * 0.70, pad = showH * 0.08
+      const frameTop = Math.max(0, topY - pad), frameH = showH + pad
+      const neededW = frameH * aspect
+      if (neededW <= imgW) { srcH = frameH; srcW = neededW; srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop }
+      else { srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop }
     } else {
-      srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
+      const cropH = imgH * 0.35, neededW = cropH * aspect
+      if (neededW <= imgW) { srcH = cropH; srcW = neededW; srcX = (imgW - srcW) / 2; srcY = 0 }
+      else { srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = 0 }
     }
     if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
     if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
