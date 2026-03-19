@@ -458,12 +458,24 @@ function handleFile(file) {
 
     // Run background removal
     isProcessing = true
+    let lastStage = ''
     removeBackground(file, {
+      model: 'isnet_quint8',
       output: { format: 'image/png' },
       progress: (key, current, total) => {
-        const pct = Math.round((current / total) * 100)
-        processingProgress.textContent = pct + '%'
-        processingFill.style.width = pct + '%'
+        // Track stage changes to show accurate progress
+        if (key !== lastStage) {
+          lastStage = key
+        }
+        if (total > 0) {
+          const pct = Math.round((current / total) * 100)
+          // Show downloading vs processing status
+          const label = key.includes('fetch') || key.includes('download')
+            ? 'Loading model... ' + pct + '%'
+            : pct + '%'
+          processingProgress.textContent = label
+          processingFill.style.width = pct + '%'
+        }
       }
     }).then(blob => {
       const bgRemovedUrl = URL.createObjectURL(blob)
@@ -472,16 +484,22 @@ function handleFile(file) {
         processedImg = bgImg
         isProcessing = false
         processingOverlay.style.display = 'none'
-
         zoomRow.style.display = ''
         downloadCard.style.display = ''
         renderCanvas()
         renderGuide()
         buildNextSteps()
       }
+      bgImg.onerror = () => {
+        finishWithoutBgRemoval()
+      }
       bgImg.src = bgRemovedUrl
     }).catch(err => {
       console.warn('Background removal failed, using original:', err)
+      finishWithoutBgRemoval()
+    })
+
+    function finishWithoutBgRemoval() {
       processedImg = null
       isProcessing = false
       processingOverlay.style.display = 'none'
@@ -490,7 +508,7 @@ function handleFile(file) {
       renderCanvas()
       renderGuide()
       buildNextSteps()
-    })
+    }
   }
   origImg.src = origUrl
 }
