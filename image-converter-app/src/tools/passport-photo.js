@@ -550,25 +550,58 @@ function renderCanvas() {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // Step 1: Define head+shoulders zone (top 40% of image)
-  const headH = imgH * 0.4
-  const headW = imgW
-
-  // Step 2: Crop that zone to the passport aspect ratio
-  let srcX, srcY, srcW, srcH
-  if (headW / headH > aspect) {
-    // Head zone is wider — crop sides, keep full head height
-    srcH = headH
-    srcW = headH * aspect
-    srcX = (imgW - srcW) / 2
-    srcY = 0
-  } else {
-    // Head zone is narrower — use full width, adjust height
-    srcW = headW
-    srcH = headW / aspect
-    srcX = 0
-    srcY = 0
+  // Find the person's bounding box by scanning for non-transparent pixels
+  let topY = 0, bottomY = imgH, leftX = 0, rightX = imgW
+  if (processedImg) {
+    const scanCanvas = document.createElement('canvas')
+    scanCanvas.width = imgW
+    scanCanvas.height = imgH
+    const sctx = scanCanvas.getContext('2d')
+    sctx.drawImage(img, 0, 0)
+    const data = sctx.getImageData(0, 0, imgW, imgH).data
+    topY = imgH; bottomY = 0; leftX = imgW; rightX = 0
+    for (let y = 0; y < imgH; y += 4) {
+      for (let x = 0; x < imgW; x += 4) {
+        const i = (y * imgW + x) * 4
+        if (data[i + 3] > 30) { // non-transparent pixel
+          if (y < topY) topY = y
+          if (y > bottomY) bottomY = y
+          if (x < leftX) leftX = x
+          if (x > rightX) rightX = x
+        }
+      }
+    }
+    if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
   }
+
+  // Person dimensions
+  const personW = rightX - leftX
+  const personH = bottomY - topY
+  const personCx = leftX + personW / 2
+
+  // Take head+shoulders: top 50% of the person's height
+  const headH = personH * 0.5
+  const headTop = topY
+
+  // Crop to passport aspect ratio, centered on person
+  let srcX, srcY, srcW, srcH
+  if (headH * aspect >= personW) {
+    // Need more width than person has — use person width, adjust height
+    srcW = Math.min(personW * 1.4, imgW) // add some padding
+    srcH = srcW / aspect
+    srcX = Math.max(0, personCx - srcW / 2)
+    srcY = Math.max(0, headTop - srcH * 0.05)
+  } else {
+    // Person is wide enough — use head height, calc width from aspect
+    srcH = headH * 1.1 // small padding
+    srcW = srcH * aspect
+    srcX = Math.max(0, personCx - srcW / 2)
+    srcY = Math.max(0, headTop - srcH * 0.05)
+  }
+
+  // Clamp to image bounds
+  if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+  if (srcY + srcH > imgH) srcH = imgH - srcY
 
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 
@@ -596,16 +629,35 @@ function generatePhoto() {
     const imgW = img.naturalWidth
     const imgH = img.naturalHeight
 
-    const headH = imgH * 0.4
-    const headW = imgW
-    let srcX, srcY, srcW, srcH
-    if (headW / headH > aspect) {
-      srcH = headH; srcW = headH * aspect
-      srcX = (imgW - srcW) / 2; srcY = 0
-    } else {
-      srcW = headW; srcH = headW / aspect
-      srcX = 0; srcY = 0
+    // Find person bounds (same logic as renderCanvas)
+    let topY = 0, bottomY = imgH, leftX = 0, rightX = imgW
+    if (processedImg) {
+      const sc = document.createElement('canvas')
+      sc.width = imgW; sc.height = imgH
+      const scx = sc.getContext('2d')
+      scx.drawImage(img, 0, 0)
+      const d = scx.getImageData(0, 0, imgW, imgH).data
+      topY = imgH; bottomY = 0; leftX = imgW; rightX = 0
+      for (let y = 0; y < imgH; y += 4) {
+        for (let x = 0; x < imgW; x += 4) {
+          const i = (y * imgW + x) * 4
+          if (d[i + 3] > 30) { if (y < topY) topY = y; if (y > bottomY) bottomY = y; if (x < leftX) leftX = x; if (x > rightX) rightX = x }
+        }
+      }
+      if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
     }
+    const personW = rightX - leftX, personH = bottomY - topY, personCx = leftX + personW / 2
+    const headH = personH * 0.5, headTop = topY
+    let srcX, srcY, srcW, srcH
+    if (headH * aspect >= personW) {
+      srcW = Math.min(personW * 1.4, imgW); srcH = srcW / aspect
+      srcX = Math.max(0, personCx - srcW / 2); srcY = Math.max(0, headTop - srcH * 0.05)
+    } else {
+      srcH = headH * 1.1; srcW = srcH * aspect
+      srcX = Math.max(0, personCx - srcW / 2); srcY = Math.max(0, headTop - srcH * 0.05)
+    }
+    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+    if (srcY + srcH > imgH) srcH = imgH - srcY
 
     octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
