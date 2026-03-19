@@ -271,20 +271,77 @@ style.textContent = `
 document.head.appendChild(style)
 document.title = toolName + ' Free & Private | RelahConvert'
 
-// SVG example illustration
-const exampleSVG = `<svg viewBox="0 0 180 230" xmlns="http://www.w3.org/2000/svg">
-  <rect width="180" height="230" fill="#ffffff" rx="4"/>
-  <ellipse cx="90" cy="210" rx="55" ry="30" fill="#4a6fa5"/>
-  <circle cx="90" cy="95" r="42" fill="#d4a574"/>
-  <ellipse cx="90" cy="55" rx="38" ry="30" fill="#2c2c2c"/>
-  <path d="M52 80 Q55 55 90 50 Q125 55 128 80" fill="#2c2c2c"/>
-  <circle cx="76" cy="92" r="3.5" fill="#2c2c2c"/>
-  <circle cx="104" cy="92" r="3.5" fill="#2c2c2c"/>
-  <ellipse cx="90" cy="105" rx="4" ry="2.5" fill="#c4916e"/>
-  <path d="M80 115 Q90 122 100 115" stroke="#b5846a" stroke-width="1.5" fill="none"/>
-  <rect x="60" y="160" width="60" height="70" rx="2" fill="#4a6fa5"/>
-  <path d="M60 160 L75 145 Q90 138 105 145 L120 160Z" fill="#4a6fa5"/>
-  <line x1="90" y1="160" x2="90" y2="195" stroke="#3d5d8a" stroke-width="0.5"/>
+// Realistic passport photo SVG illustration
+const exampleSVG = `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skinG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c4a0"/><stop offset="1" stop-color="#d4a574"/></linearGradient>
+    <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1a0e"/><stop offset="1" stop-color="#1a0f06"/></linearGradient>
+    <linearGradient id="shirtG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8a0b0"/><stop offset="1" stop-color="#d4889a"/></linearGradient>
+    <radialGradient id="cheekL" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e8a090" stop-opacity="0.4"/><stop offset="1" stop-color="#e8a090" stop-opacity="0"/></radialGradient>
+    <radialGradient id="cheekR" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e8a090" stop-opacity="0.4"/><stop offset="1" stop-color="#e8a090" stop-opacity="0"/></radialGradient>
+    <clipPath id="photoClip"><rect width="200" height="260" rx="4"/></clipPath>
+  </defs>
+  <g clip-path="url(#photoClip)">
+    <rect width="200" height="260" fill="#f0f0f0"/>
+    <!-- Shoulders / shirt -->
+    <ellipse cx="100" cy="270" rx="80" ry="50" fill="url(#shirtG)"/>
+    <path d="M40 240 Q50 220 70 215 Q85 212 100 210 Q115 212 130 215 Q150 220 160 240 L160 270 L40 270Z" fill="url(#shirtG)"/>
+    <!-- Neck -->
+    <rect x="82" y="165" width="36" height="50" rx="14" fill="url(#skinG)"/>
+    <!-- Neck shadow -->
+    <ellipse cx="100" cy="195" rx="18" ry="6" fill="#c49670" opacity="0.3"/>
+    <!-- V-neckline -->
+    <path d="M70 215 Q85 212 100 230 Q115 212 130 215" fill="none" stroke="#c47888" stroke-width="1"/>
+    <!-- Face -->
+    <ellipse cx="100" cy="120" rx="48" ry="56" fill="url(#skinG)"/>
+    <!-- Ears -->
+    <ellipse cx="52" cy="120" rx="8" ry="12" fill="#dbb08a"/>
+    <ellipse cx="52" cy="120" rx="5" ry="8" fill="#d4a574"/>
+    <ellipse cx="148" cy="120" rx="8" ry="12" fill="#dbb08a"/>
+    <ellipse cx="148" cy="120" rx="5" ry="8" fill="#d4a574"/>
+    <!-- Hair back -->
+    <path d="M48 110 Q48 50 100 42 Q152 50 152 110 Q152 65 100 58 Q48 65 48 110Z" fill="url(#hairG)"/>
+    <!-- Hair top volume -->
+    <ellipse cx="100" cy="62" rx="50" ry="28" fill="url(#hairG)"/>
+    <!-- Hair sides -->
+    <path d="M48 70 Q45 90 50 120 Q48 95 52 75Z" fill="#1a0f06"/>
+    <path d="M152 70 Q155 90 150 120 Q152 95 148 75Z" fill="#1a0f06"/>
+    <!-- Hair strands -->
+    <path d="M65 55 Q80 48 100 46 Q120 48 135 55" fill="none" stroke="#3a2a1e" stroke-width="0.5" opacity="0.4"/>
+    <path d="M60 60 Q80 50 100 48 Q120 50 140 60" fill="none" stroke="#3a2a1e" stroke-width="0.3" opacity="0.3"/>
+    <!-- Eyebrows -->
+    <path d="M72 100 Q80 96 90 98" stroke="#3a2a1e" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M110 98 Q120 96 128 100" stroke="#3a2a1e" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <!-- Eyes -->
+    <ellipse cx="82" cy="110" rx="9" ry="6" fill="#ffffff"/>
+    <circle cx="82" cy="110" r="4.5" fill="#4a3520"/>
+    <circle cx="82" cy="110" r="2.2" fill="#1a0f06"/>
+    <circle cx="80" cy="108" r="1.2" fill="#ffffff" opacity="0.7"/>
+    <ellipse cx="118" cy="110" rx="9" ry="6" fill="#ffffff"/>
+    <circle cx="118" cy="110" r="4.5" fill="#4a3520"/>
+    <circle cx="118" cy="110" r="2.2" fill="#1a0f06"/>
+    <circle cx="116" cy="108" r="1.2" fill="#ffffff" opacity="0.7"/>
+    <!-- Eyelids -->
+    <path d="M73 107 Q82 104 91 107" stroke="#c49670" stroke-width="0.6" fill="none"/>
+    <path d="M109 107 Q118 104 127 107" stroke="#c49670" stroke-width="0.6" fill="none"/>
+    <!-- Eyelashes -->
+    <path d="M73 110 Q82 105 91 110" stroke="#2a1a0e" stroke-width="0.8" fill="none"/>
+    <path d="M109 110 Q118 105 127 110" stroke="#2a1a0e" stroke-width="0.8" fill="none"/>
+    <!-- Nose -->
+    <path d="M98 108 Q96 120 92 130 Q96 133 100 134 Q104 133 108 130 Q104 120 102 108" fill="none" stroke="#c49670" stroke-width="0.8"/>
+    <ellipse cx="94" cy="130" rx="3.5" ry="2.5" fill="none" stroke="#c49670" stroke-width="0.5"/>
+    <ellipse cx="106" cy="130" rx="3.5" ry="2.5" fill="none" stroke="#c49670" stroke-width="0.5"/>
+    <!-- Cheek blush -->
+    <ellipse cx="70" cy="125" rx="12" ry="8" fill="url(#cheekL)"/>
+    <ellipse cx="130" cy="125" rx="12" ry="8" fill="url(#cheekR)"/>
+    <!-- Lips -->
+    <path d="M88 145 Q94 140 100 142 Q106 140 112 145" fill="#c47070" stroke="#b56060" stroke-width="0.3"/>
+    <path d="M88 145 Q100 153 112 145" fill="#d48080" stroke="#b56060" stroke-width="0.3"/>
+    <!-- Chin definition -->
+    <path d="M80 158 Q100 170 120 158" fill="none" stroke="#c49670" stroke-width="0.4" opacity="0.5"/>
+    <!-- Photo border -->
+    <rect width="200" height="260" rx="4" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+  </g>
 </svg>`
 
 document.querySelector('#app').innerHTML = `
