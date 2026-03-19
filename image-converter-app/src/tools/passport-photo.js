@@ -23,175 +23,195 @@ const ppSizeLbl       = t.pp_size || 'Size'
 const ppUploadLbl     = t.pp_upload || 'Upload Photo'
 const ppExampleLbl    = t.pp_example || 'Example output'
 const ppSearchLbl     = t.pp_search || 'Search country...'
+const ppDocTypeLbl    = t.pp_doc_type || 'Document Type'
+const ppPassportLbl   = t.pp_passport || 'Passport'
+const ppVisaLbl       = t.pp_visa || 'Visa'
+const ppIdCardLbl     = t.pp_id_card || 'ID Card'
+
+// Common document type sizes (mm) that apply across countries
+const DOC_TYPES = {
+  passport: { label: ppPassportLbl },
+  visa:     { label: ppVisaLbl, sizes: [
+    { name: 'US Visa (2×2 in)', w: 51, h: 51 },
+    { name: 'Schengen Visa (35×45mm)', w: 35, h: 45 },
+    { name: 'China Visa (33×48mm)', w: 33, h: 48 },
+    { name: 'India Visa (51×51mm)', w: 51, h: 51 },
+  ]},
+  id_card:  { label: ppIdCardLbl, sizes: [
+    { name: 'Standard ID (35×45mm)', w: 35, h: 45 },
+    { name: 'US Green Card (51×51mm)', w: 51, h: 51 },
+    { name: 'EU ID Card (35×45mm)', w: 35, h: 45 },
+  ]},
+}
 
 const PASSPORT_COUNTRIES = [
-  { country: "Afghanistan", flag: "🇦🇫", w: 40, h: 45, bg: "#ffffff" },
-  { country: "Albania", flag: "🇦🇱", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Algeria", flag: "🇩🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Angola", flag: "🇦🇴", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Argentina", flag: "🇦🇷", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Armenia", flag: "🇦🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Australia", flag: "🇦🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Austria", flag: "🇦🇹", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Azerbaijan", flag: "🇦🇿", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Bahamas", flag: "🇧🇸", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Bahrain", flag: "🇧🇭", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Bangladesh", flag: "🇧🇩", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Barbados", flag: "🇧🇧", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Belarus", flag: "🇧🇾", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Belgium", flag: "🇧🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Belize", flag: "🇧🇿", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Benin", flag: "🇧🇯", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Bhutan", flag: "🇧🇹", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Bolivia", flag: "🇧🇴", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Bosnia and Herzegovina", flag: "🇧🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Botswana", flag: "🇧🇼", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Brazil", flag: "🇧🇷", w: 50, h: 70, bg: "#ffffff" },
-  { country: "Brunei", flag: "🇧🇳", w: 52, h: 40, bg: "#ffffff" },
-  { country: "Bulgaria", flag: "🇧🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Burkina Faso", flag: "🇧🇫", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Cambodia", flag: "🇰🇭", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Cameroon", flag: "🇨🇲", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Canada", flag: "🇨🇦", w: 50, h: 70, bg: "#ffffff" },
-  { country: "Chad", flag: "🇹🇩", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Chile", flag: "🇨🇱", w: 45, h: 45, bg: "#ffffff" },
-  { country: "China", flag: "🇨🇳", w: 33, h: 48, bg: "#ffffff" },
-  { country: "Colombia", flag: "🇨🇴", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Congo (Brazzaville)", flag: "🇨🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Congo (DR)", flag: "🇨🇩", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Costa Rica", flag: "🇨🇷", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Croatia", flag: "🇭🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Cuba", flag: "🇨🇺", w: 45, h: 45, bg: "#ffffff" },
-  { country: "Cyprus", flag: "🇨🇾", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Czech Republic", flag: "🇨🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Denmark", flag: "🇩🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Djibouti", flag: "🇩🇯", w: 35, h: 35, bg: "#ffffff" },
-  { country: "Dominica", flag: "🇩🇲", w: 45, h: 38, bg: "#ffffff" },
-  { country: "Dominican Republic", flag: "🇩🇴", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Ecuador", flag: "🇪🇨", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Egypt", flag: "🇪🇬", w: 40, h: 60, bg: "#ffffff" },
-  { country: "El Salvador", flag: "🇸🇻", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Equatorial Guinea", flag: "🇬🇶", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Estonia", flag: "🇪🇪", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Ethiopia", flag: "🇪🇹", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Fiji", flag: "🇫🇯", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Finland", flag: "🇫🇮", w: 36, h: 47, bg: "#ffffff" },
-  { country: "France", flag: "🇫🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Gabon", flag: "🇬🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Georgia", flag: "🇬🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Germany", flag: "🇩🇪", w: 35, h: 45, bg: "#d3d3d3" },
-  { country: "Ghana", flag: "🇬🇭", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Greece", flag: "🇬🇷", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Grenada", flag: "🇬🇩", w: 38, h: 51, bg: "#ffffff" },
-  { country: "Guatemala", flag: "🇬🇹", w: 26, h: 32, bg: "#ffffff" },
-  { country: "Guinea", flag: "🇬🇳", w: 35, h: 50, bg: "#ffffff" },
-  { country: "Guinea-Bissau", flag: "🇬🇼", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Guyana", flag: "🇬🇾", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Hong Kong", flag: "🇭🇰", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Hungary", flag: "🇭🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Iceland", flag: "🇮🇸", w: 35, h: 45, bg: "#ffffff" },
-  { country: "India", flag: "🇮🇳", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Indonesia", flag: "🇮🇩", w: 51, h: 51, bg: "#ff0000" },
-  { country: "Iran", flag: "🇮🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Iraq", flag: "🇮🇶", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Ireland", flag: "🇮🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Israel", flag: "🇮🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Italy", flag: "🇮🇹", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Ivory Coast", flag: "🇨🇮", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Jamaica", flag: "🇯🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Japan", flag: "🇯🇵", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Jordan", flag: "🇯🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Kazakhstan", flag: "🇰🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Kenya", flag: "🇰🇪", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Kuwait", flag: "🇰🇼", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Kyrgyzstan", flag: "🇰🇬", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Laos", flag: "🇱🇦", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Latvia", flag: "🇱🇻", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Lebanon", flag: "🇱🇧", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Liberia", flag: "🇱🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Libya", flag: "🇱🇾", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Liechtenstein", flag: "🇱🇮", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Lithuania", flag: "🇱🇹", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Luxembourg", flag: "🇱🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Macau", flag: "🇲🇴", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Madagascar", flag: "🇲🇬", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Malawi", flag: "🇲🇼", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Malaysia", flag: "🇲🇾", w: 35, h: 50, bg: "#add8e6" },
-  { country: "Maldives", flag: "🇲🇻", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mali", flag: "🇲🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Malta", flag: "🇲🇹", w: 40, h: 30, bg: "#ffffff" },
-  { country: "Mauritania", flag: "🇲🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mauritius", flag: "🇲🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mexico", flag: "🇲🇽", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Moldova", flag: "🇲🇩", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Mongolia", flag: "🇲🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Montenegro", flag: "🇲🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Morocco", flag: "🇲🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mozambique", flag: "🇲🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Myanmar", flag: "🇲🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Namibia", flag: "🇳🇦", w: 37, h: 52, bg: "#ffffff" },
-  { country: "Nepal", flag: "🇳🇵", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Netherlands", flag: "🇳🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "New Zealand", flag: "🇳🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Nicaragua", flag: "🇳🇮", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Niger", flag: "🇳🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Nigeria", flag: "🇳🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "North Korea", flag: "🇰🇵", w: 35, h: 45, bg: "#ffffff" },
-  { country: "North Macedonia", flag: "🇲🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Norway", flag: "🇳🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Oman", flag: "🇴🇲", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Pakistan", flag: "🇵🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Palestine", flag: "🇵🇸", w: 35, h: 45, bg: "#add8e6" },
-  { country: "Panama", flag: "🇵🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Papua New Guinea", flag: "🇵🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Paraguay", flag: "🇵🇾", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Peru", flag: "🇵🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Philippines", flag: "🇵🇭", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Poland", flag: "🇵🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Portugal", flag: "🇵🇹", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Qatar", flag: "🇶🇦", w: 38, h: 48, bg: "#ffffff" },
-  { country: "Romania", flag: "🇷🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Russia", flag: "🇷🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Rwanda", flag: "🇷🇼", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Saint Kitts and Nevis", flag: "🇰🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Samoa", flag: "🇼🇸", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Saudi Arabia", flag: "🇸🇦", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Senegal", flag: "🇸🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Serbia", flag: "🇷🇸", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Seychelles", flag: "🇸🇨", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Sierra Leone", flag: "🇸🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Singapore", flag: "🇸🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Slovakia", flag: "🇸🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Slovenia", flag: "🇸🇮", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Somalia", flag: "🇸🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Africa", flag: "🇿🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Korea", flag: "🇰🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Sudan", flag: "🇸🇸", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Spain", flag: "🇪🇸", w: 26, h: 32, bg: "#ffffff" },
-  { country: "Sri Lanka", flag: "🇱🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Sudan", flag: "🇸🇩", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Sweden", flag: "🇸🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Switzerland", flag: "🇨🇭", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Syria", flag: "🇸🇾", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Taiwan", flag: "🇹🇼", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Tajikistan", flag: "🇹🇯", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Tanzania", flag: "🇹🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Thailand", flag: "🇹🇭", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Tunisia", flag: "🇹🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Turkey", flag: "🇹🇷", w: 50, h: 60, bg: "#ffffff" },
-  { country: "Turkmenistan", flag: "🇹🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Uganda", flag: "🇺🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Ukraine", flag: "🇺🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "United Arab Emirates", flag: "🇦🇪", w: 40, h: 60, bg: "#ffffff" },
-  { country: "United Kingdom", flag: "🇬🇧", w: 35, h: 45, bg: "#d3d3d3" },
-  { country: "United States", flag: "🇺🇸", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Uruguay", flag: "🇺🇾", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Uzbekistan", flag: "🇺🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Venezuela", flag: "🇻🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Vietnam", flag: "🇻🇳", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Yemen", flag: "🇾🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Zambia", flag: "🇿🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Zimbabwe", flag: "🇿🇼", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Afghanistan", code: "AF", flag: "🇦🇫", w: 40, h: 45, bg: "#ffffff" },
+  { country: "Albania", code: "AL", flag: "🇦🇱", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Algeria", code: "DZ", flag: "🇩🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Angola", code: "AO", flag: "🇦🇴", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Argentina", code: "AR", flag: "🇦🇷", w: 40, h: 40, bg: "#ffffff" },
+  { country: "Armenia", code: "AM", flag: "🇦🇲", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Australia", code: "AU", flag: "🇦🇺", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Austria", code: "AT", flag: "🇦🇹", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Azerbaijan", code: "AZ", flag: "🇦🇿", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Bahamas", code: "BS", flag: "🇧🇸", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Bahrain", code: "BH", flag: "🇧🇭", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Bangladesh", code: "BD", flag: "🇧🇩", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Barbados", code: "BB", flag: "🇧🇧", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Belarus", code: "BY", flag: "🇧🇾", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Belgium", code: "BE", flag: "🇧🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Belize", code: "BZ", flag: "🇧🇿", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Benin", code: "BJ", flag: "🇧🇯", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Bhutan", code: "BT", flag: "🇧🇹", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Bolivia", code: "BO", flag: "🇧🇴", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Bosnia and Herzegovina", code: "BA", flag: "🇧🇦", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Botswana", code: "BW", flag: "🇧🇼", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Brazil", code: "BR", flag: "🇧🇷", w: 50, h: 70, bg: "#ffffff" },
+  { country: "Brunei", code: "BN", flag: "🇧🇳", w: 52, h: 40, bg: "#ffffff" },
+  { country: "Bulgaria", code: "BG", flag: "🇧🇬", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Burkina Faso", code: "BF", flag: "🇧🇫", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Cambodia", code: "KH", flag: "🇰🇭", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Cameroon", code: "CM", flag: "🇨🇲", w: 40, h: 40, bg: "#ffffff" },
+  { country: "Canada", code: "CA", flag: "🇨🇦", w: 50, h: 70, bg: "#ffffff" },
+  { country: "Chad", code: "TD", flag: "🇹🇩", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Chile", code: "CL", flag: "🇨🇱", w: 45, h: 45, bg: "#ffffff" },
+  { country: "China", code: "CN", flag: "🇨🇳", w: 33, h: 48, bg: "#ffffff" },
+  { country: "Colombia", code: "CO", flag: "🇨🇴", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Congo (Brazzaville)", code: "CG", flag: "🇨🇬", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Congo (DR)", code: "CD", flag: "🇨🇩", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Costa Rica", code: "CR", flag: "🇨🇷", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Croatia", code: "HR", flag: "🇭🇷", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Cuba", code: "CU", flag: "🇨🇺", w: 45, h: 45, bg: "#ffffff" },
+  { country: "Cyprus", code: "CY", flag: "🇨🇾", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Czech Republic", code: "CZ", flag: "🇨🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Denmark", code: "DK", flag: "🇩🇰", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Djibouti", code: "DJ", flag: "🇩🇯", w: 35, h: 35, bg: "#ffffff" },
+  { country: "Dominica", code: "DM", flag: "🇩🇲", w: 45, h: 38, bg: "#ffffff" },
+  { country: "Dominican Republic", code: "DO", flag: "🇩🇴", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Ecuador", code: "EC", flag: "🇪🇨", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Egypt", code: "EG", flag: "🇪🇬", w: 40, h: 60, bg: "#ffffff" },
+  { country: "El Salvador", code: "SV", flag: "🇸🇻", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Equatorial Guinea", code: "GQ", flag: "🇬🇶", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Estonia", code: "EE", flag: "🇪🇪", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Ethiopia", code: "ET", flag: "🇪🇹", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Fiji", code: "FJ", flag: "🇫🇯", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Finland", code: "FI", flag: "🇫🇮", w: 36, h: 47, bg: "#ffffff" },
+  { country: "France", code: "FR", flag: "🇫🇷", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Gabon", code: "GA", flag: "🇬🇦", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Georgia", code: "GE", flag: "🇬🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Germany", code: "DE", flag: "🇩🇪", w: 35, h: 45, bg: "#d3d3d3" },
+  { country: "Ghana", code: "GH", flag: "🇬🇭", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Greece", code: "GR", flag: "🇬🇷", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Grenada", code: "GD", flag: "🇬🇩", w: 38, h: 51, bg: "#ffffff" },
+  { country: "Guatemala", code: "GT", flag: "🇬🇹", w: 26, h: 32, bg: "#ffffff" },
+  { country: "Guinea", code: "GN", flag: "🇬🇳", w: 35, h: 50, bg: "#ffffff" },
+  { country: "Guinea-Bissau", code: "GW", flag: "🇬🇼", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Guyana", code: "GY", flag: "🇬🇾", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Hong Kong", code: "HK", flag: "🇭🇰", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Hungary", code: "HU", flag: "🇭🇺", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Iceland", code: "IS", flag: "🇮🇸", w: 35, h: 45, bg: "#ffffff" },
+  { country: "India", code: "IN", flag: "🇮🇳", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Indonesia", code: "ID", flag: "🇮🇩", w: 51, h: 51, bg: "#ff0000" },
+  { country: "Iran", code: "IR", flag: "🇮🇷", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Iraq", code: "IQ", flag: "🇮🇶", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Ireland", code: "IE", flag: "🇮🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Israel", code: "IL", flag: "🇮🇱", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Italy", code: "IT", flag: "🇮🇹", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Ivory Coast", code: "CI", flag: "🇨🇮", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Jamaica", code: "JM", flag: "🇯🇲", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Japan", code: "JP", flag: "🇯🇵", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Jordan", code: "JO", flag: "🇯🇴", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Kazakhstan", code: "KZ", flag: "🇰🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Kenya", code: "KE", flag: "🇰🇪", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Kuwait", code: "KW", flag: "🇰🇼", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Kyrgyzstan", code: "KG", flag: "🇰🇬", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Laos", code: "LA", flag: "🇱🇦", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Latvia", code: "LV", flag: "🇱🇻", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Lebanon", code: "LB", flag: "🇱🇧", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Liberia", code: "LR", flag: "🇱🇷", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Libya", code: "LY", flag: "🇱🇾", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Liechtenstein", code: "LI", flag: "🇱🇮", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Lithuania", code: "LT", flag: "🇱🇹", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Luxembourg", code: "LU", flag: "🇱🇺", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Macau", code: "MO", flag: "🇲🇴", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Madagascar", code: "MG", flag: "🇲🇬", w: 40, h: 40, bg: "#ffffff" },
+  { country: "Malawi", code: "MW", flag: "🇲🇼", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Malaysia", code: "MY", flag: "🇲🇾", w: 35, h: 50, bg: "#add8e6" },
+  { country: "Maldives", code: "MV", flag: "🇲🇻", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mali", code: "ML", flag: "🇲🇱", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Malta", code: "MT", flag: "🇲🇹", w: 40, h: 30, bg: "#ffffff" },
+  { country: "Mauritania", code: "MR", flag: "🇲🇷", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mauritius", code: "MU", flag: "🇲🇺", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mexico", code: "MX", flag: "🇲🇽", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Moldova", code: "MD", flag: "🇲🇩", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Mongolia", code: "MN", flag: "🇲🇳", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Montenegro", code: "ME", flag: "🇲🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Morocco", code: "MA", flag: "🇲🇦", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mozambique", code: "MZ", flag: "🇲🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Myanmar", code: "MM", flag: "🇲🇲", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Namibia", code: "NA", flag: "🇳🇦", w: 37, h: 52, bg: "#ffffff" },
+  { country: "Nepal", code: "NP", flag: "🇳🇵", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Netherlands", code: "NL", flag: "🇳🇱", w: 35, h: 45, bg: "#ffffff" },
+  { country: "New Zealand", code: "NZ", flag: "🇳🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Nicaragua", code: "NI", flag: "🇳🇮", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Niger", code: "NE", flag: "🇳🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Nigeria", code: "NG", flag: "🇳🇬", w: 35, h: 45, bg: "#ffffff" },
+  { country: "North Korea", code: "KP", flag: "🇰🇵", w: 35, h: 45, bg: "#ffffff" },
+  { country: "North Macedonia", code: "MK", flag: "🇲🇰", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Norway", code: "NO", flag: "🇳🇴", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Oman", code: "OM", flag: "🇴🇲", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Pakistan", code: "PK", flag: "🇵🇰", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Palestine", code: "PS", flag: "🇵🇸", w: 35, h: 45, bg: "#add8e6" },
+  { country: "Panama", code: "PA", flag: "🇵🇦", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Papua New Guinea", code: "PG", flag: "🇵🇬", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Paraguay", code: "PY", flag: "🇵🇾", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Peru", code: "PE", flag: "🇵🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Philippines", code: "PH", flag: "🇵🇭", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Poland", code: "PL", flag: "🇵🇱", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Portugal", code: "PT", flag: "🇵🇹", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Qatar", code: "QA", flag: "🇶🇦", w: 38, h: 48, bg: "#ffffff" },
+  { country: "Romania", code: "RO", flag: "🇷🇴", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Russia", code: "RU", flag: "🇷🇺", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Rwanda", code: "RW", flag: "🇷🇼", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Saint Kitts and Nevis", code: "KN", flag: "🇰🇳", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Samoa", code: "WS", flag: "🇼🇸", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Saudi Arabia", code: "SA", flag: "🇸🇦", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Senegal", code: "SN", flag: "🇸🇳", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Serbia", code: "RS", flag: "🇷🇸", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Seychelles", code: "SC", flag: "🇸🇨", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Sierra Leone", code: "SL", flag: "🇸🇱", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Singapore", code: "SG", flag: "🇸🇬", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Slovakia", code: "SK", flag: "🇸🇰", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Slovenia", code: "SI", flag: "🇸🇮", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Somalia", code: "SO", flag: "🇸🇴", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Africa", code: "ZA", flag: "🇿🇦", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Korea", code: "KR", flag: "🇰🇷", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Sudan", code: "SS", flag: "🇸🇸", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Spain", code: "ES", flag: "🇪🇸", w: 26, h: 32, bg: "#ffffff" },
+  { country: "Sri Lanka", code: "LK", flag: "🇱🇰", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Sudan", code: "SD", flag: "🇸🇩", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Sweden", code: "SE", flag: "🇸🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Switzerland", code: "CH", flag: "🇨🇭", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Syria", code: "SY", flag: "🇸🇾", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Taiwan", code: "TW", flag: "🇹🇼", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Tajikistan", code: "TJ", flag: "🇹🇯", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Tanzania", code: "TZ", flag: "🇹🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Thailand", code: "TH", flag: "🇹🇭", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Tunisia", code: "TN", flag: "🇹🇳", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Turkey", code: "TR", flag: "🇹🇷", w: 50, h: 60, bg: "#ffffff" },
+  { country: "Turkmenistan", code: "TM", flag: "🇹🇲", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Uganda", code: "UG", flag: "🇺🇬", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Ukraine", code: "UA", flag: "🇺🇦", w: 35, h: 45, bg: "#ffffff" },
+  { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", w: 40, h: 60, bg: "#ffffff" },
+  { country: "United Kingdom", code: "GB", flag: "🇬🇧", w: 35, h: 45, bg: "#d3d3d3" },
+  { country: "United States", code: "US", flag: "🇺🇸", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Uruguay", code: "UY", flag: "🇺🇾", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Uzbekistan", code: "UZ", flag: "🇺🇿", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Venezuela", code: "VE", flag: "🇻🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Vietnam", code: "VN", flag: "🇻🇳", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Yemen", code: "YE", flag: "🇾🇪", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Zambia", code: "ZM", flag: "🇿🇲", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Zimbabwe", code: "ZW", flag: "🇿🇼", w: 35, h: 45, bg: "#ffffff" },
 ]
 
 // DPI for print-quality output
@@ -199,6 +219,8 @@ const DPI = 300
 const MM_PER_INCH = 25.4
 
 let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States')
+let selectedDocType = 'passport'
+let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let panOffsetX = 0, panOffsetY = 0
 let isDragging = false, dragStartX = 0, dragStartY = 0, dragStartPanX = 0, dragStartPanY = 0
@@ -225,7 +247,7 @@ style.textContent = `
   .pp-upload-btn:hover{background:#A63D26}
   .pp-country-trigger{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-family:'DM Sans',sans-serif;font-size:13px;color:#2C1810;cursor:pointer;width:100%;text-align:left;transition:border-color 0.15s}
   .pp-country-trigger:hover{border-color:#C84B31}
-  .pp-country-trigger .flag{font-size:18px}
+  .pp-country-trigger .flag-img{width:22px;height:16px;border-radius:2px;object-fit:cover;vertical-align:middle}
   .pp-country-trigger .arrow{margin-left:auto;font-size:10px;color:#9A8A7A}
   .pp-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:100;margin-top:4px;display:none;flex-direction:column;max-height:300px}
   .pp-dropdown.open{display:flex}
@@ -234,9 +256,11 @@ style.textContent = `
   .pp-dropdown-list{overflow-y:auto;flex:1}
   .pp-dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:#2C1810;transition:background 0.1s}
   .pp-dropdown-item:hover,.pp-dropdown-item.active{background:#FDE8E3}
-  .pp-dropdown-item .flag{font-size:16px}
+  .pp-dropdown-item .flag-img{width:20px;height:14px;border-radius:2px;object-fit:cover}
   .pp-dropdown-item .size{margin-left:auto;font-size:11px;color:#9A8A7A}
   .pp-size-info{font-size:12px;color:#7A6A5A;margin-top:6px}
+  .pp-doc-select{width:100%;padding:8px 12px;border:1.5px solid #DDD5C8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:#2C1810;cursor:pointer;background:#fff;margin-top:8px}
+  .pp-doc-select:focus{border-color:#C84B31;outline:none;box-shadow:0 0 0 3px rgba(200,75,49,0.12)}
   .pp-color-row{display:flex;align-items:center;gap:8px;margin-top:8px}
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
@@ -371,7 +395,7 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-card-title">${ppCountryLbl}</div>
           <div style="position:relative" id="countryWrap">
             <button class="pp-country-trigger" id="countryTrigger">
-              <span class="flag">${selectedCountry.flag}</span>
+              <img class="flag-img" id="triggerFlag" src="https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png" alt="${selectedCountry.code}" />
               <span id="countryName">${selectedCountry.country}</span>
               <span class="arrow">&#9660;</span>
             </button>
@@ -380,6 +404,10 @@ document.querySelector('#app').innerHTML = `
               <div class="pp-dropdown-list" id="countryList"></div>
             </div>
           </div>
+          <div class="pp-card-title" style="margin-top:12px">${ppDocTypeLbl}</div>
+          <select class="pp-doc-select" id="docTypeSelect">
+            <option value="passport">${ppPassportLbl} (${selectedCountry.w}×${selectedCountry.h}mm)</option>
+          </select>
           <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}×${selectedCountry.h} mm</div>
           <div class="pp-color-row">
             <input type="color" class="pp-color-input" id="bgColor" value="${selectedCountry.bg}" />
@@ -421,6 +449,8 @@ const dragHint      = document.getElementById('dragHint')
 const exampleArea   = document.getElementById('exampleArea')
 const nextSteps     = document.getElementById('nextSteps')
 const nextBtns      = document.getElementById('nextBtns')
+const docTypeSelect = document.getElementById('docTypeSelect')
+const triggerFlag   = document.getElementById('triggerFlag')
 
 // Upload
 uploadBtn.addEventListener('click', () => fileInput.click())
@@ -444,13 +474,49 @@ fileInput.addEventListener('change', () => {
   fileInput.value = ''
 })
 
+// Flag image URL helper
+function flagUrl(code, size) { return 'https://flagcdn.com/w' + (size || 40) + '/' + code.toLowerCase() + '.png' }
+
+// Update document type dropdown options based on selected country
+function updateDocTypes() {
+  const c = selectedCountry
+  docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '×' + c.h + 'mm)</option>'
+  DOC_TYPES.visa.sizes.forEach(function(s, i) {
+    docTypeSelect.innerHTML += '<option value="visa_' + i + '">' + ppVisaLbl + ' — ' + s.name + '</option>'
+  })
+  DOC_TYPES.id_card.sizes.forEach(function(s, i) {
+    docTypeSelect.innerHTML += '<option value="id_' + i + '">' + ppIdCardLbl + ' — ' + s.name + '</option>'
+  })
+  docTypeSelect.value = 'passport'
+  selectedDocType = 'passport'
+  activeW = c.w; activeH = c.h
+  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
+}
+
+// Handle document type change
+docTypeSelect.addEventListener('change', () => {
+  const val = docTypeSelect.value
+  if (val === 'passport') {
+    activeW = selectedCountry.w; activeH = selectedCountry.h
+  } else if (val.startsWith('visa_')) {
+    const s = DOC_TYPES.visa.sizes[parseInt(val.split('_')[1])]
+    activeW = s.w; activeH = s.h
+  } else if (val.startsWith('id_')) {
+    const s = DOC_TYPES.id_card.sizes[parseInt(val.split('_')[1])]
+    activeW = s.w; activeH = s.h
+  }
+  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
+  panOffsetX = 0; panOffsetY = 0
+  renderCanvas()
+})
+
 // Country dropdown
 function renderCountryList(filter) {
   const q = (filter || '').toLowerCase()
   const filtered = PASSPORT_COUNTRIES.filter(c => c.country.toLowerCase().indexOf(q) !== -1)
   countryList.innerHTML = filtered.map(c =>
     '<div class="pp-dropdown-item' + (c.country === selectedCountry.country ? ' active' : '') + '" data-country="' + c.country + '">' +
-    '<span class="flag">' + c.flag + '</span>' +
+    '<img class="flag-img" src="' + flagUrl(c.code, 40) + '" alt="' + c.code + '" />' +
     '<span>' + c.country + '</span>' +
     '<span class="size">' + c.w + '×' + c.h + 'mm</span></div>'
   ).join('')
@@ -460,12 +526,13 @@ function renderCountryList(filter) {
       if (!c) return
       selectedCountry = c
       countryNameEl.textContent = c.country
-      countryTrigger.querySelector('.flag').textContent = c.flag
-      sizeInfo.textContent = ppSizeLbl + ': ' + c.w + '×' + c.h + ' mm'
+      triggerFlag.src = flagUrl(c.code, 40)
+      triggerFlag.alt = c.code
       bgColorInput.value = c.bg
       countryDropdown.classList.remove('open')
       panOffsetX = 0
       panOffsetY = 0
+      updateDocTypes()
       renderCanvas()
     })
   })
@@ -491,9 +558,8 @@ bgColorInput.addEventListener('input', () => renderCanvas())
 
 // Canvas rendering
 function renderCanvas() {
-  const c = selectedCountry
   // Use mm-based aspect ratio for canvas display
-  const aspect = c.w / c.h
+  const aspect = activeW / activeH
   const dispW = 400
   const dispH = Math.round(dispW / aspect)
   ppCanvas.width = dispW
@@ -571,9 +637,8 @@ document.addEventListener('touchend', () => { isDragging = false })
 
 // Generate high-res single photo
 function generatePhoto() {
-  const c = selectedCountry
-  const wPx = Math.round(c.w / MM_PER_INCH * DPI)
-  const hPx = Math.round(c.h / MM_PER_INCH * DPI)
+  const wPx = Math.round(activeW / MM_PER_INCH * DPI)
+  const hPx = Math.round(activeH / MM_PER_INCH * DPI)
   const outCanvas = document.createElement('canvas')
   outCanvas.width = wPx
   outCanvas.height = hPx
@@ -584,7 +649,7 @@ function generatePhoto() {
 
   if (uploadedImg) {
     const img = uploadedImg
-    const aspect = c.w / c.h
+    const aspect = activeW / activeH
     const imgAspect = img.naturalWidth / img.naturalHeight
     let drawW, drawH
     if (imgAspect > aspect) {
@@ -680,6 +745,7 @@ function buildNextSteps() {
 
 // Initial render
 renderCountryList('')
+updateDocTypes()
 renderCanvas()
 
 // SEO section
