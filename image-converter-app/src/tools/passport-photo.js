@@ -223,6 +223,7 @@ let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let panOffsetX = 0, panOffsetY = 0
+let zoomLevel = 1.0
 let isDragging = false, dragStartX = 0, dragStartY = 0, dragStartPanX = 0, dragStartPanY = 0
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
@@ -273,6 +274,14 @@ style.textContent = `
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
   .pp-drag-hint{font-size:11px;color:#9A8A7A;text-align:center;padding:6px 0}
+  .pp-zoom-row{display:flex;align-items:center;gap:8px;padding:6px 16px 10px}
+  .pp-zoom-row label{font-size:11px;color:#9A8A7A;white-space:nowrap}
+  .pp-zoom-row input[type=range]{flex:1;accent-color:#C84B31;height:4px}
+  .pp-zoom-row span{font-size:11px;color:#5A4A3A;min-width:32px;text-align:right}
+  .pp-guide-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+  .pp-guide-toggle{display:flex;align-items:center;gap:6px;margin-top:8px}
+  .pp-guide-toggle input{accent-color:#C84B31}
+  .pp-guide-toggle label{font-size:12px;color:#5A4A3A;cursor:pointer}
   .pp-dl-btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;text-align:center;text-decoration:none}
   .pp-dl-primary{background:#C84B31;color:#fff}
   .pp-dl-primary:hover{background:#A63D26}
@@ -313,6 +322,13 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-canvas-inner" id="canvasWrap">
             <canvas id="ppCanvas" width="510" height="510"></canvas>
           </div>
+          <svg class="pp-guide-overlay" id="guideOverlay" style="display:none"></svg>
+          <div class="pp-zoom-row" id="zoomRow" style="display:none">
+            <label>-</label>
+            <input type="range" id="zoomSlider" min="0.3" max="3" step="0.05" value="1" />
+            <span id="zoomLabel">100%</span>
+            <label>+</label>
+          </div>
           <div class="pp-drag-hint" id="dragHint" style="display:none">${ppRepositionLbl}</div>
         </div>
         <div id="dropZone" class="pp-dropzone">
@@ -350,6 +366,10 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-color-row">
             <input type="color" class="pp-color-input" id="bgColor" value="${selectedCountry.bg}" />
             <span class="pp-color-label">${ppBgColorLbl}</span>
+          </div>
+          <div class="pp-guide-toggle">
+            <input type="checkbox" id="guideToggle" checked />
+            <label for="guideToggle">${t.pp_show_guides || 'Show photo guides'}</label>
           </div>
         </div>
         <div class="pp-card" id="downloadCard" style="display:none">
@@ -390,6 +410,11 @@ const nextSteps     = document.getElementById('nextSteps')
 const nextBtns      = document.getElementById('nextBtns')
 const docTypeSelect = document.getElementById('docTypeSelect')
 const triggerFlag   = document.getElementById('triggerFlag')
+const zoomSlider    = document.getElementById('zoomSlider')
+const zoomLabel     = document.getElementById('zoomLabel')
+const zoomRow       = document.getElementById('zoomRow')
+const guideOverlay  = document.getElementById('guideOverlay')
+const guideToggle   = document.getElementById('guideToggle')
 
 // Upload
 function handleFile(file) {
@@ -400,12 +425,17 @@ function handleFile(file) {
     uploadedImg = img
     panOffsetX = 0
     panOffsetY = 0
+    zoomLevel = 1.0
+    zoomSlider.value = '1'
+    zoomLabel.textContent = '100%'
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     dragHint.style.display = ''
+    zoomRow.style.display = ''
     downloadCard.style.display = ''
     renderCanvas()
+    renderGuide()
     buildNextSteps()
   }
   img.src = url
@@ -455,6 +485,7 @@ docTypeSelect.addEventListener('change', () => {
   }
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
   panOffsetX = 0; panOffsetY = 0
+  zoomLevel = 1.0; zoomSlider.value = '1'; zoomLabel.textContent = '100%'
   renderCanvas()
 })
 
@@ -504,6 +535,16 @@ document.addEventListener('click', (e) => {
 
 bgColorInput.addEventListener('input', () => renderCanvas())
 
+// Zoom slider
+zoomSlider.addEventListener('input', () => {
+  zoomLevel = parseFloat(zoomSlider.value)
+  zoomLabel.textContent = Math.round(zoomLevel * 100) + '%'
+  renderCanvas()
+})
+
+// Guide toggle
+guideToggle.addEventListener('change', () => renderGuide())
+
 // Canvas rendering
 function renderCanvas() {
   // Use mm-based aspect ratio for canvas display
@@ -520,21 +561,24 @@ function renderCanvas() {
 
   if (!uploadedImg) return
 
-  // Scale image to fill canvas, allow panning
+  // Scale image to fit (contain) then apply zoom
   const img = uploadedImg
   const imgAspect = img.naturalWidth / img.naturalHeight
-  let drawW, drawH
+  let baseW, baseH
   if (imgAspect > aspect) {
-    // Image is wider — fit height, crop sides
-    drawH = dispH
-    drawW = dispH * imgAspect
+    // Image is wider — fit height
+    baseH = dispH
+    baseW = dispH * imgAspect
   } else {
-    // Image is taller — fit width, crop top/bottom
-    drawW = dispW
-    drawH = dispW / imgAspect
+    // Image is taller — fit width
+    baseW = dispW
+    baseH = dispW / imgAspect
   }
 
-  // Clamp pan offset
+  const drawW = baseW * zoomLevel
+  const drawH = baseH * zoomLevel
+
+  // Clamp pan offset so image doesn't leave canvas entirely
   const maxPanX = Math.max(0, (drawW - dispW) / 2)
   const maxPanY = Math.max(0, (drawH - dispH) / 2)
   panOffsetX = Math.max(-maxPanX, Math.min(maxPanX, panOffsetX))
@@ -543,6 +587,49 @@ function renderCanvas() {
   const x = (dispW - drawW) / 2 + panOffsetX
   const y = (dispH - drawH) / 2 + panOffsetY
   ctx.drawImage(img, x, y, drawW, drawH)
+
+  renderGuide()
+}
+
+// Draw passport guide overlay (face oval + measurement lines)
+function renderGuide() {
+  if (!guideToggle.checked || !uploadedImg) {
+    guideOverlay.style.display = 'none'
+    return
+  }
+  guideOverlay.style.display = ''
+  const rect = ppCanvas.getBoundingClientRect()
+  const w = rect.width, h = rect.height
+  guideOverlay.setAttribute('viewBox', '0 0 ' + w + ' ' + h)
+  guideOverlay.style.width = w + 'px'
+  guideOverlay.style.height = h + 'px'
+
+  // Face oval: centered, roughly 60% width, 75% height, positioned in upper portion
+  const ovalCx = w / 2
+  const ovalCy = h * 0.40
+  const ovalRx = w * 0.22
+  const ovalRy = h * 0.30
+
+  // Measurement lines on edges
+  const m = 6 // margin
+  const lineColor = '#6B7B8D'
+  const lineW = 1.2
+
+  guideOverlay.innerHTML =
+    // Face oval
+    '<ellipse cx="' + ovalCx + '" cy="' + ovalCy + '" rx="' + ovalRx + '" ry="' + ovalRy + '" fill="none" stroke="' + lineColor + '" stroke-width="' + lineW + '" stroke-dasharray="6 4" opacity="0.6"/>' +
+    // Top border line
+    '<line x1="' + m + '" y1="' + m + '" x2="' + (w - m) + '" y2="' + m + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
+    // Bottom border line
+    '<line x1="' + m + '" y1="' + (h - m) + '" x2="' + (w - m) + '" y2="' + (h - m) + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
+    // Left border line
+    '<line x1="' + m + '" y1="' + m + '" x2="' + m + '" y2="' + (h - m) + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
+    // Right border line
+    '<line x1="' + (w - m) + '" y1="' + m + '" x2="' + (w - m) + '" y2="' + (h - m) + '" stroke="' + lineColor + '" stroke-width="' + lineW + '" opacity="0.5"/>' +
+    // Right dimension label
+    '<text x="' + (w - 2) + '" y="' + (h / 2) + '" fill="' + lineColor + '" font-size="10" font-family="DM Sans,sans-serif" text-anchor="end" transform="rotate(-90,' + (w - 2) + ',' + (h / 2) + ')" opacity="0.7">' + activeH + 'mm</text>' +
+    // Bottom dimension label
+    '<text x="' + (w / 2) + '" y="' + (h - 1) + '" fill="' + lineColor + '" font-size="10" font-family="DM Sans,sans-serif" text-anchor="middle" opacity="0.7">' + activeW + 'mm</text>'
 }
 
 // Drag to reposition
@@ -599,14 +686,16 @@ function generatePhoto() {
     const img = uploadedImg
     const aspect = activeW / activeH
     const imgAspect = img.naturalWidth / img.naturalHeight
-    let drawW, drawH
+    let baseW, baseH
     if (imgAspect > aspect) {
-      drawH = hPx
-      drawW = hPx * imgAspect
+      baseH = hPx
+      baseW = hPx * imgAspect
     } else {
-      drawW = wPx
-      drawH = wPx / imgAspect
+      baseW = wPx
+      baseH = wPx / imgAspect
     }
+    const drawW = baseW * zoomLevel
+    const drawH = baseH * zoomLevel
     // Scale pan offset from display to output resolution
     const scaleRatio = wPx / ppCanvas.width
     const ox = panOffsetX * scaleRatio
