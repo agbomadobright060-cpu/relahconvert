@@ -225,9 +225,7 @@ let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let processedImg = null  // background-removed version
 let isProcessing = false
-let panOffsetX = 0, panOffsetY = 0
 let zoomLevel = 1.0
-let isDragging = false, dragStartX = 0, dragStartY = 0, dragStartPanX = 0, dragStartPanY = 0
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -249,8 +247,7 @@ style.textContent = `
   .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
-  .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:grab;touch-action:none}
-  .pp-canvas-inner:active{cursor:grabbing}
+  .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .pp-canvas-inner canvas{display:block;width:100%;height:auto}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
@@ -276,7 +273,7 @@ style.textContent = `
   .pp-color-row{display:flex;align-items:center;gap:8px;margin-top:8px}
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
-  .pp-drag-hint{font-size:11px;color:#9A8A7A;text-align:center;padding:6px 0}
+  .pp-drag-hint{font-size:11px;color:#9A8A7A;text-align:center;padding:6px 0;display:none}
   .pp-zoom-row{display:flex;align-items:center;gap:8px;padding:6px 16px 10px}
   .pp-zoom-row label{font-size:11px;color:#9A8A7A;white-space:nowrap}
   .pp-zoom-row input[type=range]{flex:1;accent-color:#C84B31;height:4px}
@@ -452,7 +449,6 @@ function handleFile(file) {
   origImg.onload = () => {
     uploadedImg = origImg
     processedImg = null
-    panOffsetX = 0; panOffsetY = 0
     zoomLevel = 1.0; zoomSlider.value = '1'; zoomLabel.textContent = '100%'
     renderCanvas()
 
@@ -539,7 +535,6 @@ docTypeSelect.addEventListener('change', () => {
     activeW = s.w; activeH = s.h
   }
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
-  panOffsetX = 0; panOffsetY = 0
   zoomLevel = 1.0; zoomSlider.value = '1'; zoomLabel.textContent = '100%'
   renderCanvas()
 })
@@ -564,8 +559,6 @@ function renderCountryList(filter) {
       triggerFlag.alt = c.code
       bgColorInput.value = c.bg
       countryDropdown.classList.remove('open')
-      panOffsetX = 0
-      panOffsetY = 0
       updateDocTypes()
       renderCanvas()
     })
@@ -600,9 +593,8 @@ zoomSlider.addEventListener('input', () => {
 // Guide toggle
 guideToggle.addEventListener('change', () => renderGuide())
 
-// Canvas rendering
+// Canvas rendering — auto-crops image to passport dimensions
 function renderCanvas() {
-  // Use mm-based aspect ratio for canvas display
   const aspect = activeW / activeH
   const dispW = 400
   const dispH = Math.round(dispW / aspect)
@@ -610,38 +602,42 @@ function renderCanvas() {
   ppCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
 
-  // Background
+  // Fill background with selected color
   ctx.fillStyle = bgColorInput.value
   ctx.fillRect(0, 0, dispW, dispH)
 
   if (!uploadedImg) return
 
-  // Use background-removed image if available, else original
   const img = processedImg || uploadedImg
-  const imgAspect = img.naturalWidth / img.naturalHeight
-  let baseW, baseH
+  const imgW = img.naturalWidth
+  const imgH = img.naturalHeight
+  const imgAspect = imgW / imgH
+
+  // Crop source region from center of image to match passport aspect ratio
+  let srcX, srcY, srcW, srcH
   if (imgAspect > aspect) {
-    // Image is wider — fit height
-    baseH = dispH
-    baseW = dispH * imgAspect
+    // Image is wider than passport — crop sides, keep full height
+    srcH = imgH
+    srcW = imgH * aspect
+    srcX = (imgW - srcW) / 2
+    srcY = 0
   } else {
-    // Image is taller — fit width
-    baseW = dispW
-    baseH = dispW / imgAspect
+    // Image is taller than passport — crop top/bottom, keep full width
+    srcW = imgW
+    srcH = imgW / aspect
+    srcX = 0
+    // Bias crop toward top (face is usually in upper portion)
+    srcY = Math.max(0, (imgH - srcH) * 0.15)
   }
 
-  const drawW = baseW * zoomLevel
-  const drawH = baseH * zoomLevel
+  // Apply zoom: zoom into the center of the cropped region
+  const zSrcW = srcW / zoomLevel
+  const zSrcH = srcH / zoomLevel
+  const zSrcX = srcX + (srcW - zSrcW) / 2
+  const zSrcY = srcY + (srcH - zSrcH) / 2
 
-  // Clamp pan offset so image doesn't leave canvas entirely
-  const maxPanX = Math.max(0, (drawW - dispW) / 2)
-  const maxPanY = Math.max(0, (drawH - dispH) / 2)
-  panOffsetX = Math.max(-maxPanX, Math.min(maxPanX, panOffsetX))
-  panOffsetY = Math.max(-maxPanY, Math.min(maxPanY, panOffsetY))
-
-  const x = (dispW - drawW) / 2 + panOffsetX
-  const y = (dispH - drawH) / 2 + panOffsetY
-  ctx.drawImage(img, x, y, drawW, drawH)
+  // Draw cropped & zoomed image to fill the entire canvas
+  ctx.drawImage(img, zSrcX, zSrcY, zSrcW, zSrcH, 0, 0, dispW, dispH)
 
   renderGuide()
 }
@@ -687,43 +683,7 @@ function renderGuide() {
     '<text x="' + (w / 2) + '" y="' + (h - 1) + '" fill="' + lineColor + '" font-size="10" font-family="DM Sans,sans-serif" text-anchor="middle" opacity="0.7">' + activeW + 'mm</text>'
 }
 
-// Drag to reposition
-canvasWrap.addEventListener('mousedown', startDrag)
-canvasWrap.addEventListener('touchstart', startDragTouch, { passive: false })
-
-function startDrag(e) {
-  if (!uploadedImg) return
-  isDragging = true
-  dragStartX = e.clientX
-  dragStartY = e.clientY
-  dragStartPanX = panOffsetX
-  dragStartPanY = panOffsetY
-  e.preventDefault()
-}
-function startDragTouch(e) {
-  if (!uploadedImg) return
-  isDragging = true
-  dragStartX = e.touches[0].clientX
-  dragStartY = e.touches[0].clientY
-  dragStartPanX = panOffsetX
-  dragStartPanY = panOffsetY
-  e.preventDefault()
-}
-
-document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return
-  panOffsetX = dragStartPanX + (e.clientX - dragStartX)
-  panOffsetY = dragStartPanY + (e.clientY - dragStartY)
-  renderCanvas()
-})
-document.addEventListener('touchmove', (e) => {
-  if (!isDragging) return
-  panOffsetX = dragStartPanX + (e.touches[0].clientX - dragStartX)
-  panOffsetY = dragStartPanY + (e.touches[0].clientY - dragStartY)
-  renderCanvas()
-}, { passive: true })
-document.addEventListener('mouseup', () => { isDragging = false })
-document.addEventListener('touchend', () => { isDragging = false })
+// No drag — image auto-crops to passport dimensions
 
 // Generate high-res single photo
 function generatePhoto() {
@@ -740,24 +700,25 @@ function generatePhoto() {
   if (uploadedImg) {
     const img = processedImg || uploadedImg
     const aspect = activeW / activeH
-    const imgAspect = img.naturalWidth / img.naturalHeight
-    let baseW, baseH
+    const imgW = img.naturalWidth
+    const imgH = img.naturalHeight
+    const imgAspect = imgW / imgH
+
+    let srcX, srcY, srcW, srcH
     if (imgAspect > aspect) {
-      baseH = hPx
-      baseW = hPx * imgAspect
+      srcH = imgH; srcW = imgH * aspect
+      srcX = (imgW - srcW) / 2; srcY = 0
     } else {
-      baseW = wPx
-      baseH = wPx / imgAspect
+      srcW = imgW; srcH = imgW / aspect
+      srcX = 0; srcY = Math.max(0, (imgH - srcH) * 0.15)
     }
-    const drawW = baseW * zoomLevel
-    const drawH = baseH * zoomLevel
-    // Scale pan offset from display to output resolution
-    const scaleRatio = wPx / ppCanvas.width
-    const ox = panOffsetX * scaleRatio
-    const oy = panOffsetY * scaleRatio
-    const x = (wPx - drawW) / 2 + ox
-    const y = (hPx - drawH) / 2 + oy
-    octx.drawImage(img, x, y, drawW, drawH)
+
+    const zSrcW = srcW / zoomLevel
+    const zSrcH = srcH / zoomLevel
+    const zSrcX = srcX + (srcW - zSrcW) / 2
+    const zSrcY = srcY + (srcH - zSrcH) / 2
+
+    octx.drawImage(img, zSrcX, zSrcY, zSrcW, zSrcH, 0, 0, wPx, hPx)
   }
   return outCanvas
 }
