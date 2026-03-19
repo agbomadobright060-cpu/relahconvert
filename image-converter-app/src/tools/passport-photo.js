@@ -247,8 +247,8 @@ style.textContent = `
   .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
-  .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .pp-canvas-inner canvas{display:block;width:100%;height:auto}
+  .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+  .pp-canvas-inner canvas{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;user-select:none}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -428,6 +428,12 @@ const guideToggle   = document.getElementById('guideToggle')
 const processingOverlay = document.getElementById('processingOverlay')
 const processingProgress = document.getElementById('processingProgress')
 const processingFill = document.getElementById('processingFill')
+
+// Prevent all drag/select on canvas
+ppCanvas.setAttribute('draggable', 'false')
+canvasWrap.addEventListener('dragstart', e => e.preventDefault())
+canvasWrap.addEventListener('mousedown', e => e.preventDefault())
+canvasWrap.addEventListener('touchstart', e => e.preventDefault(), { passive: false })
 
 // Upload
 function handleFile(file) {
