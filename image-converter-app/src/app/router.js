@@ -35,13 +35,18 @@ const _urlLang = _segments[0]
 // If URL has a language prefix, save it
 if (_urlLang) setLang(_urlLang)
 
-// Handle translated URLs: dynamically load standalone tools instead of redirecting
+// Handle standalone tools: dynamically load instead of letting main.js render
 let _handledByDynamicImport = false
+// Direct English slug (e.g. /passport-photo, /merge-images loaded via catch-all)
+if (!_urlLang && _segments.length === 1 && standaloneModules[_segments[0]]) {
+  _handledByDynamicImport = true
+  standaloneModules[_segments[0]]()
+}
+// Translated URLs (e.g. /fr/photo-passeport)
 if (_urlLang && _segments[1]) {
   const englishKey = englishKeyFromSlug(_urlLang, _segments[1])
   if (englishKey && standaloneModules[englishKey]) {
     _handledByDynamicImport = true
-    // Dynamically import the tool module — it will render itself into #app
     standaloneModules[englishKey]()
   }
 }
