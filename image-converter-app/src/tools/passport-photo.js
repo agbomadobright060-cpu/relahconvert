@@ -237,29 +237,14 @@ async function loadFaceDetection() {
 }
 
 async function detectFace(img) {
-  // Try native browser FaceDetector first (Chrome, Edge, Safari — instant, no download)
-  if (typeof FaceDetector !== 'undefined') {
-    try {
-      const detector = new FaceDetector({ fastMode: true })
-      const faces = await detector.detect(img)
-      if (faces.length > 0) {
-        const b = faces[0].boundingBox
-        return { x: b.x, y: b.y, width: b.width, height: b.height }
-      }
-    } catch (err) {
-      console.warn('Native FaceDetector failed:', err)
-    }
-  }
-
-  // Fallback to face-api.js (Firefox, older browsers)
   try {
     await loadFaceDetection()
+    // face-api needs an HTMLImageElement or canvas
     const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
     if (detection) return detection.box
   } catch (err) {
-    console.warn('face-api.js detection failed:', err)
+    console.error('Face detection failed:', err)
   }
-
   return null
 }
 
