@@ -224,6 +224,7 @@ let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
+let detectedFace = null  // { x, y, width, height } from FaceDetector
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -390,11 +391,24 @@ function handleFile(file) {
   img.onload = async () => {
     uploadedImg = img
     processedImg = null
+    detectedFace = null
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
+
+    // Detect face for smart cropping
+    if (typeof FaceDetector !== 'undefined') {
+      try {
+        const fd = new FaceDetector()
+        const faces = await fd.detect(img)
+        if (faces.length > 0) {
+          detectedFace = faces[0].boundingBox
+        }
+      } catch (e) { /* FaceDetector not supported or failed */ }
+    }
+
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
     renderCanvas()
 
@@ -531,11 +545,35 @@ function detectPhotoCropRatio(imgW, imgH) {
 }
 
 function getCropRegion(aspect) {
-  // Always use ORIGINAL image dimensions for crop calculation
-  // (bg-removed image has same dimensions, just transparent background)
   const imgW = uploadedImg.naturalWidth
   const imgH = uploadedImg.naturalHeight
 
+  if (detectedFace) {
+    // Face detected — frame so head is ~65% of frame height
+    const face = detectedFace
+    const faceCx = face.x + face.width / 2
+    const faceTop = face.y
+    const faceH = face.height
+
+    // Total frame: head ~65%, space above ~10%, shoulders below ~25%
+    const frameH = faceH / 0.65
+    const padAbove = frameH * 0.10
+    const frameTop = Math.max(0, faceTop - padAbove)
+
+    const neededW = frameH * aspect
+    let srcX, srcY, srcW, srcH
+    if (neededW <= imgW) {
+      srcH = frameH; srcW = neededW
+      srcX = Math.max(0, faceCx - srcW / 2); srcY = frameTop
+    } else {
+      srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
+    }
+    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+    if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
+    return { srcX, srcY, srcW, srcH }
+  }
+
+  // Fallback: ratio-based crop from top
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
   const neededW = cropH * aspect
