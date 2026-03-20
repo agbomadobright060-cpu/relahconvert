@@ -1,6 +1,5 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
-import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 injectHreflang('passport-photo')
 
 const t = getT()
@@ -226,33 +225,45 @@ let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
 let detectedFaceBox = null
-let mpFaceDetector = null
-
-async function loadMediaPipeFaceDetector() {
-  if (mpFaceDetector) return mpFaceDetector
-  const vision = await FilesetResolver.forVisionTasks(
-    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-  )
-  mpFaceDetector = await FaceDetector.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
-      delegate: 'GPU',
-    },
-    runningMode: 'IMAGE',
-  })
-  return mpFaceDetector
-}
 
 async function detectFace(img) {
   try {
-    const detector = await loadMediaPipeFaceDetector()
-    const result = detector.detect(img)
-    if (result.detections.length > 0) {
-      const bb = result.detections[0].boundingBox
-      return { x: bb.originX, y: bb.originY, width: bb.width, height: bb.height }
+    // Draw image to canvas to get base64
+    const c = document.createElement('canvas')
+    // Resize large images to reduce payload (max 1024px on longest side)
+    const maxDim = 1024
+    let w = img.naturalWidth, h = img.naturalHeight
+    if (w > maxDim || h > maxDim) {
+      const scale = maxDim / Math.max(w, h)
+      w = Math.round(w * scale)
+      h = Math.round(h * scale)
+    }
+    c.width = w; c.height = h
+    const cx = c.getContext('2d')
+    cx.drawImage(img, 0, 0, w, h)
+    const dataUrl = c.toDataURL('image/jpeg', 0.85)
+    const base64 = dataUrl.split(',')[1]
+
+    const resp = await fetch('/api/detect-face', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
+    })
+    if (!resp.ok) return null
+    const face = await resp.json()
+    if (face.error || !face.faceX) return null
+
+    // Scale coordinates back to original image dimensions
+    const scaleX = img.naturalWidth / w
+    const scaleY = img.naturalHeight / h
+    return {
+      x: face.faceX * scaleX,
+      y: face.faceY * scaleY,
+      width: face.faceW * scaleX,
+      height: face.faceH * scaleY,
     }
   } catch (err) {
-    console.warn('MediaPipe face detection failed:', err)
+    console.warn('Face detection failed:', err)
   }
   return null
 }
@@ -673,7 +684,21 @@ function renderCanvas() {
   if (!uploadedImg) return
   const img = processedImg || uploadedImg
   const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
+  // If source crop doesn't match target aspect, pad with bg and center
+  const srcAspect = srcW / srcH
+  let dstX = 0, dstY = 0, dstW = dispW, dstH = dispH
+  if (Math.abs(srcAspect - aspect) > 0.01) {
+    if (srcAspect < aspect) {
+      // Image is narrower than target — pillarbox (pad sides)
+      dstW = Math.round(dispH * srcAspect)
+      dstX = Math.round((dispW - dstW) / 2)
+    } else {
+      // Image is shorter than target — letterbox (pad top/bottom)
+      dstH = Math.round(dispW / srcAspect)
+      dstY = Math.round((dispH - dstH) / 2)
+    }
+  }
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH)
 }
 
 function generatePhoto() {
@@ -688,7 +713,18 @@ function generatePhoto() {
   if (uploadedImg) {
     const img = processedImg || uploadedImg
     const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-    octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
+    const srcAspect = srcW / srcH
+    let dstX = 0, dstY = 0, dstW = wPx, dstH = hPx
+    if (Math.abs(srcAspect - aspect) > 0.01) {
+      if (srcAspect < aspect) {
+        dstW = Math.round(hPx * srcAspect)
+        dstX = Math.round((wPx - dstW) / 2)
+      } else {
+        dstH = Math.round(wPx / srcAspect)
+        dstY = Math.round((hPx - dstH) / 2)
+      }
+    }
+    octx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH)
   }
   return outCanvas
 }
