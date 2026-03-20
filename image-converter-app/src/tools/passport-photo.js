@@ -313,18 +313,13 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-status" id="ppStatus" style="display:none"></div>
         </div>
         <div id="dropZone" class="pp-dropzone">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
-        </div>
-        <div class="pp-hero" id="heroSection">
-          <div style="background:#fff;border-radius:12px;padding:48px 24px;text-align:center;border:2px dashed #DDD5C8;color:#9A8A7A;font-family:'DM Sans',sans-serif">
-            <svg width="72" height="90" viewBox="0 0 72 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="72" height="90" rx="8" fill="#F5F0E8"/>
-              <circle cx="36" cy="30" r="16" fill="#DDD5C8"/>
-              <ellipse cx="36" cy="72" rx="26" ry="16" fill="#DDD5C8"/>
-            </svg>
-            <p style="margin:16px 0 0;font-size:14px;color:#9A8A7A">${t.pp_upload_hint || 'Upload your photo to get started'}</p>
-          </div>
+          <svg width="72" height="90" viewBox="0 0 72 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:12px">
+            <rect width="72" height="90" rx="8" fill="#F5F0E8"/>
+            <circle cx="36" cy="28" r="16" fill="#DDD5C8"/>
+            <ellipse cx="36" cy="72" rx="26" ry="16" fill="#DDD5C8"/>
+          </svg>
+          <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#5A4A3A">${t.pp_drop || 'Upload your photo'}</p>
+          <p style="margin:0;font-size:13px;color:#9A8A7A">${t.pp_drop_sub || 'Click or drag & drop — head & shoulders will be auto-cropped'}</p>
         </div>
       </div>
       <div class="pp-panel">
@@ -399,7 +394,6 @@ function handleFile(file) {
     uploadedImg = img
     processedImg = null
     dropZoneEl.style.display = 'none'
-    document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
