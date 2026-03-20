@@ -215,7 +215,7 @@ const PASSPORT_COUNTRIES = [
 ]
 
 // DPI for print-quality output
-const DPI = 300
+const DPI = 600
 const MM_PER_INCH = 25.4
 
 let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States')
@@ -602,23 +602,29 @@ function getCropRegion(img, aspect) {
     const faceH = box.height
     const faceCx = box.x + box.width / 2
 
-    // Passport standard: face ~60-70% of photo height
-    // Tight crop: small gap above head, just enough below for shoulders
-    const gapAbove = faceH * 0.45      // small space above top of head
-    const gapBelow = faceH * 0.55      // chin to top of shoulders
+    // ICAO passport standard: face = 70-80% of photo height
+    // FaceDetector box covers forehead-to-chin, need extra for hair + small margin
+    const gapAbove = faceH * 0.35      // hair + tiny gap above crown
+    const gapBelow = faceH * 0.35      // neck + very top of shoulders
     let srcY = Math.max(0, box.y - gapAbove)
     let srcH = faceH + gapAbove + gapBelow
     let srcW = srcH * aspect
     let srcX = Math.max(0, faceCx - srcW / 2)
 
-    // If crop is wider than the image, fit to image width
+    // If crop is wider than the image, keep target aspect by centering vertically
     if (srcW > imgW) {
       srcW = imgW
       srcH = srcW / aspect
       srcX = 0
-      // Re-center vertically on face
+      // Center on face, placing face in upper 40% of frame
       const faceCy = box.y + faceH / 2
-      srcY = Math.max(0, faceCy - srcH * 0.4)
+      srcY = Math.max(0, faceCy - srcH * 0.38)
+    }
+    // If crop is taller than image, clamp height
+    if (srcH > imgH) {
+      srcH = imgH
+      srcW = srcH * aspect
+      srcX = Math.max(0, faceCx - srcW / 2)
     }
     // Clamp to image bounds
     if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
@@ -697,21 +703,7 @@ function renderCanvas() {
   if (!uploadedImg) return
   const img = processedImg || uploadedImg
   const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-  // If source crop doesn't match target aspect, pad with bg and center
-  const srcAspect = srcW / srcH
-  let dstX = 0, dstY = 0, dstW = dispW, dstH = dispH
-  if (Math.abs(srcAspect - aspect) > 0.01) {
-    if (srcAspect < aspect) {
-      // Image is narrower than target — pillarbox (pad sides)
-      dstW = Math.round(dispH * srcAspect)
-      dstX = Math.round((dispW - dstW) / 2)
-    } else {
-      // Image is shorter than target — letterbox (pad top/bottom)
-      dstH = Math.round(dispW / srcAspect)
-      dstY = Math.round((dispH - dstH) / 2)
-    }
-  }
-  ctx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH)
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 }
 
 function generatePhoto() {
@@ -726,18 +718,7 @@ function generatePhoto() {
   if (uploadedImg) {
     const img = processedImg || uploadedImg
     const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-    const srcAspect = srcW / srcH
-    let dstX = 0, dstY = 0, dstW = wPx, dstH = hPx
-    if (Math.abs(srcAspect - aspect) > 0.01) {
-      if (srcAspect < aspect) {
-        dstW = Math.round(hPx * srcAspect)
-        dstX = Math.round((wPx - dstW) / 2)
-      } else {
-        dstH = Math.round(wPx / srcAspect)
-        dstY = Math.round((hPx - dstH) / 2)
-      }
-    }
-    octx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH)
+    octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
   return outCanvas
 }
