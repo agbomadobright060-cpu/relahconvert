@@ -399,15 +399,7 @@ function handleFile(file) {
     ppStatus.style.display = ''
 
     // Detect face for smart cropping
-    if (typeof FaceDetector !== 'undefined') {
-      try {
-        const fd = new FaceDetector()
-        const faces = await fd.detect(img)
-        if (faces.length > 0) {
-          detectedFace = faces[0].boundingBox
-        }
-      } catch (e) { /* FaceDetector not supported or failed */ }
-    }
+    detectedFace = await detectFace(img)
 
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
     renderCanvas()
@@ -535,6 +527,58 @@ document.addEventListener('click', (e) => {
     countryDropdown.classList.remove('open')
   }
 })
+
+// Detect face — Chrome FaceDetector API with skin-tone fallback for all browsers
+async function detectFace(img) {
+  // Try Chrome's built-in FaceDetector first
+  if (typeof FaceDetector !== 'undefined') {
+    try {
+      const fd = new FaceDetector()
+      const faces = await fd.detect(img)
+      if (faces.length > 0) return faces[0].boundingBox
+    } catch (e) { /* not supported */ }
+  }
+
+  // Fallback: skin-tone detection on a small canvas
+  const sw = 100, sh = Math.round(100 * img.naturalHeight / img.naturalWidth)
+  const sc = document.createElement('canvas')
+  sc.width = sw; sc.height = sh
+  const sctx = sc.getContext('2d')
+  sctx.drawImage(img, 0, 0, sw, sh)
+  const data = sctx.getImageData(0, 0, sw, sh).data
+
+  let minY = sh, maxY = 0, minX = sw, maxX = 0, count = 0
+  for (let y = 0; y < sh; y++) {
+    for (let x = 0; x < sw; x++) {
+      const i = (y * sw + x) * 4
+      const r = data[i], g = data[i + 1], b = data[i + 2]
+      // Skin tone detection (works across skin colors)
+      if (r > 60 && g > 40 && b > 20 && r > g && r > b &&
+          (r - g) > 12 && Math.abs(r - g) < 120 &&
+          (r + g + b) > 150 && (r + g + b) < 700) {
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        count++
+      }
+    }
+  }
+
+  if (count > 20 && maxY > minY) {
+    // Scale back to original image dimensions
+    const scaleX = img.naturalWidth / sw
+    const scaleY = img.naturalHeight / sh
+    return {
+      x: minX * scaleX,
+      y: minY * scaleY,
+      width: (maxX - minX) * scaleX,
+      height: (maxY - minY) * scaleY
+    }
+  }
+
+  return null // no face detected
+}
 
 function detectPhotoCropRatio(imgW, imgH) {
   const ratio = imgH / imgW
