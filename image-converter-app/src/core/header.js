@@ -389,21 +389,13 @@ export function injectHeader() {
     </div>
   `
 
-  // Non-English tool pages reuse the homepage HTML, which has its own header,
-  // footer, and <style> tag with conflicting CSS (including !important rules).
-  // Remove all of these so header.js is the single source of truth.
+  // Remove existing header/dropdown/footer to avoid duplicate IDs on non-English pages
   const oldHeader = document.getElementById('site-header')
   if (oldHeader) oldHeader.remove()
   const oldDropdown = document.getElementById('dropdown-menu')
   if (oldDropdown) oldDropdown.remove()
   const oldFooter = document.getElementById('site-footer')
   if (oldFooter) oldFooter.remove()
-  // Remove homepage inline <style> that conflicts with header.js styles
-  document.querySelectorAll('head > style').forEach(s => {
-    if (s.textContent.includes('.tool-card') || s.textContent.includes('.lang-grid-wrap')) s.remove()
-  })
-  // Remove leftover homepage sections (hero, tools-grid, bg-canvas, etc.)
-  document.querySelectorAll('.hero, .tools-section, .bg-canvas, .bg-fade, .filter-bar').forEach(el => el.remove())
 
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
