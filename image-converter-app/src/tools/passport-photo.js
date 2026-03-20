@@ -224,7 +224,6 @@ let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
-let detectedFace = null  // { x, y, width, height } from FaceDetector
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -246,8 +245,8 @@ style.textContent = `
   .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
-  .pp-canvas-inner{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none;margin:0 auto}
-  .pp-canvas-inner canvas{display:block;pointer-events:none;user-select:none}
+  .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+  .pp-canvas-inner canvas{display:block;max-width:100%;height:auto;pointer-events:none;user-select:none;margin:0 auto}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -391,16 +390,11 @@ function handleFile(file) {
   img.onload = async () => {
     uploadedImg = img
     processedImg = null
-    detectedFace = null
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
-
-    // Detect face for smart cropping
-    detectedFace = await detectFace(img)
-
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
     renderCanvas()
 
@@ -528,89 +522,58 @@ document.addEventListener('click', (e) => {
   }
 })
 
-// Detect face — Chrome FaceDetector API with skin-tone fallback for all browsers
-async function detectFace(img) {
-  // Try Chrome's built-in FaceDetector first
-  if (typeof FaceDetector !== 'undefined') {
-    try {
-      const fd = new FaceDetector()
-      const faces = await fd.detect(img)
-      if (faces.length > 0) return faces[0].boundingBox
-    } catch (e) { /* not supported */ }
-  }
-
-  // Fallback: skin-tone detection on a small canvas
-  const sw = 100, sh = Math.round(100 * img.naturalHeight / img.naturalWidth)
-  const sc = document.createElement('canvas')
-  sc.width = sw; sc.height = sh
-  const sctx = sc.getContext('2d')
-  sctx.drawImage(img, 0, 0, sw, sh)
-  const data = sctx.getImageData(0, 0, sw, sh).data
-
-  // Only scan top 35% of image — face is always near the top
-  const scanH = Math.round(sh * 0.35)
-  let minY = sh, maxY = 0, minX = sw, maxX = 0, count = 0
-  for (let y = 0; y < scanH; y++) {
-    for (let x = 0; x < sw; x++) {
-      const i = (y * sw + x) * 4
-      const r = data[i], g = data[i + 1], b = data[i + 2]
-      // Skin tone detection (works across skin colors)
-      if (r > 60 && g > 40 && b > 20 && r > g && r > b &&
-          (r - g) > 12 && Math.abs(r - g) < 120 &&
-          (r + g + b) > 150 && (r + g + b) < 700) {
-        if (y < minY) minY = y
-        if (y > maxY) maxY = y
-        if (x < minX) minX = x
-        if (x > maxX) maxX = x
-        count++
-      }
-    }
-  }
-
-  if (count > 20 && maxY > minY) {
-    // Scale back to original image dimensions
-    const scaleX = img.naturalWidth / sw
-    const scaleY = img.naturalHeight / sh
-    return {
-      x: minX * scaleX,
-      y: minY * scaleY,
-      width: (maxX - minX) * scaleX,
-      height: (maxY - minY) * scaleY
-    }
-  }
-
-  return null // no face detected
-}
-
 function detectPhotoCropRatio(imgW, imgH) {
   const ratio = imgH / imgW
-  if (ratio >= 2.0) return 0.15       // full body → top 15%
-  else if (ratio >= 1.4) return 0.22  // 3/4 body → top 22%
-  else if (ratio >= 1.0) return 0.35  // half body → top 35%
-  else return 0.50                     // landscape → top 50%
+  if (ratio >= 2.0) return 0.18       // full body standing — very tight crop
+  else if (ratio >= 1.4) return 0.25  // 3/4 body — tighter
+  else if (ratio >= 1.0) return 0.45  // chest up / headshot
+  else return 0.55                     // landscape
 }
 
-function getCropRegion(aspect) {
-  const imgW = uploadedImg.naturalWidth
-  const imgH = uploadedImg.naturalHeight
+function getCropRegion(img, aspect) {
+  const imgW = img.naturalWidth
+  const imgH = img.naturalHeight
 
-  if (detectedFace) {
-    // Face detected — frame so head is ~65% of frame height
-    const face = detectedFace
-    const faceCx = face.x + face.width / 2
-    const faceTop = face.y
-    const faceH = face.height
+  if (processedImg) {
+    const sc = document.createElement('canvas')
+    sc.width = imgW; sc.height = imgH
+    const sctx = sc.getContext('2d')
+    sctx.drawImage(img, 0, 0)
+    const data = sctx.getImageData(0, 0, imgW, imgH).data
+    let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
+    for (let y = 0; y < imgH; y += 4) {
+      for (let x = 0; x < imgW; x += 4) {
+        const i = (y * imgW + x) * 4
+        if (data[i + 3] > 30) {
+          if (y < topY) topY = y
+          if (y > bottomY) bottomY = y
+          if (x < leftX) leftX = x
+          if (x > rightX) rightX = x
+        }
+      }
+    }
+    if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
 
-    // Total frame: head ~65%, space above ~10%, shoulders below ~25%
-    const frameH = faceH / 0.65
-    const padAbove = frameH * 0.10
-    const frameTop = Math.max(0, faceTop - padAbove)
+    const personH = bottomY - topY
+    const personW = rightX - leftX
+    const personRatio = personH / Math.max(personW, 1)
+    const personCx = leftX + personW / 2
 
+    let showFraction
+    if (personRatio >= 2.5) showFraction = 0.32
+    else if (personRatio >= 1.6) showFraction = 0.38
+    else if (personRatio >= 1.0) showFraction = 0.52
+    else showFraction = 0.80
+
+    const pad = personH * 0.06
+    const frameTop = Math.max(0, topY - pad)
+    const frameH = personH * showFraction + pad * 2
     const neededW = frameH * aspect
+
     let srcX, srcY, srcW, srcH
     if (neededW <= imgW) {
       srcH = frameH; srcW = neededW
-      srcX = Math.max(0, faceCx - srcW / 2); srcY = frameTop
+      srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
     } else {
       srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
     }
@@ -619,7 +582,6 @@ function getCropRegion(aspect) {
     return { srcX, srcY, srcW, srcH }
   }
 
-  // Fallback: ratio-based crop from top
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
   const neededW = cropH * aspect
@@ -640,15 +602,12 @@ function renderCanvas() {
   const dispH = Math.round(dispW / aspect)
   ppCanvas.width = dispW
   ppCanvas.height = dispH
-  canvasWrap.style.width = dispW + 'px'
-  canvasWrap.style.height = dispH + 'px'
-  ppCanvas.style.width = dispW + 'px'
-  ppCanvas.style.height = dispH + 'px'
+  canvasWrap.style.maxWidth = dispW + 'px'
   ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
   if (!uploadedImg) return
   const img = processedImg || uploadedImg
-  const { srcX, srcY, srcW, srcH } = getCropRegion(aspect)
+  const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 }
 
@@ -663,7 +622,7 @@ function generatePhoto() {
   octx.fillRect(0, 0, wPx, hPx)
   if (uploadedImg) {
     const img = processedImg || uploadedImg
-    const { srcX, srcY, srcW, srcH } = getCropRegion(aspect)
+    const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
     octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
   return outCanvas
