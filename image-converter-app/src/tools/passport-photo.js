@@ -579,8 +579,8 @@ function getCropRegion(img, aspect) {
     const faceH = box.height
     const faceCx = box.x + box.width / 2
 
-    // Passport standard: face ~43% of photo height
-    const gapAbove = faceH * 0.6       // space above top of head
+    // Passport standard: face ~40% of photo height
+    const gapAbove = faceH * 0.85      // space above top of head
     const gapBelow = faceH * 0.9       // space below chin (shoulders)
     const srcY = Math.max(0, box.y - gapAbove)
     const srcH = faceH + gapAbove + gapBelow
