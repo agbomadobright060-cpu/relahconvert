@@ -530,53 +530,11 @@ function detectPhotoCropRatio(imgW, imgH) {
   else return 0.50                     // landscape → top 50%
 }
 
-function getCropRegion(img, aspect) {
-  const imgW = img.naturalWidth
-  const imgH = img.naturalHeight
-
-  if (processedImg) {
-    const sc = document.createElement('canvas')
-    sc.width = imgW; sc.height = imgH
-    const sctx = sc.getContext('2d')
-    sctx.drawImage(img, 0, 0)
-    const data = sctx.getImageData(0, 0, imgW, imgH).data
-    let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
-    for (let y = 0; y < imgH; y += 4) {
-      for (let x = 0; x < imgW; x += 4) {
-        const i = (y * imgW + x) * 4
-        if (data[i + 3] > 30) {
-          if (y < topY) topY = y
-          if (y > bottomY) bottomY = y
-          if (x < leftX) leftX = x
-          if (x > rightX) rightX = x
-        }
-      }
-    }
-    if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
-
-    const personH = bottomY - topY
-    const personW = rightX - leftX
-    const personCx = leftX + personW / 2
-
-    // Estimate head height (~15% of person height for full body, more for close-ups)
-    const headEstimate = Math.min(personW * 0.8, personH * 0.15)
-    // Frame = 3x head height (space above + head + shoulders)
-    const frameH = headEstimate * 3.2
-    const padAbove = headEstimate * 0.3
-    const frameTop = Math.max(0, topY - padAbove)
-    const neededW = frameH * aspect
-
-    let srcX, srcY, srcW, srcH
-    if (neededW <= imgW) {
-      srcH = frameH; srcW = neededW
-      srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
-    } else {
-      srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
-    }
-    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
-    return { srcX, srcY, srcW, srcH }
-  }
+function getCropRegion(aspect) {
+  // Always use ORIGINAL image dimensions for crop calculation
+  // (bg-removed image has same dimensions, just transparent background)
+  const imgW = uploadedImg.naturalWidth
+  const imgH = uploadedImg.naturalHeight
 
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
@@ -607,7 +565,7 @@ function renderCanvas() {
   ctx.fillRect(0, 0, dispW, dispH)
   if (!uploadedImg) return
   const img = processedImg || uploadedImg
-  const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
+  const { srcX, srcY, srcW, srcH } = getCropRegion(aspect)
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 }
 
@@ -622,7 +580,7 @@ function generatePhoto() {
   octx.fillRect(0, 0, wPx, hPx)
   if (uploadedImg) {
     const img = processedImg || uploadedImg
-    const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
+    const { srcX, srcY, srcW, srcH } = getCropRegion(aspect)
     octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
   }
   return outCanvas
