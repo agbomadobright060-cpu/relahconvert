@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
-import * as faceapi from 'face-api.js'
+import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 injectHreflang('passport-photo')
 
 const t = getT()
@@ -226,24 +226,33 @@ let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
 let detectedFaceBox = null
-let faceModelLoaded = false
+let mpFaceDetector = null
 
-async function loadFaceDetection() {
-  if (faceModelLoaded) return
-  await faceapi.nets.tinyFaceDetector.loadFromUri(
-    'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+async function loadMediaPipeFaceDetector() {
+  if (mpFaceDetector) return mpFaceDetector
+  const vision = await FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
   )
-  faceModelLoaded = true
+  mpFaceDetector = await FaceDetector.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
+      delegate: 'GPU',
+    },
+    runningMode: 'IMAGE',
+  })
+  return mpFaceDetector
 }
 
 async function detectFace(img) {
   try {
-    await loadFaceDetection()
-    // face-api needs an HTMLImageElement or canvas
-    const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-    if (detection) return detection.box
+    const detector = await loadMediaPipeFaceDetector()
+    const result = detector.detect(img)
+    if (result.detections.length > 0) {
+      const bb = result.detections[0].boundingBox
+      return { x: bb.originX, y: bb.originY, width: bb.width, height: bb.height }
+    }
   } catch (err) {
-    console.error('Face detection failed:', err)
+    console.warn('MediaPipe face detection failed:', err)
   }
   return null
 }
@@ -570,9 +579,9 @@ function getCropRegion(img, aspect) {
     const faceH = box.height
     const faceCx = box.x + box.width / 2
 
-    // Passport standard: face height ~50% of photo height
-    const gapAbove = faceH * 0.5       // space above top of head
-    const gapBelow = faceH * 0.8       // space below chin (shoulders)
+    // Passport standard: face ~43% of photo height
+    const gapAbove = faceH * 0.6       // space above top of head
+    const gapBelow = faceH * 0.9       // space below chin (shoulders)
     const srcY = Math.max(0, box.y - gapAbove)
     const srcH = faceH + gapAbove + gapBelow
     const srcW = srcH * aspect
