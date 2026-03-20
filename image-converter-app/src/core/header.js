@@ -215,7 +215,8 @@ export function injectHeader() {
     .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
     .lang-grid-wrap {
       display: none;
-      position: fixed;
+      position: absolute;
+      bottom: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
       background: #fff;
@@ -223,7 +224,7 @@ export function injectHeader() {
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       padding: 12px;
-      z-index: 9999;
+      z-index: 200;
       width: 480px;
       max-height: 60vh;
       overflow-y: auto;
@@ -259,7 +260,7 @@ export function injectHeader() {
       text-align: center;
     }
     @media (max-width: 768px) {
-      .lang-grid-wrap { width: 90vw; max-width: 400px; }
+      .lang-grid-wrap { position: fixed; left: 50%; transform: translateX(-50%); width: 90vw; max-width: 400px; bottom: auto; z-index: 9999; }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
@@ -399,7 +400,7 @@ export function injectHeader() {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
-      if (isOpen) {
+      if (isOpen && window.innerWidth <= 768) {
         const btn = langToggle.getBoundingClientRect()
         langGridWrap.style.bottom = (window.innerHeight - btn.top + 8) + 'px'
       }
