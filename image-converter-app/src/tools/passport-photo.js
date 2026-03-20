@@ -1,5 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import * as faceapi from 'face-api.js'
 injectHreflang('passport-photo')
 
 const t = getT()
@@ -224,6 +225,28 @@ let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
+let detectedFaceBox = null
+let faceModelLoaded = false
+
+async function loadFaceDetection() {
+  if (faceModelLoaded) return
+  await faceapi.nets.tinyFaceDetector.loadFromUri(
+    'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+  )
+  faceModelLoaded = true
+}
+
+async function detectFace(img) {
+  try {
+    await loadFaceDetection()
+    // face-api needs an HTMLImageElement or canvas
+    const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+    if (detection) return detection.box
+  } catch (err) {
+    console.error('Face detection failed:', err)
+  }
+  return null
+}
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -390,13 +413,20 @@ function handleFile(file) {
   img.onload = async () => {
     uploadedImg = img
     processedImg = null
+    detectedFaceBox = null
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
-    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
+    ppStatus.textContent = t.pp_detecting_face || 'Detecting face...'
     renderCanvas()
+
+    // Run face detection
+    detectedFaceBox = await detectFace(img)
+    if (detectedFaceBox) renderCanvas()
+
+    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
 
     try {
       if (!removeBgFn) {
@@ -534,8 +564,28 @@ function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
+  // Priority 1: Use detected face box for precise cropping
+  if (detectedFaceBox) {
+    const box = detectedFaceBox
+    const faceH = box.height
+    const faceCx = box.x + box.width / 2
+
+    // Passport standard: face height ~50% of photo height
+    const gapAbove = faceH * 0.5       // space above top of head
+    const gapBelow = faceH * 0.8       // space below chin (shoulders)
+    const srcY = Math.max(0, box.y - gapAbove)
+    const srcH = faceH + gapAbove + gapBelow
+    const srcW = srcH * aspect
+    let srcX = Math.max(0, faceCx - srcW / 2)
+
+    // Clamp to image bounds
+    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+    const clampedH = (srcY + srcH > imgH) ? Math.max(1, imgH - srcY) : srcH
+    return { srcX, srcY, srcW: Math.min(srcW, imgW), srcH: clampedH }
+  }
+
+  // Priority 2: bg-removed image — find person via alpha channel
   if (processedImg) {
-    // Find top of person via alpha channel
     const sc = document.createElement('canvas')
     sc.width = imgW; sc.height = imgH
     const sctx = sc.getContext('2d')
@@ -559,8 +609,6 @@ function getCropRegion(img, aspect) {
     const personW = rightX - leftX
     const personCx = leftX + personW / 2
 
-    // Take top 35% of person height = head + top of shoulders
-    // Add gap above head (8% of person height) so top of head isn't cut
     const gapAbove = personH * 0.08
     const cropH = personH * 0.35
     const frameTop = Math.max(0, topY - gapAbove)
@@ -579,7 +627,7 @@ function getCropRegion(img, aspect) {
     return { srcX, srcY, srcW, srcH }
   }
 
-  // No bg removal — use image proportion detection
+  // Priority 3: No face, no bg removal — use image proportion detection
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
   const neededW = cropH * aspect
