@@ -535,7 +535,7 @@ function getCropRegion(img, aspect) {
   const imgH = img.naturalHeight
 
   if (processedImg) {
-    // Scan alpha channel to find person bounds
+    // Find top of person via alpha channel
     const sc = document.createElement('canvas')
     sc.width = imgW; sc.height = imgH
     const sctx = sc.getContext('2d')
@@ -559,31 +559,12 @@ function getCropRegion(img, aspect) {
     const personW = rightX - leftX
     const personCx = leftX + personW / 2
 
-    // Find head width by scanning the top 20% of person for the widest point
-    // Head is typically at the top, shoulders are wider below
-    let headMaxW = 0
-    const scanEnd = topY + personH * 0.20
-    for (let y = topY; y < scanEnd; y += 2) {
-      let rowLeft = imgW, rowRight = 0
-      for (let x = 0; x < imgW; x += 2) {
-        const i = (y * imgW + x) * 4
-        if (data[i + 3] > 30) {
-          if (x < rowLeft) rowLeft = x
-          if (x > rowRight) rowRight = x
-        }
-      }
-      if (rowRight > rowLeft) headMaxW = Math.max(headMaxW, rowRight - rowLeft)
-    }
-
-    // Estimate head height as ~1.3x head width (typical facial proportions)
-    const headH = headMaxW > 0 ? headMaxW * 1.3 : personH * 0.25
-
-    // Passport standard: head fills ~70-80% of photo height
-    // So photo height = headH / 0.75, with small gap above head
-    const gapAbove = headH * 0.15  // small gap above head
-    const photoH = headH / 0.72    // head is 72% of photo
+    // Take only top 30% of person height = head + just top of shoulders
+    // Add small gap above head (5% of person height)
+    const gapAbove = personH * 0.05
+    const cropH = personH * 0.30
     const frameTop = Math.max(0, topY - gapAbove)
-    const frameH = Math.min(photoH, personH * 0.55) // never show more than 55% of body
+    const frameH = cropH + gapAbove
 
     const neededW = frameH * aspect
     let srcX, srcY, srcW, srcH
@@ -598,7 +579,7 @@ function getCropRegion(img, aspect) {
     return { srcX, srcY, srcW, srcH }
   }
 
-  // No bg removal — detect photo type by proportions and crop top portion
+  // No bg removal — use image proportion detection
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
   const neededW = cropH * aspect
