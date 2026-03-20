@@ -556,18 +556,12 @@ function getCropRegion(img, aspect) {
 
     const personH = bottomY - topY
     const personW = rightX - leftX
-    const personRatio = personH / Math.max(personW, 1)
     const personCx = leftX + personW / 2
 
-    // Always crop tight to head + shoulders regardless of body length
-    // Use top 28% of person for full body, slightly more for shorter crops
-    let showFraction
-    if (personRatio >= 2.5) showFraction = 0.25       // full body — very tight
-    else if (personRatio >= 1.6) showFraction = 0.30  // 3/4 body — tight
-    else if (personRatio >= 1.0) showFraction = 0.40  // half body
-    else showFraction = 0.70                            // already a headshot
-
-    const pad = personH * 0.04
+    // Always show only top 22% of detected person = head + shoulders only
+    // This works for any photo type — full body, 3/4, half body
+    const showFraction = 0.22
+    const pad = personH * 0.03
     const frameTop = Math.max(0, topY - pad)
     const frameH = personH * showFraction + pad * 2
     const neededW = frameH * aspect
