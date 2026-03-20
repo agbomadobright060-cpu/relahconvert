@@ -587,11 +587,14 @@ function getCropRegion(img, aspect) {
     let srcW = srcH * aspect
     let srcX = Math.max(0, faceCx - srcW / 2)
 
-    // If crop is wider than the image, fit to image width and derive height
+    // If crop is wider than the image, use full width + pad sides to center
+    let padX = 0
     if (srcW > imgW) {
+      const idealW = srcW
       srcW = imgW
-      srcH = srcW / aspect
       srcX = 0
+      // padX = fraction of output width that is background padding on each side
+      padX = (1 - imgW / idealW) / 2
       // Re-center vertically on face
       const faceCy = box.y + faceH / 2
       srcY = Math.max(0, faceCy - srcH * 0.4)
@@ -599,7 +602,7 @@ function getCropRegion(img, aspect) {
     // Clamp to image bounds
     if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
     if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
-    return { srcX, srcY, srcW, srcH }
+    return { srcX, srcY, srcW, srcH, padX }
   }
 
   // Priority 2: bg-removed image — find person via alpha channel
@@ -671,8 +674,11 @@ function renderCanvas() {
   ctx.fillRect(0, 0, dispW, dispH)
   if (!uploadedImg) return
   const img = processedImg || uploadedImg
-  const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
+  const { srcX, srcY, srcW, srcH, padX } = getCropRegion(img, aspect)
+  const px = padX || 0
+  const dstX = Math.round(px * dispW)
+  const dstW = dispW - dstX * 2
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, dstX, 0, dstW, dispH)
 }
 
 function generatePhoto() {
@@ -686,8 +692,11 @@ function generatePhoto() {
   octx.fillRect(0, 0, wPx, hPx)
   if (uploadedImg) {
     const img = processedImg || uploadedImg
-    const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-    octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
+    const { srcX, srcY, srcW, srcH, padX } = getCropRegion(img, aspect)
+    const px = padX || 0
+    const dstX = Math.round(px * wPx)
+    const dstW = wPx - dstX * 2
+    octx.drawImage(img, srcX, srcY, srcW, srcH, dstX, 0, dstW, hPx)
   }
   return outCanvas
 }
