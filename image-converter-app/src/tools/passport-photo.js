@@ -602,6 +602,8 @@ function renderCanvas() {
   const dispH = Math.round(dispW / aspect)
   ppCanvas.width = dispW
   ppCanvas.height = dispH
+  ppCanvas.style.width = dispW + 'px'
+  ppCanvas.style.height = dispH + 'px'
   canvasWrap.style.maxWidth = dispW + 'px'
   ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
