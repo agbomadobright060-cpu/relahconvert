@@ -28,6 +28,7 @@ const ppPassportLbl   = t.pp_passport || 'Passport'
 const ppVisaLbl       = t.pp_visa || 'Visa'
 const ppIdCardLbl     = t.pp_id_card || 'ID Card'
 
+// Common document type sizes (mm) that apply across countries
 const DOC_TYPES = {
   passport: { label: ppPassportLbl },
   visa:     { label: ppVisaLbl, sizes: [
@@ -213,6 +214,7 @@ const PASSPORT_COUNTRIES = [
   { country: "Zimbabwe", code: "ZW", flag: "🇿🇼", w: 35, h: 45, bg: "#ffffff" },
 ]
 
+// DPI for print-quality output
 const DPI = 300
 const MM_PER_INCH = 25.4
 
@@ -275,9 +277,6 @@ style.textContent = `
   .pp-dl-primary:hover{background:#A63D26}
   .pp-dl-secondary{background:#2C1810;color:#fff;margin-top:8px}
   .pp-dl-secondary:hover{background:#1a0f0a}
-  .pp-example{text-align:center;padding:20px}
-  .pp-example-label{font-size:11px;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-weight:600}
-  .pp-example svg{max-width:180px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
   .pp-next{margin-top:20px}
   .pp-next-label{font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px}
   .pp-next-btns{display:flex;gap:10px;flex-wrap:wrap}
@@ -313,13 +312,11 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-status" id="ppStatus" style="display:none"></div>
         </div>
         <div id="dropZone" class="pp-dropzone">
-          <svg width="72" height="90" viewBox="0 0 72 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:12px">
-            <rect width="72" height="90" rx="8" fill="#F5F0E8"/>
-            <circle cx="36" cy="28" r="16" fill="#DDD5C8"/>
-            <ellipse cx="36" cy="72" rx="26" ry="16" fill="#DDD5C8"/>
-          </svg>
-          <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#5A4A3A">${t.pp_drop || 'Upload your photo'}</p>
-          <p style="margin:0;font-size:13px;color:#9A8A7A">${t.pp_drop_sub || 'Click or drag & drop — head & shoulders will be auto-cropped'}</p>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
+        </div>
+        <div class="pp-hero" id="heroSection">
+          <img src="/passport-before-after.jpg" alt="Passport photo before and after example" />
         </div>
       </div>
       <div class="pp-panel">
@@ -363,28 +360,28 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput      = document.getElementById('fileInput')
-const uploadBtn      = document.getElementById('uploadBtn')
-const canvasWrap     = document.getElementById('canvasWrap')
-const ppCanvas       = document.getElementById('ppCanvas')
-const ctx            = ppCanvas.getContext('2d')
+const fileInput     = document.getElementById('fileInput')
+const uploadBtn     = document.getElementById('uploadBtn')
+const canvasWrap    = document.getElementById('canvasWrap')
+const ppCanvas      = document.getElementById('ppCanvas')
+const ctx           = ppCanvas.getContext('2d')
 const countryTrigger = document.getElementById('countryTrigger')
 const countryDropdown = document.getElementById('countryDropdown')
-const countrySearch  = document.getElementById('countrySearch')
-const countryList    = document.getElementById('countryList')
-const countryNameEl  = document.getElementById('countryName')
-const sizeInfo       = document.getElementById('sizeInfo')
-const bgColorInput   = document.getElementById('bgColor')
-const downloadCard   = document.getElementById('downloadCard')
-const dlPhoto        = document.getElementById('dlPhoto')
-const dlSheet        = document.getElementById('dlSheet')
-const canvasArea     = document.getElementById('canvasArea')
-const dropZoneEl     = document.getElementById('dropZone')
-const nextSteps      = document.getElementById('nextSteps')
-const nextBtns       = document.getElementById('nextBtns')
-const docTypeSelect  = document.getElementById('docTypeSelect')
-const triggerFlag    = document.getElementById('triggerFlag')
-const ppStatus       = document.getElementById('ppStatus')
+const countrySearch = document.getElementById('countrySearch')
+const countryList   = document.getElementById('countryList')
+const countryNameEl = document.getElementById('countryName')
+const sizeInfo      = document.getElementById('sizeInfo')
+const bgColorInput  = document.getElementById('bgColor')
+const downloadCard  = document.getElementById('downloadCard')
+const dlPhoto       = document.getElementById('dlPhoto')
+const dlSheet       = document.getElementById('dlSheet')
+const canvasArea    = document.getElementById('canvasArea')
+const dropZoneEl    = document.getElementById('dropZone')
+const nextSteps     = document.getElementById('nextSteps')
+const nextBtns      = document.getElementById('nextBtns')
+const docTypeSelect = document.getElementById('docTypeSelect')
+const triggerFlag   = document.getElementById('triggerFlag')
+const ppStatus      = document.getElementById('ppStatus')
 
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
@@ -394,6 +391,7 @@ function handleFile(file) {
     uploadedImg = img
     processedImg = null
     dropZoneEl.style.display = 'none'
+    document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
@@ -524,36 +522,18 @@ document.addEventListener('click', (e) => {
   }
 })
 
-/**
- * Detect what type of photo was uploaded based on aspect ratio:
- * - aspectRatio < 0.8  → portrait/headshot (tall & narrow) → use almost all
- * - aspectRatio 0.8–1.2 → square or close → mid crop
- * - aspectRatio > 1.2  → landscape → top portion only
- * Also checks height vs width ratio to detect full body vs headshot
- */
 function detectPhotoCropRatio(imgW, imgH) {
-  const ratio = imgH / imgW // > 1 means portrait (taller than wide)
-
-  if (ratio >= 2.0) {
-    // Very tall — likely full body standing shot → crop top 22%
-    return 0.22
-  } else if (ratio >= 1.4) {
-    // Tall portrait — likely half body or 3/4 body → crop top 32%
-    return 0.32
-  } else if (ratio >= 1.0) {
-    // Roughly square or mild portrait — likely chest-up or headshot → crop top 55%
-    return 0.55
-  } else {
-    // Landscape — unusual, take top portion → crop top 60% height
-    return 0.60
-  }
+  const ratio = imgH / imgW
+  if (ratio >= 2.0) return 0.22
+  else if (ratio >= 1.4) return 0.32
+  else if (ratio >= 1.0) return 0.55
+  else return 0.60
 }
 
 function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // --- With background removed: use alpha channel to find person bounds ---
   if (processedImg) {
     const sc = document.createElement('canvas')
     sc.width = imgW; sc.height = imgH
@@ -579,21 +559,11 @@ function getCropRegion(img, aspect) {
     const personRatio = personH / Math.max(personW, 1)
     const personCx = leftX + personW / 2
 
-    // Determine how much of the person to show based on detected person dimensions
     let showFraction
-    if (personRatio >= 2.5) {
-      // Full body — show top 38% (head + shoulders)
-      showFraction = 0.38
-    } else if (personRatio >= 1.6) {
-      // 3/4 body — show top 45%
-      showFraction = 0.45
-    } else if (personRatio >= 1.0) {
-      // Half body or chest up — show top 60%
-      showFraction = 0.60
-    } else {
-      // Already close-up / headshot — show 85%
-      showFraction = 0.85
-    }
+    if (personRatio >= 2.5) showFraction = 0.38
+    else if (personRatio >= 1.6) showFraction = 0.45
+    else if (personRatio >= 1.0) showFraction = 0.60
+    else showFraction = 0.85
 
     const pad = personH * 0.06
     const frameTop = Math.max(0, topY - pad)
@@ -612,22 +582,15 @@ function getCropRegion(img, aspect) {
     return { srcX, srcY, srcW, srcH }
   }
 
-  // --- No background removal: detect photo type by image proportions ---
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
   const neededW = cropH * aspect
-
   let srcX, srcY, srcW, srcH
   if (neededW <= imgW) {
-    srcH = cropH
-    srcW = neededW
-    srcX = (imgW - srcW) / 2
-    srcY = 0
+    srcH = cropH; srcW = neededW
+    srcX = (imgW - srcW) / 2; srcY = 0
   } else {
-    srcW = imgW
-    srcH = imgW / aspect
-    srcX = 0
-    srcY = 0
+    srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = 0
   }
   if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
   return { srcX, srcY, srcW, srcH }
@@ -640,12 +603,9 @@ function renderCanvas() {
   ppCanvas.width = dispW
   ppCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
-
   ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
-
   if (!uploadedImg) return
-
   const img = processedImg || uploadedImg
   const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
@@ -656,13 +616,10 @@ function generatePhoto() {
   const hPx = Math.round(activeH / MM_PER_INCH * DPI)
   const aspect = activeW / activeH
   const outCanvas = document.createElement('canvas')
-  outCanvas.width = wPx
-  outCanvas.height = hPx
+  outCanvas.width = wPx; outCanvas.height = hPx
   const octx = outCanvas.getContext('2d')
-
   octx.fillStyle = selectedCountry.bg || '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
-
   if (uploadedImg) {
     const img = processedImg || uploadedImg
     const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
@@ -691,24 +648,20 @@ dlSheet.addEventListener('click', () => {
   const sheetW = 6 * DPI
   const sheetH = 4 * DPI
   const sheetCanvas = document.createElement('canvas')
-  sheetCanvas.width = sheetW
-  sheetCanvas.height = sheetH
+  sheetCanvas.width = sheetW; sheetCanvas.height = sheetH
   const sctx = sheetCanvas.getContext('2d')
   sctx.fillStyle = '#ffffff'
   sctx.fillRect(0, 0, sheetW, sheetH)
-
   const gap = 20
   const cols = Math.floor((sheetW + gap) / (photoW + gap))
   const rows = Math.floor((sheetH + gap) / (photoH + gap))
   const startX = Math.round((sheetW - (cols * photoW + (cols - 1) * gap)) / 2)
   const startY = Math.round((sheetH - (rows * photoH + (rows - 1) * gap)) / 2)
-
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       sctx.drawImage(photoCanvas, startX + c * (photoW + gap), startY + r * (photoH + gap))
     }
   }
-
   sheetCanvas.toBlob(blob => {
     if (!blob) return
     const url = URL.createObjectURL(blob)
