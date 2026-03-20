@@ -225,6 +225,44 @@ let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
 let personBounds = null
+let detectedFaceBox = null
+
+async function detectFaceViaAPI(img) {
+  try {
+    const c = document.createElement('canvas')
+    const maxDim = 1024
+    let w = img.naturalWidth, h = img.naturalHeight
+    if (w > maxDim || h > maxDim) {
+      const scale = maxDim / Math.max(w, h)
+      w = Math.round(w * scale)
+      h = Math.round(h * scale)
+    }
+    c.width = w; c.height = h
+    c.getContext('2d').drawImage(img, 0, 0, w, h)
+    const base64 = c.toDataURL('image/jpeg', 0.85).split(',')[1]
+
+    const resp = await fetch('/api/detect-face', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
+    })
+    if (!resp.ok) return null
+    const face = await resp.json()
+    if (face.error || !face.faceX) return null
+
+    const scaleX = img.naturalWidth / w
+    const scaleY = img.naturalHeight / h
+    return {
+      x: face.faceX * scaleX,
+      y: face.faceY * scaleY,
+      width: face.faceW * scaleX,
+      height: face.faceH * scaleY,
+    }
+  } catch (err) {
+    console.warn('Face detection API failed:', err)
+    return null
+  }
+}
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -392,13 +430,20 @@ function handleFile(file) {
     uploadedImg = img
     processedImg = null
     personBounds = null
+    detectedFaceBox = null
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
-    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
+    ppStatus.textContent = t.pp_detecting_face || 'Detecting face...'
     renderCanvas()
+
+    // Run face detection via Claude API (runs in parallel with bg removal)
+    detectFaceViaAPI(img).then(box => {
+      detectedFaceBox = box
+      if (box) renderCanvas()
+    })
 
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
 
@@ -555,7 +600,28 @@ function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // After bg removal: use alpha channel to find person, then crop head+shoulders
+  // Priority 1: Claude API detected face — most accurate
+  if (detectedFaceBox) {
+    const box = detectedFaceBox
+    const faceH = box.height
+    const faceCx = box.x + box.width / 2
+
+    // ICAO: face = 70-80% of photo. FaceDetector gives forehead-to-chin.
+    const gapAbove = faceH * 0.35   // hair + small margin above head
+    const gapBelow = faceH * 0.35   // neck + top of shoulders
+    let srcY = Math.max(0, box.y - gapAbove)
+    let srcH = faceH + gapAbove + gapBelow
+    let srcW = srcH * aspect
+    let srcX = Math.max(0, faceCx - srcW / 2)
+
+    if (srcW > imgW) { srcW = imgW; srcH = srcW / aspect; srcX = 0; srcY = Math.max(0, box.y - gapAbove) }
+    if (srcH > imgH) { srcH = imgH; srcW = srcH * aspect; srcX = Math.max(0, faceCx - srcW / 2) }
+    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+    if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
+    return { srcX, srcY, srcW, srcH }
+  }
+
+  // Priority 2: After bg removal — use alpha channel to find person
   if (processedImg) {
     // Cache person bounds so we don't rescan every render
     if (!personBounds) personBounds = findPersonBounds(img)
