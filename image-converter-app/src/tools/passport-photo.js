@@ -227,10 +227,23 @@ let removeBgFn = null
 let detectedFaceBox = null
 
 async function detectFace(img) {
+  // Try browser native FaceDetector API (Chrome, Edge, Safari)
+  if (typeof FaceDetector !== 'undefined') {
+    try {
+      const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 })
+      const faces = await detector.detect(img)
+      if (faces.length > 0) {
+        const b = faces[0].boundingBox
+        return { x: b.x, y: b.y, width: b.width, height: b.height }
+      }
+    } catch (err) {
+      console.warn('Native FaceDetector failed:', err)
+    }
+  }
+
+  // Fallback: call server API for browsers without native FaceDetector
   try {
-    // Draw image to canvas to get base64
     const c = document.createElement('canvas')
-    // Resize large images to reduce payload (max 1024px on longest side)
     const maxDim = 1024
     let w = img.naturalWidth, h = img.naturalHeight
     if (w > maxDim || h > maxDim) {
@@ -253,7 +266,6 @@ async function detectFace(img) {
     const face = await resp.json()
     if (face.error || !face.faceX) return null
 
-    // Scale coordinates back to original image dimensions
     const scaleX = img.naturalWidth / w
     const scaleY = img.naturalHeight / h
     return {
@@ -263,7 +275,7 @@ async function detectFace(img) {
       height: face.faceH * scaleY,
     }
   } catch (err) {
-    console.warn('Face detection failed:', err)
+    console.warn('API face detection failed:', err)
   }
   return null
 }
