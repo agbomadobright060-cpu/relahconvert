@@ -225,44 +225,6 @@ let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
 let personBounds = null
-let detectedFaceBox = null
-
-async function detectFaceViaAPI(img) {
-  try {
-    const c = document.createElement('canvas')
-    const maxDim = 1024
-    let w = img.naturalWidth, h = img.naturalHeight
-    if (w > maxDim || h > maxDim) {
-      const scale = maxDim / Math.max(w, h)
-      w = Math.round(w * scale)
-      h = Math.round(h * scale)
-    }
-    c.width = w; c.height = h
-    c.getContext('2d').drawImage(img, 0, 0, w, h)
-    const base64 = c.toDataURL('image/jpeg', 0.85).split(',')[1]
-
-    const resp = await fetch('/api/detect-face', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
-    })
-    if (!resp.ok) return null
-    const face = await resp.json()
-    if (face.error || !face.faceX) return null
-
-    const scaleX = img.naturalWidth / w
-    const scaleY = img.naturalHeight / h
-    return {
-      x: face.faceX * scaleX,
-      y: face.faceY * scaleY,
-      width: face.faceW * scaleX,
-      height: face.faceH * scaleY,
-    }
-  } catch (err) {
-    console.warn('Face detection API failed:', err)
-    return null
-  }
-}
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -430,20 +392,12 @@ function handleFile(file) {
     uploadedImg = img
     processedImg = null
     personBounds = null
-    detectedFaceBox = null
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
-    ppStatus.textContent = t.pp_detecting_face || 'Detecting face...'
     renderCanvas()
-
-    // Run face detection via Claude API (runs in parallel with bg removal)
-    detectFaceViaAPI(img).then(box => {
-      detectedFaceBox = box
-      if (box) renderCanvas()
-    })
 
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
 
@@ -600,96 +554,78 @@ function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // Priority 1: Claude API detected face — most accurate
-  if (detectedFaceBox) {
-    const box = detectedFaceBox
-    const faceH = box.height
-    const faceCx = box.x + box.width / 2
-
-    // ICAO: face = 70-80% of photo. FaceDetector gives forehead-to-chin.
-    const gapAbove = faceH * 0.35   // hair + small margin above head
-    const gapBelow = faceH * 0.35   // neck + top of shoulders
-    let srcY = Math.max(0, box.y - gapAbove)
-    let srcH = faceH + gapAbove + gapBelow
-    let srcW = srcH * aspect
-    let srcX = Math.max(0, faceCx - srcW / 2)
-
-    if (srcW > imgW) { srcW = imgW; srcH = srcW / aspect; srcX = 0; srcY = Math.max(0, box.y - gapAbove) }
-    if (srcH > imgH) { srcH = imgH; srcW = srcH * aspect; srcX = Math.max(0, faceCx - srcW / 2) }
-    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
-    return { srcX, srcY, srcW, srcH }
-  }
-
-  // Priority 2: After bg removal — use alpha channel to find person
+  // After bg removal: scan alpha to find person, crop head+shoulders
   if (processedImg) {
-    // Cache person bounds so we don't rescan every render
     if (!personBounds) personBounds = findPersonBounds(img)
     if (personBounds) {
       const { topY, bottomY, leftX, rightX } = personBounds
       const personH = bottomY - topY
-      const personW = rightX - leftX
-      const personCx = leftX + personW / 2
+      const personCx = leftX + (rightX - leftX) / 2
+      console.log('Person bounds:', { topY, bottomY, leftX, rightX, personH, imgW, imgH, fillRatio: personH/imgH })
 
-      // Head is at top of person. Estimate head height as ~15% of person height.
-      // Passport crop: head + neck + top of shoulders
-      // For full body: top 25% of person. For half body: top 50%. For headshot: 100%.
-      const bodyRatio = personH / imgH
-      let cropFraction
-      if (bodyRatio > 0.85) cropFraction = 0.30      // full body
-      else if (bodyRatio > 0.6) cropFraction = 0.45   // 3/4 body
-      else if (bodyRatio > 0.4) cropFraction = 0.65   // half body
-      else cropFraction = 1.0                          // already headshot
+      // How much of image does person fill?
+      const fillRatio = personH / imgH
 
-      const cropH = personH * cropFraction
-      const margin = cropH * 0.08  // small gap above head
-      let srcY = Math.max(0, topY - margin)
-      let srcH = cropH + margin
+      // Calculate how much of the person to show (head + shoulders)
+      // For any photo type, we want: top of head → mid-chest
+      let headTop = topY
+      let cropBottom
+      if (fillRatio > 0.7) {
+        // Full body or 3/4: take head + shoulders (top 28%)
+        cropBottom = topY + personH * 0.28
+      } else if (fillRatio > 0.4) {
+        // Half body: take head + shoulders (top 50%)
+        cropBottom = topY + personH * 0.50
+      } else {
+        // Already close-up: use full person bounds
+        cropBottom = bottomY
+      }
 
-      // Ensure crop maintains target aspect ratio
+      // Add small margin above head (5% of crop height)
+      const cropH = cropBottom - headTop
+      const marginTop = cropH * 0.12
+      let srcY = Math.max(0, headTop - marginTop)
+      let srcH = cropH + marginTop
+
+      // Apply aspect ratio
       let srcW = srcH * aspect
-      let srcX = Math.max(0, personCx - srcW / 2)
+      let srcX = personCx - srcW / 2
 
-      // If wider than image, fit to width and adjust height
+      // Clamp: if wider than image, expand height to fill
       if (srcW > imgW) {
         srcW = imgW
         srcH = srcW / aspect
         srcX = 0
-        srcY = Math.max(0, topY - margin)
       }
-      // If taller than image, fit to height
-      if (srcH > imgH) {
-        srcH = imgH
-        srcW = srcH * aspect
-        srcX = Math.max(0, personCx - srcW / 2)
-      }
-      // Clamp bounds
-      if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-      if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
+      // Clamp all bounds
+      if (srcX < 0) srcX = 0
+      if (srcX + srcW > imgW) srcX = imgW - srcW
+      if (srcY < 0) srcY = 0
+      if (srcY + srcH > imgH) { srcH = imgH - srcY }
+
       return { srcX, srcY, srcW, srcH }
     }
   }
 
-  // Before bg removal or if bounds failed: simple top-center crop
-  // Assume face is in upper portion of image
-  const ratio = imgH / imgW
-  let cropFraction
-  if (ratio >= 2.0) cropFraction = 0.25       // full body
-  else if (ratio >= 1.4) cropFraction = 0.40   // 3/4 body
-  else if (ratio >= 1.0) cropFraction = 0.60   // chest up
-  else cropFraction = 0.70                      // landscape
-
-  let srcH = imgH * cropFraction
-  let srcW = srcH * aspect
-  let srcX = (imgW - srcW) / 2
-  let srcY = 0
-  if (srcW > imgW) {
+  // Before bg removal: show original image, rough center crop
+  let srcW, srcH, srcX, srcY
+  if (aspect >= 1) {
+    // Wide or square: crop from top, width = image width
     srcW = imgW
     srcH = srcW / aspect
     srcX = 0
+    srcY = 0
+  } else {
+    // Tall: crop centered
+    srcH = imgH * 0.5
+    srcW = srcH * aspect
+    srcX = (imgW - srcW) / 2
+    srcY = 0
   }
+  if (srcW > imgW) { srcW = imgW; srcH = srcW / aspect }
+  if (srcH > imgH) { srcH = imgH; srcW = srcH * aspect }
   if (srcX < 0) srcX = 0
-  if (srcY + srcH > imgH) srcH = imgH
+  if (srcY < 0) srcY = 0
   return { srcX, srcY, srcW, srcH }
 }
 
