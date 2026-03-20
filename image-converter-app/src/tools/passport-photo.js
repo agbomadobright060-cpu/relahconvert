@@ -556,19 +556,14 @@ function getCropRegion(img, aspect) {
 
     const personH = bottomY - topY
     const personW = rightX - leftX
-    const personRatio = personH / Math.max(personW, 1)
     const personCx = leftX + personW / 2
 
-    // Head + top of shoulders only
-    let showFraction
-    if (personRatio >= 2.5) showFraction = 0.20      // full body → top 20%
-    else if (personRatio >= 1.6) showFraction = 0.28  // 3/4 body → top 28%
-    else if (personRatio >= 1.0) showFraction = 0.40  // half body → top 40%
-    else showFraction = 0.75                           // headshot → 75%
-
-    const pad = personH * 0.06
-    const frameTop = Math.max(0, topY - pad)
-    const frameH = personH * showFraction + pad * 2
+    // Estimate head height (~15% of person height for full body, more for close-ups)
+    const headEstimate = Math.min(personW * 0.8, personH * 0.15)
+    // Frame = 3x head height (space above + head + shoulders)
+    const frameH = headEstimate * 3.2
+    const padAbove = headEstimate * 0.3
+    const frameTop = Math.max(0, topY - padAbove)
     const neededW = frameH * aspect
 
     let srcX, srcY, srcW, srcH
