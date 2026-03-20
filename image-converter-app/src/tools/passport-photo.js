@@ -28,7 +28,6 @@ const ppPassportLbl   = t.pp_passport || 'Passport'
 const ppVisaLbl       = t.pp_visa || 'Visa'
 const ppIdCardLbl     = t.pp_id_card || 'ID Card'
 
-// Common document type sizes (mm) that apply across countries
 const DOC_TYPES = {
   passport: { label: ppPassportLbl },
   visa:     { label: ppVisaLbl, sizes: [
@@ -214,7 +213,6 @@ const PASSPORT_COUNTRIES = [
   { country: "Zimbabwe", code: "ZW", flag: "🇿🇼", w: 35, h: 45, bg: "#ffffff" },
 ]
 
-// DPI for print-quality output
 const DPI = 300
 const MM_PER_INCH = 25.4
 
@@ -363,31 +361,29 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-// Elements
-const fileInput     = document.getElementById('fileInput')
-const uploadBtn     = document.getElementById('uploadBtn')
-const canvasWrap    = document.getElementById('canvasWrap')
-const ppCanvas      = document.getElementById('ppCanvas')
-const ctx           = ppCanvas.getContext('2d')
+const fileInput      = document.getElementById('fileInput')
+const uploadBtn      = document.getElementById('uploadBtn')
+const canvasWrap     = document.getElementById('canvasWrap')
+const ppCanvas       = document.getElementById('ppCanvas')
+const ctx            = ppCanvas.getContext('2d')
 const countryTrigger = document.getElementById('countryTrigger')
 const countryDropdown = document.getElementById('countryDropdown')
-const countrySearch = document.getElementById('countrySearch')
-const countryList   = document.getElementById('countryList')
-const countryNameEl = document.getElementById('countryName')
-const sizeInfo      = document.getElementById('sizeInfo')
-const bgColorInput  = document.getElementById('bgColor')
-const downloadCard  = document.getElementById('downloadCard')
-const dlPhoto       = document.getElementById('dlPhoto')
-const dlSheet       = document.getElementById('dlSheet')
-const canvasArea    = document.getElementById('canvasArea')
-const dropZoneEl    = document.getElementById('dropZone')
-const nextSteps     = document.getElementById('nextSteps')
-const nextBtns      = document.getElementById('nextBtns')
-const docTypeSelect = document.getElementById('docTypeSelect')
-const triggerFlag   = document.getElementById('triggerFlag')
-const ppStatus      = document.getElementById('ppStatus')
+const countrySearch  = document.getElementById('countrySearch')
+const countryList    = document.getElementById('countryList')
+const countryNameEl  = document.getElementById('countryName')
+const sizeInfo       = document.getElementById('sizeInfo')
+const bgColorInput   = document.getElementById('bgColor')
+const downloadCard   = document.getElementById('downloadCard')
+const dlPhoto        = document.getElementById('dlPhoto')
+const dlSheet        = document.getElementById('dlSheet')
+const canvasArea     = document.getElementById('canvasArea')
+const dropZoneEl     = document.getElementById('dropZone')
+const nextSteps      = document.getElementById('nextSteps')
+const nextBtns       = document.getElementById('nextBtns')
+const docTypeSelect  = document.getElementById('docTypeSelect')
+const triggerFlag    = document.getElementById('triggerFlag')
+const ppStatus       = document.getElementById('ppStatus')
 
-// Upload with background removal (same approach as remove-background tool)
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   const img = new Image()
@@ -404,7 +400,6 @@ function handleFile(file) {
     renderCanvas()
 
     try {
-      // Lazy-load the library (same as remove-background tool)
       if (!removeBgFn) {
         ppStatus.textContent = t.pp_loading_model || 'Loading AI model...'
         const mod = await import('@imgly/background-removal')
@@ -443,6 +438,7 @@ function showWithoutBgRemoval() {
   renderCanvas()
   buildNextSteps()
 }
+
 uploadBtn.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('dragover', e => { e.preventDefault(); dropZoneEl.style.borderColor = '#C84B31'; dropZoneEl.style.background = '#FDE8E3' })
@@ -455,10 +451,8 @@ fileInput.addEventListener('change', () => {
   fileInput.value = ''
 })
 
-// Flag image URL helper
 function flagUrl(code, size) { return 'https://flagcdn.com/w' + (size || 40) + '/' + code.toLowerCase() + '.png' }
 
-// Update document type dropdown options based on selected country
 function updateDocTypes() {
   const c = selectedCountry
   docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '×' + c.h + 'mm)</option>'
@@ -474,7 +468,6 @@ function updateDocTypes() {
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
 }
 
-// Handle document type change
 docTypeSelect.addEventListener('change', () => {
   const val = docTypeSelect.value
   if (val === 'passport') {
@@ -490,7 +483,6 @@ docTypeSelect.addEventListener('change', () => {
   renderCanvas()
 })
 
-// Country dropdown
 function renderCountryList(filter) {
   const q = (filter || '').toLowerCase()
   const filtered = PASSPORT_COUNTRIES.filter(c => c.country.toLowerCase().indexOf(q) !== -1)
@@ -531,13 +523,37 @@ document.addEventListener('click', (e) => {
   }
 })
 
-// Calculate the source crop region for passport framing
+/**
+ * Detect what type of photo was uploaded based on aspect ratio:
+ * - aspectRatio < 0.8  → portrait/headshot (tall & narrow) → use almost all
+ * - aspectRatio 0.8–1.2 → square or close → mid crop
+ * - aspectRatio > 1.2  → landscape → top portion only
+ * Also checks height vs width ratio to detect full body vs headshot
+ */
+function detectPhotoCropRatio(imgW, imgH) {
+  const ratio = imgH / imgW // > 1 means portrait (taller than wide)
+
+  if (ratio >= 2.0) {
+    // Very tall — likely full body standing shot → crop top 22%
+    return 0.22
+  } else if (ratio >= 1.4) {
+    // Tall portrait — likely half body or 3/4 body → crop top 32%
+    return 0.32
+  } else if (ratio >= 1.0) {
+    // Roughly square or mild portrait — likely chest-up or headshot → crop top 55%
+    return 0.55
+  } else {
+    // Landscape — unusual, take top portion → crop top 60% height
+    return 0.60
+  }
+}
+
 function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
+  // --- With background removed: use alpha channel to find person bounds ---
   if (processedImg) {
-    // Background removed — find person bounds via alpha channel
     const sc = document.createElement('canvas')
     sc.width = imgW; sc.height = imgH
     const sctx = sc.getContext('2d')
@@ -558,11 +574,29 @@ function getCropRegion(img, aspect) {
     if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
 
     const personH = bottomY - topY
-    const personCx = leftX + (rightX - leftX) / 2
-    const showH = personH * 0.70
-    const pad = showH * 0.10
+    const personW = rightX - leftX
+    const personRatio = personH / Math.max(personW, 1)
+    const personCx = leftX + personW / 2
+
+    // Determine how much of the person to show based on detected person dimensions
+    let showFraction
+    if (personRatio >= 2.5) {
+      // Full body — show top 38% (head + shoulders)
+      showFraction = 0.38
+    } else if (personRatio >= 1.6) {
+      // 3/4 body — show top 45%
+      showFraction = 0.45
+    } else if (personRatio >= 1.0) {
+      // Half body or chest up — show top 60%
+      showFraction = 0.60
+    } else {
+      // Already close-up / headshot — show 85%
+      showFraction = 0.85
+    }
+
+    const pad = personH * 0.06
     const frameTop = Math.max(0, topY - pad)
-    const frameH = showH + pad
+    const frameH = personH * showFraction + pad * 2
     const neededW = frameH * aspect
 
     let srcX, srcY, srcW, srcH
@@ -577,31 +611,36 @@ function getCropRegion(img, aspect) {
     return { srcX, srcY, srcW, srcH }
   }
 
-  // No background removal — crop top 40% of image to passport aspect ratio
-  const cropH = imgH * 0.40
+  // --- No background removal: detect photo type by image proportions ---
+  const cropFraction = detectPhotoCropRatio(imgW, imgH)
+  const cropH = imgH * cropFraction
   const neededW = cropH * aspect
+
   let srcX, srcY, srcW, srcH
   if (neededW <= imgW) {
-    srcH = cropH; srcW = neededW
-    srcX = (imgW - srcW) / 2; srcY = 0
+    srcH = cropH
+    srcW = neededW
+    srcX = (imgW - srcW) / 2
+    srcY = 0
   } else {
-    srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = 0
+    srcW = imgW
+    srcH = imgW / aspect
+    srcX = 0
+    srcY = 0
   }
   if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
   return { srcX, srcY, srcW, srcH }
 }
 
-// Render preview
 function renderCanvas() {
   const aspect = activeW / activeH
-  // Preview size (display only)
   const dispW = 400
   const dispH = Math.round(dispW / aspect)
   ppCanvas.width = dispW
   ppCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
 
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
 
   if (!uploadedImg) return
@@ -611,7 +650,6 @@ function renderCanvas() {
   ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
 }
 
-// Generate high-res photo at exact passport dimensions (300 DPI)
 function generatePhoto() {
   const wPx = Math.round(activeW / MM_PER_INCH * DPI)
   const hPx = Math.round(activeH / MM_PER_INCH * DPI)
@@ -621,7 +659,7 @@ function generatePhoto() {
   outCanvas.height = hPx
   const octx = outCanvas.getContext('2d')
 
-  octx.fillStyle = '#ffffff'
+  octx.fillStyle = selectedCountry.bg || '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
 
   if (uploadedImg) {
@@ -632,7 +670,6 @@ function generatePhoto() {
   return outCanvas
 }
 
-// Download single photo
 dlPhoto.addEventListener('click', () => {
   const photoCanvas = generatePhoto()
   photoCanvas.toBlob(blob => {
@@ -646,14 +683,12 @@ dlPhoto.addEventListener('click', () => {
   }, 'image/jpeg', 0.95)
 })
 
-// Download 4×6 print sheet
 dlSheet.addEventListener('click', () => {
   const photoCanvas = generatePhoto()
   const photoW = photoCanvas.width
   const photoH = photoCanvas.height
-  // 4×6 inches at 300 DPI
-  const sheetW = 6 * DPI  // 1800
-  const sheetH = 4 * DPI  // 1200
+  const sheetW = 6 * DPI
+  const sheetH = 4 * DPI
   const sheetCanvas = document.createElement('canvas')
   sheetCanvas.width = sheetW
   sheetCanvas.height = sheetH
@@ -661,7 +696,6 @@ dlSheet.addEventListener('click', () => {
   sctx.fillStyle = '#ffffff'
   sctx.fillRect(0, 0, sheetW, sheetH)
 
-  // Tile photos with 20px gap
   const gap = 20
   const cols = Math.floor((sheetW + gap) / (photoW + gap))
   const rows = Math.floor((sheetH + gap) / (photoH + gap))
@@ -685,7 +719,6 @@ dlSheet.addEventListener('click', () => {
   }, 'image/jpeg', 0.95)
 })
 
-// Next steps
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -705,12 +738,10 @@ function buildNextSteps() {
   nextSteps.style.display = ''
 }
 
-// Initial render
 renderCountryList('')
 updateDocTypes()
 renderCanvas()
 
-// SEO section
 ;(function injectSEO() {
   const seo = t.seo && t.seo['passport-photo']
   if (!seo) return
