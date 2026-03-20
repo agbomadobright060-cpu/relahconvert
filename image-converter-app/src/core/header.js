@@ -6,8 +6,6 @@ export function injectHeader() {
   const currentLang = getLang()
   const isRTL = currentLang === 'ar'
 
-  // Detect the current English tool key from the URL
-  // Handles both /compress and /fr/compresser-image
   const activeToolKey = (function() {
     const path = decodeURIComponent(window.location.pathname).replace(/^\/|\/$/g, '').split('?')[0]
     if (!path) return null
@@ -23,7 +21,6 @@ export function injectHeader() {
     return null
   })()
 
-  // Build a localized href: English → /slug, other → /{lang}/{translatedSlug}
   function localHref(englishSlug) {
     if (currentLang === 'en') return '/' + englishSlug
     return '/' + currentLang + '/' + translatedSlug(currentLang, englishSlug)
@@ -215,16 +212,13 @@ export function injectHeader() {
     .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
     .lang-grid-wrap {
       display: none;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
+      position: fixed;
       background: #fff;
       border: 1px solid #E8E0D5;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       padding: 12px;
-      z-index: 200;
+      z-index: 9999;
       width: 480px;
       max-height: 60vh;
       overflow-y: auto;
@@ -260,14 +254,19 @@ export function injectHeader() {
       text-align: center;
     }
     @media (max-width: 768px) {
-      .lang-grid-wrap { position: fixed; left: 50%; transform: translateX(-50%); width: 90vw; max-width: 400px; bottom: auto; z-index: 9999; }
+      .lang-grid-wrap {
+        width: 90vw;
+        max-width: 400px;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+      }
       .lang-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 360px) {
       .lang-grid { grid-template-columns: 1fr; }
     }
 
-    /* ── RTL Arabic ── */
+    /* RTL Arabic */
     [dir="rtl"] #site-header .desktop-nav { justify-content: flex-start; }
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
     [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
@@ -278,7 +277,6 @@ export function injectHeader() {
   `
   document.head.appendChild(style)
 
-  // Prevent Chrome auto-translate from modifying page content
   if (!document.querySelector('meta[name="google"][content="notranslate"]')) {
     const noTranslate = document.createElement('meta')
     noTranslate.name = 'google'
@@ -286,7 +284,6 @@ export function injectHeader() {
     document.head.appendChild(noTranslate)
   }
 
-  // Set correct lang attribute and prevent Chrome auto-translate
   document.documentElement.setAttribute('lang', currentLang)
   document.documentElement.classList.add('notranslate')
   document.documentElement.setAttribute('translate', 'no')
@@ -323,8 +320,8 @@ export function injectHeader() {
     'remove-background': { bg: '#F0F9FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="6" width="28" height="28" rx="4" fill="#0EA5E9" opacity="0.15" stroke="#0EA5E9" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="20" cy="18" r="5" fill="#0EA5E9" opacity="0.5"/><path d="M10 30c0-4 4.5-7 10-7s10 3 10 7" fill="#0EA5E9" opacity="0.3"/><path d="M6 6l28 28" stroke="#0EA5E9" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/></svg>` },
     'heic-to-jpg':       { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#F97316" opacity="0.3"/><text x="4" y="21" font-family="Arial" font-size="5.5" font-weight="800" fill="#EA580C">HEIC</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#EA580C"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
     'image-to-ico':      { bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="#7C3AED" opacity="0.15" stroke="#7C3AED" stroke-width="1.5"/><rect x="13" y="13" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.5"/><rect x="21" y="13" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.3"/><rect x="13" y="21" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.3"/><rect x="21" y="21" width="6" height="6" rx="1" fill="#7C3AED" opacity="0.6"/></svg>` },
-    'jpg-to-svg':           { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">SVG</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
-    'html-to-image':   { bg: '#E0F2FE', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="3" fill="#0EA5E9" opacity="0.2" stroke="#0EA5E9" stroke-width="1.5"/><rect x="4" y="8" width="32" height="7" rx="3" fill="#0EA5E9" opacity="0.35"/><circle cx="9" cy="11.5" r="1.5" fill="#fff"/><circle cx="14" cy="11.5" r="1.5" fill="#fff"/><circle cx="19" cy="11.5" r="1.5" fill="#fff"/><rect x="8" y="19" width="24" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/><rect x="8" y="24" width="16" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/></svg>` },
+    'jpg-to-svg':        { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">SVG</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+    'html-to-image':     { bg: '#E0F2FE', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="3" fill="#0EA5E9" opacity="0.2" stroke="#0EA5E9" stroke-width="1.5"/><rect x="4" y="8" width="32" height="7" rx="3" fill="#0EA5E9" opacity="0.35"/><circle cx="9" cy="11.5" r="1.5" fill="#fff"/><circle cx="14" cy="11.5" r="1.5" fill="#fff"/><circle cx="19" cy="11.5" r="1.5" fill="#fff"/><rect x="8" y="19" width="24" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/><rect x="8" y="24" width="16" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/></svg>` },
   }
 
   const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
@@ -350,11 +347,7 @@ export function injectHeader() {
 
   const header = document.createElement('header')
   header.id = 'site-header'
-  header.innerHTML = `
-    <div class="header-inner">
-      ${logoHTML + navHTML}
-    </div>
-  `
+  header.innerHTML = `<div class="header-inner">${logoHTML + navHTML}</div>`
 
   const dropdown = document.createElement('div')
   dropdown.id = 'dropdown-menu'
@@ -389,22 +382,59 @@ export function injectHeader() {
     </div>
   `
 
+  const oldHeader = document.getElementById('site-header')
+  if (oldHeader) oldHeader.remove()
+  const oldDropdown = document.getElementById('dropdown-menu')
+  if (oldDropdown) oldDropdown.remove()
+  const oldFooter = document.getElementById('site-footer')
+  if (oldFooter) oldFooter.remove()
+
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
 
   const langToggle = document.getElementById('langToggle')
   const langGridWrap = document.getElementById('langGridWrap')
+
+  function positionLangDropdown() {
+    // Always recalculate position based on current button location
+    const btn = langToggle.getBoundingClientRect()
+    const dropH = Math.min(langGridWrap.scrollHeight, window.innerHeight * 0.6)
+    const spaceAbove = btn.top
+    const spaceBelow = window.innerHeight - btn.bottom
+
+    if (spaceAbove > dropH || spaceAbove > spaceBelow) {
+      // Open upward
+      langGridWrap.style.top = 'auto'
+      langGridWrap.style.bottom = (window.innerHeight - btn.top + 8) + 'px'
+    } else {
+      // Open downward
+      langGridWrap.style.bottom = 'auto'
+      langGridWrap.style.top = (btn.bottom + 8) + 'px'
+    }
+
+    if (window.innerWidth <= 768) {
+      // On mobile: center horizontally using fixed positioning
+      langGridWrap.style.left = '50%'
+      langGridWrap.style.transform = 'translateX(-50%)'
+    } else {
+      // On desktop: center relative to button
+      const wrapW = 480
+      let left = btn.left + btn.width / 2 - wrapW / 2
+      left = Math.max(8, Math.min(left, window.innerWidth - wrapW - 8))
+      langGridWrap.style.left = left + 'px'
+      langGridWrap.style.transform = 'none'
+    }
+  }
+
   if (langToggle && langGridWrap) {
     langToggle.addEventListener('click', (e) => {
       e.stopPropagation()
       const isOpen = langGridWrap.classList.toggle('open')
       langToggle.classList.toggle('open', isOpen)
-      if (isOpen && window.innerWidth <= 768) {
-        const btn = langToggle.getBoundingClientRect()
-        langGridWrap.style.bottom = (window.innerHeight - btn.top + 8) + 'px'
-      }
+      if (isOpen) positionLangDropdown()
     })
+
     langGridWrap.addEventListener('click', (e) => {
       e.stopPropagation()
       const link = e.target.closest('a[data-lang]')
@@ -412,7 +442,6 @@ export function injectHeader() {
         e.preventDefault()
         const newLang = link.dataset.lang
         setLang(newLang)
-        // Navigate to the translated URL for the current tool
         if (activeToolKey && tools[activeToolKey]) {
           if (newLang === 'en') {
             window.location.href = '/' + activeToolKey
@@ -420,14 +449,19 @@ export function injectHeader() {
             window.location.href = '/' + newLang + '/' + translatedSlug(newLang, activeToolKey)
           }
         } else {
-          // Homepage — navigate to /{lang} or / for English
           window.location.href = newLang === 'en' ? '/' : '/' + newLang
         }
       }
     })
+
     document.addEventListener('click', () => {
       langGridWrap.classList.remove('open')
       langToggle.classList.remove('open')
+    })
+
+    // Reposition on scroll/resize in case page scrolls
+    window.addEventListener('resize', () => {
+      if (langGridWrap.classList.contains('open')) positionLangDropdown()
     })
   }
 
