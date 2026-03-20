@@ -667,6 +667,7 @@ function renderCanvas() {
   ppCanvas.width = dispW
   ppCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
+  canvasArea.style.maxWidth = dispW + 'px'
   ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
   if (!uploadedImg) return
