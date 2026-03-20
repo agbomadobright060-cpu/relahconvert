@@ -246,8 +246,8 @@ style.textContent = `
   .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
-  .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
-  .pp-canvas-inner canvas{display:block;pointer-events:none;user-select:none;margin:0 auto}
+  .pp-canvas-inner{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none;margin:0 auto}
+  .pp-canvas-inner canvas{display:block;pointer-events:none;user-select:none}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -547,8 +547,10 @@ async function detectFace(img) {
   sctx.drawImage(img, 0, 0, sw, sh)
   const data = sctx.getImageData(0, 0, sw, sh).data
 
+  // Only scan top 35% of image — face is always near the top
+  const scanH = Math.round(sh * 0.35)
   let minY = sh, maxY = 0, minX = sw, maxX = 0, count = 0
-  for (let y = 0; y < sh; y++) {
+  for (let y = 0; y < scanH; y++) {
     for (let x = 0; x < sw; x++) {
       const i = (y * sw + x) * 4
       const r = data[i], g = data[i + 1], b = data[i + 2]
@@ -638,11 +640,10 @@ function renderCanvas() {
   const dispH = Math.round(dispW / aspect)
   ppCanvas.width = dispW
   ppCanvas.height = dispH
-  // Responsive: if container is narrower than 400px, scale down
-  const containerW = canvasWrap.clientWidth || dispW
-  const scale = Math.min(1, containerW / dispW)
-  ppCanvas.style.width = Math.round(dispW * scale) + 'px'
-  ppCanvas.style.height = Math.round(dispH * scale) + 'px'
+  canvasWrap.style.width = dispW + 'px'
+  canvasWrap.style.height = dispH + 'px'
+  ppCanvas.style.width = dispW + 'px'
+  ppCanvas.style.height = dispH + 'px'
   ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
   if (!uploadedImg) return
