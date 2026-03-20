@@ -224,61 +224,7 @@ let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let processedImg = null
 let removeBgFn = null
-let detectedFaceBox = null
-
-async function detectFace(img) {
-  // Try browser native FaceDetector API (Chrome, Edge, Safari)
-  if (typeof FaceDetector !== 'undefined') {
-    try {
-      const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 })
-      const faces = await detector.detect(img)
-      if (faces.length > 0) {
-        const b = faces[0].boundingBox
-        return { x: b.x, y: b.y, width: b.width, height: b.height }
-      }
-    } catch (err) {
-      console.warn('Native FaceDetector failed:', err)
-    }
-  }
-
-  // Fallback: call server API for browsers without native FaceDetector
-  try {
-    const c = document.createElement('canvas')
-    const maxDim = 1024
-    let w = img.naturalWidth, h = img.naturalHeight
-    if (w > maxDim || h > maxDim) {
-      const scale = maxDim / Math.max(w, h)
-      w = Math.round(w * scale)
-      h = Math.round(h * scale)
-    }
-    c.width = w; c.height = h
-    const cx = c.getContext('2d')
-    cx.drawImage(img, 0, 0, w, h)
-    const dataUrl = c.toDataURL('image/jpeg', 0.85)
-    const base64 = dataUrl.split(',')[1]
-
-    const resp = await fetch('/api/detect-face', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
-    })
-    if (!resp.ok) return null
-    const face = await resp.json()
-    if (face.error || !face.faceX) return null
-
-    const scaleX = img.naturalWidth / w
-    const scaleY = img.naturalHeight / h
-    return {
-      x: face.faceX * scaleX,
-      y: face.faceY * scaleY,
-      width: face.faceW * scaleX,
-      height: face.faceH * scaleY,
-    }
-  } catch (err) {
-    console.warn('API face detection failed:', err)
-  }
-  return null
-}
+let personBounds = null
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -445,18 +391,14 @@ function handleFile(file) {
   img.onload = async () => {
     uploadedImg = img
     processedImg = null
-    detectedFaceBox = null
+    personBounds = null
     dropZoneEl.style.display = 'none'
     document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
     downloadCard.style.display = 'none'
     ppStatus.style.display = ''
-    ppStatus.textContent = t.pp_detecting_face || 'Detecting face...'
+    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
     renderCanvas()
-
-    // Run face detection
-    detectedFaceBox = await detectFace(img)
-    if (detectedFaceBox) renderCanvas()
 
     ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
 
@@ -474,6 +416,7 @@ function handleFile(file) {
       const bgImg = new Image()
       bgImg.onload = () => {
         processedImg = bgImg
+        personBounds = null  // reset so getCropRegion rescans
         ppStatus.style.display = 'none'
         downloadCard.style.display = ''
         renderCanvas()
@@ -584,109 +527,103 @@ document.addEventListener('click', (e) => {
   }
 })
 
-function detectPhotoCropRatio(imgW, imgH) {
-  const ratio = imgH / imgW
-  if (ratio >= 2.0) return 0.22       // full body standing
-  else if (ratio >= 1.4) return 0.35  // 3/4 body — portrait like the test image
-  else if (ratio >= 1.0) return 0.55  // chest up / headshot
-  else return 0.60                     // landscape
+function findPersonBounds(img) {
+  const imgW = img.naturalWidth
+  const imgH = img.naturalHeight
+  const sc = document.createElement('canvas')
+  sc.width = imgW; sc.height = imgH
+  const sctx = sc.getContext('2d')
+  sctx.drawImage(img, 0, 0)
+  const data = sctx.getImageData(0, 0, imgW, imgH).data
+  let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
+  for (let y = 0; y < imgH; y += 2) {
+    for (let x = 0; x < imgW; x += 2) {
+      const i = (y * imgW + x) * 4
+      if (data[i + 3] > 30) {
+        if (y < topY) topY = y
+        if (y > bottomY) bottomY = y
+        if (x < leftX) leftX = x
+        if (x > rightX) rightX = x
+      }
+    }
+  }
+  if (topY >= bottomY) return null
+  return { topY, bottomY, leftX, rightX }
 }
 
 function getCropRegion(img, aspect) {
   const imgW = img.naturalWidth
   const imgH = img.naturalHeight
 
-  // Priority 1: Use detected face box for precise cropping
-  if (detectedFaceBox) {
-    const box = detectedFaceBox
-    const faceH = box.height
-    const faceCx = box.x + box.width / 2
-
-    // ICAO passport standard: face = 70-80% of photo height
-    // FaceDetector box covers forehead-to-chin, need extra for hair + small margin
-    const gapAbove = faceH * 0.35      // hair + tiny gap above crown
-    const gapBelow = faceH * 0.35      // neck + very top of shoulders
-    let srcY = Math.max(0, box.y - gapAbove)
-    let srcH = faceH + gapAbove + gapBelow
-    let srcW = srcH * aspect
-    let srcX = Math.max(0, faceCx - srcW / 2)
-
-    // If crop is wider than the image, keep target aspect by centering vertically
-    if (srcW > imgW) {
-      srcW = imgW
-      srcH = srcW / aspect
-      srcX = 0
-      // Center on face, placing face in upper 40% of frame
-      const faceCy = box.y + faceH / 2
-      srcY = Math.max(0, faceCy - srcH * 0.38)
-    }
-    // If crop is taller than image, clamp height
-    if (srcH > imgH) {
-      srcH = imgH
-      srcW = srcH * aspect
-      srcX = Math.max(0, faceCx - srcW / 2)
-    }
-    // Clamp to image bounds
-    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
-    return { srcX, srcY, srcW, srcH }
-  }
-
-  // Priority 2: bg-removed image — find person via alpha channel
+  // After bg removal: use alpha channel to find person, then crop head+shoulders
   if (processedImg) {
-    const sc = document.createElement('canvas')
-    sc.width = imgW; sc.height = imgH
-    const sctx = sc.getContext('2d')
-    sctx.drawImage(img, 0, 0)
-    const data = sctx.getImageData(0, 0, imgW, imgH).data
-    let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
-    for (let y = 0; y < imgH; y += 2) {
-      for (let x = 0; x < imgW; x += 2) {
-        const i = (y * imgW + x) * 4
-        if (data[i + 3] > 30) {
-          if (y < topY) topY = y
-          if (y > bottomY) bottomY = y
-          if (x < leftX) leftX = x
-          if (x > rightX) rightX = x
-        }
+    // Cache person bounds so we don't rescan every render
+    if (!personBounds) personBounds = findPersonBounds(img)
+    if (personBounds) {
+      const { topY, bottomY, leftX, rightX } = personBounds
+      const personH = bottomY - topY
+      const personW = rightX - leftX
+      const personCx = leftX + personW / 2
+
+      // Head is at top of person. Estimate head height as ~15% of person height.
+      // Passport crop: head + neck + top of shoulders
+      // For full body: top 25% of person. For half body: top 50%. For headshot: 100%.
+      const bodyRatio = personH / imgH
+      let cropFraction
+      if (bodyRatio > 0.85) cropFraction = 0.30      // full body
+      else if (bodyRatio > 0.6) cropFraction = 0.45   // 3/4 body
+      else if (bodyRatio > 0.4) cropFraction = 0.65   // half body
+      else cropFraction = 1.0                          // already headshot
+
+      const cropH = personH * cropFraction
+      const margin = cropH * 0.08  // small gap above head
+      let srcY = Math.max(0, topY - margin)
+      let srcH = cropH + margin
+
+      // Ensure crop maintains target aspect ratio
+      let srcW = srcH * aspect
+      let srcX = Math.max(0, personCx - srcW / 2)
+
+      // If wider than image, fit to width and adjust height
+      if (srcW > imgW) {
+        srcW = imgW
+        srcH = srcW / aspect
+        srcX = 0
+        srcY = Math.max(0, topY - margin)
       }
+      // If taller than image, fit to height
+      if (srcH > imgH) {
+        srcH = imgH
+        srcW = srcH * aspect
+        srcX = Math.max(0, personCx - srcW / 2)
+      }
+      // Clamp bounds
+      if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
+      if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
+      return { srcX, srcY, srcW, srcH }
     }
-    if (topY >= bottomY) { topY = 0; bottomY = imgH; leftX = 0; rightX = imgW }
-
-    const personH = bottomY - topY
-    const personW = rightX - leftX
-    const personCx = leftX + personW / 2
-
-    const gapAbove = personH * 0.08
-    const cropH = personH * 0.35
-    const frameTop = Math.max(0, topY - gapAbove)
-    const frameH = cropH + gapAbove
-
-    const neededW = frameH * aspect
-    let srcX, srcY, srcW, srcH
-    if (neededW <= imgW) {
-      srcH = frameH; srcW = neededW
-      srcX = Math.max(0, personCx - srcW / 2); srcY = frameTop
-    } else {
-      srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = frameTop
-    }
-    if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
-    return { srcX, srcY, srcW, srcH }
   }
 
-  // Priority 3: No face, no bg removal — use image proportion detection
-  const cropFraction = detectPhotoCropRatio(imgW, imgH)
-  const cropH = imgH * cropFraction
-  const neededW = cropH * aspect
-  let srcX, srcY, srcW, srcH
-  if (neededW <= imgW) {
-    srcH = cropH; srcW = neededW
-    srcX = (imgW - srcW) / 2; srcY = 0
-  } else {
-    srcW = imgW; srcH = imgW / aspect; srcX = 0; srcY = 0
+  // Before bg removal or if bounds failed: simple top-center crop
+  // Assume face is in upper portion of image
+  const ratio = imgH / imgW
+  let cropFraction
+  if (ratio >= 2.0) cropFraction = 0.25       // full body
+  else if (ratio >= 1.4) cropFraction = 0.40   // 3/4 body
+  else if (ratio >= 1.0) cropFraction = 0.60   // chest up
+  else cropFraction = 0.70                      // landscape
+
+  let srcH = imgH * cropFraction
+  let srcW = srcH * aspect
+  let srcX = (imgW - srcW) / 2
+  let srcY = 0
+  if (srcW > imgW) {
+    srcW = imgW
+    srcH = srcW / aspect
+    srcX = 0
   }
-  if (srcY + srcH > imgH) srcH = Math.max(1, imgH - srcY)
+  if (srcX < 0) srcX = 0
+  if (srcY + srcH > imgH) srcH = imgH
   return { srcX, srcY, srcW, srcH }
 }
 
