@@ -524,10 +524,10 @@ document.addEventListener('click', (e) => {
 
 function detectPhotoCropRatio(imgW, imgH) {
   const ratio = imgH / imgW
-  if (ratio >= 2.0) return 0.18       // full body → top 18%
-  else if (ratio >= 1.4) return 0.28  // 3/4 body → top 28%
-  else if (ratio >= 1.0) return 0.45  // half body → top 45%
-  else return 0.55                     // landscape → top 55%
+  if (ratio >= 2.0) return 0.15       // full body → top 15%
+  else if (ratio >= 1.4) return 0.22  // 3/4 body → top 22%
+  else if (ratio >= 1.0) return 0.35  // half body → top 35%
+  else return 0.50                     // landscape → top 50%
 }
 
 function getCropRegion(img, aspect) {
@@ -559,12 +559,12 @@ function getCropRegion(img, aspect) {
     const personRatio = personH / Math.max(personW, 1)
     const personCx = leftX + personW / 2
 
-    // Tighter crop: head + top of shoulders only
+    // Head + top of shoulders only
     let showFraction
-    if (personRatio >= 2.5) showFraction = 0.25      // full body → show top 25%
-    else if (personRatio >= 1.6) showFraction = 0.33  // 3/4 body → show top 33%
-    else if (personRatio >= 1.0) showFraction = 0.50  // half body → show top 50%
-    else showFraction = 0.80                           // headshot → show 80%
+    if (personRatio >= 2.5) showFraction = 0.20      // full body → top 20%
+    else if (personRatio >= 1.6) showFraction = 0.28  // 3/4 body → top 28%
+    else if (personRatio >= 1.0) showFraction = 0.40  // half body → top 40%
+    else showFraction = 0.75                           // headshot → 75%
 
     const pad = personH * 0.06
     const frameTop = Math.max(0, topY - pad)
