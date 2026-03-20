@@ -246,7 +246,7 @@ style.textContent = `
   .pp-hero{text-align:center;margin-bottom:24px}
   .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
   .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
-  .pp-canvas-inner canvas{display:block;max-width:100%;height:auto;pointer-events:none;user-select:none;margin:0 auto}
+  .pp-canvas-inner canvas{display:block;pointer-events:none;user-select:none;margin:0 auto}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -602,9 +602,11 @@ function renderCanvas() {
   const dispH = Math.round(dispW / aspect)
   ppCanvas.width = dispW
   ppCanvas.height = dispH
-  ppCanvas.style.width = dispW + 'px'
-  ppCanvas.style.height = dispH + 'px'
-  canvasWrap.style.maxWidth = dispW + 'px'
+  // Responsive: if container is narrower than 400px, scale down
+  const containerW = canvasWrap.clientWidth || dispW
+  const scale = Math.min(1, containerW / dispW)
+  ppCanvas.style.width = Math.round(dispW * scale) + 'px'
+  ppCanvas.style.height = Math.round(dispH * scale) + 'px'
   ctx.fillStyle = selectedCountry.bg || '#ffffff'
   ctx.fillRect(0, 0, dispW, dispH)
   if (!uploadedImg) return
