@@ -535,14 +535,15 @@ function getCropRegion(img, aspect) {
   const imgH = img.naturalHeight
 
   if (processedImg) {
+    // Scan alpha channel to find person bounds
     const sc = document.createElement('canvas')
     sc.width = imgW; sc.height = imgH
     const sctx = sc.getContext('2d')
     sctx.drawImage(img, 0, 0)
     const data = sctx.getImageData(0, 0, imgW, imgH).data
     let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
-    for (let y = 0; y < imgH; y += 4) {
-      for (let x = 0; x < imgW; x += 4) {
+    for (let y = 0; y < imgH; y += 2) {
+      for (let x = 0; x < imgW; x += 2) {
         const i = (y * imgW + x) * 4
         if (data[i + 3] > 30) {
           if (y < topY) topY = y
@@ -558,14 +559,33 @@ function getCropRegion(img, aspect) {
     const personW = rightX - leftX
     const personCx = leftX + personW / 2
 
-    // Always show only top 22% of detected person = head + shoulders only
-    // This works for any photo type — full body, 3/4, half body
-    const showFraction = 0.22
-    const pad = personH * 0.03
-    const frameTop = Math.max(0, topY - pad)
-    const frameH = personH * showFraction + pad * 2
-    const neededW = frameH * aspect
+    // Find head width by scanning the top 20% of person for the widest point
+    // Head is typically at the top, shoulders are wider below
+    let headMaxW = 0
+    const scanEnd = topY + personH * 0.20
+    for (let y = topY; y < scanEnd; y += 2) {
+      let rowLeft = imgW, rowRight = 0
+      for (let x = 0; x < imgW; x += 2) {
+        const i = (y * imgW + x) * 4
+        if (data[i + 3] > 30) {
+          if (x < rowLeft) rowLeft = x
+          if (x > rowRight) rowRight = x
+        }
+      }
+      if (rowRight > rowLeft) headMaxW = Math.max(headMaxW, rowRight - rowLeft)
+    }
 
+    // Estimate head height as ~1.3x head width (typical facial proportions)
+    const headH = headMaxW > 0 ? headMaxW * 1.3 : personH * 0.25
+
+    // Passport standard: head fills ~70-80% of photo height
+    // So photo height = headH / 0.75, with small gap above head
+    const gapAbove = headH * 0.15  // small gap above head
+    const photoH = headH / 0.72    // head is 72% of photo
+    const frameTop = Math.max(0, topY - gapAbove)
+    const frameH = Math.min(photoH, personH * 0.55) // never show more than 55% of body
+
+    const neededW = frameH * aspect
     let srcX, srcY, srcW, srcH
     if (neededW <= imgW) {
       srcH = frameH; srcW = neededW
@@ -578,6 +598,7 @@ function getCropRegion(img, aspect) {
     return { srcX, srcY, srcW, srcH }
   }
 
+  // No bg removal — detect photo type by proportions and crop top portion
   const cropFraction = detectPhotoCropRatio(imgW, imgH)
   const cropH = imgH * cropFraction
   const neededW = cropH * aspect
