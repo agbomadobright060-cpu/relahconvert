@@ -571,8 +571,8 @@ function getCropRegion(img, aspect) {
       let headTop = topY
       let cropBottom
       if (fillRatio > 0.7) {
-        // Full body or 3/4: take head + shoulders (top 28%)
-        cropBottom = topY + personH * 0.28
+        // Full body or 3/4: take head + shoulders (top 22%)
+        cropBottom = topY + personH * 0.22
       } else if (fillRatio > 0.4) {
         // Half body: take head + shoulders (top 50%)
         cropBottom = topY + personH * 0.50
