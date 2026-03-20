@@ -582,15 +582,24 @@ function getCropRegion(img, aspect) {
     // Passport standard: face ~40% of photo height
     const gapAbove = faceH * 0.85      // space above top of head
     const gapBelow = faceH * 0.9       // space below chin (shoulders)
-    const srcY = Math.max(0, box.y - gapAbove)
-    const srcH = faceH + gapAbove + gapBelow
-    const srcW = srcH * aspect
+    let srcY = Math.max(0, box.y - gapAbove)
+    let srcH = faceH + gapAbove + gapBelow
+    let srcW = srcH * aspect
     let srcX = Math.max(0, faceCx - srcW / 2)
 
+    // If crop is wider than the image, fit to image width and derive height
+    if (srcW > imgW) {
+      srcW = imgW
+      srcH = srcW / aspect
+      srcX = 0
+      // Re-center vertically on face
+      const faceCy = box.y + faceH / 2
+      srcY = Math.max(0, faceCy - srcH * 0.4)
+    }
     // Clamp to image bounds
     if (srcX + srcW > imgW) srcX = Math.max(0, imgW - srcW)
-    const clampedH = (srcY + srcH > imgH) ? Math.max(1, imgH - srcY) : srcH
-    return { srcX, srcY, srcW: Math.min(srcW, imgW), srcH: clampedH }
+    if (srcY + srcH > imgH) srcY = Math.max(0, imgH - srcH)
+    return { srcX, srcY, srcW, srcH }
   }
 
   // Priority 2: bg-removed image — find person via alpha channel
