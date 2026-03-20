@@ -317,7 +317,14 @@ document.querySelector('#app').innerHTML = `
           <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
         </div>
         <div class="pp-hero" id="heroSection">
-          <img src="/passport-before-after.jpg" alt="Passport photo before and after example" />
+          <div style="background:#fff;border-radius:12px;padding:48px 24px;text-align:center;border:2px dashed #DDD5C8;color:#9A8A7A;font-family:'DM Sans',sans-serif">
+            <svg width="72" height="90" viewBox="0 0 72 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="72" height="90" rx="8" fill="#F5F0E8"/>
+              <circle cx="36" cy="30" r="16" fill="#DDD5C8"/>
+              <ellipse cx="36" cy="72" rx="26" ry="16" fill="#DDD5C8"/>
+            </svg>
+            <p style="margin:16px 0 0;font-size:14px;color:#9A8A7A">${t.pp_upload_hint || 'Upload your photo to get started'}</p>
+          </div>
         </div>
       </div>
       <div class="pp-panel">
