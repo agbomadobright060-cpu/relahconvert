@@ -1,1 +1,41 @@
 # RelahConvert
+
+> Free browser-based image tools. No upload, no server, no account needed. All processing happens locally in your browser.
+
+## What is RelahConvert?
+
+RelahConvert is a free online image converter and editor. Every tool runs entirely in the browser — files never leave your device. No signup, no ads, no limits.
+
+## Tools Available
+
+- Compress Image — reduce JPG, PNG, WebP file size without quality loss
+- Resize Image — change image dimensions in pixels or percentage
+- Crop Image — crop any image to custom dimensions
+- Convert JPG to PNG — lossless format conversion
+- Convert PNG to JPG — compress PNG to smaller JPG
+- Convert JPG to WebP — modern format for faster websites
+- Convert WebP to JPG — convert WebP back to universal JPG
+- Remove Background — AI-powered background removal in browser
+- Blur Background — blur image background instantly
+- Add Watermark — add text or logo watermark to images
+- Rotate Image — rotate or flip images
+- Convert to PDF — turn images into PDF documents
+- Passport Photo Maker — create passport photos for 160+ countries
+- Image Splitter — split images into grid pieces
+- Sharpen Image — enhance image sharpness
+- Pixelate Image — pixelate faces or areas
+- Add Text to Image — overlay text on images
+- Enlarge Image — upscale images with AI
+- And 20+ more free tools
+
+## Supported Languages
+
+English, French, Spanish, Portuguese, German, Arabic, Italian, Dutch, Russian, Japanese, Chinese, Korean, Hindi, Turkish, Polish, Ukrainian, Vietnamese, Thai, Indonesian, Malay, Romanian, Czech, Swedish, Norwegian, Danish
+
+## Key Facts
+
+- 100% free, no account required
+- Browser-only processing — complete privacy
+- Supports JPG, PNG, WebP, GIF, SVG, ICO formats
+- Works on desktop and mobile
+- Available at https://relahconvert.com
