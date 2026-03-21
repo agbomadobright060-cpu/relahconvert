@@ -230,4 +230,11 @@ export const tools = {
     outputFormat: null,
     slug: 'image-splitter'
   },
+  'resize-in-kb': {
+    title: 'Resize Image in KB',
+    description: 'Resize any image to a specific file size in KB. Free, private, browser-only.',
+    inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    outputFormat: 'image/jpeg',
+    slug: 'resize-in-kb'
+  },
 }

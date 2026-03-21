@@ -9,6 +9,7 @@ const icons = {
   'webp-to-png': '🔄',
   'compress': '📦',
   'resize': '↔️',
+  'resize-in-kb': '📏',
   'jpg-to-pdf': '📄',
   'png-to-pdf': '📄',
 }
