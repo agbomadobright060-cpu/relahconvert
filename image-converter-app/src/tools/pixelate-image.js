@@ -294,7 +294,7 @@ let selectedFiles = []
 let isWholeMode = true
 let isApplyAll = false
 let activeFileIdx = 0
-let perFileSelections = [] // perFileSelections[i] = [{ x, y, w, h }, ...]
+let perFileSelections = [] // perFileSelections[i] = [{ x, y, w, h, active:bool }, ...]
 let perFileMode = []       // perFileMode[i] = 'whole' | 'area'
 let perFileLevel = []      // perFileLevel[i] = blockSize number
 let currentDrag = null
@@ -508,7 +508,7 @@ function endDrag() {
   if (!isDragging) return
   isDragging = false
   if (currentDrag && currentDrag.w > 5 && currentDrag.h > 5) {
-    perFileSelections[activeFileIdx].push(currentDrag)
+    perFileSelections[activeFileIdx].push({ ...currentDrag, active: true })
   }
   currentDrag = null
   renderSelectionBoxes()
@@ -526,8 +526,10 @@ function renderSelectionBoxes() {
   const scaleY = canvasRect.height / pixCanvas.height
   const savedSels = perFileSelections[activeFileIdx] || []
   const allSels = [...savedSels]
-  if (currentDrag) allSels.push(currentDrag)
+  if (currentDrag) allSels.push({ ...currentDrag, active: true })
   allSels.forEach((sel, i) => {
+    const isSaved = i < savedSels.length
+    const isActive = sel.active !== false
     const div = document.createElement('div')
     div.className = 'pix-selection'
     div.style.left = (offsetX + sel.x * scaleX) + 'px'
@@ -535,8 +537,26 @@ function renderSelectionBoxes() {
     div.style.width = (sel.w * scaleX) + 'px'
     div.style.height = (sel.h * scaleY) + 'px'
     div.style.display = 'block'
-    // Add X delete button for saved selections (not the current drag)
-    if (i < savedSels.length) {
+    // Active: solid border + colored fill; Inactive: dashed border, no fill
+    if (isActive) {
+      div.style.borderColor = '#C84B31'
+      div.style.background = 'rgba(200,75,49,0.15)'
+      div.style.borderStyle = 'solid'
+    } else {
+      div.style.borderColor = '#9A8A7A'
+      div.style.background = 'transparent'
+      div.style.borderStyle = 'dashed'
+    }
+    if (isSaved) {
+      // Click to toggle active/inactive
+      div.style.cursor = 'pointer'
+      div.addEventListener('click', e => {
+        if (e.target.closest('button')) return // don't toggle when clicking X
+        perFileSelections[activeFileIdx][i].active = !perFileSelections[activeFileIdx][i].active
+        renderSelectionBoxes()
+        applyPixelation()
+      })
+      // X delete button
       const xBtn = document.createElement('button')
       xBtn.textContent = '\u00d7'
       xBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(200,75,49,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;line-height:1;padding:0;'
@@ -561,7 +581,7 @@ function applyPixelation() {
   if (isWholeMode) {
     pixelateRegion(0, 0, pixCanvas.width, pixCanvas.height, blockSize)
   } else {
-    const sels = [...(perFileSelections[activeFileIdx] || [])]
+    const sels = (perFileSelections[activeFileIdx] || []).filter(s => s.active !== false)
     if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) sels.push(currentDrag)
     sels.forEach(sel => {
       pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), blockSize)
@@ -664,7 +684,7 @@ downloadBtn.addEventListener('click', async () => {
         })
       }
       const fileBlockSize = isApplyAll ? blockSize : (perFileLevel[i] || 12)
-      const sels = isApplyAll ? [] : (perFileSelections[i] || [])
+      const sels = isApplyAll ? [] : (perFileSelections[i] || []).filter(s => s.active !== false)
       const fileIsWhole = isApplyAll ? isWholeMode : (perFileMode[i] === 'whole')
       const blob = await pixelateImageToBlob(loadedImages[i], selectedFiles[i], fileBlockSize, fileIsWhole ? [] : sels)
       const ext = selectedFiles[i].type === 'image/png' ? '.png' : (selectedFiles[i].type === 'image/webp' ? '.webp' : '.jpg')
