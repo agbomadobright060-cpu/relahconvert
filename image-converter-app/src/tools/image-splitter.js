@@ -122,12 +122,14 @@ const nextSteps       = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 let uploadedImg = null
+let originalFile = null
 let currentRows = 2
 let currentCols = 2
 let isCustom = false
 
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
+  originalFile = file
   const img = new Image()
   img.onload = () => {
     uploadedImg = img
@@ -313,6 +315,27 @@ downloadBtn.addEventListener('click', async () => {
   downloadBtn.disabled = false
 })
 
+// ── IndexedDB helpers ──────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -321,7 +344,22 @@ function buildNextSteps() {
     { label: ns.compress || 'Compress Image', href: localHref('compress') },
     { label: ns['merge-images'] || 'Merge Images', href: localHref('merge-images') },
   ]
-  nextStepsButtons.innerHTML = buttons.map(b => `<a class="next-link" href="${b.href}">${b.label}</a>`).join('')
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (originalFile) {
+        try {
+          await saveFilesToIDB([{ blob: originalFile, name: originalFile.name, type: originalFile.type }])
+          sessionStorage.setItem('pendingFromIDB', '1')
+        } catch (e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
   nextSteps.style.display = 'block'
 }
 
