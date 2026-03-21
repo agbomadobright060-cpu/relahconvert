@@ -38,8 +38,8 @@ if (document.head) {
     .pix-mode-btn { padding:7px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:600; color:#2C1810; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
     .pix-mode-btn:hover { border-color:#C84B31; color:#C84B31; }
     .pix-mode-btn.active { background:#C84B31; color:#fff; border-color:#C84B31; }
-    .preview-card { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; max-width:280px; }
-    .preview-card img { width:100%; height:240px; object-fit:contain; display:block; background:#f9f9f9; }
+    .preview-card { background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; width:100%; }
+    .preview-card img { width:100%; height:120px; object-fit:cover; display:block; }
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -185,7 +185,7 @@ const addMoreLbl = t.add_more || 'Add More'
 const downloadZipLbl = t.download_zip || 'Download ZIP'
 
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
+  <div style="max-width:960px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         ${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em>
@@ -200,31 +200,37 @@ document.querySelector('#app').innerHTML = `
     </div>
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
-    <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
-    <div id="controlsArea" style="display:none; margin-bottom:16px;">
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-        <div style="display:flex; gap:8px;">
-          <button class="pix-mode-btn active" id="modeWhole">${pixWholeLbl}</button>
-          <button class="pix-mode-btn" id="modeArea">${pixAreaLbl}</button>
+    <div id="workArea" style="display:none; margin-bottom:16px;">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div id="previewGrid" style="display:none; flex-shrink:0; width:160px; overflow-y:auto; max-height:500px;"></div>
+        <div id="editorPanel" style="flex:1; min-width:0;">
+          <div id="controlsArea" style="margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
+              <div style="display:flex; gap:8px;">
+                <button class="pix-mode-btn active" id="modeWhole">${pixWholeLbl}</button>
+                <button class="pix-mode-btn" id="modeArea">${pixAreaLbl}</button>
+              </div>
+              <div id="batchModeWrap" style="display:none; margin-left:auto; display:flex; gap:4px;">
+                <button id="modeAllBtn" style="padding:4px 10px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+                <button id="modeIndBtn" style="padding:4px 10px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="font-size:13px; font-weight:600; color:#2C1810; display:block; margin-bottom:6px;">${pixLevelLbl}</label>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:11px; color:#9A8A7A;">${pixLowLbl}</span>
+                <input type="range" id="pixelSlider" min="2" max="60" value="12" style="flex:1; accent-color:#C84B31;" />
+                <span style="font-size:11px; color:#9A8A7A;">${pixHighLbl}</span>
+              </div>
+            </div>
+          </div>
+          <div id="editorArea" style="display:none;">
+            <div class="pix-canvas-wrap" id="canvasWrap">
+              <canvas id="pixCanvas"></canvas>
+            </div>
+            <p id="editorLabel" style="font-size:12px; color:#7A6A5A; margin:8px 0 0; text-align:center;"></p>
+          </div>
         </div>
-        <div id="batchModeWrap" style="display:none; margin-left:auto; display:flex; gap:4px;">
-          <button id="modeAllBtn" style="padding:4px 10px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
-          <button id="modeIndBtn" style="padding:4px 10px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
-        </div>
-      </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px; font-weight:600; color:#2C1810; display:block; margin-bottom:6px;">${pixLevelLbl}</label>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:11px; color:#9A8A7A;">${pixLowLbl}</span>
-          <input type="range" id="pixelSlider" min="2" max="60" value="12" style="flex:1; accent-color:#C84B31;" />
-          <span style="font-size:11px; color:#9A8A7A;">${pixHighLbl}</span>
-        </div>
-      </div>
-      <div id="editorArea" style="display:none;">
-        <div class="pix-canvas-wrap" id="canvasWrap">
-          <canvas id="pixCanvas"></canvas>
-        </div>
-        <p id="editorLabel" style="font-size:12px; color:#7A6A5A; margin:8px 0 0; text-align:center;"></p>
       </div>
     </div>
     <button id="downloadBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${dlLabel}</button>
@@ -245,6 +251,7 @@ const MAX_TOTAL_BYTES = 200 * 1024 * 1024
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const fileInput    = document.getElementById('fileInput')
 const previewGrid  = document.getElementById('previewGrid')
+const workArea     = document.getElementById('workArea')
 const controlsArea = document.getElementById('controlsArea')
 const editorArea   = document.getElementById('editorArea')
 const editorLabel  = document.getElementById('editorLabel')
@@ -337,7 +344,7 @@ function addFiles(files) {
     img.src = url
   })
   renderPreviews()
-  controlsArea.style.display = 'block'
+  workArea.style.display = 'block'
   // For single file, auto-open editor; for multiple in Apply to All, keep editor hidden
   if (selectedFiles.length === 1) {
     // Wait for image to load then open editor
@@ -366,7 +373,7 @@ function removeFile(idx) {
   if (activeFileIdx >= selectedFiles.length) activeFileIdx = Math.max(0, selectedFiles.length - 1)
   renderPreviews()
   if (!selectedFiles.length) {
-    controlsArea.style.display = 'none'
+    workArea.style.display = 'none'
     editorArea.style.display = 'none'
     downloadBtn.disabled = true
     downloadBtn.style.opacity = '0.7'
@@ -380,7 +387,7 @@ function renderPreviews() {
   previewUrls.forEach(u => { if (u) URL.revokeObjectURL(u) })
   previewUrls = selectedFiles.map(f => URL.createObjectURL(f))
 
-  // Single file — hide preview grid, editor handles display
+  // Single file — hide preview grid sidebar, editor handles display
   if (selectedFiles.length <= 1) {
     previewGrid.style.display = 'none'
     previewGrid.innerHTML = ''
@@ -393,11 +400,10 @@ function renderPreviews() {
       <button class="remove-btn" data-idx="${i}">&times;</button>
       <div class="fname">${f.name} &mdash; ${formatSize(f.size)}</div>
     </div>
-  `).join('') + `<div style="display:flex;align-items:center;justify-content:center;"><button id="addMoreBtn" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;">+ ${addMoreLbl}</button></div>`
+  `).join('') + `<button id="addMoreBtn" style="width:100%; padding:6px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:center;">+ ${addMoreLbl}</button>`
   previewGrid.style.display = 'flex'
   previewGrid.style.flexDirection = 'column'
-  previewGrid.style.gap = '10px'
-  previewGrid.style.alignItems = 'flex-start'
+  previewGrid.style.gap = '8px'
 
   // Show/hide batch mode toggle
   batchModeWrap.style.display = selectedFiles.length > 1 ? 'flex' : 'none'
@@ -407,7 +413,13 @@ function renderPreviews() {
   })
   previewGrid.querySelectorAll('.preview-card').forEach(card => {
     card.addEventListener('click', () => {
-      if (!isApplyAll) openEditor(parseInt(card.dataset.idx))
+      // Clicking a thumbnail always opens editor for that file
+      if (isApplyAll) {
+        isApplyAll = false
+        modeIndBtn.style.background = '#C84B31'; modeIndBtn.style.color = '#fff'; modeIndBtn.style.borderColor = '#C84B31'
+        modeAllBtn.style.background = '#fff'; modeAllBtn.style.color = '#2C1810'; modeAllBtn.style.borderColor = '#DDD5C8'
+      }
+      openEditor(parseInt(card.dataset.idx))
     })
   })
   document.getElementById('addMoreBtn').addEventListener('click', () => fileInput.click())
