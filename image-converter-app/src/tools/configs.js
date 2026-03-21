@@ -237,4 +237,11 @@ export const tools = {
     outputFormat: 'image/jpeg',
     slug: 'resize-in-kb'
   },
+  'pixelate-image': {
+    title: 'Pixelate Image',
+    description: 'Pixelate an entire image or just a face/region. Adjustable intensity, live preview. Free and private.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'pixelate-image'
+  },
 }

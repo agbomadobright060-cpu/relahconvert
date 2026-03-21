@@ -10,6 +10,7 @@ const icons = {
   'compress': '📦',
   'resize': '↔️',
   'resize-in-kb': '📏',
+  'pixelate-image': '🟦',
   'jpg-to-pdf': '📄',
   'png-to-pdf': '📄',
 }

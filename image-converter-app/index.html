@@ -298,7 +298,7 @@
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif',
         'crop','rotate','flip','grayscale','watermark','round-corners','meme-generator','blur-face',
-        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb'
+        'remove-background','heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image'
       ]
 
       // ── Category map ──────────────────────────────────────────────────────
@@ -337,6 +337,7 @@
         'passport-photo': 'create',
         'image-splitter': 'edit',
         'resize-in-kb':  'optimize',
+        'pixelate-image': 'privacy',
       }
 
       document.querySelector('.logo').href = currentLang === 'en' ? '/' : '/' + currentLang
@@ -380,6 +381,7 @@
         'merge-images':    { bg: '#FEF3C7', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="10" width="14" height="20" rx="3" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1.5"/><rect x="22" y="10" width="14" height="20" rx="3" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1.5"/><path d="M18 17l2 3-2 3" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 17l-2 3 2 3" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'image-splitter':  { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="5" width="30" height="30" rx="3" fill="#F97316" opacity="0.15" stroke="#F97316" stroke-width="1.5"/><line x1="20" y1="5" x2="20" y2="35" stroke="#F97316" stroke-width="1.5" stroke-dasharray="3 2"/><line x1="5" y1="20" x2="35" y2="20" stroke="#F97316" stroke-width="1.5" stroke-dasharray="3 2"/><rect x="8" y="8" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/><rect x="23" y="8" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/><rect x="8" y="23" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/><rect x="23" y="23" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/></svg>` },
         'resize-in-kb':   { bg: '#FEF3E6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="3" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="1.5"/><text x="20" y="22" font-family="Arial" font-size="8" font-weight="800" fill="#D97706" text-anchor="middle">KB</text><path d="M14 28h12" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><path d="M20 10v4M18 12l2-2 2 2" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'pixelate-image': { bg: '#F0F4FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="6" width="28" height="28" rx="3" fill="#6366F1" opacity="0.15" stroke="#6366F1" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" fill="#6366F1" opacity="0.5"/><rect x="17" y="9" width="6" height="6" fill="#6366F1" opacity="0.3"/><rect x="25" y="9" width="6" height="6" fill="#6366F1" opacity="0.6"/><rect x="9" y="17" width="6" height="6" fill="#6366F1" opacity="0.4"/><rect x="17" y="17" width="6" height="6" fill="#6366F1" opacity="0.7"/><rect x="25" y="17" width="6" height="6" fill="#6366F1" opacity="0.25"/><rect x="9" y="25" width="6" height="6" fill="#6366F1" opacity="0.6"/><rect x="17" y="25" width="6" height="6" fill="#6366F1" opacity="0.35"/><rect x="25" y="25" width="6" height="6" fill="#6366F1" opacity="0.5"/></svg>` },
       }
 
       document.getElementById('dropdownInner').innerHTML =
@@ -435,6 +437,7 @@
         { slug: 'passport-photo',    title: t.nav_short?.['passport-photo'] || 'Passport Photo',      desc: cardDesc('passport_photo',    'Create passport photos for 170+ countries. Free and private.'), cat: 'create' },
         { slug: 'image-splitter',    title: t.nav_short?.['image-splitter'] || 'Image Splitter',      desc: cardDesc('image_splitter',    'Split any image into a grid of equal pieces.'), cat: 'edit' },
         { slug: 'resize-in-kb',     title: t.nav_short?.['resize-in-kb']  || 'Resize in KB',         desc: cardDesc('resize_in_kb',      'Resize any image to a specific file size in KB.'), cat: 'optimize' },
+        { slug: 'pixelate-image',   title: t.nav_short?.['pixelate-image'] || 'Pixelate Image',     desc: cardDesc('pixelate_image',    'Pixelate an entire image or just a face/region.'), cat: 'privacy' },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
