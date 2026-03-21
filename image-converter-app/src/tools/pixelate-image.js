@@ -46,7 +46,7 @@ if (document.head) {
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .tool-layout { display:grid; grid-template-columns:1fr 280px; gap:20px; align-items:start; }
-    .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
+    .image-col { min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; }
     .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:16px; font-family:'DM Sans',sans-serif; }
     .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:#2C1810; margin:0 0 12px; }
     .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:6px; }
@@ -56,11 +56,16 @@ if (document.head) {
     .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; }
     .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
     .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
-    .file-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-    .file-chip { display:flex; align-items:center; gap:5px; background:#F5F0E8; border-radius:20px; padding:4px 10px; font-size:11px; font-family:'DM Sans',sans-serif; color:#5A4A3A; cursor:pointer; transition:all 0.1s; }
-    .file-chip.active { background:#C84B31; color:#fff; }
-    .file-chip button { background:none; border:none; cursor:pointer; color:inherit; font-size:12px; line-height:1; padding:0; opacity:0.7; }
-    .file-chip button:hover { opacity:1; }
+    .file-chips { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:4px; }
+    .file-thumb { position:relative; flex-shrink:0; width:64px; height:64px; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid transparent; transition:border-color 0.15s; }
+    .file-thumb:hover { border-color:#C84B31; }
+    .file-thumb.active { border-color:#C84B31; box-shadow:0 0 0 2px rgba(200,75,49,0.3); }
+    .file-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .file-thumb .thumb-x { position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; padding:0; opacity:0; transition:opacity 0.15s; }
+    .file-thumb:hover .thumb-x { opacity:1; }
+    .file-thumb .thumb-x:hover { background:#C84B31; }
+    .add-thumb { flex-shrink:0; width:64px; height:64px; border-radius:8px; border:1.5px dashed #DDD5C8; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; color:#9A8A7A; transition:all 0.15s; }
+    .add-thumb:hover { border-color:#C84B31; color:#C84B31; }
     .pix-canvas-wrap { position:relative; overflow:hidden; display:block; cursor:crosshair; width:100%; }
     .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
@@ -391,6 +396,8 @@ function addFiles(files) {
 }
 
 function removeFile(idx) {
+  if (thumbUrls[idx]) URL.revokeObjectURL(thumbUrls[idx])
+  thumbUrls.splice(idx, 1)
   selectedFiles.splice(idx, 1)
   perFileSelections.splice(idx, 1)
   perFileMode.splice(idx, 1)
@@ -409,21 +416,27 @@ function removeFile(idx) {
   }
 }
 
+let thumbUrls = []
+
 function renderFileChips() {
-  const shortName = (name) => name.length > 14 ? name.substring(0, 12) + '...' : name
+  // Revoke old thumb URLs
+  thumbUrls.forEach(u => { if (u) URL.revokeObjectURL(u) })
+  thumbUrls = selectedFiles.map(f => URL.createObjectURL(f))
+
   fileChips.innerHTML = selectedFiles.map((f, i) => `
-    <span class="file-chip${i === activeFileIdx ? ' active' : ''}" data-idx="${i}">
-      ${shortName(f.name)} <button data-idx="${i}">&times;</button>
-    </span>
-  `).join('') + `<span class="file-chip" id="addMoreChip" style="cursor:pointer; border:1.5px dashed #DDD5C8; background:transparent;">+ ${addMoreLbl}</span>`
+    <div class="file-thumb${i === activeFileIdx ? ' active' : ''}" data-idx="${i}">
+      <img src="${thumbUrls[i]}" alt="${f.name}" />
+      <button class="thumb-x" data-idx="${i}">&times;</button>
+    </div>
+  `).join('') + `<div class="add-thumb" id="addMoreChip">+</div>`
 
   batchModeWrap.style.display = selectedFiles.length > 1 ? 'block' : 'none'
 
-  fileChips.querySelectorAll('.file-chip[data-idx] button').forEach(btn => {
+  fileChips.querySelectorAll('.thumb-x').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); removeFile(parseInt(btn.dataset.idx)) })
   })
-  fileChips.querySelectorAll('.file-chip[data-idx]').forEach(chip => {
-    chip.addEventListener('click', () => openEditor(parseInt(chip.dataset.idx)))
+  fileChips.querySelectorAll('.file-thumb[data-idx]').forEach(thumb => {
+    thumb.addEventListener('click', () => openEditor(parseInt(thumb.dataset.idx)))
   })
   document.getElementById('addMoreChip').addEventListener('click', () => fileInput.click())
 }
@@ -451,9 +464,9 @@ function openEditor(idx) {
     canvasWrap.style.cursor = isWholeMode ? 'default' : 'crosshair'
   }
   applyPixelation()
-  // Update active chip highlight
-  fileChips.querySelectorAll('.file-chip[data-idx]').forEach((chip, i) => {
-    chip.classList.toggle('active', i === idx)
+  // Update active thumbnail highlight
+  fileChips.querySelectorAll('.file-thumb[data-idx]').forEach((thumb, i) => {
+    thumb.classList.toggle('active', i === idx)
   })
 }
 
