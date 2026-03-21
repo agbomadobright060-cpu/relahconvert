@@ -511,6 +511,7 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
     <button id="resizeBtn" disabled style="display:none; width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${rikResizeBtn}</button>
+    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="resultBar" style="display:none; margin-bottom:12px;"></div>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
     <div id="nextSteps" style="display:none; margin-top:20px;">
@@ -533,6 +534,7 @@ const resultBar      = document.getElementById('resultBar')
 const downloadLink   = document.getElementById('downloadLink')
 const nextSteps      = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
+const warning        = document.getElementById('warning')
 
 let originalFile = null
 let resultBlob = null
@@ -547,6 +549,7 @@ function loadFile(file) {
   resultBar.style.display = 'none'
   downloadLink.style.display = 'none'
   nextSteps.style.display = 'none'
+  warning.style.display = 'none'
 
   const url = URL.createObjectURL(file)
   previewArea.innerHTML = `<div class="preview-card">
@@ -589,39 +592,31 @@ document.addEventListener('drop', e => {
 // ── Core compression logic ──────────────────────────────────────────────────
 async function compressToTargetSize(canvas, targetKB) {
   const targetBytes = targetKB * 1024
-  let min = 0.01, max = 1.0, quality = 0.5
-  let underBlob = null  // best blob at or under target
-  let overBlob = null   // best blob just over target
-  // Binary search
-  for (let i = 0; i < 25; i++) {
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality))
-    if (blob.size <= targetBytes) {
-      if (!underBlob || blob.size > underBlob.size) underBlob = blob
-      min = quality
-    } else {
-      if (!overBlob || blob.size < overBlob.size) overBlob = blob
-      max = quality
-    }
-    quality = (min + max) / 2
+
+  // Check minimum achievable
+  const minBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.01))
+  if (minBlob.size > targetBytes) {
+    // Can't go that small — try scaling down dimensions
+    const scale = Math.sqrt(targetBytes / minBlob.size) * 0.9
+    const small = document.createElement('canvas')
+    small.width = Math.floor(canvas.width * scale)
+    small.height = Math.floor(canvas.height * scale)
+    small.getContext('2d').drawImage(canvas, 0, 0, small.width, small.height)
+    return await new Promise(res => small.toBlob(res, 'image/jpeg', 0.5))
   }
-  // Prefer under-target blob (can pad to exact), fall back to closest over
-  let bestBlob = underBlob || overBlob
-  // Pad under-target blob to hit exact size
-  if (bestBlob && bestBlob.size < targetBytes) {
-    const shortfall = targetBytes - bestBlob.size
-    if (shortfall >= 4 && shortfall <= 65537) {
-      const original = new Uint8Array(await bestBlob.arrayBuffer())
-      const payloadSize = shortfall - 4
-      const seg = new Uint8Array(4 + payloadSize)
-      seg[0] = 0xFF; seg[1] = 0xFE
-      seg[2] = ((payloadSize + 2) >> 8) & 0xFF
-      seg[3] = (payloadSize + 2) & 0xFF
-      bestBlob = new Blob([
-        original.subarray(0, original.length - 2),
-        seg,
-        new Uint8Array([0xFF, 0xD9])
-      ], { type: 'image/jpeg' })
+
+  // Binary search — stay under target
+  let low = 0.01, high = 1.0, bestBlob = minBlob
+  for (let i = 0; i < 20; i++) {
+    const mid = (low + high) / 2
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', mid))
+    if (blob.size <= targetBytes) {
+      bestBlob = blob
+      low = mid
+    } else {
+      high = mid
     }
+    if (high - low < 0.0005) break
   }
   return bestBlob
 }
@@ -632,45 +627,32 @@ resizeBtn.addEventListener('click', async () => {
   const targetKB = parseInt(targetKBInput.value)
   if (!targetKB || targetKB < 1) return
 
+  const targetBytes = targetKB * 1024
+
+  // Edge case: target is larger than original — just download original
+  if (originalFile.size <= targetBytes) {
+    resultBlob = originalFile
+    showResultBar(originalFile.size, originalFile.size)
+    showDownload(originalFile.name, originalFile)
+    showWarning(t.rik_warn_larger || 'Target is larger than original — downloading original.')
+    return
+  }
+
   setResizing()
 
   try {
     const img = await loadImage(originalFile)
-    const targetBytes = targetKB * 1024
-    let canvas = document.createElement('canvas')
+    const canvas = document.createElement('canvas')
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
-    let ctx = canvas.getContext('2d')
-    ctx.drawImage(img, 0, 0)
+    canvas.getContext('2d').drawImage(img, 0, 0)
 
-    // First try at original dimensions
-    let blob = await compressToTargetSize(canvas, targetKB)
+    const blob = await compressToTargetSize(canvas, targetKB)
 
-    // If max quality still can't reach target, iteratively upscale
-    if (blob && blob.size < targetBytes * 0.95) {
-      const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
-      if (maxBlob.size < targetBytes) {
-        for (let attempt = 0; attempt < 3; attempt++) {
-          const ratio = targetBytes / maxBlob.size
-          const scale = Math.sqrt(ratio) * (1 + attempt * 0.1)
-          const upCanvas = document.createElement('canvas')
-          upCanvas.width = Math.round(img.naturalWidth * scale)
-          upCanvas.height = Math.round(img.naturalHeight * scale)
-          const upCtx = upCanvas.getContext('2d')
-          upCtx.drawImage(img, 0, 0, upCanvas.width, upCanvas.height)
-          const upBlob = await compressToTargetSize(upCanvas, targetKB)
-          if (upBlob && Math.abs(upBlob.size - targetBytes) < Math.abs(blob.size - targetBytes)) {
-            blob = upBlob
-            canvas = upCanvas
-          }
-          if (blob.size >= targetBytes * 0.95 && blob.size <= targetBytes * 1.05) break
-        }
-      }
-    }
-    if (!blob) {
-      alert('Could not reach target size. Try a larger value or resize dimensions first.')
-      setIdle()
-      return
+    // Check if we had to scale down (target was too small for dimensions)
+    const minBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.01))
+    if (minBlob.size > targetBytes) {
+      showWarning(t.rik_warn_small || 'Target too small for these dimensions — image was scaled down.')
     }
 
     resultBlob = blob
@@ -697,6 +679,7 @@ function setDisabled() { resizeBtn.disabled = true; resizeBtn.textContent = rikR
 function setIdle() { resizeBtn.disabled = false; resizeBtn.textContent = rikResizeBtn; resizeBtn.style.background = '#C84B31'; resizeBtn.style.cursor = 'pointer'; resizeBtn.style.opacity = '1' }
 function setResizing() { resizeBtn.disabled = true; resizeBtn.textContent = rikResizingBtn; resizeBtn.style.background = '#9A8A7A'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '1' }
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
+function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
 
 function showResultBar(originalBytes, outputBytes) {
   const isIncrease = outputBytes > originalBytes
