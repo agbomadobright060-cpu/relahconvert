@@ -561,23 +561,26 @@ function getCropRegion(img, aspect) {
       const { topY, bottomY, leftX, rightX } = personBounds
       const personH = bottomY - topY
       const personCx = leftX + (rightX - leftX) / 2
-      console.log('Person bounds:', { topY, bottomY, leftX, rightX, personH, imgW, imgH, fillRatio: personH/imgH })
+      console.log('Person bounds:', { topY, bottomY, leftX, rightX, personH, personW: rightX-leftX, personAspect: personH/(rightX-leftX), imgW, imgH })
 
-      // How much of image does person fill?
-      const fillRatio = personH / imgH
+      // Use person shape to determine photo type
+      const personW = rightX - leftX
+      const personAspect = personH / personW  // tall=body, square=head
 
       // Calculate how much of the person to show (head + shoulders)
-      // For any photo type, we want: top of head → mid-chest
       let headTop = topY
       let cropBottom
-      if (fillRatio > 0.7) {
-        // Full body or 3/4: take head + shoulders (top 22%)
+      if (personAspect > 3.0) {
+        // Very tall & narrow = full body → crop head + shoulders (top 22%)
         cropBottom = topY + personH * 0.22
-      } else if (fillRatio > 0.4) {
-        // Half body: take head + shoulders (top 50%)
-        cropBottom = topY + personH * 0.50
+      } else if (personAspect > 2.0) {
+        // Tall = 3/4 body → top 35%
+        cropBottom = topY + personH * 0.35
+      } else if (personAspect > 1.4) {
+        // Medium = half body → top 55%
+        cropBottom = topY + personH * 0.55
       } else {
-        // Already close-up: use full person bounds
+        // Square-ish = already headshot → use full person bounds
         cropBottom = bottomY
       }
 
