@@ -64,7 +64,7 @@ if (document.head) {
     .pix-canvas-wrap { position:relative; overflow:hidden; display:block; cursor:crosshair; width:100%; }
     .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
-    .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); pointer-events:none; z-index:1; }
+    .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); z-index:1; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -479,8 +479,10 @@ function getCanvasCoords(e) {
 canvasWrap.addEventListener('mousedown', startDrag)
 canvasWrap.addEventListener('touchstart', startDrag, { passive: false })
 function startDrag(e) {
-  if (isWholeMode || (isApplyAll && selectedFiles.length > 1)) return
+  if (isWholeMode || isApplyAll) return
   if (!loadedImages[activeFileIdx]) return
+  // Don't start drag if clicking on a selection box or its X button
+  if (e.target.closest('.pix-selection')) return
   e.preventDefault()
   isDragging = true
   dragStart = getCanvasCoords(e)
