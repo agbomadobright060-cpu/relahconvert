@@ -203,7 +203,6 @@ document.querySelector('#app').innerHTML = `
       </div>
       <div class="pix-canvas-wrap" id="canvasWrap">
         <canvas id="pixCanvas"></canvas>
-        <div id="selectionBox" class="pix-selection" style="display:none;"></div>
       </div>
     </div>
     <button id="downloadBtn" disabled style="display:none; width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; margin-top:12px;">${dlLabel}</button>
@@ -226,7 +225,6 @@ const pixelSlider  = document.getElementById('pixelSlider')
 const downloadBtn  = document.getElementById('downloadBtn')
 const modeWhole    = document.getElementById('modeWhole')
 const modeArea     = document.getElementById('modeArea')
-const selectionBox = document.getElementById('selectionBox')
 const nextSteps    = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
 const ctx          = pixCanvas.getContext('2d')
@@ -234,7 +232,8 @@ const ctx          = pixCanvas.getContext('2d')
 let uploadedImg = null
 let originalFile = null
 let isWholeMode = true
-let selection = null // { x, y, w, h } in image coords
+let selections = [] // [{ x, y, w, h }, ...]
+let currentDrag = null // { x, y, w, h } while dragging
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
 
@@ -248,8 +247,9 @@ function loadFile(file) {
     uploadedImg = img
     pixCanvas.width = img.naturalWidth
     pixCanvas.height = img.naturalHeight
-    selection = null
-    selectionBox.style.display = 'none'
+    selections = []
+    currentDrag = null
+    renderSelectionBoxes()
     editorArea.style.display = 'block'
     downloadBtn.style.display = 'block'
     downloadBtn.disabled = false
@@ -276,8 +276,9 @@ modeWhole.addEventListener('click', () => {
   isWholeMode = true
   modeWhole.classList.add('active')
   modeArea.classList.remove('active')
-  selection = null
-  selectionBox.style.display = 'none'
+  selections = []
+  currentDrag = null
+  renderSelectionBoxes()
   canvasWrap.style.cursor = 'default'
   applyPixelation()
 })
@@ -327,18 +328,8 @@ function moveDrag(e) {
   const y = Math.min(dragStart.y, pos.y)
   const w = Math.abs(pos.x - dragStart.x)
   const h = Math.abs(pos.y - dragStart.y)
-  selection = { x, y, w, h }
-
-  // Show CSS selection box
-  const rect = pixCanvas.getBoundingClientRect()
-  const scaleX = rect.width / pixCanvas.width
-  const scaleY = rect.height / pixCanvas.height
-  selectionBox.style.display = 'block'
-  selectionBox.style.left = (x * scaleX) + 'px'
-  selectionBox.style.top = (y * scaleY) + 'px'
-  selectionBox.style.width = (w * scaleX) + 'px'
-  selectionBox.style.height = (h * scaleY) + 'px'
-
+  currentDrag = { x, y, w, h }
+  renderSelectionBoxes()
   applyPixelation()
 }
 
@@ -348,7 +339,32 @@ document.addEventListener('touchend', endDrag)
 function endDrag() {
   if (!isDragging) return
   isDragging = false
+  if (currentDrag && currentDrag.w > 5 && currentDrag.h > 5) {
+    selections.push(currentDrag)
+  }
+  currentDrag = null
+  renderSelectionBoxes()
   applyPixelation()
+}
+
+function renderSelectionBoxes() {
+  // Remove old selection box elements
+  canvasWrap.querySelectorAll('.pix-selection').forEach(el => el.remove())
+  const rect = pixCanvas.getBoundingClientRect()
+  const scaleX = rect.width / pixCanvas.width
+  const scaleY = rect.height / pixCanvas.height
+  const allSels = [...selections]
+  if (currentDrag) allSels.push(currentDrag)
+  allSels.forEach((sel, i) => {
+    const div = document.createElement('div')
+    div.className = 'pix-selection'
+    div.style.left = (sel.x * scaleX) + 'px'
+    div.style.top = (sel.y * scaleY) + 'px'
+    div.style.width = (sel.w * scaleX) + 'px'
+    div.style.height = (sel.h * scaleY) + 'px'
+    div.style.display = 'block'
+    canvasWrap.appendChild(div)
+  })
 }
 
 // ── Pixelation logic ────────────────────────────────────────────────────────
@@ -362,15 +378,19 @@ function applyPixelation() {
   if (isWholeMode) {
     // Pixelate entire image
     pixelateRegion(0, 0, pixCanvas.width, pixCanvas.height, blockSize)
-  } else if (selection && selection.w > 2 && selection.h > 2) {
-    // Pixelate only selected area
-    pixelateRegion(
-      Math.round(selection.x),
-      Math.round(selection.y),
-      Math.round(selection.w),
-      Math.round(selection.h),
-      blockSize
-    )
+  } else {
+    // Pixelate all selected areas
+    const allSels = [...selections]
+    if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) allSels.push(currentDrag)
+    allSels.forEach(sel => {
+      pixelateRegion(
+        Math.round(sel.x),
+        Math.round(sel.y),
+        Math.round(sel.w),
+        Math.round(sel.h),
+        blockSize
+      )
+    })
   }
 }
 
