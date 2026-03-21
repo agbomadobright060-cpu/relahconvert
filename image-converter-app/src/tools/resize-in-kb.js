@@ -631,12 +631,6 @@ resizeBtn.addEventListener('click', async () => {
 
   const targetBytes = targetKB * 1024
 
-  // Can only reduce — show warning if target is larger than original
-  if (originalFile.size <= targetBytes) {
-    showWarning(t.rik_warn_larger || 'Target is larger than original. This tool can only reduce file size.')
-    return
-  }
-
   setResizing()
 
   try {
@@ -646,18 +640,32 @@ resizeBtn.addEventListener('click', async () => {
     canvas.height = img.naturalHeight
     canvas.getContext('2d').drawImage(img, 0, 0)
 
-    const blob = await compressToTargetSize(canvas, targetKB)
+    // Check max achievable size at quality 1.0
+    const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
 
-    // Check if we had to scale down (target was too small for dimensions)
-    const minBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.01))
-    if (minBlob.size > targetBytes) {
-      showWarning(t.rik_warn_small || 'Target too small for these dimensions — image was scaled down.')
+    if (targetBytes >= maxBlob.size) {
+      // Target is beyond max achievable — download at highest quality with warning
+      const maxKB = Math.round(maxBlob.size / 1024)
+      showWarning((t.rik_warn_max || 'Maximum achievable is') + ' ' + maxKB + 'KB — ' + (t.rik_warn_max_dl || 'downloading at highest quality.'))
+      resultBlob = maxBlob
+      const baseName = originalFile.name.replace(/\.[^.]+$/, '')
+      showResultBar(originalFile.size, maxBlob.size)
+      showDownload(baseName + '_' + maxKB + 'kb.jpg', maxBlob)
+    } else {
+      // Target is within range — compress to hit it
+      const blob = await compressToTargetSize(canvas, targetKB)
+
+      // Check if we had to scale down (target was too small for dimensions)
+      const minBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.01))
+      if (minBlob.size > targetBytes) {
+        showWarning(t.rik_warn_small || 'Target too small for these dimensions — image was scaled down.')
+      }
+
+      resultBlob = blob
+      const baseName = originalFile.name.replace(/\.[^.]+$/, '')
+      showResultBar(originalFile.size, blob.size)
+      showDownload(baseName + '_' + targetKB + 'kb.jpg', blob)
     }
-
-    resultBlob = blob
-    const baseName = originalFile.name.replace(/\.[^.]+$/, '')
-    showResultBar(originalFile.size, blob.size)
-    showDownload(baseName + '_' + targetKB + 'kb.jpg', blob)
   } catch (e) {
     alert('Error: ' + e.message)
   }
@@ -681,21 +689,26 @@ function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(current
 function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
 
 function showResultBar(originalBytes, outputBytes) {
-  const pct = Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
+  const isIncrease = outputBytes > originalBytes
+  const pct = isIncrease
+    ? Math.round((outputBytes / originalBytes - 1) * 100)
+    : Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
   const circumference = 226
-  const dashOffset = circumference - (circumference * pct / 100)
+  const dashOffset = circumference - (circumference * Math.min(pct, 100) / 100)
+  const changeLbl = isIncrease ? (t.rik_increase || 'increase') : rikReductionLbl
+  const circleColor = isIncrease ? '#2563EB' : '#C84B31'
   resultBar.style.display = 'block'
   resultBar.innerHTML = `
     <div class="result-bar">
       <div class="savings-circle">
         <svg width="72" height="72" viewBox="0 0 72 72">
           <circle class="circle-bg" cx="36" cy="36" r="30" />
-          <circle class="circle-fill" cx="36" cy="36" r="30" style="stroke-dashoffset:${circumference}" id="circleAnim" />
+          <circle class="circle-fill" cx="36" cy="36" r="30" style="stroke-dashoffset:${circumference};stroke:${circleColor}" id="circleAnim" />
           <text class="circle-label" x="36" y="36" transform="rotate(90,36,36)">${pct}%</text>
         </svg>
       </div>
       <div class="result-stats">
-        <p class="result-saved">${pct}% ${rikReductionLbl}</p>
+        <p class="result-saved">${pct}% ${changeLbl}</p>
         <div class="result-sizes">
           <span>${rikOriginalLbl}: ${formatSize(originalBytes)}</span>
           <span class="result-arrow">\u2192</span>
