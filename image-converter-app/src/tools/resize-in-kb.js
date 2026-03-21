@@ -1,5 +1,6 @@
 import { injectHeader } from '../core/header.js'
-import { formatSize } from '../core/utils.js'
+import { formatSize, totalBytes } from '../core/utils.js'
+import JSZip from 'jszip'
 import { getT, getLang, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 injectHreflang('resize-in-kb')
 
@@ -48,10 +49,13 @@ if (document.head) {
     .result-sizes { font-size:13px; color:#7A6A5A; display:flex; align-items:center; gap:8px; }
     .result-arrow { color:#C84B31; font-size:16px; }
     .preview-card { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; }
-    .preview-card img { width:100%; max-height:400px; object-fit:contain; display:block; }
+    .preview-card img { width:100%; height:120px; object-fit:cover; display:block; }
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .preview-card .kb-input { width:70px; padding:4px 6px; border:1.5px solid #DDD5C8; border-radius:6px; font-size:12px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none; margin:0 4px 6px 8px; }
+    #addMoreBtn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; margin-top:8px; }
+    #addMoreBtn:hover { border-color:#C84B31; color:#C84B31; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -67,10 +71,10 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = 'Resize Image in KB \u2014 Resize to Specific KB Size Free & Private | RelahConvert'
+  document.title = 'Resize Image in KB \u2014 Batch Resize to Specific KB Size Free & Private | RelahConvert'
   const metaDesc = document.createElement('meta')
   metaDesc.name = 'description'
-  metaDesc.content = 'Resize image in KB \u2014 compress or adjust any image to a specific file size in kilobytes. Free, private, browser-only. Perfect for passport photos, visa applications, and upload limits.'
+  metaDesc.content = 'Resize image in KB \u2014 batch compress or adjust multiple images to a specific file size in kilobytes. Process up to 25 files at once with individual or global KB targets. Free, private, browser-only.'
   document.head.appendChild(metaDesc)
 }
 
@@ -501,13 +505,18 @@ function buildSeoSection() {
 }
 
 // ── HTML ────────────────────────────────────────────────────────────────────
+const applyAllLbl = t.rik_apply_all || 'Apply to All'
+const individualLbl = t.rik_individual || 'Individual'
+const addMoreLbl = t.add_more || 'Add More'
+const downloadZipLbl = t.download_zip || 'Download ZIP'
+
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         ${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.rik_desc || 'Compress any image to an exact file size in KB. Free, private, browser-only.'}</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.rik_desc || 'Batch resize images to an exact file size in KB. Free, private, browser-only.'}</p>
     </div>
     <div id="uploadArea" style="margin-bottom:16px;">
       <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
@@ -515,17 +524,23 @@ document.querySelector('#app').innerHTML = `
       </label>
       <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${dropHint}</span>
     </div>
-    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" />
-    <div id="previewArea" style="display:none; margin-bottom:16px;"></div>
+    <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
+    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
+    <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
     <div id="controlsArea" style="display:none; margin-bottom:16px;">
-      <label style="font-size:13px; font-weight:600; color:#2C1810; display:block; margin-bottom:6px;">${rikTargetLbl}</label>
-      <div style="display:flex; gap:10px; align-items:center;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+        <label style="font-size:13px; font-weight:600; color:#2C1810;">${rikTargetLbl}</label>
+        <div style="display:flex; gap:4px; margin-left:auto;">
+          <button id="modeAllBtn" style="padding:4px 10px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+          <button id="modeIndBtn" style="padding:4px 10px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+        </div>
+      </div>
+      <div id="globalTarget" style="display:flex; gap:10px; align-items:center;">
         <input type="number" id="targetKB" min="1" max="99999" value="200" style="width:120px; padding:10px 14px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:15px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none;" />
         <span style="font-size:13px; color:#7A6A5A;">KB</span>
       </div>
     </div>
-    <button id="resizeBtn" disabled style="display:none; width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${rikResizeBtn}</button>
-    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
+    <button id="resizeBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${rikResizeBtn}</button>
     <div id="resultBar" style="display:none; margin-bottom:12px;"></div>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
     <div id="nextSteps" style="display:none; margin-top:20px;">
@@ -538,10 +553,15 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
+// ── Constants ───────────────────────────────────────────────────────────────
+const MAX_FILES = 25
+const MAX_TOTAL_BYTES = 200 * 1024 * 1024
+
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const fileInput      = document.getElementById('fileInput')
-const previewArea    = document.getElementById('previewArea')
+const previewGrid    = document.getElementById('previewGrid')
 const controlsArea   = document.getElementById('controlsArea')
+const globalTarget   = document.getElementById('globalTarget')
 const resizeBtn      = document.getElementById('resizeBtn')
 const targetKBInput  = document.getElementById('targetKB')
 const resultBar      = document.getElementById('resultBar')
@@ -549,58 +569,106 @@ const downloadLink   = document.getElementById('downloadLink')
 const nextSteps      = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
 const warning        = document.getElementById('warning')
+const modeAllBtn     = document.getElementById('modeAllBtn')
+const modeIndBtn     = document.getElementById('modeIndBtn')
 
-let originalFile = null
-let resultBlob = null
+let selectedFiles = []
+let previewUrls = []
+let resultBlobs = []
 let currentDownloadUrl = null
+let isApplyAll = true
+
+// ── Mode toggle ─────────────────────────────────────────────────────────────
+modeAllBtn.addEventListener('click', () => {
+  isApplyAll = true
+  modeAllBtn.style.background = '#C84B31'; modeAllBtn.style.color = '#fff'; modeAllBtn.style.borderColor = '#C84B31'
+  modeIndBtn.style.background = '#fff'; modeIndBtn.style.color = '#2C1810'; modeIndBtn.style.borderColor = '#DDD5C8'
+  globalTarget.style.display = 'flex'
+  document.querySelectorAll('.kb-input').forEach(el => el.style.display = 'none')
+  document.querySelectorAll('.kb-label').forEach(el => el.style.display = 'none')
+})
+modeIndBtn.addEventListener('click', () => {
+  isApplyAll = false
+  modeIndBtn.style.background = '#C84B31'; modeIndBtn.style.color = '#fff'; modeIndBtn.style.borderColor = '#C84B31'
+  modeAllBtn.style.background = '#fff'; modeAllBtn.style.color = '#2C1810'; modeAllBtn.style.borderColor = '#DDD5C8'
+  globalTarget.style.display = 'none'
+  document.querySelectorAll('.kb-input').forEach(el => el.style.display = 'inline-block')
+  document.querySelectorAll('.kb-label').forEach(el => el.style.display = 'inline')
+})
 
 // ── File handling ───────────────────────────────────────────────────────────
-function loadFile(file) {
-  if (!file || !file.type.startsWith('image/')) return
-  originalFile = file
-  resultBlob = null
-  cleanupOldUrl()
-  resultBar.style.display = 'none'
-  downloadLink.style.display = 'none'
-  nextSteps.style.display = 'none'
-  warning.style.display = 'none'
+function addFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
+  if (!arr.length) return
 
-  const url = URL.createObjectURL(file)
-  previewArea.innerHTML = `<div class="preview-card">
-    <img src="${url}" alt="preview" />
-    <button class="remove-btn" id="removeBtn">&times;</button>
-    <div class="fname">${file.name} &mdash; ${formatSize(file.size)}</div>
-  </div>`
-  previewArea.style.display = 'block'
-  controlsArea.style.display = 'block'
-  resizeBtn.style.display = 'block'
+  const total = selectedFiles.length + arr.length
+  if (total > MAX_FILES) {
+    showWarning((t.warn_files || 'Maximum') + ' ' + MAX_FILES + ' ' + (t.warn_files_suffix || 'files.'))
+    return
+  }
+  const totalSize = selectedFiles.reduce((s, f) => s + f.size, 0) + arr.reduce((s, f) => s + f.size, 0)
+  if (totalSize > MAX_TOTAL_BYTES) {
+    showWarning(t.warn_too_large || 'Total file size exceeds 200 MB limit.')
+    return
+  }
+
+  arr.forEach(f => selectedFiles.push(f))
+  renderPreviews()
   setIdle()
+}
 
-  document.getElementById('removeBtn').addEventListener('click', () => {
-    originalFile = null
-    resultBlob = null
-    cleanupOldUrl()
-    previewArea.style.display = 'none'
+function removeFile(idx) {
+  if (previewUrls[idx]) URL.revokeObjectURL(previewUrls[idx])
+  selectedFiles.splice(idx, 1)
+  renderPreviews()
+  if (!selectedFiles.length) {
+    setDisabled()
     controlsArea.style.display = 'none'
-    resizeBtn.style.display = 'none'
     resultBar.style.display = 'none'
     downloadLink.style.display = 'none'
     nextSteps.style.display = 'none'
-    setDisabled()
-    URL.revokeObjectURL(url)
+  }
+}
+
+function renderPreviews() {
+  // Revoke old URLs
+  previewUrls.forEach(u => { if (u) URL.revokeObjectURL(u) })
+  previewUrls = selectedFiles.map(f => URL.createObjectURL(f))
+
+  previewGrid.innerHTML = selectedFiles.map((f, i) => `
+    <div class="preview-card" style="display:inline-block; width:calc(33.33% - 8px); vertical-align:top; margin-bottom:10px;">
+      <img src="${previewUrls[i]}" alt="preview" />
+      <button class="remove-btn" data-idx="${i}">&times;</button>
+      <div class="fname">${f.name} &mdash; ${formatSize(f.size)}</div>
+      <div style="padding:0 8px 6px;">
+        <input type="number" class="kb-input" data-idx="${i}" min="1" max="99999" value="200" style="${isApplyAll ? 'display:none' : ''}" />
+        <span class="kb-label" style="font-size:11px; color:#7A6A5A; ${isApplyAll ? 'display:none' : ''}">KB</span>
+      </div>
+    </div>
+  `).join('') + `<button id="addMoreBtn">+ ${addMoreLbl}</button>`
+
+  previewGrid.style.display = 'block'
+  controlsArea.style.display = 'block'
+  resizeBtn.style.display = 'block'
+
+  // Wire up remove buttons
+  previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => removeFile(parseInt(btn.dataset.idx)))
   })
+  // Wire up add more
+  document.getElementById('addMoreBtn').addEventListener('click', () => fileInput.click())
 }
 
 fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) loadFile(fileInput.files[0])
+  if (fileInput.files.length) addFiles(fileInput.files)
   fileInput.value = ''
 })
 
 document.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation() })
 document.addEventListener('drop', e => {
   e.preventDefault(); e.stopPropagation()
-  const file = e.dataTransfer.files?.[0]
-  if (file && file.type.startsWith('image/')) loadFile(file)
+  const files = e.dataTransfer.files
+  if (files && files.length) addFiles(files)
 })
 
 // ── Core compression logic ──────────────────────────────────────────────────
@@ -638,53 +706,76 @@ async function compressToTargetSize(canvas, targetKB) {
 }
 
 // ── Resize action ───────────────────────────────────────────────────────────
-resizeBtn.addEventListener('click', async () => {
-  if (!originalFile) return
-  const targetKB = parseInt(targetKBInput.value)
-  if (!targetKB || targetKB < 1) return
-
+async function processOneFile(file, targetKB) {
   const targetBytes = targetKB * 1024
-  const originalKB = originalFile.size / 1024
-
-  setResizing()
+  const originalKB = file.size / 1024
+  const imgUrl = URL.createObjectURL(file)
 
   try {
-    const img = await loadImage(originalFile)
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image()
+      i.onload = () => resolve(i)
+      i.onerror = () => reject(new Error('Image load failed'))
+      i.src = imgUrl
+    })
     const canvas = document.createElement('canvas')
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
     canvas.getContext('2d').drawImage(img, 0, 0)
-    const baseName = originalFile.name.replace(/\.[^.]+$/, '')
+    const baseName = file.name.replace(/\.[^.]+$/, '')
 
+    let blob, outName
     if (targetKB >= originalKB * 0.95) {
-      // Target is same size or larger than original
       if (Math.abs(targetKB - originalKB) / originalKB < 0.05) {
-        // Within 5% — already close, download original
-        showWarning(t.rik_warn_close || 'Image already close to target size.')
-        resultBlob = originalFile
-        showResultBar(originalFile.size, originalFile.size)
-        showDownload(originalFile.name, originalFile)
+        blob = file
+        outName = file.name
       } else {
-        // Target larger — save at max quality
-        const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
-        showWarning(t.rik_warn_larger || 'Target larger than original — saved at maximum quality.')
-        resultBlob = maxBlob
-        showResultBar(originalFile.size, maxBlob.size)
-        showDownload(baseName + '_maxq.jpg', maxBlob)
+        blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
+        outName = baseName + '_maxq.jpg'
       }
     } else {
-      // Target < original — compress down
-      const blob = await compressToTargetSize(canvas, targetKB)
+      blob = await compressToTargetSize(canvas, targetKB)
+      outName = baseName + '_' + targetKB + 'kb.jpg'
+    }
+    return { blob, name: outName, originalSize: file.size, type: blob.type || 'image/jpeg' }
+  } finally {
+    URL.revokeObjectURL(imgUrl)
+  }
+}
 
-      // Check if we had to scale down (target was too small for dimensions)
-      const minBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.01))
-      if (minBlob.size > targetBytes) {
-        showWarning(t.rik_warn_small || 'Target too small for these dimensions — image was scaled down.')
-      }
+resizeBtn.addEventListener('click', async () => {
+  if (!selectedFiles.length) return
 
-      resultBlob = blob
-      showResultBar(originalFile.size, blob.size)
-      showDownload(baseName + '_' + targetKB + 'kb.jpg', blob)
+  // Gather targets
+  const targets = selectedFiles.map((f, i) => {
+    if (isApplyAll) return parseInt(targetKBInput.value) || 200
+    const inp = previewGrid.querySelector(`.kb-input[data-idx="${i}"]`)
+    return inp ? (parseInt(inp.value) || 200) : 200
+  })
+
+  setResizing()
+  resultBlobs = []
+  let totalOriginal = 0, totalOutput = 0
+
+  try {
+    for (let i = 0; i < selectedFiles.length; i++) {
+      resizeBtn.textContent = rikResizingBtn + ` (${i + 1}/${selectedFiles.length})`
+      const result = await processOneFile(selectedFiles[i], targets[i])
+      resultBlobs.push(result)
+      totalOriginal += result.originalSize
+      totalOutput += result.blob.size
+    }
+
+    showResultBar(totalOriginal, totalOutput)
+
+    if (resultBlobs.length === 1) {
+      showDownload(resultBlobs[0].name, resultBlobs[0].blob)
+    } else {
+      // ZIP multiple results
+      const zip = new JSZip()
+      resultBlobs.forEach(r => zip.file(r.name, r.blob))
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+      showDownload('resized-images.zip', zipBlob)
     }
   } catch (e) {
     alert('Error: ' + e.message)
@@ -692,18 +783,9 @@ resizeBtn.addEventListener('click', async () => {
   setIdle()
 })
 
-function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => resolve(img)
-    img.onerror = () => reject(new Error('Image load failed'))
-    img.src = URL.createObjectURL(file)
-  })
-}
-
 // ── UI helpers ──────────────────────────────────────────────────────────────
 function setDisabled() { resizeBtn.disabled = true; resizeBtn.textContent = rikResizeBtn; resizeBtn.style.background = '#C4B8A8'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '0.7' }
-function setIdle() { resizeBtn.disabled = false; resizeBtn.textContent = rikResizeBtn; resizeBtn.style.background = '#C84B31'; resizeBtn.style.cursor = 'pointer'; resizeBtn.style.opacity = '1' }
+function setIdle() { if (!selectedFiles.length) { setDisabled(); return } resizeBtn.disabled = false; resizeBtn.textContent = rikResizeBtn; resizeBtn.style.background = '#C84B31'; resizeBtn.style.cursor = 'pointer'; resizeBtn.style.opacity = '1' }
 function setResizing() { resizeBtn.disabled = true; resizeBtn.textContent = rikResizingBtn; resizeBtn.style.background = '#9A8A7A'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '1' }
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
 function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
@@ -717,6 +799,7 @@ function showResultBar(originalBytes, outputBytes) {
   const dashOffset = circumference - (circumference * Math.min(pct, 100) / 100)
   const changeLbl = isIncrease ? (t.rik_increase || 'increase') : rikReductionLbl
   const circleColor = isIncrease ? '#2563EB' : '#C84B31'
+  const plural = selectedFiles.length > 1 ? (t.compress_result_plural || 'Total') : ''
   resultBar.style.display = 'block'
   resultBar.innerHTML = `
     <div class="result-bar">
@@ -728,7 +811,7 @@ function showResultBar(originalBytes, outputBytes) {
         </svg>
       </div>
       <div class="result-stats">
-        <p class="result-saved">${pct}% ${changeLbl}</p>
+        <p class="result-saved">${plural} ${pct}% ${changeLbl}</p>
         <div class="result-sizes">
           <span>${rikOriginalLbl}: ${formatSize(originalBytes)}</span>
           <span class="result-arrow">\u2192</span>
@@ -747,7 +830,7 @@ function showDownload(filename, blob) {
   currentDownloadUrl = URL.createObjectURL(blob)
   downloadLink.href = currentDownloadUrl
   downloadLink.download = filename
-  downloadLink.textContent = dlLabel
+  downloadLink.textContent = selectedFiles.length > 1 ? downloadZipLbl : dlLabel
   downloadLink.style.display = 'block'
   buildNextSteps()
 }
@@ -788,8 +871,8 @@ async function loadPendingFiles() {
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
-    const file = new File([records[0].blob], records[0].name, { type: records[0].type })
-    loadFile(file)
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    addFiles(files)
   } catch (e) {}
 }
 
@@ -807,9 +890,9 @@ function buildNextSteps() {
     btn.className = 'next-link'
     btn.textContent = b.label
     btn.addEventListener('click', async () => {
-      if (resultBlob) {
+      if (resultBlobs.length) {
         try {
-          await saveFilesToIDB([{ blob: resultBlob, name: originalFile.name, type: resultBlob.type }])
+          await saveFilesToIDB(resultBlobs.map(r => ({ blob: r.blob, name: r.name, type: r.type })))
           sessionStorage.setItem('pendingFromIDB', '1')
         } catch (e) {}
       }
