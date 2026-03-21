@@ -619,11 +619,23 @@ resizeBtn.addEventListener('click', async () => {
 
   try {
     const img = await loadImage(originalFile)
-    const canvas = document.createElement('canvas')
+    const targetBytes = targetKB * 1024
+    let canvas = document.createElement('canvas')
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
-    const ctx = canvas.getContext('2d')
+    let ctx = canvas.getContext('2d')
     ctx.drawImage(img, 0, 0)
+
+    // Check if max quality can reach target; if not, upscale canvas
+    const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
+    if (maxBlob.size < targetBytes) {
+      const scale = Math.sqrt(targetBytes / maxBlob.size) * 1.15
+      canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.naturalWidth * scale)
+      canvas.height = Math.round(img.naturalHeight * scale)
+      ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    }
 
     const blob = await compressToTargetSize(canvas, targetKB)
     if (!blob) {
@@ -658,21 +670,26 @@ function setResizing() { resizeBtn.disabled = true; resizeBtn.textContent = rikR
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
 
 function showResultBar(originalBytes, outputBytes) {
-  const saved = Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
+  const isIncrease = outputBytes > originalBytes
+  const pct = isIncrease
+    ? Math.round((outputBytes / originalBytes - 1) * 100)
+    : Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
   const circumference = 226
-  const dashOffset = circumference - (circumference * saved / 100)
+  const dashOffset = circumference - (circumference * Math.min(pct, 100) / 100)
+  const changeLbl = isIncrease ? (t.rik_increase || 'increase') : rikReductionLbl
+  const circleColor = isIncrease ? '#2563EB' : '#C84B31'
   resultBar.style.display = 'block'
   resultBar.innerHTML = `
     <div class="result-bar">
       <div class="savings-circle">
         <svg width="72" height="72" viewBox="0 0 72 72">
           <circle class="circle-bg" cx="36" cy="36" r="30" />
-          <circle class="circle-fill" cx="36" cy="36" r="30" style="stroke-dashoffset:${circumference}" id="circleAnim" />
-          <text class="circle-label" x="36" y="36" transform="rotate(90,36,36)">${saved}%</text>
+          <circle class="circle-fill" cx="36" cy="36" r="30" style="stroke-dashoffset:${circumference};stroke:${circleColor}" id="circleAnim" />
+          <text class="circle-label" x="36" y="36" transform="rotate(90,36,36)">${pct}%</text>
         </svg>
       </div>
       <div class="result-stats">
-        <p class="result-saved">${saved}% ${rikReductionLbl}</p>
+        <p class="result-saved">${pct}% ${changeLbl}</p>
         <div class="result-sizes">
           <span>${rikOriginalLbl}: ${formatSize(originalBytes)}</span>
           <span class="result-arrow">\u2192</span>
