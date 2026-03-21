@@ -592,7 +592,8 @@ async function compressToTargetSize(canvas, targetKB) {
   let min = 0.01, max = 1.0, quality = 0.5
   let bestBlob = null
   let bestDiff = Infinity
-  for (let i = 0; i < 20; i++) {
+  // Binary search for closest quality
+  for (let i = 0; i < 25; i++) {
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality))
     const diff = Math.abs(blob.size - targetBytes)
     if (diff < bestDiff) {
@@ -605,6 +606,23 @@ async function compressToTargetSize(canvas, targetKB) {
       max = quality
     }
     quality = (min + max) / 2
+  }
+  // If under target, pad with a JPEG comment marker to hit exact size
+  if (bestBlob && bestBlob.size < targetBytes) {
+    const shortfall = targetBytes - bestBlob.size
+    if (shortfall >= 4 && shortfall <= 65537) {
+      const original = new Uint8Array(await bestBlob.arrayBuffer())
+      const payloadSize = shortfall - 4 // 4 bytes = FF FE + 2-byte length
+      const seg = new Uint8Array(4 + payloadSize)
+      seg[0] = 0xFF; seg[1] = 0xFE // COM marker
+      seg[2] = ((payloadSize + 2) >> 8) & 0xFF
+      seg[3] = (payloadSize + 2) & 0xFF
+      bestBlob = new Blob([
+        original.subarray(0, original.length - 2), // before EOI
+        seg,
+        new Uint8Array([0xFF, 0xD9]) // EOI
+      ], { type: 'image/jpeg' })
+    }
   }
   return bestBlob
 }
@@ -761,7 +779,6 @@ function buildNextSteps() {
     { label: ns.compress || 'Compress Image', href: localHref('compress') },
     { label: ns.resize || 'Resize Image', href: localHref('resize') },
     { label: ns.crop || 'Crop Image', href: localHref('crop') },
-    { label: ns['passport-photo'] || 'Passport Photo', href: localHref('passport-photo') },
   ]
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {
