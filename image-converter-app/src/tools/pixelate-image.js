@@ -303,6 +303,7 @@ let activeFileIdx = 0
 let perFileSelections = [] // perFileSelections[i] = [{ x, y, w, h }, ...]
 let perFileMode = []       // perFileMode[i] = 'whole' | 'area'
 let perFileLevel = []      // perFileLevel[i] = blockSize number
+let activeSelIdx = -1 // which selection box is visible (-1 = none/drawing)
 let currentDrag = null
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
@@ -454,6 +455,7 @@ function openEditor(idx) {
   pixCanvas.height = img.naturalHeight
   editorArea.style.display = 'block'
   currentDrag = null
+  activeSelIdx = -1
   // Restore per-file state in Individual mode
   if (!isApplyAll) {
     isWholeMode = perFileMode[idx] === 'whole'
@@ -497,11 +499,28 @@ canvasWrap.addEventListener('touchstart', startDrag, { passive: false })
 function startDrag(e) {
   if (isWholeMode || isApplyAll) return
   if (!loadedImages[activeFileIdx]) return
-  // Don't start drag if clicking on a selection box or its X button
   if (e.target.closest('.pix-selection')) return
   e.preventDefault()
+
+  // Check if click is inside an existing pixelated region
+  const coords = getCanvasCoords(e)
+  const sels = perFileSelections[activeFileIdx] || []
+  const clickedIdx = sels.findIndex(s =>
+    coords.x >= s.x && coords.x <= s.x + s.w &&
+    coords.y >= s.y && coords.y <= s.y + s.h
+  )
+  if (clickedIdx >= 0) {
+    // Clicked on a pixelated area — show its box
+    activeSelIdx = clickedIdx
+    renderSelectionBoxes()
+    return
+  }
+
+  // Clicked on empty area — hide any active box and start new drag
+  activeSelIdx = -1
+  renderSelectionBoxes()
   isDragging = true
-  dragStart = getCanvasCoords(e)
+  dragStart = coords
 }
 
 document.addEventListener('mousemove', moveDrag)
@@ -525,6 +544,7 @@ function endDrag() {
   isDragging = false
   if (currentDrag && currentDrag.w > 5 && currentDrag.h > 5) {
     perFileSelections[activeFileIdx].push({ ...currentDrag })
+    activeSelIdx = perFileSelections[activeFileIdx].length - 1
   }
   currentDrag = null
   renderSelectionBoxes()
@@ -533,18 +553,30 @@ function endDrag() {
 
 function renderSelectionBoxes() {
   canvasWrap.querySelectorAll('.pix-selection').forEach(el => el.remove())
-  if (isApplyAll && selectedFiles.length > 1) return
+  if (isApplyAll) return
   const canvasRect = pixCanvas.getBoundingClientRect()
   const wrapRect = canvasWrap.getBoundingClientRect()
   const offsetX = canvasRect.left - wrapRect.left
   const offsetY = canvasRect.top - wrapRect.top
   const scaleX = canvasRect.width / pixCanvas.width
   const scaleY = canvasRect.height / pixCanvas.height
+
+  // Show box for current drag (while drawing)
+  if (currentDrag) {
+    const div = document.createElement('div')
+    div.className = 'pix-selection'
+    div.style.left = (offsetX + currentDrag.x * scaleX) + 'px'
+    div.style.top = (offsetY + currentDrag.y * scaleY) + 'px'
+    div.style.width = (currentDrag.w * scaleX) + 'px'
+    div.style.height = (currentDrag.h * scaleY) + 'px'
+    div.style.display = 'block'
+    canvasWrap.appendChild(div)
+  }
+
+  // Show box only for the active selection (if any)
   const savedSels = perFileSelections[activeFileIdx] || []
-  const allSels = [...savedSels]
-  if (currentDrag) allSels.push(currentDrag)
-  allSels.forEach((sel, i) => {
-    const isSaved = i < savedSels.length
+  if (activeSelIdx >= 0 && activeSelIdx < savedSels.length) {
+    const sel = savedSels[activeSelIdx]
     const div = document.createElement('div')
     div.className = 'pix-selection'
     div.style.left = (offsetX + sel.x * scaleX) + 'px'
@@ -552,30 +584,22 @@ function renderSelectionBoxes() {
     div.style.width = (sel.w * scaleX) + 'px'
     div.style.height = (sel.h * scaleY) + 'px'
     div.style.display = 'block'
-    if (isSaved) {
-      // Prevent drag when clicking on selection box
-      div.addEventListener('mousedown', e => {
-        e.stopPropagation()
-      })
-      // X delete button
-      const xBtn = document.createElement('button')
-      xBtn.textContent = '\u00d7'
-      xBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(200,75,49,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;line-height:1;padding:0;'
-      xBtn.addEventListener('mousedown', e => {
-        e.stopPropagation()
-        e.preventDefault()
-      })
-      xBtn.addEventListener('click', e => {
-        e.stopPropagation()
-        e.preventDefault()
-        perFileSelections[activeFileIdx].splice(i, 1)
-        renderSelectionBoxes()
-        applyPixelation()
-      })
-      div.appendChild(xBtn)
-    }
+    div.addEventListener('mousedown', e => e.stopPropagation())
+    // X delete button
+    const xBtn = document.createElement('button')
+    xBtn.textContent = '\u00d7'
+    xBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(200,75,49,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;line-height:1;padding:0;'
+    xBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault() })
+    xBtn.addEventListener('click', e => {
+      e.stopPropagation()
+      perFileSelections[activeFileIdx].splice(activeSelIdx, 1)
+      activeSelIdx = -1
+      renderSelectionBoxes()
+      applyPixelation()
+    })
+    div.appendChild(xBtn)
     canvasWrap.appendChild(div)
-  })
+  }
 }
 
 // ── Pixelation logic ────────────────────────────────────────────────────────
