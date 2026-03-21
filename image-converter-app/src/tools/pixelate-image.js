@@ -507,16 +507,19 @@ function endDrag() {
 function renderSelectionBoxes() {
   canvasWrap.querySelectorAll('.pix-selection').forEach(el => el.remove())
   if (isApplyAll && selectedFiles.length > 1) return
-  const rect = pixCanvas.getBoundingClientRect()
-  const scaleX = rect.width / pixCanvas.width
-  const scaleY = rect.height / pixCanvas.height
+  const canvasRect = pixCanvas.getBoundingClientRect()
+  const wrapRect = canvasWrap.getBoundingClientRect()
+  const offsetX = canvasRect.left - wrapRect.left
+  const offsetY = canvasRect.top - wrapRect.top
+  const scaleX = canvasRect.width / pixCanvas.width
+  const scaleY = canvasRect.height / pixCanvas.height
   const sels = [...(perFileSelections[activeFileIdx] || [])]
   if (currentDrag) sels.push(currentDrag)
   sels.forEach(sel => {
     const div = document.createElement('div')
     div.className = 'pix-selection'
-    div.style.left = (sel.x * scaleX) + 'px'
-    div.style.top = (sel.y * scaleY) + 'px'
+    div.style.left = (offsetX + sel.x * scaleX) + 'px'
+    div.style.top = (offsetY + sel.y * scaleY) + 'px'
     div.style.width = (sel.w * scaleX) + 'px'
     div.style.height = (sel.h * scaleY) + 'px'
     div.style.display = 'block'
