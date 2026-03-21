@@ -272,6 +272,7 @@ const MAX_TOTAL_BYTES = 200 * 1024 * 1024
 
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const fileInput    = document.getElementById('fileInput')
+const uploadArea   = document.getElementById('uploadArea')
 const workArea     = document.getElementById('workArea')
 const fileChips    = document.getElementById('fileChips')
 const editorArea   = document.getElementById('editorArea')
@@ -377,6 +378,7 @@ function addFiles(files) {
     img.src = url
   })
   renderFileChips()
+  uploadArea.style.display = 'none'
   workArea.style.display = 'block'
   downloadBtn.disabled = false
   // Always auto-open first/active file in editor
@@ -398,6 +400,7 @@ function removeFile(idx) {
   renderFileChips()
   if (!selectedFiles.length) {
     workArea.style.display = 'none'
+    uploadArea.style.display = 'block'
     editorArea.style.display = 'none'
     downloadBtn.disabled = true
     nextSteps.style.display = 'none'
