@@ -117,7 +117,7 @@ function langCopyPlugin() {
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
         'round-corners','meme-generator','blur-face','remove-background',
-        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo'
+        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')

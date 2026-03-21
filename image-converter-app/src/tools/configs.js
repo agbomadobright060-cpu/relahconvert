@@ -223,4 +223,11 @@ export const tools = {
     outputFormat: null,
     slug: 'passport-photo'
   },
+  'image-splitter': {
+    title: 'Image Splitter',
+    description: 'Split any image into a grid of equal pieces. Choose presets or custom rows and columns. Download as ZIP.',
+    inputFormats: [],
+    outputFormat: null,
+    slug: 'image-splitter'
+  },
 }
