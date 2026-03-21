@@ -1,5 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { formatSize } from '../core/utils.js'
+import JSZip from 'jszip'
 import { getT, getLang, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 injectHreflang('pixelate-image')
 
@@ -173,13 +174,18 @@ function buildSeoSection() {
 }
 
 // ── HTML ────────────────────────────────────────────────────────────────────
+const applyAllLbl = t.rik_apply_all || 'Apply to All'
+const individualLbl = t.rik_individual || 'Individual'
+const addMoreLbl = t.add_more || 'Add More'
+const downloadZipLbl = t.download_zip || 'Download ZIP'
+
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         ${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.pix_desc || 'Pixelate an entire image or just a face/region. Free, private, browser-only.'}</p>
+      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.pix_desc || 'Pixelate an entire image or just a face/region. Batch process up to 25 files. Free, private, browser-only.'}</p>
     </div>
     <div id="uploadArea" style="margin-bottom:16px;">
       <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
@@ -187,11 +193,19 @@ document.querySelector('#app').innerHTML = `
       </label>
       <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${dropHint}</span>
     </div>
-    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" />
-    <div id="editorArea" style="display:none;">
-      <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <button class="pix-mode-btn active" id="modeWhole">${pixWholeLbl}</button>
-        <button class="pix-mode-btn" id="modeArea">${pixAreaLbl}</button>
+    <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
+    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
+    <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
+    <div id="controlsArea" style="display:none; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+        <div style="display:flex; gap:8px;">
+          <button class="pix-mode-btn active" id="modeWhole">${pixWholeLbl}</button>
+          <button class="pix-mode-btn" id="modeArea">${pixAreaLbl}</button>
+        </div>
+        <div id="batchModeWrap" style="display:none; margin-left:auto; display:flex; gap:4px;">
+          <button id="modeAllBtn" style="padding:4px 10px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+          <button id="modeIndBtn" style="padding:4px 10px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+        </div>
       </div>
       <div style="margin-bottom:12px;">
         <label style="font-size:13px; font-weight:600; color:#2C1810; display:block; margin-bottom:6px;">${pixLevelLbl}</label>
@@ -201,11 +215,14 @@ document.querySelector('#app').innerHTML = `
           <span style="font-size:11px; color:#9A8A7A;">${pixHighLbl}</span>
         </div>
       </div>
-      <div class="pix-canvas-wrap" id="canvasWrap">
-        <canvas id="pixCanvas"></canvas>
+      <div id="editorArea" style="display:none;">
+        <div class="pix-canvas-wrap" id="canvasWrap">
+          <canvas id="pixCanvas"></canvas>
+        </div>
+        <p id="editorLabel" style="font-size:12px; color:#7A6A5A; margin:8px 0 0; text-align:center;"></p>
       </div>
     </div>
-    <button id="downloadBtn" disabled style="display:none; width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; margin-top:12px;">${dlLabel}</button>
+    <button id="downloadBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${dlLabel}</button>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next || "WHAT'S NEXT?"}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -216,69 +233,49 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
+// ── Constants ───────────────────────────────────────────────────────────────
+const MAX_FILES = 25
+const MAX_TOTAL_BYTES = 200 * 1024 * 1024
+
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const fileInput    = document.getElementById('fileInput')
+const previewGrid  = document.getElementById('previewGrid')
+const controlsArea = document.getElementById('controlsArea')
 const editorArea   = document.getElementById('editorArea')
+const editorLabel  = document.getElementById('editorLabel')
 const pixCanvas    = document.getElementById('pixCanvas')
 const canvasWrap   = document.getElementById('canvasWrap')
 const pixelSlider  = document.getElementById('pixelSlider')
 const downloadBtn  = document.getElementById('downloadBtn')
 const modeWhole    = document.getElementById('modeWhole')
 const modeArea     = document.getElementById('modeArea')
+const modeAllBtn   = document.getElementById('modeAllBtn')
+const modeIndBtn   = document.getElementById('modeIndBtn')
+const batchModeWrap = document.getElementById('batchModeWrap')
+const warning      = document.getElementById('warning')
 const nextSteps    = document.getElementById('nextSteps')
 const nextStepsButtons = document.getElementById('nextStepsButtons')
 const ctx          = pixCanvas.getContext('2d')
 
-let uploadedImg = null
-let originalFile = null
+let selectedFiles = []
+let previewUrls = []
 let isWholeMode = true
-let selections = [] // [{ x, y, w, h }, ...]
-let currentDrag = null // { x, y, w, h } while dragging
+let isApplyAll = true
+let activeFileIdx = 0 // which file is being edited in Individual mode
+let perFileSelections = [] // perFileSelections[i] = [{ x, y, w, h }, ...]
+let currentDrag = null
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
+let loadedImages = [] // cached Image objects
+let resultBlobs = []
+let currentDownloadUrl = null
 
-// ── File handling ───────────────────────────────────────────────────────────
-function loadFile(file) {
-  if (!file || !file.type.startsWith('image/')) return
-  originalFile = file
-  const url = URL.createObjectURL(file)
-  const img = new Image()
-  img.onload = () => {
-    uploadedImg = img
-    pixCanvas.width = img.naturalWidth
-    pixCanvas.height = img.naturalHeight
-    selections = []
-    currentDrag = null
-    renderSelectionBoxes()
-    editorArea.style.display = 'block'
-    downloadBtn.style.display = 'block'
-    downloadBtn.disabled = false
-    applyPixelation()
-    URL.revokeObjectURL(url)
-  }
-  img.src = url
-}
-
-fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) loadFile(fileInput.files[0])
-  fileInput.value = ''
-})
-
-document.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation() })
-document.addEventListener('drop', e => {
-  e.preventDefault(); e.stopPropagation()
-  const file = e.dataTransfer.files?.[0]
-  if (file && file.type.startsWith('image/')) loadFile(file)
-})
-
-// ── Mode toggle ─────────────────────────────────────────────────────────────
+// ── Mode toggles ────────────────────────────────────────────────────────────
 modeWhole.addEventListener('click', () => {
   isWholeMode = true
   modeWhole.classList.add('active')
   modeArea.classList.remove('active')
-  selections = []
-  currentDrag = null
-  renderSelectionBoxes()
+  if (!isApplyAll) { perFileSelections[activeFileIdx] = [] }
   canvasWrap.style.cursor = 'default'
   applyPixelation()
 })
@@ -288,10 +285,125 @@ modeArea.addEventListener('click', () => {
   modeArea.classList.add('active')
   modeWhole.classList.remove('active')
   canvasWrap.style.cursor = 'crosshair'
-  // Redraw original without pixelation until area is selected
-  if (uploadedImg) {
-    ctx.drawImage(uploadedImg, 0, 0)
+  applyPixelation()
+})
+
+modeAllBtn.addEventListener('click', () => {
+  isApplyAll = true
+  modeAllBtn.style.background = '#C84B31'; modeAllBtn.style.color = '#fff'; modeAllBtn.style.borderColor = '#C84B31'
+  modeIndBtn.style.background = '#fff'; modeIndBtn.style.color = '#2C1810'; modeIndBtn.style.borderColor = '#DDD5C8'
+  editorArea.style.display = 'none'
+  editorLabel.textContent = ''
+})
+
+modeIndBtn.addEventListener('click', () => {
+  isApplyAll = false
+  modeIndBtn.style.background = '#C84B31'; modeIndBtn.style.color = '#fff'; modeIndBtn.style.borderColor = '#C84B31'
+  modeAllBtn.style.background = '#fff'; modeAllBtn.style.color = '#2C1810'; modeAllBtn.style.borderColor = '#DDD5C8'
+  if (selectedFiles.length) openEditor(0)
+})
+
+// ── File handling ───────────────────────────────────────────────────────────
+function addFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
+  if (!arr.length) return
+  if (selectedFiles.length + arr.length > MAX_FILES) {
+    showWarning('Maximum ' + MAX_FILES + ' files.')
+    return
   }
+  const totalSize = selectedFiles.reduce((s, f) => s + f.size, 0) + arr.reduce((s, f) => s + f.size, 0)
+  if (totalSize > MAX_TOTAL_BYTES) {
+    showWarning('Total file size exceeds 200 MB limit.')
+    return
+  }
+  arr.forEach(f => {
+    selectedFiles.push(f)
+    perFileSelections.push([])
+    loadedImages.push(null)
+  })
+  // Preload images
+  arr.forEach((f, i) => {
+    const idx = selectedFiles.length - arr.length + i
+    const url = URL.createObjectURL(f)
+    const img = new Image()
+    img.onload = () => { loadedImages[idx] = img; URL.revokeObjectURL(url) }
+    img.src = url
+  })
+  renderPreviews()
+  controlsArea.style.display = 'block'
+  downloadBtn.disabled = false
+  downloadBtn.style.opacity = '1'
+  downloadBtn.style.cursor = 'pointer'
+  downloadBtn.style.background = '#C84B31'
+}
+
+function removeFile(idx) {
+  if (previewUrls[idx]) URL.revokeObjectURL(previewUrls[idx])
+  selectedFiles.splice(idx, 1)
+  perFileSelections.splice(idx, 1)
+  loadedImages.splice(idx, 1)
+  if (activeFileIdx >= selectedFiles.length) activeFileIdx = Math.max(0, selectedFiles.length - 1)
+  renderPreviews()
+  if (!selectedFiles.length) {
+    controlsArea.style.display = 'none'
+    editorArea.style.display = 'none'
+    downloadBtn.disabled = true
+    downloadBtn.style.opacity = '0.7'
+    downloadBtn.style.cursor = 'not-allowed'
+    downloadBtn.style.background = '#C4B8A8'
+    nextSteps.style.display = 'none'
+  }
+}
+
+function renderPreviews() {
+  previewUrls.forEach(u => { if (u) URL.revokeObjectURL(u) })
+  previewUrls = selectedFiles.map(f => URL.createObjectURL(f))
+  previewGrid.innerHTML = selectedFiles.map((f, i) => `
+    <div class="preview-card" data-idx="${i}" style="display:inline-block; width:calc(33.33% - 8px); vertical-align:top; margin-bottom:10px; cursor:pointer; ${!isApplyAll && i === activeFileIdx ? 'outline:2px solid #C84B31; outline-offset:2px;' : ''}">
+      <img src="${previewUrls[i]}" alt="preview" />
+      <button class="remove-btn" data-idx="${i}">&times;</button>
+      <div class="fname">${f.name} &mdash; ${formatSize(f.size)}</div>
+    </div>
+  `).join('') + `<button id="addMoreBtn" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; margin-top:8px;">+ ${addMoreLbl}</button>`
+  previewGrid.style.display = 'block'
+
+  // Show/hide batch mode toggle
+  batchModeWrap.style.display = selectedFiles.length > 1 ? 'flex' : 'none'
+
+  previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); removeFile(parseInt(btn.dataset.idx)) })
+  })
+  previewGrid.querySelectorAll('.preview-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if (!isApplyAll) openEditor(parseInt(card.dataset.idx))
+    })
+  })
+  document.getElementById('addMoreBtn').addEventListener('click', () => fileInput.click())
+}
+
+function openEditor(idx) {
+  activeFileIdx = idx
+  const img = loadedImages[idx]
+  if (!img) return
+  pixCanvas.width = img.naturalWidth
+  pixCanvas.height = img.naturalHeight
+  editorArea.style.display = 'block'
+  editorLabel.textContent = selectedFiles[idx].name
+  currentDrag = null
+  applyPixelation()
+  renderPreviews() // refresh outline
+}
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) addFiles(fileInput.files)
+  fileInput.value = ''
+})
+
+document.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation() })
+document.addEventListener('drop', e => {
+  e.preventDefault(); e.stopPropagation()
+  const files = e.dataTransfer.files
+  if (files && files.length) addFiles(files)
 })
 
 // ── Selection drawing ───────────────────────────────────────────────────────
@@ -301,17 +413,14 @@ function getCanvasCoords(e) {
   const scaleY = pixCanvas.height / rect.height
   const clientX = e.touches ? e.touches[0].clientX : e.clientX
   const clientY = e.touches ? e.touches[0].clientY : e.clientY
-  return {
-    x: (clientX - rect.left) * scaleX,
-    y: (clientY - rect.top) * scaleY
-  }
+  return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }
 }
 
 canvasWrap.addEventListener('mousedown', startDrag)
 canvasWrap.addEventListener('touchstart', startDrag, { passive: false })
-
 function startDrag(e) {
-  if (isWholeMode || !uploadedImg) return
+  if (isWholeMode || (isApplyAll && selectedFiles.length > 1)) return
+  if (!loadedImages[activeFileIdx]) return
   e.preventDefault()
   isDragging = true
   dragStart = getCanvasCoords(e)
@@ -319,28 +428,25 @@ function startDrag(e) {
 
 document.addEventListener('mousemove', moveDrag)
 document.addEventListener('touchmove', moveDrag, { passive: false })
-
 function moveDrag(e) {
   if (!isDragging) return
   e.preventDefault()
   const pos = getCanvasCoords(e)
-  const x = Math.min(dragStart.x, pos.x)
-  const y = Math.min(dragStart.y, pos.y)
-  const w = Math.abs(pos.x - dragStart.x)
-  const h = Math.abs(pos.y - dragStart.y)
-  currentDrag = { x, y, w, h }
+  currentDrag = {
+    x: Math.min(dragStart.x, pos.x), y: Math.min(dragStart.y, pos.y),
+    w: Math.abs(pos.x - dragStart.x), h: Math.abs(pos.y - dragStart.y)
+  }
   renderSelectionBoxes()
   applyPixelation()
 }
 
 document.addEventListener('mouseup', endDrag)
 document.addEventListener('touchend', endDrag)
-
 function endDrag() {
   if (!isDragging) return
   isDragging = false
   if (currentDrag && currentDrag.w > 5 && currentDrag.h > 5) {
-    selections.push(currentDrag)
+    perFileSelections[activeFileIdx].push(currentDrag)
   }
   currentDrag = null
   renderSelectionBoxes()
@@ -348,14 +454,14 @@ function endDrag() {
 }
 
 function renderSelectionBoxes() {
-  // Remove old selection box elements
   canvasWrap.querySelectorAll('.pix-selection').forEach(el => el.remove())
+  if (isApplyAll && selectedFiles.length > 1) return
   const rect = pixCanvas.getBoundingClientRect()
   const scaleX = rect.width / pixCanvas.width
   const scaleY = rect.height / pixCanvas.height
-  const allSels = [...selections]
-  if (currentDrag) allSels.push(currentDrag)
-  allSels.forEach((sel, i) => {
+  const sels = [...(perFileSelections[activeFileIdx] || [])]
+  if (currentDrag) sels.push(currentDrag)
+  sels.forEach(sel => {
     const div = document.createElement('div')
     div.className = 'pix-selection'
     div.style.left = (sel.x * scaleX) + 'px'
@@ -369,43 +475,27 @@ function renderSelectionBoxes() {
 
 // ── Pixelation logic ────────────────────────────────────────────────────────
 function applyPixelation() {
-  if (!uploadedImg) return
+  const img = loadedImages[activeFileIdx]
+  if (!img) return
   const blockSize = parseInt(pixelSlider.value)
-
-  // Draw original image first
-  ctx.drawImage(uploadedImg, 0, 0)
-
+  ctx.drawImage(img, 0, 0)
   if (isWholeMode) {
-    // Pixelate entire image
     pixelateRegion(0, 0, pixCanvas.width, pixCanvas.height, blockSize)
   } else {
-    // Pixelate all selected areas
-    const allSels = [...selections]
-    if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) allSels.push(currentDrag)
-    allSels.forEach(sel => {
-      pixelateRegion(
-        Math.round(sel.x),
-        Math.round(sel.y),
-        Math.round(sel.w),
-        Math.round(sel.h),
-        blockSize
-      )
+    const sels = [...(perFileSelections[activeFileIdx] || [])]
+    if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) sels.push(currentDrag)
+    sels.forEach(sel => {
+      pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), blockSize)
     })
   }
 }
 
 function pixelateRegion(rx, ry, rw, rh, blockSize) {
-  // Clamp to canvas bounds
-  const x0 = Math.max(0, rx)
-  const y0 = Math.max(0, ry)
-  const x1 = Math.min(pixCanvas.width, rx + rw)
-  const y1 = Math.min(pixCanvas.height, ry + rh)
-
+  const x0 = Math.max(0, rx), y0 = Math.max(0, ry)
+  const x1 = Math.min(pixCanvas.width, rx + rw), y1 = Math.min(pixCanvas.height, ry + rh)
   for (let y = y0; y < y1; y += blockSize) {
     for (let x = x0; x < x1; x += blockSize) {
-      const bw = Math.min(blockSize, x1 - x)
-      const bh = Math.min(blockSize, y1 - y)
-      // Sample center pixel of block
+      const bw = Math.min(blockSize, x1 - x), bh = Math.min(blockSize, y1 - y)
       const sx = Math.min(x + Math.floor(bw / 2), x1 - 1)
       const sy = Math.min(y + Math.floor(bh / 2), y1 - 1)
       const pixel = ctx.getImageData(sx, sy, 1, 1).data
@@ -415,27 +505,108 @@ function pixelateRegion(rx, ry, rw, rh, blockSize) {
   }
 }
 
+function pixelateImageToBlob(img, file, blockSize, sels) {
+  return new Promise(resolve => {
+    const c = document.createElement('canvas')
+    c.width = img.naturalWidth; c.height = img.naturalHeight
+    const cx = c.getContext('2d')
+    cx.drawImage(img, 0, 0)
+    if (isWholeMode || !sels || !sels.length) {
+      // Pixelate whole
+      const x1 = c.width, y1 = c.height
+      for (let y = 0; y < y1; y += blockSize) {
+        for (let x = 0; x < x1; x += blockSize) {
+          const bw = Math.min(blockSize, x1 - x), bh = Math.min(blockSize, y1 - y)
+          const sx = Math.min(x + Math.floor(bw / 2), x1 - 1)
+          const sy = Math.min(y + Math.floor(bh / 2), y1 - 1)
+          const p = cx.getImageData(sx, sy, 1, 1).data
+          cx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`
+          cx.fillRect(x, y, bw, bh)
+        }
+      }
+    } else {
+      sels.forEach(sel => {
+        const sx0 = Math.max(0, Math.round(sel.x)), sy0 = Math.max(0, Math.round(sel.y))
+        const sx1 = Math.min(c.width, Math.round(sel.x + sel.w)), sy1 = Math.min(c.height, Math.round(sel.y + sel.h))
+        for (let y = sy0; y < sy1; y += blockSize) {
+          for (let x = sx0; x < sx1; x += blockSize) {
+            const bw = Math.min(blockSize, sx1 - x), bh = Math.min(blockSize, sy1 - y)
+            const px = Math.min(x + Math.floor(bw / 2), sx1 - 1)
+            const py = Math.min(y + Math.floor(bh / 2), sy1 - 1)
+            const p = cx.getImageData(px, py, 1, 1).data
+            cx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`
+            cx.fillRect(x, y, bw, bh)
+          }
+        }
+      })
+    }
+    const mime = file.type === 'image/png' ? 'image/png' : (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg')
+    c.toBlob(blob => resolve(blob), mime, mime === 'image/jpeg' ? 0.92 : undefined)
+  })
+}
+
 // ── Slider live update ──────────────────────────────────────────────────────
-pixelSlider.addEventListener('input', () => applyPixelation())
+pixelSlider.addEventListener('input', () => {
+  if (!isApplyAll && loadedImages[activeFileIdx]) applyPixelation()
+})
 
 // ── Download ────────────────────────────────────────────────────────────────
-downloadBtn.addEventListener('click', () => {
-  if (!uploadedImg) return
-  const mime = originalFile.type === 'image/png' ? 'image/png' : (originalFile.type === 'image/webp' ? 'image/webp' : 'image/jpeg')
-  const ext = mime === 'image/png' ? '.png' : (mime === 'image/webp' ? '.webp' : '.jpg')
-  const quality = mime === 'image/jpeg' ? 0.92 : undefined
+downloadBtn.addEventListener('click', async () => {
+  if (!selectedFiles.length) return
+  const blockSize = parseInt(pixelSlider.value)
+  downloadBtn.disabled = true
+  downloadBtn.textContent = t.processing || 'Processing...'
 
-  pixCanvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    const baseName = originalFile.name.replace(/\.[^.]+$/, '')
-    a.href = url
-    a.download = baseName + '_pixelated' + ext
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 10000)
-    buildNextSteps(blob)
-  }, mime, quality)
+  try {
+    resultBlobs = []
+    for (let i = 0; i < selectedFiles.length; i++) {
+      downloadBtn.textContent = (t.processing || 'Processing...') + ` (${i + 1}/${selectedFiles.length})`
+      // Wait for image to load if not ready
+      if (!loadedImages[i]) {
+        loadedImages[i] = await new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(selectedFiles[i])
+          const img = new Image()
+          img.onload = () => { URL.revokeObjectURL(url); resolve(img) }
+          img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Load failed')) }
+          img.src = url
+        })
+      }
+      const sels = isApplyAll ? [] : (perFileSelections[i] || [])
+      const blob = await pixelateImageToBlob(loadedImages[i], selectedFiles[i], blockSize, sels)
+      const ext = selectedFiles[i].type === 'image/png' ? '.png' : (selectedFiles[i].type === 'image/webp' ? '.webp' : '.jpg')
+      const baseName = selectedFiles[i].name.replace(/\.[^.]+$/, '')
+      resultBlobs.push({ blob, name: baseName + '_pixelated' + ext, type: blob.type })
+    }
+
+    if (resultBlobs.length === 1) {
+      cleanupOldUrl()
+      currentDownloadUrl = URL.createObjectURL(resultBlobs[0].blob)
+      const a = document.createElement('a')
+      a.href = currentDownloadUrl
+      a.download = resultBlobs[0].name
+      a.click()
+    } else {
+      const zip = new JSZip()
+      resultBlobs.forEach((r, i) => zip.file((i + 1) + '_' + r.name, r.blob))
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+      cleanupOldUrl()
+      currentDownloadUrl = URL.createObjectURL(zipBlob)
+      const a = document.createElement('a')
+      a.href = currentDownloadUrl
+      a.download = 'pixelated-images.zip'
+      a.click()
+    }
+    buildNextSteps()
+  } catch (e) {
+    alert('Error: ' + e.message)
+  }
+  downloadBtn.disabled = false
+  downloadBtn.textContent = selectedFiles.length > 1 ? downloadZipLbl : dlLabel
 })
+
+// ── UI helpers ──────────────────────────────────────────────────────────────
+function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
+function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
 
 // ── IndexedDB helpers ───────────────────────────────────────────────────────
 function openDB() {
@@ -473,13 +644,13 @@ async function loadPendingFiles() {
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
-    const file = new File([records[0].blob], records[0].name, { type: records[0].type })
-    loadFile(file)
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type }))
+    addFiles(files)
   } catch (e) {}
 }
 
 // ── Next steps ──────────────────────────────────────────────────────────────
-function buildNextSteps(lastBlob) {
+function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
     { label: ns.compress || 'Compress Image', href: localHref('compress') },
@@ -492,9 +663,9 @@ function buildNextSteps(lastBlob) {
     btn.className = 'next-link'
     btn.textContent = b.label
     btn.addEventListener('click', async () => {
-      if (lastBlob) {
+      if (resultBlobs.length) {
         try {
-          await saveFilesToIDB([{ blob: lastBlob, name: originalFile.name, type: lastBlob.type }])
+          await saveFilesToIDB(resultBlobs.map(r => ({ blob: r.blob, name: r.name, type: r.type })))
           sessionStorage.setItem('pendingFromIDB', '1')
         } catch (e) {}
       }
