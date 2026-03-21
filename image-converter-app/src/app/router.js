@@ -28,7 +28,7 @@ const standaloneModules = {
 }
 
 // Parse URL
-const _path = window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0]
+const _path = decodeURIComponent(window.location.pathname).replace(/^\/|\/$/g, '').split('?')[0]
 const _segments = _path.split('/')
 const _urlLang = _segments[0]
   ? supportedLangs.find(l => l.toLowerCase() === _segments[0].toLowerCase())
