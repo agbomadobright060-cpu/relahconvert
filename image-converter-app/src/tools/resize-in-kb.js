@@ -644,18 +644,30 @@ resizeBtn.addEventListener('click', async () => {
     let ctx = canvas.getContext('2d')
     ctx.drawImage(img, 0, 0)
 
-    // Check if max quality can reach target; if not, upscale canvas
-    const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
-    if (maxBlob.size < targetBytes) {
-      const scale = Math.sqrt(targetBytes / maxBlob.size) * 1.15
-      canvas = document.createElement('canvas')
-      canvas.width = Math.round(img.naturalWidth * scale)
-      canvas.height = Math.round(img.naturalHeight * scale)
-      ctx = canvas.getContext('2d')
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-    }
+    // First try at original dimensions
+    let blob = await compressToTargetSize(canvas, targetKB)
 
-    const blob = await compressToTargetSize(canvas, targetKB)
+    // If max quality still can't reach target, iteratively upscale
+    if (blob && blob.size < targetBytes * 0.95) {
+      const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
+      if (maxBlob.size < targetBytes) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const ratio = targetBytes / maxBlob.size
+          const scale = Math.sqrt(ratio) * (1 + attempt * 0.1)
+          const upCanvas = document.createElement('canvas')
+          upCanvas.width = Math.round(img.naturalWidth * scale)
+          upCanvas.height = Math.round(img.naturalHeight * scale)
+          const upCtx = upCanvas.getContext('2d')
+          upCtx.drawImage(img, 0, 0, upCanvas.width, upCanvas.height)
+          const upBlob = await compressToTargetSize(upCanvas, targetKB)
+          if (upBlob && Math.abs(upBlob.size - targetBytes) < Math.abs(blob.size - targetBytes)) {
+            blob = upBlob
+            canvas = upCanvas
+          }
+          if (blob.size >= targetBytes * 0.95 && blob.size <= targetBytes * 1.05) break
+        }
+      }
+    }
     if (!blob) {
       alert('Could not reach target size. Try a larger value or resize dimensions first.')
       setIdle()
