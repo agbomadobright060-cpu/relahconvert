@@ -67,10 +67,10 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = 'Resize Image to Specific KB \u2014 Free & Private | RelahConvert'
+  document.title = 'Resize Image in KB \u2014 Resize to Specific KB Size Free & Private | RelahConvert'
   const metaDesc = document.createElement('meta')
   metaDesc.name = 'description'
-  metaDesc.content = 'Resize any image to a specific file size in KB. Free, private, browser-only. Compress image to exact target size \u2014 perfect for passport photos, visa applications, and upload limits.'
+  metaDesc.content = 'Resize image in KB \u2014 compress or adjust any image to a specific file size in kilobytes. Free, private, browser-only. Perfect for passport photos, visa applications, and upload limits.'
   document.head.appendChild(metaDesc)
 }
 
@@ -79,7 +79,7 @@ const seoResizeKB = {
   en: {
     h2a: 'How to Resize an Image to a Specific KB Size',
     steps: ['<strong>Upload your image</strong> \u2014 click "Select Image" or drag and drop a JPG, PNG, or WebP file.','<strong>Enter target size</strong> \u2014 type the file size you want in kilobytes (e.g. 100 KB, 200 KB).','<strong>Click Resize</strong> \u2014 the tool compresses to hit your target. If the target is larger than the original, it saves at maximum quality instead.','<strong>Download</strong> \u2014 save the resized image to your device.'],
-    h2b: 'Best Free Tool to Resize an Image to Exact KB Size',
+    h2b: 'Best Free Resize Image in KB Tool \u2014 Hit Exact File Size',
     body: '<p>Need an image under 100 KB for a form submission? Or exactly 200 KB for a visa photo? RelahConvert\u2019s Resize in KB tool uses smart binary-search compression to hit your target file size as closely as possible \u2014 all inside your browser. No upload, no server, completely free.</p><p>The tool handles three scenarios automatically: if your target is smaller than the original, it compresses to match. If the target is larger, it re-encodes at maximum JPEG quality. If the image is already close to the target size, it downloads the original. Works perfectly for passport photo size requirements, government form upload limits, email attachment restrictions, and any situation where you need an image at a specific kilobyte size.</p>',
     h3why: 'Why Resize Images to a Specific KB?',
     why: 'Many websites, government portals, and applications require images under a specific file size. Manually adjusting quality until you hit the target is tedious. This tool automates the process \u2014 just enter your target KB and download.',
