@@ -605,20 +605,22 @@ async function compressToTargetSize(canvas, targetKB) {
     return await new Promise(res => small.toBlob(res, 'image/jpeg', 0.5))
   }
 
-  // Binary search — stay under target
-  let low = 0.01, high = 1.0, bestBlob = minBlob
+  // Binary search — track best under and best over
+  let low = 0.01, high = 1.0
+  let underBlob = minBlob, overBlob = null
   for (let i = 0; i < 20; i++) {
     const mid = (low + high) / 2
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', mid))
     if (blob.size <= targetBytes) {
-      bestBlob = blob
+      underBlob = blob
       low = mid
     } else {
+      if (!overBlob || blob.size < overBlob.size) overBlob = blob
       high = mid
     }
     if (high - low < 0.0005) break
   }
-  return bestBlob
+  return underBlob
 }
 
 // ── Resize action ───────────────────────────────────────────────────────────
@@ -629,25 +631,20 @@ resizeBtn.addEventListener('click', async () => {
 
   const targetBytes = targetKB * 1024
 
+  // Can only reduce — show warning if target is larger than original
+  if (originalFile.size <= targetBytes) {
+    showWarning(t.rik_warn_larger || 'Target is larger than original. This tool can only reduce file size.')
+    return
+  }
+
   setResizing()
 
   try {
     const img = await loadImage(originalFile)
-    let canvas = document.createElement('canvas')
+    const canvas = document.createElement('canvas')
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
     canvas.getContext('2d').drawImage(img, 0, 0)
-
-    // Check if we need to increase size (target > what max quality produces)
-    const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
-    if (maxBlob.size < targetBytes) {
-      // Upscale dimensions so max quality can reach target, then compress down
-      const scale = Math.sqrt(targetBytes / maxBlob.size) * 1.05
-      canvas = document.createElement('canvas')
-      canvas.width = Math.round(img.naturalWidth * scale)
-      canvas.height = Math.round(img.naturalHeight * scale)
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
-    }
 
     const blob = await compressToTargetSize(canvas, targetKB)
 
@@ -684,26 +681,21 @@ function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(current
 function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
 
 function showResultBar(originalBytes, outputBytes) {
-  const isIncrease = outputBytes > originalBytes
-  const pct = isIncrease
-    ? Math.round((outputBytes / originalBytes - 1) * 100)
-    : Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
+  const pct = Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
   const circumference = 226
-  const dashOffset = circumference - (circumference * Math.min(pct, 100) / 100)
-  const changeLbl = isIncrease ? (t.rik_increase || 'increase') : rikReductionLbl
-  const circleColor = isIncrease ? '#2563EB' : '#C84B31'
+  const dashOffset = circumference - (circumference * pct / 100)
   resultBar.style.display = 'block'
   resultBar.innerHTML = `
     <div class="result-bar">
       <div class="savings-circle">
         <svg width="72" height="72" viewBox="0 0 72 72">
           <circle class="circle-bg" cx="36" cy="36" r="30" />
-          <circle class="circle-fill" cx="36" cy="36" r="30" style="stroke-dashoffset:${circumference};stroke:${circleColor}" id="circleAnim" />
+          <circle class="circle-fill" cx="36" cy="36" r="30" style="stroke-dashoffset:${circumference}" id="circleAnim" />
           <text class="circle-label" x="36" y="36" transform="rotate(90,36,36)">${pct}%</text>
         </svg>
       </div>
       <div class="result-stats">
-        <p class="result-saved">${pct}% ${changeLbl}</p>
+        <p class="result-saved">${pct}% ${rikReductionLbl}</p>
         <div class="result-sizes">
           <span>${rikOriginalLbl}: ${formatSize(originalBytes)}</span>
           <span class="result-arrow">\u2192</span>
