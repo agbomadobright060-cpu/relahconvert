@@ -550,6 +550,9 @@ function renderSelectionBoxes() {
     if (isSaved) {
       // Click to toggle active/inactive
       div.style.cursor = 'pointer'
+      div.addEventListener('mousedown', e => {
+        e.stopPropagation() // prevent drag start
+      })
       div.addEventListener('click', e => {
         if (e.target.closest('button')) return // don't toggle when clicking X
         perFileSelections[activeFileIdx][i].active = !perFileSelections[activeFileIdx][i].active
@@ -560,8 +563,13 @@ function renderSelectionBoxes() {
       const xBtn = document.createElement('button')
       xBtn.textContent = '\u00d7'
       xBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(200,75,49,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;line-height:1;padding:0;'
+      xBtn.addEventListener('mousedown', e => {
+        e.stopPropagation()
+        e.preventDefault()
+      })
       xBtn.addEventListener('click', e => {
         e.stopPropagation()
+        e.preventDefault()
         perFileSelections[activeFileIdx].splice(i, 1)
         renderSelectionBoxes()
         applyPixelation()
