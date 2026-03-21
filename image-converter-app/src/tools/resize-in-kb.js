@@ -590,37 +590,36 @@ document.addEventListener('drop', e => {
 async function compressToTargetSize(canvas, targetKB) {
   const targetBytes = targetKB * 1024
   let min = 0.01, max = 1.0, quality = 0.5
-  let bestBlob = null
-  let bestDiff = Infinity
-  // Binary search for closest quality
+  let underBlob = null  // best blob at or under target
+  let overBlob = null   // best blob just over target
+  // Binary search
   for (let i = 0; i < 25; i++) {
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality))
-    const diff = Math.abs(blob.size - targetBytes)
-    if (diff < bestDiff) {
-      bestDiff = diff
-      bestBlob = blob
-    }
     if (blob.size <= targetBytes) {
+      if (!underBlob || blob.size > underBlob.size) underBlob = blob
       min = quality
     } else {
+      if (!overBlob || blob.size < overBlob.size) overBlob = blob
       max = quality
     }
     quality = (min + max) / 2
   }
-  // If under target, pad with a JPEG comment marker to hit exact size
+  // Prefer under-target blob (can pad to exact), fall back to closest over
+  let bestBlob = underBlob || overBlob
+  // Pad under-target blob to hit exact size
   if (bestBlob && bestBlob.size < targetBytes) {
     const shortfall = targetBytes - bestBlob.size
     if (shortfall >= 4 && shortfall <= 65537) {
       const original = new Uint8Array(await bestBlob.arrayBuffer())
-      const payloadSize = shortfall - 4 // 4 bytes = FF FE + 2-byte length
+      const payloadSize = shortfall - 4
       const seg = new Uint8Array(4 + payloadSize)
-      seg[0] = 0xFF; seg[1] = 0xFE // COM marker
+      seg[0] = 0xFF; seg[1] = 0xFE
       seg[2] = ((payloadSize + 2) >> 8) & 0xFF
       seg[3] = (payloadSize + 2) & 0xFF
       bestBlob = new Blob([
-        original.subarray(0, original.length - 2), // before EOI
+        original.subarray(0, original.length - 2),
         seg,
-        new Uint8Array([0xFF, 0xD9]) // EOI
+        new Uint8Array([0xFF, 0xD9])
       ], { type: 'image/jpeg' })
     }
   }
