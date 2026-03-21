@@ -38,13 +38,15 @@ if (document.head) {
     .pix-mode-btn { padding:7px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:600; color:#2C1810; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
     .pix-mode-btn:hover { border-color:#C84B31; color:#C84B31; }
     .pix-mode-btn.active { background:#C84B31; color:#fff; border-color:#C84B31; }
-    .preview-card { background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; width:100%; }
-    .preview-card img { width:100%; height:120px; object-fit:cover; display:block; }
+    .preview-card { background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); position:relative; cursor:pointer; transition:outline 0.1s; }
+    .preview-card:hover { outline:2px solid #C84B31; outline-offset:1px; }
+    .preview-card.active { outline:2px solid #C84B31; outline-offset:1px; }
+    .preview-card img { width:100%; height:80px; object-fit:cover; display:block; }
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .pix-canvas-wrap { position:relative; background:#fff; border-radius:12px; border:1.5px solid #E8E0D5; overflow:hidden; display:inline-block; max-width:100%; cursor:crosshair; }
-    .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:400px; width:auto; height:auto; }
+    .pix-canvas-wrap { position:relative; background:#fff; border-radius:12px; border:1.5px solid #E8E0D5; overflow:hidden; display:block; cursor:crosshair; }
+    .pix-canvas-wrap canvas { display:block; width:100%; height:auto; }
     .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); pointer-events:none; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -185,7 +187,7 @@ const addMoreLbl = t.add_more || 'Add More'
 const downloadZipLbl = t.download_zip || 'Download ZIP'
 
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:960px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
+  <div style="max-width:1100px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         ${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em>
@@ -201,34 +203,38 @@ document.querySelector('#app').innerHTML = `
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="workArea" style="display:none; margin-bottom:16px;">
-      <div style="display:flex; gap:16px; align-items:flex-start;">
-        <div id="previewGrid" style="display:none; flex-shrink:0; width:160px; overflow-y:auto; max-height:500px;"></div>
-        <div id="editorPanel" style="flex:1; min-width:0;">
-          <div id="controlsArea" style="margin-bottom:12px;">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
-              <div style="display:flex; gap:8px;">
-                <button class="pix-mode-btn active" id="modeWhole">${pixWholeLbl}</button>
-                <button class="pix-mode-btn" id="modeArea">${pixAreaLbl}</button>
-              </div>
-              <div id="batchModeWrap" style="display:none; margin-left:auto; display:flex; gap:4px;">
-                <button id="modeAllBtn" style="padding:4px 10px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
-                <button id="modeIndBtn" style="padding:4px 10px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+        <!-- LEFT PANEL: controls + thumbnails -->
+        <div id="leftPanel" style="flex-shrink:0; width:220px;">
+          <div id="controlsArea">
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <button class="pix-mode-btn active" id="modeWhole" style="flex:1;">${pixWholeLbl}</button>
+              <button class="pix-mode-btn" id="modeArea" style="flex:1;">${pixAreaLbl}</button>
+            </div>
+            <div id="batchModeWrap" style="display:none; margin-bottom:10px;">
+              <div style="display:flex; gap:0;">
+                <button id="modeAllBtn" style="flex:1; padding:5px 8px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+                <button id="modeIndBtn" style="flex:1; padding:5px 8px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
               </div>
             </div>
             <div style="margin-bottom:12px;">
-              <label style="font-size:13px; font-weight:600; color:#2C1810; display:block; margin-bottom:6px;">${pixLevelLbl}</label>
-              <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:11px; color:#9A8A7A;">${pixLowLbl}</span>
+              <label style="font-size:12px; font-weight:600; color:#2C1810; display:block; margin-bottom:4px;">${pixLevelLbl}</label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:10px; color:#9A8A7A;">${pixLowLbl}</span>
                 <input type="range" id="pixelSlider" min="2" max="60" value="12" style="flex:1; accent-color:#C84B31;" />
-                <span style="font-size:11px; color:#9A8A7A;">${pixHighLbl}</span>
+                <span style="font-size:10px; color:#9A8A7A;">${pixHighLbl}</span>
               </div>
             </div>
           </div>
+          <div id="previewGrid" style="display:none;"></div>
+        </div>
+        <!-- RIGHT PANEL: editor canvas -->
+        <div id="editorPanel" style="flex:1; min-width:0;">
           <div id="editorArea" style="display:none;">
             <div class="pix-canvas-wrap" id="canvasWrap">
               <canvas id="pixCanvas"></canvas>
             </div>
-            <p id="editorLabel" style="font-size:12px; color:#7A6A5A; margin:8px 0 0; text-align:center;"></p>
+            <p id="editorLabel" style="font-size:12px; color:#7A6A5A; margin:6px 0 0; text-align:center;"></p>
           </div>
         </div>
       </div>
@@ -395,18 +401,20 @@ function renderPreviews() {
     return
   }
   previewGrid.innerHTML = selectedFiles.map((f, i) => `
-    <div class="preview-card" data-idx="${i}" style="cursor:pointer; ${!isApplyAll && i === activeFileIdx ? 'outline:2px solid #C84B31; outline-offset:2px;' : ''}">
+    <div class="preview-card${i === activeFileIdx ? ' active' : ''}" data-idx="${i}">
       <img src="${previewUrls[i]}" alt="preview" />
       <button class="remove-btn" data-idx="${i}">&times;</button>
-      <div class="fname">${f.name} &mdash; ${formatSize(f.size)}</div>
+      <div class="fname">${f.name}</div>
     </div>
-  `).join('') + `<button id="addMoreBtn" style="width:100%; padding:6px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:center;">+ ${addMoreLbl}</button>`
+  `).join('') + `<button id="addMoreBtn" style="width:100%; padding:6px; border:1.5px dashed #DDD5C8; border-radius:6px; background:transparent; color:#7A6A5A; font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:center;">+ ${addMoreLbl}</button>`
   previewGrid.style.display = 'flex'
   previewGrid.style.flexDirection = 'column'
-  previewGrid.style.gap = '8px'
+  previewGrid.style.gap = '6px'
+  previewGrid.style.maxHeight = '600px'
+  previewGrid.style.overflowY = 'auto'
 
   // Show/hide batch mode toggle
-  batchModeWrap.style.display = selectedFiles.length > 1 ? 'flex' : 'none'
+  batchModeWrap.style.display = selectedFiles.length > 1 ? 'block' : 'none'
 
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); removeFile(parseInt(btn.dataset.idx)) })
@@ -435,7 +443,10 @@ function openEditor(idx) {
   editorLabel.textContent = selectedFiles[idx].name
   currentDrag = null
   applyPixelation()
-  renderPreviews() // refresh outline
+  // Update active thumbnail highlight
+  previewGrid.querySelectorAll('.preview-card').forEach((card, i) => {
+    card.classList.toggle('active', i === idx)
+  })
 }
 
 fileInput.addEventListener('change', () => {
