@@ -629,23 +629,25 @@ resizeBtn.addEventListener('click', async () => {
 
   const targetBytes = targetKB * 1024
 
-  // Edge case: target is larger than original — just download original
-  if (originalFile.size <= targetBytes) {
-    resultBlob = originalFile
-    showResultBar(originalFile.size, originalFile.size)
-    showDownload(originalFile.name, originalFile)
-    showWarning(t.rik_warn_larger || 'Target is larger than original — downloading original.')
-    return
-  }
-
   setResizing()
 
   try {
     const img = await loadImage(originalFile)
-    const canvas = document.createElement('canvas')
+    let canvas = document.createElement('canvas')
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
     canvas.getContext('2d').drawImage(img, 0, 0)
+
+    // Check if we need to increase size (target > what max quality produces)
+    const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
+    if (maxBlob.size < targetBytes) {
+      // Upscale dimensions so max quality can reach target, then compress down
+      const scale = Math.sqrt(targetBytes / maxBlob.size) * 1.05
+      canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.naturalWidth * scale)
+      canvas.height = Math.round(img.naturalHeight * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+    }
 
     const blob = await compressToTargetSize(canvas, targetKB)
 
