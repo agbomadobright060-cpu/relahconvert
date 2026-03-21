@@ -21,6 +21,7 @@ const standaloneModules = {
   'jpg-to-gif':        () => import('../tools/jpg-to-gif.js'),
   'png-to-gif':        () => import('../tools/png-to-gif.js'),
   'passport-photo':    () => import('../tools/passport-photo.js'),
+  'image-splitter':    () => import('../tools/image-splitter.js'),
   'jpg-to-pdf':        () => import('../jpg-to-pdf.js'),
   'png-to-pdf':        () => import('../png-to-pdf.js'),
 }
