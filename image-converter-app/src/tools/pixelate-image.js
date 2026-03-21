@@ -237,8 +237,8 @@ document.querySelector('#app').innerHTML = `
           </div>
           <div id="batchModeWrap" style="display:none; margin-bottom:12px;">
             <div style="display:flex; gap:0;">
-              <button id="modeAllBtn" style="flex:1; padding:6px 8px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
-              <button id="modeIndBtn" style="flex:1; padding:6px 8px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+              <button id="modeAllBtn" style="flex:1; padding:6px 8px; border:1.5px solid #DDD5C8; border-radius:6px 0 0 6px; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+              <button id="modeIndBtn" style="flex:1; padding:6px 8px; border:1.5px solid #C84B31; border-radius:0 6px 6px 0; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
             </div>
           </div>
           <div class="divider"></div>
@@ -292,7 +292,7 @@ const ctx          = pixCanvas.getContext('2d')
 
 let selectedFiles = []
 let isWholeMode = true
-let isApplyAll = true
+let isApplyAll = false
 let activeFileIdx = 0
 let perFileSelections = [] // perFileSelections[i] = [{ x, y, w, h }, ...]
 let perFileMode = []       // perFileMode[i] = 'whole' | 'area'
