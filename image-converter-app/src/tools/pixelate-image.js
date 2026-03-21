@@ -383,13 +383,15 @@ function renderPreviews() {
     return
   }
   previewGrid.innerHTML = selectedFiles.map((f, i) => `
-    <div class="preview-card" data-idx="${i}" style="display:inline-block; width:calc(33.33% - 8px); vertical-align:top; margin-bottom:10px; cursor:pointer; ${!isApplyAll && i === activeFileIdx ? 'outline:2px solid #C84B31; outline-offset:2px;' : ''}">
+    <div class="preview-card" data-idx="${i}" style="cursor:pointer; ${!isApplyAll && i === activeFileIdx ? 'outline:2px solid #C84B31; outline-offset:2px;' : ''}">
       <img src="${previewUrls[i]}" alt="preview" />
       <button class="remove-btn" data-idx="${i}">&times;</button>
       <div class="fname">${f.name} &mdash; ${formatSize(f.size)}</div>
     </div>
-  `).join('') + `<button id="addMoreBtn" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; margin-top:8px;">+ ${addMoreLbl}</button>`
-  previewGrid.style.display = 'block'
+  `).join('') + `<div style="display:flex;align-items:center;justify-content:center;"><button id="addMoreBtn" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:1.5px dashed #DDD5C8; border-radius:8px; background:transparent; color:#7A6A5A; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;">+ ${addMoreLbl}</button></div>`
+  previewGrid.style.display = 'grid'
+  previewGrid.style.gridTemplateColumns = 'repeat(3, 1fr)'
+  previewGrid.style.gap = '10px'
 
   // Show/hide batch mode toggle
   batchModeWrap.style.display = selectedFiles.length > 1 ? 'flex' : 'none'
