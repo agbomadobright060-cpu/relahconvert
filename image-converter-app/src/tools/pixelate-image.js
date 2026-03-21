@@ -45,8 +45,25 @@ if (document.head) {
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .pix-canvas-wrap { position:relative; background:#fff; border-radius:12px; border:1.5px solid #E8E0D5; overflow:hidden; display:block; cursor:crosshair; }
-    .pix-canvas-wrap canvas { display:block; width:100%; height:auto; }
+    .tool-layout { display:grid; grid-template-columns:1fr 280px; gap:20px; align-items:start; }
+    .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:16px; }
+    .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:16px; font-family:'DM Sans',sans-serif; }
+    .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:#2C1810; margin:0 0 12px; }
+    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:6px; }
+    .divider { height:1px; background:#F0EAE3; margin:12px 0; }
+    .range-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+    .range-val { font-size:12px; color:#9A8A7A; min-width:28px; text-align:right; }
+    .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; }
+    .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
+    .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
+    .file-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .file-chip { display:flex; align-items:center; gap:5px; background:#F5F0E8; border-radius:20px; padding:4px 10px; font-size:11px; font-family:'DM Sans',sans-serif; color:#5A4A3A; cursor:pointer; transition:all 0.1s; }
+    .file-chip.active { background:#C84B31; color:#fff; }
+    .file-chip button { background:none; border:none; cursor:pointer; color:inherit; font-size:12px; line-height:1; padding:0; opacity:0.7; }
+    .file-chip button:hover { opacity:1; }
+    .pix-canvas-wrap { position:relative; overflow:hidden; display:block; cursor:crosshair; width:100%; }
+    .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; }
+    @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
     .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); pointer-events:none; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -203,43 +220,42 @@ document.querySelector('#app').innerHTML = `
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
     <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
     <div id="workArea" style="display:none; margin-bottom:16px;">
-      <div style="display:flex; gap:20px; align-items:flex-start;">
-        <!-- LEFT PANEL: controls + thumbnails -->
-        <div id="leftPanel" style="flex-shrink:0; width:220px;">
-          <div id="controlsArea">
-            <div style="display:flex; gap:6px; margin-bottom:10px;">
-              <button class="pix-mode-btn active" id="modeWhole" style="flex:1;">${pixWholeLbl}</button>
-              <button class="pix-mode-btn" id="modeArea" style="flex:1;">${pixAreaLbl}</button>
-            </div>
-            <div id="batchModeWrap" style="display:none; margin-bottom:10px;">
-              <div style="display:flex; gap:0;">
-                <button id="modeAllBtn" style="flex:1; padding:5px 8px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
-                <button id="modeIndBtn" style="flex:1; padding:5px 8px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
-              </div>
-            </div>
-            <div style="margin-bottom:12px;">
-              <label style="font-size:12px; font-weight:600; color:#2C1810; display:block; margin-bottom:4px;">${pixLevelLbl}</label>
-              <div style="display:flex; align-items:center; gap:6px;">
-                <span style="font-size:10px; color:#9A8A7A;">${pixLowLbl}</span>
-                <input type="range" id="pixelSlider" min="2" max="60" value="12" style="flex:1; accent-color:#C84B31;" />
-                <span style="font-size:10px; color:#9A8A7A;">${pixHighLbl}</span>
-              </div>
-            </div>
-          </div>
-          <div id="previewGrid" style="display:none;"></div>
-        </div>
-        <!-- RIGHT PANEL: editor canvas -->
-        <div id="editorPanel" style="flex:1; min-width:0;">
-          <div id="editorArea" style="display:none;">
-            <div class="pix-canvas-wrap" id="canvasWrap">
+      <div id="fileChips" class="file-chips"></div>
+      <div class="tool-layout">
+        <div class="image-col" id="imageCol">
+          <div id="editorArea" style="display:none; width:100%;">
+            <div class="pix-canvas-wrap" id="canvasWrap" style="width:100%;">
               <canvas id="pixCanvas"></canvas>
             </div>
-            <p id="editorLabel" style="font-size:12px; color:#7A6A5A; margin:6px 0 0; text-align:center;"></p>
           </div>
+        </div>
+        <div class="controls-col">
+          <h3>${t.pix_controls || 'Pixelation'}</h3>
+          <div style="display:flex; gap:6px; margin-bottom:12px;">
+            <button class="pix-mode-btn active" id="modeWhole" style="flex:1;">${pixWholeLbl}</button>
+            <button class="pix-mode-btn" id="modeArea" style="flex:1;">${pixAreaLbl}</button>
+          </div>
+          <div id="batchModeWrap" style="display:none; margin-bottom:12px;">
+            <div style="display:flex; gap:0;">
+              <button id="modeAllBtn" style="flex:1; padding:6px 8px; border:1.5px solid #C84B31; border-radius:6px 0 0 6px; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+              <button id="modeIndBtn" style="flex:1; padding:6px 8px; border:1.5px solid #DDD5C8; border-radius:0 6px 6px 0; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <p class="section-label">${pixLevelLbl}</p>
+          <div class="range-row">
+            <input type="range" id="pixelSlider" min="2" max="60" value="12" style="flex:1;" />
+            <span class="range-val" id="pixelVal">12</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:-6px; margin-bottom:12px;">
+            <span style="font-size:10px; color:#9A8A7A;">${pixLowLbl}</span>
+            <span style="font-size:10px; color:#9A8A7A;">${pixHighLbl}</span>
+          </div>
+          <div class="divider"></div>
+          <button class="opt-btn" id="downloadBtn" disabled>${dlLabel}</button>
         </div>
       </div>
     </div>
-    <button id="downloadBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${dlLabel}</button>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next || "WHAT'S NEXT?"}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -256,14 +272,13 @@ const MAX_TOTAL_BYTES = 200 * 1024 * 1024
 
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const fileInput    = document.getElementById('fileInput')
-const previewGrid  = document.getElementById('previewGrid')
 const workArea     = document.getElementById('workArea')
-const controlsArea = document.getElementById('controlsArea')
+const fileChips    = document.getElementById('fileChips')
 const editorArea   = document.getElementById('editorArea')
-const editorLabel  = document.getElementById('editorLabel')
 const pixCanvas    = document.getElementById('pixCanvas')
 const canvasWrap   = document.getElementById('canvasWrap')
 const pixelSlider  = document.getElementById('pixelSlider')
+const pixelVal     = document.getElementById('pixelVal')
 const downloadBtn  = document.getElementById('downloadBtn')
 const modeWhole    = document.getElementById('modeWhole')
 const modeArea     = document.getElementById('modeArea')
@@ -276,7 +291,6 @@ const nextStepsButtons = document.getElementById('nextStepsButtons')
 const ctx          = pixCanvas.getContext('2d')
 
 let selectedFiles = []
-let previewUrls = []
 let isWholeMode = true
 let isApplyAll = true
 let activeFileIdx = 0 // which file is being edited in Individual mode
@@ -312,7 +326,6 @@ modeAllBtn.addEventListener('click', () => {
   modeIndBtn.style.background = '#fff'; modeIndBtn.style.color = '#2C1810'; modeIndBtn.style.borderColor = '#DDD5C8'
   if (selectedFiles.length > 1) {
     editorArea.style.display = 'none'
-    editorLabel.textContent = ''
   }
 })
 
@@ -349,7 +362,7 @@ function addFiles(files) {
     img.onload = () => { loadedImages[idx] = img; URL.revokeObjectURL(url) }
     img.src = url
   })
-  renderPreviews()
+  renderFileChips()
   workArea.style.display = 'block'
   // For single file, auto-open editor; for multiple in Apply to All, keep editor hidden
   if (selectedFiles.length === 1) {
@@ -366,71 +379,41 @@ function addFiles(files) {
     editorArea.style.display = 'none'
   }
   downloadBtn.disabled = false
-  downloadBtn.style.opacity = '1'
-  downloadBtn.style.cursor = 'pointer'
-  downloadBtn.style.background = '#C84B31'
 }
 
 function removeFile(idx) {
-  if (previewUrls[idx]) URL.revokeObjectURL(previewUrls[idx])
   selectedFiles.splice(idx, 1)
   perFileSelections.splice(idx, 1)
   loadedImages.splice(idx, 1)
   if (activeFileIdx >= selectedFiles.length) activeFileIdx = Math.max(0, selectedFiles.length - 1)
-  renderPreviews()
+  renderFileChips()
   if (!selectedFiles.length) {
     workArea.style.display = 'none'
     editorArea.style.display = 'none'
     downloadBtn.disabled = true
-    downloadBtn.style.opacity = '0.7'
-    downloadBtn.style.cursor = 'not-allowed'
-    downloadBtn.style.background = '#C4B8A8'
     nextSteps.style.display = 'none'
+  } else {
+    if (loadedImages[activeFileIdx]) openEditor(activeFileIdx)
   }
 }
 
-function renderPreviews() {
-  previewUrls.forEach(u => { if (u) URL.revokeObjectURL(u) })
-  previewUrls = selectedFiles.map(f => URL.createObjectURL(f))
+function renderFileChips() {
+  const shortName = (name) => name.length > 14 ? name.substring(0, 12) + '...' : name
+  fileChips.innerHTML = selectedFiles.map((f, i) => `
+    <span class="file-chip${i === activeFileIdx ? ' active' : ''}" data-idx="${i}">
+      ${shortName(f.name)} <button data-idx="${i}">&times;</button>
+    </span>
+  `).join('') + `<span class="file-chip" id="addMoreChip" style="cursor:pointer; border:1.5px dashed #DDD5C8; background:transparent;">+ ${addMoreLbl}</span>`
 
-  // Single file — hide preview grid sidebar, editor handles display
-  if (selectedFiles.length <= 1) {
-    previewGrid.style.display = 'none'
-    previewGrid.innerHTML = ''
-    batchModeWrap.style.display = 'none'
-    return
-  }
-  previewGrid.innerHTML = selectedFiles.map((f, i) => `
-    <div class="preview-card${i === activeFileIdx ? ' active' : ''}" data-idx="${i}">
-      <img src="${previewUrls[i]}" alt="preview" />
-      <button class="remove-btn" data-idx="${i}">&times;</button>
-      <div class="fname">${f.name}</div>
-    </div>
-  `).join('') + `<button id="addMoreBtn" style="width:100%; padding:6px; border:1.5px dashed #DDD5C8; border-radius:6px; background:transparent; color:#7A6A5A; font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:center;">+ ${addMoreLbl}</button>`
-  previewGrid.style.display = 'flex'
-  previewGrid.style.flexDirection = 'column'
-  previewGrid.style.gap = '6px'
-  previewGrid.style.maxHeight = '600px'
-  previewGrid.style.overflowY = 'auto'
-
-  // Show/hide batch mode toggle
   batchModeWrap.style.display = selectedFiles.length > 1 ? 'block' : 'none'
 
-  previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
+  fileChips.querySelectorAll('.file-chip[data-idx] button').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); removeFile(parseInt(btn.dataset.idx)) })
   })
-  previewGrid.querySelectorAll('.preview-card').forEach(card => {
-    card.addEventListener('click', () => {
-      // Clicking a thumbnail always opens editor for that file
-      if (isApplyAll) {
-        isApplyAll = false
-        modeIndBtn.style.background = '#C84B31'; modeIndBtn.style.color = '#fff'; modeIndBtn.style.borderColor = '#C84B31'
-        modeAllBtn.style.background = '#fff'; modeAllBtn.style.color = '#2C1810'; modeAllBtn.style.borderColor = '#DDD5C8'
-      }
-      openEditor(parseInt(card.dataset.idx))
-    })
+  fileChips.querySelectorAll('.file-chip[data-idx]').forEach(chip => {
+    chip.addEventListener('click', () => openEditor(parseInt(chip.dataset.idx)))
   })
-  document.getElementById('addMoreBtn').addEventListener('click', () => fileInput.click())
+  document.getElementById('addMoreChip').addEventListener('click', () => fileInput.click())
 }
 
 function openEditor(idx) {
@@ -440,12 +423,11 @@ function openEditor(idx) {
   pixCanvas.width = img.naturalWidth
   pixCanvas.height = img.naturalHeight
   editorArea.style.display = 'block'
-  editorLabel.textContent = selectedFiles[idx].name
   currentDrag = null
   applyPixelation()
-  // Update active thumbnail highlight
-  previewGrid.querySelectorAll('.preview-card').forEach((card, i) => {
-    card.classList.toggle('active', i === idx)
+  // Update active chip highlight
+  fileChips.querySelectorAll('.file-chip[data-idx]').forEach((chip, i) => {
+    chip.classList.toggle('active', i === idx)
   })
 }
 
@@ -602,6 +584,7 @@ function pixelateImageToBlob(img, file, blockSize, sels) {
 
 // ── Slider live update ──────────────────────────────────────────────────────
 pixelSlider.addEventListener('input', () => {
+  pixelVal.textContent = pixelSlider.value
   if (loadedImages[activeFileIdx] && editorArea.style.display !== 'none') applyPixelation()
 })
 
