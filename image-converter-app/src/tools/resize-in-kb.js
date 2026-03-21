@@ -747,20 +747,24 @@ async function processOneFile(file, targetKB) {
     canvas.getContext('2d').drawImage(img, 0, 0)
     const baseName = file.name.replace(/\.[^.]+$/, '')
 
-    let blob, outName
+    let blob, outName, warn = null
     if (targetKB >= originalKB * 0.95) {
       if (Math.abs(targetKB - originalKB) / originalKB < 0.05) {
         blob = file
         outName = file.name
+        warn = 'close'
       } else {
         blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
         outName = baseName + '_maxq.jpg'
+        warn = 'larger'
       }
     } else {
+      const minBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.01))
       blob = await compressToTargetSize(canvas, targetKB)
       outName = baseName + '_' + targetKB + 'kb.jpg'
+      if (minBlob.size > targetBytes) warn = 'small'
     }
-    return { blob, name: outName, originalSize: file.size, type: blob.type || 'image/jpeg' }
+    return { blob, name: outName, originalSize: file.size, type: blob.type || 'image/jpeg', warn }
   } finally {
     URL.revokeObjectURL(imgUrl)
   }
@@ -787,6 +791,17 @@ resizeBtn.addEventListener('click', async () => {
       resultBlobs.push(result)
       totalOriginal += result.originalSize
       totalOutput += result.blob.size
+    }
+
+    // Show warnings if any
+    const warns = resultBlobs.filter(r => r.warn)
+    if (warns.length) {
+      const hasLarger = warns.some(r => r.warn === 'larger')
+      const hasClose = warns.some(r => r.warn === 'close')
+      const hasSmall = warns.some(r => r.warn === 'small')
+      if (hasLarger) showWarning(t.rik_warn_larger || 'Target larger than original \u2014 saved at maximum quality.')
+      else if (hasClose) showWarning(t.rik_warn_close || 'Image already close to target size.')
+      else if (hasSmall) showWarning(t.rik_warn_small || 'Target too small for these dimensions \u2014 image was scaled down.')
     }
 
     showResultBar(totalOriginal, totalOutput)
