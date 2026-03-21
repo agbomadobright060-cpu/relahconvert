@@ -630,6 +630,7 @@ resizeBtn.addEventListener('click', async () => {
   if (!targetKB || targetKB < 1) return
 
   const targetBytes = targetKB * 1024
+  const originalKB = originalFile.size / 1024
 
   setResizing()
 
@@ -639,20 +640,26 @@ resizeBtn.addEventListener('click', async () => {
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
     canvas.getContext('2d').drawImage(img, 0, 0)
+    const baseName = originalFile.name.replace(/\.[^.]+$/, '')
 
-    // Check max achievable size at quality 1.0
-    const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
-
-    if (targetBytes >= maxBlob.size) {
-      // Target is beyond max achievable — download at highest quality with warning
-      const maxKB = Math.round(maxBlob.size / 1024)
-      showWarning((t.rik_warn_max || 'Maximum achievable is') + ' ' + maxKB + 'KB — ' + (t.rik_warn_max_dl || 'downloading at highest quality.'))
-      resultBlob = maxBlob
-      const baseName = originalFile.name.replace(/\.[^.]+$/, '')
-      showResultBar(originalFile.size, maxBlob.size)
-      showDownload(baseName + '_' + maxKB + 'kb.jpg', maxBlob)
+    if (targetKB >= originalKB * 0.95) {
+      // Target is same size or larger than original
+      if (Math.abs(targetKB - originalKB) / originalKB < 0.05) {
+        // Within 5% — already close, download original
+        showWarning(t.rik_warn_close || 'Image already close to target size.')
+        resultBlob = originalFile
+        showResultBar(originalFile.size, originalFile.size)
+        showDownload(originalFile.name, originalFile)
+      } else {
+        // Target larger — save at max quality
+        const maxBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 1.0))
+        showWarning(t.rik_warn_larger || 'Target larger than original — saved at maximum quality.')
+        resultBlob = maxBlob
+        showResultBar(originalFile.size, maxBlob.size)
+        showDownload(baseName + '_maxq.jpg', maxBlob)
+      }
     } else {
-      // Target is within range — compress to hit it
+      // Target < original — compress down
       const blob = await compressToTargetSize(canvas, targetKB)
 
       // Check if we had to scale down (target was too small for dimensions)
@@ -662,7 +669,6 @@ resizeBtn.addEventListener('click', async () => {
       }
 
       resultBlob = blob
-      const baseName = originalFile.name.replace(/\.[^.]+$/, '')
       showResultBar(originalFile.size, blob.size)
       showDownload(baseName + '_' + targetKB + 'kb.jpg', blob)
     }
