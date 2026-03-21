@@ -39,7 +39,7 @@ if (document.head) {
     .pix-mode-btn:hover { border-color:#C84B31; color:#C84B31; }
     .pix-mode-btn.active { background:#C84B31; color:#fff; border-color:#C84B31; }
     .pix-canvas-wrap { position:relative; background:#fff; border-radius:12px; border:1.5px solid #E8E0D5; overflow:hidden; display:inline-block; max-width:100%; cursor:crosshair; }
-    .pix-canvas-wrap canvas { display:block; max-width:100%; height:auto; }
+    .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:400px; width:auto; height:auto; }
     .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); pointer-events:none; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -292,8 +292,10 @@ modeAllBtn.addEventListener('click', () => {
   isApplyAll = true
   modeAllBtn.style.background = '#C84B31'; modeAllBtn.style.color = '#fff'; modeAllBtn.style.borderColor = '#C84B31'
   modeIndBtn.style.background = '#fff'; modeIndBtn.style.color = '#2C1810'; modeIndBtn.style.borderColor = '#DDD5C8'
-  editorArea.style.display = 'none'
-  editorLabel.textContent = ''
+  if (selectedFiles.length > 1) {
+    editorArea.style.display = 'none'
+    editorLabel.textContent = ''
+  }
 })
 
 modeIndBtn.addEventListener('click', () => {
@@ -331,6 +333,20 @@ function addFiles(files) {
   })
   renderPreviews()
   controlsArea.style.display = 'block'
+  // For single file, auto-open editor; for multiple in Apply to All, keep editor hidden
+  if (selectedFiles.length === 1) {
+    // Wait for image to load then open editor
+    const waitIdx = selectedFiles.length - 1
+    const waitForLoad = () => {
+      if (loadedImages[waitIdx]) { openEditor(waitIdx) }
+      else { setTimeout(waitForLoad, 50) }
+    }
+    waitForLoad()
+  } else if (!isApplyAll) {
+    openEditor(activeFileIdx)
+  } else {
+    editorArea.style.display = 'none'
+  }
   downloadBtn.disabled = false
   downloadBtn.style.opacity = '1'
   downloadBtn.style.cursor = 'pointer'
