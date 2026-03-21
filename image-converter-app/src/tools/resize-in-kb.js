@@ -49,7 +49,7 @@ if (document.head) {
     .result-sizes { font-size:13px; color:#7A6A5A; display:flex; align-items:center; gap:8px; }
     .result-arrow { color:#C84B31; font-size:16px; }
     .preview-card { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; }
-    .preview-card img { width:100%; height:120px; object-fit:cover; display:block; }
+    .preview-card img { width:100%; height:180px; object-fit:contain; display:block; background:#f9f9f9; }
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .preview-card .remove-btn:hover { background:#C84B31; }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
