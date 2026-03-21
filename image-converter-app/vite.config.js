@@ -200,6 +200,7 @@ export default defineConfig({
         'html-to-image':     resolve(__dirname, 'html-to-image.html'),
         'merge-images':      resolve(__dirname, 'merge-images.html'),
         'passport-photo':    resolve(__dirname, 'passport-photo.html'),
+        'image-splitter':    resolve(__dirname, 'image-splitter.html'),
       }
     }
   }
