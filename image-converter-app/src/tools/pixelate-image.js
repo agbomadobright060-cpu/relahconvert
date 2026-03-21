@@ -293,8 +293,10 @@ const ctx          = pixCanvas.getContext('2d')
 let selectedFiles = []
 let isWholeMode = true
 let isApplyAll = true
-let activeFileIdx = 0 // which file is being edited in Individual mode
+let activeFileIdx = 0
 let perFileSelections = [] // perFileSelections[i] = [{ x, y, w, h }, ...]
+let perFileMode = []       // perFileMode[i] = 'whole' | 'area'
+let perFileLevel = []      // perFileLevel[i] = blockSize number
 let currentDrag = null
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
@@ -307,7 +309,7 @@ modeWhole.addEventListener('click', () => {
   isWholeMode = true
   modeWhole.classList.add('active')
   modeArea.classList.remove('active')
-  if (!isApplyAll) { perFileSelections[activeFileIdx] = [] }
+  if (!isApplyAll) { perFileSelections[activeFileIdx] = []; perFileMode[activeFileIdx] = 'whole' }
   canvasWrap.style.cursor = 'default'
   applyPixelation()
 })
@@ -316,6 +318,7 @@ modeArea.addEventListener('click', () => {
   isWholeMode = false
   modeArea.classList.add('active')
   modeWhole.classList.remove('active')
+  if (!isApplyAll) { perFileMode[activeFileIdx] = 'area' }
   canvasWrap.style.cursor = 'crosshair'
   applyPixelation()
 })
@@ -352,6 +355,8 @@ function addFiles(files) {
   arr.forEach(f => {
     selectedFiles.push(f)
     perFileSelections.push([])
+    perFileMode.push('whole')
+    perFileLevel.push(12)
     loadedImages.push(null)
   })
   // Preload images
@@ -364,26 +369,21 @@ function addFiles(files) {
   })
   renderFileChips()
   workArea.style.display = 'block'
-  // For single file, auto-open editor; for multiple in Apply to All, keep editor hidden
-  if (selectedFiles.length === 1) {
-    // Wait for image to load then open editor
-    const waitIdx = selectedFiles.length - 1
-    const waitForLoad = () => {
-      if (loadedImages[waitIdx]) { openEditor(waitIdx) }
-      else { setTimeout(waitForLoad, 50) }
-    }
-    waitForLoad()
-  } else if (!isApplyAll) {
-    openEditor(activeFileIdx)
-  } else {
-    editorArea.style.display = 'none'
-  }
   downloadBtn.disabled = false
+  // Always auto-open first/active file in editor
+  const targetIdx = activeFileIdx < selectedFiles.length ? activeFileIdx : 0
+  const waitForLoad = () => {
+    if (loadedImages[targetIdx]) { openEditor(targetIdx) }
+    else { setTimeout(waitForLoad, 50) }
+  }
+  waitForLoad()
 }
 
 function removeFile(idx) {
   selectedFiles.splice(idx, 1)
   perFileSelections.splice(idx, 1)
+  perFileMode.splice(idx, 1)
+  perFileLevel.splice(idx, 1)
   loadedImages.splice(idx, 1)
   if (activeFileIdx >= selectedFiles.length) activeFileIdx = Math.max(0, selectedFiles.length - 1)
   renderFileChips()
@@ -417,6 +417,11 @@ function renderFileChips() {
 }
 
 function openEditor(idx) {
+  // Save current file's state before switching
+  if (!isApplyAll && activeFileIdx < selectedFiles.length) {
+    perFileMode[activeFileIdx] = isWholeMode ? 'whole' : 'area'
+    perFileLevel[activeFileIdx] = parseInt(pixelSlider.value)
+  }
   activeFileIdx = idx
   const img = loadedImages[idx]
   if (!img) return
@@ -424,6 +429,15 @@ function openEditor(idx) {
   pixCanvas.height = img.naturalHeight
   editorArea.style.display = 'block'
   currentDrag = null
+  // Restore per-file state in Individual mode
+  if (!isApplyAll) {
+    isWholeMode = perFileMode[idx] === 'whole'
+    pixelSlider.value = perFileLevel[idx] || 12
+    pixelVal.textContent = pixelSlider.value
+    modeWhole.classList.toggle('active', isWholeMode)
+    modeArea.classList.toggle('active', !isWholeMode)
+    canvasWrap.style.cursor = isWholeMode ? 'default' : 'crosshair'
+  }
   applyPixelation()
   // Update active chip highlight
   fileChips.querySelectorAll('.file-chip[data-idx]').forEach((chip, i) => {
@@ -530,14 +544,20 @@ function applyPixelation() {
 function pixelateRegion(rx, ry, rw, rh, blockSize) {
   const x0 = Math.max(0, rx), y0 = Math.max(0, ry)
   const x1 = Math.min(pixCanvas.width, rx + rw), y1 = Math.min(pixCanvas.height, ry + rh)
-  for (let y = y0; y < y1; y += blockSize) {
-    for (let x = x0; x < x1; x += blockSize) {
-      const bw = Math.min(blockSize, x1 - x), bh = Math.min(blockSize, y1 - y)
-      const sx = Math.min(x + Math.floor(bw / 2), x1 - 1)
-      const sy = Math.min(y + Math.floor(bh / 2), y1 - 1)
-      const pixel = ctx.getImageData(sx, sy, 1, 1).data
-      ctx.fillStyle = `rgb(${pixel[0]},${pixel[1]},${pixel[2]})`
-      ctx.fillRect(x, y, bw, bh)
+  const w = x1 - x0, h = y1 - y0
+  if (w <= 0 || h <= 0) return
+  // Read all pixels at once for performance
+  const imgData = ctx.getImageData(x0, y0, w, h)
+  const d = imgData.data
+  for (let by = 0; by < h; by += blockSize) {
+    for (let bx = 0; bx < w; bx += blockSize) {
+      const bw = Math.min(blockSize, w - bx), bh = Math.min(blockSize, h - by)
+      const sx = Math.min(bx + (bw >> 1), w - 1)
+      const sy = Math.min(by + (bh >> 1), h - 1)
+      const idx = (sy * w + sx) * 4
+      const r = d[idx], g = d[idx + 1], b = d[idx + 2]
+      ctx.fillStyle = `rgb(${r},${g},${b})`
+      ctx.fillRect(x0 + bx, y0 + by, bw, bh)
     }
   }
 }
@@ -548,31 +568,36 @@ function pixelateImageToBlob(img, file, blockSize, sels) {
     c.width = img.naturalWidth; c.height = img.naturalHeight
     const cx = c.getContext('2d')
     cx.drawImage(img, 0, 0)
-    if (isWholeMode || !sels || !sels.length) {
-      // Pixelate whole
-      const x1 = c.width, y1 = c.height
-      for (let y = 0; y < y1; y += blockSize) {
-        for (let x = 0; x < x1; x += blockSize) {
-          const bw = Math.min(blockSize, x1 - x), bh = Math.min(blockSize, y1 - y)
-          const sx = Math.min(x + Math.floor(bw / 2), x1 - 1)
-          const sy = Math.min(y + Math.floor(bh / 2), y1 - 1)
-          const p = cx.getImageData(sx, sy, 1, 1).data
-          cx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`
-          cx.fillRect(x, y, bw, bh)
+    if (!sels || !sels.length) {
+      // Pixelate whole — read all pixels once
+      const imgData = cx.getImageData(0, 0, c.width, c.height)
+      const d = imgData.data, w = c.width, h = c.height
+      for (let by = 0; by < h; by += blockSize) {
+        for (let bx = 0; bx < w; bx += blockSize) {
+          const bw = Math.min(blockSize, w - bx), bh = Math.min(blockSize, h - by)
+          const sx = Math.min(bx + (bw >> 1), w - 1)
+          const sy = Math.min(by + (bh >> 1), h - 1)
+          const idx = (sy * w + sx) * 4
+          cx.fillStyle = `rgb(${d[idx]},${d[idx+1]},${d[idx+2]})`
+          cx.fillRect(bx, by, bw, bh)
         }
       }
     } else {
       sels.forEach(sel => {
-        const sx0 = Math.max(0, Math.round(sel.x)), sy0 = Math.max(0, Math.round(sel.y))
-        const sx1 = Math.min(c.width, Math.round(sel.x + sel.w)), sy1 = Math.min(c.height, Math.round(sel.y + sel.h))
-        for (let y = sy0; y < sy1; y += blockSize) {
-          for (let x = sx0; x < sx1; x += blockSize) {
-            const bw = Math.min(blockSize, sx1 - x), bh = Math.min(blockSize, sy1 - y)
-            const px = Math.min(x + Math.floor(bw / 2), sx1 - 1)
-            const py = Math.min(y + Math.floor(bh / 2), sy1 - 1)
-            const p = cx.getImageData(px, py, 1, 1).data
-            cx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`
-            cx.fillRect(x, y, bw, bh)
+        const x0 = Math.max(0, Math.round(sel.x)), y0 = Math.max(0, Math.round(sel.y))
+        const x1 = Math.min(c.width, Math.round(sel.x + sel.w)), y1 = Math.min(c.height, Math.round(sel.y + sel.h))
+        const rw = x1 - x0, rh = y1 - y0
+        if (rw <= 0 || rh <= 0) return
+        const imgData = cx.getImageData(x0, y0, rw, rh)
+        const d = imgData.data
+        for (let by = 0; by < rh; by += blockSize) {
+          for (let bx = 0; bx < rw; bx += blockSize) {
+            const bw = Math.min(blockSize, rw - bx), bh = Math.min(blockSize, rh - by)
+            const sx = Math.min(bx + (bw >> 1), rw - 1)
+            const sy = Math.min(by + (bh >> 1), rh - 1)
+            const idx = (sy * rw + sx) * 4
+            cx.fillStyle = `rgb(${d[idx]},${d[idx+1]},${d[idx+2]})`
+            cx.fillRect(x0 + bx, y0 + by, bw, bh)
           }
         }
       })
@@ -585,6 +610,7 @@ function pixelateImageToBlob(img, file, blockSize, sels) {
 // ── Slider live update ──────────────────────────────────────────────────────
 pixelSlider.addEventListener('input', () => {
   pixelVal.textContent = pixelSlider.value
+  if (!isApplyAll) perFileLevel[activeFileIdx] = parseInt(pixelSlider.value)
   if (loadedImages[activeFileIdx] && editorArea.style.display !== 'none') applyPixelation()
 })
 
@@ -609,8 +635,10 @@ downloadBtn.addEventListener('click', async () => {
           img.src = url
         })
       }
+      const fileBlockSize = isApplyAll ? blockSize : (perFileLevel[i] || 12)
       const sels = isApplyAll ? [] : (perFileSelections[i] || [])
-      const blob = await pixelateImageToBlob(loadedImages[i], selectedFiles[i], blockSize, sels)
+      const fileIsWhole = isApplyAll ? isWholeMode : (perFileMode[i] === 'whole')
+      const blob = await pixelateImageToBlob(loadedImages[i], selectedFiles[i], fileBlockSize, fileIsWhole ? [] : sels)
       const ext = selectedFiles[i].type === 'image/png' ? '.png' : (selectedFiles[i].type === 'image/webp' ? '.webp' : '.jpg')
       const baseName = selectedFiles[i].name.replace(/\.[^.]+$/, '')
       resultBlobs.push({ blob, name: baseName + '_pixelated' + ext, type: blob.type })
