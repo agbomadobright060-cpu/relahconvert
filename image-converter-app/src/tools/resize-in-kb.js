@@ -589,12 +589,17 @@ document.addEventListener('drop', e => {
 // ── Core compression logic ──────────────────────────────────────────────────
 async function compressToTargetSize(canvas, targetKB) {
   const targetBytes = targetKB * 1024
-  let min = 0.01, max = 1.0, quality = 0.8
+  let min = 0.01, max = 1.0, quality = 0.5
   let bestBlob = null
-  for (let i = 0; i < 15; i++) {
+  let bestDiff = Infinity
+  for (let i = 0; i < 20; i++) {
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality))
-    if (blob.size <= targetBytes) {
+    const diff = Math.abs(blob.size - targetBytes)
+    if (diff < bestDiff) {
+      bestDiff = diff
       bestBlob = blob
+    }
+    if (blob.size <= targetBytes) {
       min = quality
     } else {
       max = quality
@@ -609,13 +614,6 @@ resizeBtn.addEventListener('click', async () => {
   if (!originalFile) return
   const targetKB = parseInt(targetKBInput.value)
   if (!targetKB || targetKB < 1) return
-
-  if (originalFile.size <= targetKB * 1024) {
-    showResultBar(originalFile.size, originalFile.size)
-    resultBlob = originalFile
-    showDownload(originalFile.name, originalFile)
-    return
-  }
 
   setResizing()
 
