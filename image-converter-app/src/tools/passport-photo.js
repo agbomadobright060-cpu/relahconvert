@@ -561,7 +561,6 @@ function getCropRegion(img, aspect) {
       const { topY, bottomY, leftX, rightX } = personBounds
       const personH = bottomY - topY
       const personCx = leftX + (rightX - leftX) / 2
-      console.log('Person bounds:', { topY, bottomY, leftX, rightX, personH, personW: rightX-leftX, personAspect: personH/(rightX-leftX), imgW, imgH })
 
       // Use person shape to determine photo type
       const personW = rightX - leftX
