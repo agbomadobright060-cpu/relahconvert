@@ -374,6 +374,14 @@ function removeFile(idx) {
 function renderPreviews() {
   previewUrls.forEach(u => { if (u) URL.revokeObjectURL(u) })
   previewUrls = selectedFiles.map(f => URL.createObjectURL(f))
+
+  // Single file — hide preview grid, editor handles display
+  if (selectedFiles.length <= 1) {
+    previewGrid.style.display = 'none'
+    previewGrid.innerHTML = ''
+    batchModeWrap.style.display = 'none'
+    return
+  }
   previewGrid.innerHTML = selectedFiles.map((f, i) => `
     <div class="preview-card" data-idx="${i}" style="display:inline-block; width:calc(33.33% - 8px); vertical-align:top; margin-bottom:10px; cursor:pointer; ${!isApplyAll && i === activeFileIdx ? 'outline:2px solid #C84B31; outline-offset:2px;' : ''}">
       <img src="${previewUrls[i]}" alt="preview" />
