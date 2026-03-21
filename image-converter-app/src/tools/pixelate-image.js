@@ -64,7 +64,7 @@ if (document.head) {
     .pix-canvas-wrap { position:relative; overflow:hidden; display:block; cursor:crosshair; width:100%; }
     .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
-    .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); pointer-events:none; }
+    .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); pointer-events:none; z-index:1; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -315,10 +315,11 @@ modeWhole.addEventListener('click', () => {
 })
 
 modeArea.addEventListener('click', () => {
+  if (isApplyAll) return // Select Area only available in Individual mode
   isWholeMode = false
   modeArea.classList.add('active')
   modeWhole.classList.remove('active')
-  if (!isApplyAll) { perFileMode[activeFileIdx] = 'area' }
+  perFileMode[activeFileIdx] = 'area'
   canvasWrap.style.cursor = 'crosshair'
   applyPixelation()
 })
@@ -327,16 +328,24 @@ modeAllBtn.addEventListener('click', () => {
   isApplyAll = true
   modeAllBtn.style.background = '#C84B31'; modeAllBtn.style.color = '#fff'; modeAllBtn.style.borderColor = '#C84B31'
   modeIndBtn.style.background = '#fff'; modeIndBtn.style.color = '#2C1810'; modeIndBtn.style.borderColor = '#DDD5C8'
-  if (selectedFiles.length > 1) {
-    editorArea.style.display = 'none'
-  }
+  // Force Whole Image mode in Apply to All
+  isWholeMode = true
+  modeWhole.classList.add('active')
+  modeArea.classList.remove('active')
+  modeArea.style.opacity = '0.5'
+  modeArea.style.pointerEvents = 'none'
+  canvasWrap.style.cursor = 'default'
+  applyPixelation()
 })
 
 modeIndBtn.addEventListener('click', () => {
   isApplyAll = false
   modeIndBtn.style.background = '#C84B31'; modeIndBtn.style.color = '#fff'; modeIndBtn.style.borderColor = '#C84B31'
   modeAllBtn.style.background = '#fff'; modeAllBtn.style.color = '#2C1810'; modeAllBtn.style.borderColor = '#DDD5C8'
-  if (selectedFiles.length) openEditor(0)
+  // Re-enable Select Area button
+  modeArea.style.opacity = '1'
+  modeArea.style.pointerEvents = 'auto'
+  if (selectedFiles.length) openEditor(activeFileIdx)
 })
 
 // ── File handling ───────────────────────────────────────────────────────────
@@ -513,9 +522,10 @@ function renderSelectionBoxes() {
   const offsetY = canvasRect.top - wrapRect.top
   const scaleX = canvasRect.width / pixCanvas.width
   const scaleY = canvasRect.height / pixCanvas.height
-  const sels = [...(perFileSelections[activeFileIdx] || [])]
-  if (currentDrag) sels.push(currentDrag)
-  sels.forEach(sel => {
+  const savedSels = perFileSelections[activeFileIdx] || []
+  const allSels = [...savedSels]
+  if (currentDrag) allSels.push(currentDrag)
+  allSels.forEach((sel, i) => {
     const div = document.createElement('div')
     div.className = 'pix-selection'
     div.style.left = (offsetX + sel.x * scaleX) + 'px'
@@ -523,6 +533,19 @@ function renderSelectionBoxes() {
     div.style.width = (sel.w * scaleX) + 'px'
     div.style.height = (sel.h * scaleY) + 'px'
     div.style.display = 'block'
+    // Add X delete button for saved selections (not the current drag)
+    if (i < savedSels.length) {
+      const xBtn = document.createElement('button')
+      xBtn.textContent = '\u00d7'
+      xBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(200,75,49,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;line-height:1;padding:0;'
+      xBtn.addEventListener('click', e => {
+        e.stopPropagation()
+        perFileSelections[activeFileIdx].splice(i, 1)
+        renderSelectionBoxes()
+        applyPixelation()
+      })
+      div.appendChild(xBtn)
+    }
     canvasWrap.appendChild(div)
   })
 }
