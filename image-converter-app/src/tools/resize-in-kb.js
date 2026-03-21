@@ -665,6 +665,15 @@ function renderPreviews() {
   controlsArea.style.display = 'block'
   resizeBtn.style.display = 'block'
 
+  // Hide mode toggle for single file
+  const modeWrap = modeAllBtn.parentElement
+  if (selectedFiles.length <= 1) {
+    modeWrap.style.display = 'none'
+    globalTarget.style.display = 'flex'
+  } else {
+    modeWrap.style.display = 'flex'
+  }
+
   // Wire up remove buttons
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', () => removeFile(parseInt(btn.dataset.idx)))
@@ -785,9 +794,9 @@ resizeBtn.addEventListener('click', async () => {
     if (resultBlobs.length === 1) {
       showDownload(resultBlobs[0].name, resultBlobs[0].blob)
     } else {
-      // ZIP multiple results
+      // ZIP multiple results — prefix with index to avoid duplicate names
       const zip = new JSZip()
-      resultBlobs.forEach(r => zip.file(r.name, r.blob))
+      resultBlobs.forEach((r, i) => zip.file((i + 1) + '_' + r.name, r.blob))
       const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
       showDownload('resized-images.zip', zipBlob)
     }
