@@ -823,13 +823,16 @@ function generatePhoto() {
   octx.fillStyle = selectedCountry.bg || '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
   if (croppedImg) {
+    // Cover-fill: scale to fill width, align bottom, crop overflow at top
     const cropAspect = croppedImg.naturalWidth / croppedImg.naturalHeight
     const outAspect = wPx / hPx
     let dw, dh, dx, dy
     if (cropAspect > outAspect) {
-      dw = wPx; dh = wPx / cropAspect; dx = 0; dy = hPx - dh // align bottom
-    } else {
+      // Crop is wider than output — fill height, center horizontally
       dh = hPx; dw = hPx * cropAspect; dx = (wPx - dw) / 2; dy = 0
+    } else {
+      // Crop is taller than output — fill width, align bottom
+      dw = wPx; dh = wPx / cropAspect; dx = 0; dy = hPx - dh
     }
     octx.drawImage(croppedImg, dx, dy, dw, dh)
   }
