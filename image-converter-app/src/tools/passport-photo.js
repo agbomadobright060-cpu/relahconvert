@@ -502,26 +502,19 @@ function handleFile(file) {
         removeBgFn = mod.removeBackground
       }
       progressText.textContent = bgLabel + ' 0%'
-      let displayedPct = 0
+      let simPct = 0
+      const simInterval = setInterval(() => {
+        if (simPct < 90) {
+          simPct += 10
+          progressText.textContent = bgLabel + ' ' + simPct + '%'
+        }
+      }, 3000)
       const resultBlob = await removeBgFn(file, {
         model: 'isnet_quint8',
         output: { format: 'image/png' },
-        progress: (key, current, total) => {
-          let phasePct = total > 0 ? (current / total) : 0
-          let overallPct = 0
-          if (key === 'compute:inference') {
-            overallPct = 50 + phasePct * 50
-          } else {
-            overallPct = phasePct * 50
-          }
-          // Round down to nearest 10 so it jumps in visible steps
-          const stepped = Math.floor(overallPct / 10) * 10
-          if (stepped > displayedPct && stepped <= 90) {
-            displayedPct = stepped
-            progressText.textContent = bgLabel + ' ' + displayedPct + '%'
-          }
-        },
       })
+      clearInterval(simInterval)
+      progressText.textContent = bgLabel + ' 100%'
       const bgImg = new Image()
       bgImg.onload = async () => {
         bgRemovedImg = bgImg
