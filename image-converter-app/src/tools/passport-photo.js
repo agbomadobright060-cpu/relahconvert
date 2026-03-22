@@ -318,6 +318,9 @@ document.querySelector('#app').innerHTML = `
         <button class="pp-upload-btn" style="margin-top:12px;width:auto;display:inline-flex"><span style="font-size:18px">+</span> ${selectLbl}</button>
       </div>
       <input type="file" id="fileInput" accept="image/*" style="display:none" />
+      <div id="heroSection" style="text-align:center;margin-top:20px">
+        <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)" />
+      </div>
       <div id="processingArea" style="display:none">
         <div style="position:relative;display:inline-block;width:100%;text-align:center">
           <canvas id="uploadPreview" style="max-width:100%;border-radius:12px;display:block;margin:0 auto"></canvas>
@@ -476,8 +479,9 @@ function handleFile(file) {
     bgWhiteImg = null
     croppedImg = null
 
-    // Show processing area, hide dropzone
+    // Show processing area, hide dropzone and hero
     dropZoneEl.style.display = 'none'
+    document.getElementById('heroSection').style.display = 'none'
     processingArea.style.display = ''
     step1NextBtn.style.display = 'none'
     step1Error.style.display = 'none'
@@ -823,7 +827,7 @@ function generatePhoto() {
     const outAspect = wPx / hPx
     let dw, dh, dx, dy
     if (cropAspect > outAspect) {
-      dw = wPx; dh = wPx / cropAspect; dx = 0; dy = (hPx - dh) / 2
+      dw = wPx; dh = wPx / cropAspect; dx = 0; dy = hPx - dh // align bottom
     } else {
       dh = hPx; dw = hPx * cropAspect; dx = (wPx - dw) / 2; dy = 0
     }
