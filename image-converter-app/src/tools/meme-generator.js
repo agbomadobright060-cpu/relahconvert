@@ -32,7 +32,7 @@ if (document.head) {
     *{box-sizing:border-box}
     .tool-wrap{max-width:1200px;margin:0 auto;padding:24px 16px 60px;font-family:'DM Sans',sans-serif}
     .tool-hero{margin-bottom:16px}
-    .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:900;color:#2C1810;margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
+    .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:#2C1810;margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
     .brand-em{font-style:italic;color:#C84B31}
     .tool-sub{font-size:13px;color:#7A6A5A;margin:0}
 

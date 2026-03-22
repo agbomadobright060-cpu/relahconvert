@@ -302,7 +302,7 @@ function buildSeoSection() {
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:900; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         ${t.compress_title} <em style="font-style:italic; color:#C84B31;">${t.compress_title_em}</em>
       </h1>
       <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.compress_desc}</p>
