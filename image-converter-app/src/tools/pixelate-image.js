@@ -510,9 +510,13 @@ function startDrag(e) {
     coords.y >= s.y && coords.y <= s.y + s.h
   )
   if (clickedIdx >= 0) {
-    // Clicked on a pixelated area — show its box
+    // Clicked on a pixelated area — show its box and restore its slider level
     activeSelIdx = clickedIdx
+    const selBlockSize = sels[clickedIdx].blockSize || 12
+    pixelSlider.value = selBlockSize
+    pixelVal.textContent = selBlockSize
     renderSelectionBoxes()
+    applyPixelation()
     return
   }
 
@@ -543,7 +547,7 @@ function endDrag() {
   if (!isDragging) return
   isDragging = false
   if (currentDrag && currentDrag.w > 5 && currentDrag.h > 5) {
-    perFileSelections[activeFileIdx].push({ ...currentDrag })
+    perFileSelections[activeFileIdx].push({ ...currentDrag, blockSize: parseInt(pixelSlider.value) })
     activeSelIdx = perFileSelections[activeFileIdx].length - 1
   }
   currentDrag = null
@@ -612,9 +616,10 @@ function applyPixelation() {
     pixelateRegion(0, 0, pixCanvas.width, pixCanvas.height, blockSize)
   } else {
     const sels = perFileSelections[activeFileIdx] || []
-    // Always pixelate all saved selections
-    sels.forEach(sel => {
-      pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), blockSize)
+    // Pixelate all saved selections — each with its own blockSize
+    sels.forEach((sel, i) => {
+      const bs = (i === activeSelIdx) ? blockSize : (sel.blockSize || blockSize)
+      pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), bs)
     })
     // Also pixelate current drag (while drawing)
     if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) {
@@ -666,15 +671,16 @@ function pixelateImageToBlob(img, file, blockSize, sels) {
       }
     } else {
       sels.forEach(sel => {
+        const selBS = sel.blockSize || blockSize
         const x0 = Math.max(0, Math.round(sel.x)), y0 = Math.max(0, Math.round(sel.y))
         const x1 = Math.min(c.width, Math.round(sel.x + sel.w)), y1 = Math.min(c.height, Math.round(sel.y + sel.h))
         const rw = x1 - x0, rh = y1 - y0
         if (rw <= 0 || rh <= 0) return
         const imgData = cx.getImageData(x0, y0, rw, rh)
         const d = imgData.data
-        for (let by = 0; by < rh; by += blockSize) {
-          for (let bx = 0; bx < rw; bx += blockSize) {
-            const bw = Math.min(blockSize, rw - bx), bh = Math.min(blockSize, rh - by)
+        for (let by = 0; by < rh; by += selBS) {
+          for (let bx = 0; bx < rw; bx += selBS) {
+            const bw = Math.min(selBS, rw - bx), bh = Math.min(selBS, rh - by)
             const sx = Math.min(bx + (bw >> 1), rw - 1)
             const sy = Math.min(by + (bh >> 1), rh - 1)
             const idx = (sy * rw + sx) * 4
@@ -693,6 +699,10 @@ function pixelateImageToBlob(img, file, blockSize, sels) {
 pixelSlider.addEventListener('input', () => {
   pixelVal.textContent = pixelSlider.value
   if (!isApplyAll) perFileLevel[activeFileIdx] = parseInt(pixelSlider.value)
+  // Update active selection's blockSize
+  if (activeSelIdx >= 0 && perFileSelections[activeFileIdx] && perFileSelections[activeFileIdx][activeSelIdx]) {
+    perFileSelections[activeFileIdx][activeSelIdx].blockSize = parseInt(pixelSlider.value)
+  }
   if (loadedImages[activeFileIdx] && editorArea.style.display !== 'none') applyPixelation()
 })
 
