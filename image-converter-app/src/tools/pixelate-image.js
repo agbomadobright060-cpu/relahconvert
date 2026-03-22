@@ -611,12 +611,14 @@ function applyPixelation() {
   if (isWholeMode) {
     pixelateRegion(0, 0, pixCanvas.width, pixCanvas.height, blockSize)
   } else {
-    // Only pixelate the active selection or current drag — not all
+    const sels = perFileSelections[activeFileIdx] || []
+    // Always pixelate all saved selections
+    sels.forEach(sel => {
+      pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), blockSize)
+    })
+    // Also pixelate current drag (while drawing)
     if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) {
       pixelateRegion(Math.round(currentDrag.x), Math.round(currentDrag.y), Math.round(currentDrag.w), Math.round(currentDrag.h), blockSize)
-    } else if (activeSelIdx >= 0) {
-      const sel = (perFileSelections[activeFileIdx] || [])[activeSelIdx]
-      if (sel) pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), blockSize)
     }
   }
 }
