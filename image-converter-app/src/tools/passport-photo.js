@@ -319,7 +319,7 @@ document.querySelector('#app').innerHTML = `
       </div>
       <input type="file" id="fileInput" accept="image/*" style="display:none" />
       <div id="heroSection" style="text-align:center;margin-top:20px">
-        <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)" />
+        <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="max-width:400px;width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)" />
       </div>
       <div id="processingArea" style="display:none">
         <div style="position:relative;display:inline-block;width:100%;text-align:center">
