@@ -374,7 +374,7 @@ convertBtn.addEventListener('click', async () => {
         statusNote.textContent = `${files.length} GIFs ready — ${Math.round(zipBlob.size / 1024)} KB total`
         zipBtn.addEventListener('click', () => {
           const a = document.createElement('a')
-          a.href = zipBtn._url; a.download = 'converted-gif.zip'; a.click()
+          a.href = zipBtn._url; a.download = 'converted-gif.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
           setTimeout(() => URL.revokeObjectURL(zipBtn._url), 10000)
         }, { once: true })
       }

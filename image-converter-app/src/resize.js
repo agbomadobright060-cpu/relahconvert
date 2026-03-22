@@ -543,7 +543,7 @@ resizeBtn.addEventListener('click', async () => {
       const { blob, filename, outputSize, type } = await resizeFile(selectedFiles[0], dims.w, dims.h)
       resizedBlobs = [{ blob, name: filename, type }]
       currentDownloadUrl = URL.createObjectURL(blob)
-      downloadLink.href = currentDownloadUrl; downloadLink.download = filename; downloadLink.style.display = 'block'
+      downloadLink.href = currentDownloadUrl; downloadLink.download = filename; downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
       downloadLink.textContent = `${t.download} (${formatSize(outputSize)})`
     } else {
       const zip = new JSZip(), usedNames = new Set()
@@ -557,7 +557,7 @@ resizeBtn.addEventListener('click', async () => {
       }
       const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
       currentDownloadUrl = URL.createObjectURL(zipBlob)
-      downloadLink.href = currentDownloadUrl; downloadLink.download = 'resized-images.zip'; downloadLink.style.display = 'block'
+      downloadLink.href = currentDownloadUrl; downloadLink.download = 'resized-images.zip'; downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
     }
     buildNextSteps(); setIdle(); fileInput.value = ''

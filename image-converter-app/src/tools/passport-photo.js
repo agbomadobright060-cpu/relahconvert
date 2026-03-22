@@ -671,7 +671,7 @@ dlPhoto.addEventListener('click', () => {
     const a = document.createElement('a')
     a.href = url
     a.download = 'passport-photo-' + selectedCountry.country.toLowerCase().replace(/\s+/g, '-') + '.jpg'
-    a.click()
+    a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
   }, 'image/jpeg', 0.95)
 })
@@ -703,7 +703,7 @@ dlSheet.addEventListener('click', () => {
     const a = document.createElement('a')
     a.href = url
     a.download = 'passport-photo-sheet-4x6.jpg'
-    a.click()
+    a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
   }, 'image/jpeg', 0.95)
 })

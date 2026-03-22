@@ -198,7 +198,7 @@ zipBtn.addEventListener('click', async () => {
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(zipBlob); a.download = 'png-files.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    a.href = URL.createObjectURL(zipBlob); a.download = 'png-files.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })

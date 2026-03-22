@@ -532,7 +532,7 @@ compressBtn.addEventListener('click', async () => {
       const { blob, filename, originalSize, outputSize, type } = await compressFile(selectedFiles[0])
       compressedBlobs = [{ blob, name: filename, type }]
       currentDownloadUrl = URL.createObjectURL(blob)
-      downloadLink.href = currentDownloadUrl; downloadLink.download = filename; downloadLink.style.display = 'block'
+      downloadLink.href = currentDownloadUrl; downloadLink.download = filename; downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
       downloadLink.textContent = `${t.download} (${formatSize(outputSize)})`
       showResultBar(originalSize, outputSize)
     } else {
@@ -549,7 +549,7 @@ compressBtn.addEventListener('click', async () => {
       }
       const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
       currentDownloadUrl = URL.createObjectURL(zipBlob)
-      downloadLink.href = currentDownloadUrl; downloadLink.download = 'compressed-images.zip'; downloadLink.style.display = 'block'
+      downloadLink.href = currentDownloadUrl; downloadLink.download = 'compressed-images.zip'; downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
       showResultBar(totalOriginal, totalOutput)
     }

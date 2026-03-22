@@ -869,7 +869,7 @@ function showDownload(filename, blob) {
   downloadLink.href = currentDownloadUrl
   downloadLink.download = filename
   downloadLink.textContent = selectedFiles.length > 1 ? downloadZipLbl : dlLabel
-  downloadLink.style.display = 'block'
+  downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
   buildNextSteps()
 }
 

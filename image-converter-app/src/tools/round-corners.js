@@ -360,7 +360,7 @@ applyBtn.addEventListener('click', async () => {
     lastResults = [{ blob, name: fname, type: 'image/png' }]
     const a = document.createElement('a')
     const url = URL.createObjectURL(blob)
-    a.href = url; a.download = fname; a.click()
+    a.href = url; a.download = fname; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
     applyBtn.disabled = false
     applyBtn.textContent = t.round_corners_btn

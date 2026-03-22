@@ -559,7 +559,7 @@ $('downloadBtn').onclick=async()=>{
   const tc=await renderClean(images[activeIdx])
   const blob=await canvasToBlob(tc)
   const url=URL.createObjectURL(blob)
-  const a=document.createElement('a');a.href=url;a.download='blurred-face.jpg';a.click()
+  const a=document.createElement('a');a.href=url;a.download='blurred-face.jpg';a.click();if(window.showReviewPrompt)window.showReviewPrompt()
   setTimeout(()=>URL.revokeObjectURL(url),10000)
   buildNextSteps(blob)
 }
@@ -582,7 +582,7 @@ $('batchDownloadBtn').onclick=async()=>{
     btn.textContent=ui.creatingZip
     const zipBlob=await zip.generateAsync({type:'blob'})
     const url=URL.createObjectURL(zipBlob)
-    const a=document.createElement('a');a.href=url;a.download='blurred-faces.zip';a.click()
+    const a=document.createElement('a');a.href=url;a.download='blurred-faces.zip';a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(()=>URL.revokeObjectURL(url),10000)
   }catch(e){alert(ui.batchFailed+': '+e.message)}
   btn.disabled=false;btn.textContent='⬇ ${ui.downloadZip}'

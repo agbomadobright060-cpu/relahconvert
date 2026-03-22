@@ -289,7 +289,7 @@ applyBtn.addEventListener('click', async () => {
         const url = URL.createObjectURL(blob)
         a.href = url
         a.download = `grayscale-${baseName}.${ext}`
-        a.click()
+        a.click();if(window.showReviewPrompt)window.showReviewPrompt()
         setTimeout(() => URL.revokeObjectURL(url), 10000)
         applyBtn.disabled = false
         applyBtn.textContent = dlBtn

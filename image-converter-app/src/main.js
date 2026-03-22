@@ -325,7 +325,7 @@ convertBtn.addEventListener('click', async () => {
       convertedBlobs = [{ blob, name: filename, type: mime }]
       currentDownloadUrl = URL.createObjectURL(blob)
       downloadLink.href = currentDownloadUrl; downloadLink.download = filename
-      downloadLink.style.display = 'block'
+      downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
       downloadLink.textContent = `${t.download} (${formatSize(outputSize)})`
       sizes.textContent = ''
     } else {
@@ -336,7 +336,7 @@ convertBtn.addEventListener('click', async () => {
       convertedBlobs.push(...blobs)
       currentDownloadUrl = URL.createObjectURL(zipBlob)
       downloadLink.href = currentDownloadUrl; downloadLink.download = zipName
-      downloadLink.style.display = 'block'
+      downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
       sizes.textContent = ''
     }

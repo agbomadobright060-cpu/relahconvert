@@ -172,7 +172,7 @@ captureBtn.addEventListener('click', async () => {
     previewBox.style.display = 'block'
     downloadBtn.href     = objUrl
     downloadBtn.download = `screenshot.${ext}`
-    downloadBtn.style.display = 'block'
+    downloadBtn.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
   } catch {
     showError(t.hti_error || 'Could not capture screenshot. Please check the URL and try again.')
   } finally {

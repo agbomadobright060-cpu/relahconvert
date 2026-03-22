@@ -178,7 +178,7 @@ convertBtn.addEventListener('click', () => {
   downloadLink.href = url
   downloadLink.download = 'favicon.ico'
   downloadLink.textContent = `${dlBtn} favicon.ico (${sorted.join(', ')}px)`
-  downloadLink.style.display = 'block'
+  downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
   downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
 })
 

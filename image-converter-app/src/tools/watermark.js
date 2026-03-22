@@ -569,7 +569,7 @@ applyBtn.addEventListener('click', async () => {
     lastResults = [{ blob, name: `watermarked.${ext}`, type: mime }]
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = `watermarked.${ext}`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000)
+    a.href = url; a.download = `watermarked.${ext}`; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(url), 10000)
     applyBtn.disabled = false; applyBtn.textContent = dlBtn
     buildNextSteps()
     return

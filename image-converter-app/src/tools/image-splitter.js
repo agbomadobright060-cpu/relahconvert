@@ -302,7 +302,7 @@ downloadBtn.addEventListener('click', async () => {
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob)
     a.download = 'split-images.zip'
-    a.click()
+    a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
 
     buildNextSteps()

@@ -326,7 +326,7 @@ zipBtn.addEventListener('click', async () => {
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob)
     a.download = 'rotated-images.zip'
-    a.click()
+    a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn

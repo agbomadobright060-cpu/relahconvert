@@ -360,7 +360,7 @@ cropBtn.addEventListener('click', () => {
     downloadLink.href = url
     downloadLink.download = `cropped-image.${ext}`
     downloadLink.textContent = `${t.download || 'Download'} (${Math.round(blob.size / 1024)} KB)`
-    downloadLink.style.display = 'block'
+    downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
     downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
     buildNextSteps(mime)
   }, mime, 0.92)

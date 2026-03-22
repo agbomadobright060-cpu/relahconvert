@@ -1021,7 +1021,7 @@ $('downloadBtn').onclick = () => {
   render()
   canvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = `meme.${S.fmt}`; a.click()
+    const a = document.createElement('a'); a.href = url; a.download = `meme.${S.fmt}`; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
     buildNextSteps(blob, mime)
     // restore selection

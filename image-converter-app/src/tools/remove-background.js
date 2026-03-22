@@ -360,7 +360,7 @@ dlBtnEl.addEventListener('click', () => {
   const a = document.createElement('a')
   a.href = off.toDataURL('image/png')
   a.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
-  a.click()
+  a.click();if(window.showReviewPrompt)window.showReviewPrompt()
 })
 
 zipBtn.addEventListener('click', async () => {
@@ -379,7 +379,7 @@ zipBtn.addEventListener('click', async () => {
     }
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(zipBlob); a.download = 'removed-backgrounds.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    a.href = URL.createObjectURL(zipBlob); a.download = 'removed-backgrounds.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
   } catch(err) { alert('ZIP failed: ' + err.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })
