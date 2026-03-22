@@ -319,8 +319,11 @@ document.querySelector('#app').innerHTML = `
         <button class="pp-upload-btn" style="margin-top:12px;width:auto;display:inline-flex"><span style="font-size:18px">+</span> ${selectLbl}</button>
       </div>
       <input type="file" id="fileInput" accept="image/*" style="display:none" />
-      <div id="heroSection" style="margin-top:16px;max-width:400px">
-        <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08)" />
+      <div id="heroSection" style="margin-top:16px;max-width:450px">
+        <video autoplay loop muted playsinline style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+          <source src="/passport-demo.mp4" type="video/mp4" />
+        </video>
+        <p style="font-size:11px;color:#9A8A7A;text-align:center;margin:6px 0 0">${t.pp_demo_label || 'See how it works'}</p>
       </div>
       <div id="processingArea" style="display:none;max-width:500px">
         <div style="position:relative;display:inline-block">
