@@ -18,7 +18,7 @@ const ppCountryLbl    = t.pp_country || 'Country'
 const ppBgColorLbl    = t.pp_bg_color || 'Background'
 const ppRepositionLbl = t.pp_reposition || 'Drag to reposition'
 const ppDownloadLbl   = t.pp_download || 'Download Photo'
-const ppPrintSheetLbl = t.pp_print_sheet || 'Download Print Sheet (4×6)'
+const ppPrintSheetLbl = t.pp_print_sheet || 'Download Print Sheet (4x6)'
 const ppSizeLbl       = t.pp_size || 'Size'
 const ppUploadLbl     = t.pp_upload || 'Upload Photo'
 const ppExampleLbl    = t.pp_example || 'Example output'
@@ -32,186 +32,186 @@ const ppIdCardLbl     = t.pp_id_card || 'ID Card'
 const DOC_TYPES = {
   passport: { label: ppPassportLbl },
   visa:     { label: ppVisaLbl, sizes: [
-    { name: 'US Visa (2×2 in)', w: 51, h: 51 },
-    { name: 'Schengen Visa (35×45mm)', w: 35, h: 45 },
-    { name: 'China Visa (33×48mm)', w: 33, h: 48 },
-    { name: 'India Visa (51×51mm)', w: 51, h: 51 },
+    { name: 'US Visa (2x2 in)', w: 51, h: 51 },
+    { name: 'Schengen Visa (35x45mm)', w: 35, h: 45 },
+    { name: 'China Visa (33x48mm)', w: 33, h: 48 },
+    { name: 'India Visa (51x51mm)', w: 51, h: 51 },
   ]},
   id_card:  { label: ppIdCardLbl, sizes: [
-    { name: 'Standard ID (35×45mm)', w: 35, h: 45 },
-    { name: 'US Green Card (51×51mm)', w: 51, h: 51 },
-    { name: 'EU ID Card (35×45mm)', w: 35, h: 45 },
+    { name: 'Standard ID (35x45mm)', w: 35, h: 45 },
+    { name: 'US Green Card (51x51mm)', w: 51, h: 51 },
+    { name: 'EU ID Card (35x45mm)', w: 35, h: 45 },
   ]},
 }
 
 const PASSPORT_COUNTRIES = [
-  { country: "Afghanistan", code: "AF", flag: "🇦🇫", w: 40, h: 45, bg: "#ffffff" },
-  { country: "Albania", code: "AL", flag: "🇦🇱", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Algeria", code: "DZ", flag: "🇩🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Angola", code: "AO", flag: "🇦🇴", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Argentina", code: "AR", flag: "🇦🇷", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Armenia", code: "AM", flag: "🇦🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Australia", code: "AU", flag: "🇦🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Austria", code: "AT", flag: "🇦🇹", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Azerbaijan", code: "AZ", flag: "🇦🇿", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Bahamas", code: "BS", flag: "🇧🇸", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Bahrain", code: "BH", flag: "🇧🇭", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Bangladesh", code: "BD", flag: "🇧🇩", w: 45, h: 55, bg: "#ffffff" },
-  { country: "Barbados", code: "BB", flag: "🇧🇧", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Belarus", code: "BY", flag: "🇧🇾", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Belgium", code: "BE", flag: "🇧🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Belize", code: "BZ", flag: "🇧🇿", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Benin", code: "BJ", flag: "🇧🇯", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Bhutan", code: "BT", flag: "🇧🇹", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Bolivia", code: "BO", flag: "🇧🇴", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Bosnia and Herzegovina", code: "BA", flag: "🇧🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Botswana", code: "BW", flag: "🇧🇼", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Brazil", code: "BR", flag: "🇧🇷", w: 50, h: 70, bg: "#ffffff" },
-  { country: "Brunei", code: "BN", flag: "🇧🇳", w: 52, h: 40, bg: "#ffffff" },
-  { country: "Bulgaria", code: "BG", flag: "🇧🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Burkina Faso", code: "BF", flag: "🇧🇫", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Cambodia", code: "KH", flag: "🇰🇭", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Cameroon", code: "CM", flag: "🇨🇲", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Canada", code: "CA", flag: "🇨🇦", w: 50, h: 70, bg: "#ffffff" },
-  { country: "Chad", code: "TD", flag: "🇹🇩", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Chile", code: "CL", flag: "🇨🇱", w: 45, h: 45, bg: "#ffffff" },
-  { country: "China", code: "CN", flag: "🇨🇳", w: 33, h: 48, bg: "#ffffff" },
-  { country: "Colombia", code: "CO", flag: "🇨🇴", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Congo (Brazzaville)", code: "CG", flag: "🇨🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Congo (DR)", code: "CD", flag: "🇨🇩", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Costa Rica", code: "CR", flag: "🇨🇷", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Croatia", code: "HR", flag: "🇭🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Cuba", code: "CU", flag: "🇨🇺", w: 45, h: 45, bg: "#ffffff" },
-  { country: "Cyprus", code: "CY", flag: "🇨🇾", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Czech Republic", code: "CZ", flag: "🇨🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Denmark", code: "DK", flag: "🇩🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Djibouti", code: "DJ", flag: "🇩🇯", w: 35, h: 35, bg: "#ffffff" },
-  { country: "Dominica", code: "DM", flag: "🇩🇲", w: 45, h: 38, bg: "#ffffff" },
-  { country: "Dominican Republic", code: "DO", flag: "🇩🇴", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Ecuador", code: "EC", flag: "🇪🇨", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Egypt", code: "EG", flag: "🇪🇬", w: 40, h: 60, bg: "#ffffff" },
-  { country: "El Salvador", code: "SV", flag: "🇸🇻", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Equatorial Guinea", code: "GQ", flag: "🇬🇶", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Estonia", code: "EE", flag: "🇪🇪", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Ethiopia", code: "ET", flag: "🇪🇹", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Fiji", code: "FJ", flag: "🇫🇯", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Finland", code: "FI", flag: "🇫🇮", w: 36, h: 47, bg: "#ffffff" },
-  { country: "France", code: "FR", flag: "🇫🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Gabon", code: "GA", flag: "🇬🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Georgia", code: "GE", flag: "🇬🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Germany", code: "DE", flag: "🇩🇪", w: 35, h: 45, bg: "#d3d3d3" },
-  { country: "Ghana", code: "GH", flag: "🇬🇭", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Greece", code: "GR", flag: "🇬🇷", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Grenada", code: "GD", flag: "🇬🇩", w: 38, h: 51, bg: "#ffffff" },
-  { country: "Guatemala", code: "GT", flag: "🇬🇹", w: 26, h: 32, bg: "#ffffff" },
-  { country: "Guinea", code: "GN", flag: "🇬🇳", w: 35, h: 50, bg: "#ffffff" },
-  { country: "Guinea-Bissau", code: "GW", flag: "🇬🇼", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Guyana", code: "GY", flag: "🇬🇾", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Hong Kong", code: "HK", flag: "🇭🇰", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Hungary", code: "HU", flag: "🇭🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Iceland", code: "IS", flag: "🇮🇸", w: 35, h: 45, bg: "#ffffff" },
-  { country: "India", code: "IN", flag: "🇮🇳", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Indonesia", code: "ID", flag: "🇮🇩", w: 51, h: 51, bg: "#ff0000" },
-  { country: "Iran", code: "IR", flag: "🇮🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Iraq", code: "IQ", flag: "🇮🇶", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Ireland", code: "IE", flag: "🇮🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Israel", code: "IL", flag: "🇮🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Italy", code: "IT", flag: "🇮🇹", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Ivory Coast", code: "CI", flag: "🇨🇮", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Jamaica", code: "JM", flag: "🇯🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Japan", code: "JP", flag: "🇯🇵", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Jordan", code: "JO", flag: "🇯🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Kazakhstan", code: "KZ", flag: "🇰🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Kenya", code: "KE", flag: "🇰🇪", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Kuwait", code: "KW", flag: "🇰🇼", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Kyrgyzstan", code: "KG", flag: "🇰🇬", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Laos", code: "LA", flag: "🇱🇦", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Latvia", code: "LV", flag: "🇱🇻", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Lebanon", code: "LB", flag: "🇱🇧", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Liberia", code: "LR", flag: "🇱🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Libya", code: "LY", flag: "🇱🇾", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Liechtenstein", code: "LI", flag: "🇱🇮", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Lithuania", code: "LT", flag: "🇱🇹", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Luxembourg", code: "LU", flag: "🇱🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Macau", code: "MO", flag: "🇲🇴", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Madagascar", code: "MG", flag: "🇲🇬", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Malawi", code: "MW", flag: "🇲🇼", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Malaysia", code: "MY", flag: "🇲🇾", w: 35, h: 50, bg: "#ffffff" },
-  { country: "Maldives", code: "MV", flag: "🇲🇻", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mali", code: "ML", flag: "🇲🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Malta", code: "MT", flag: "🇲🇹", w: 40, h: 30, bg: "#ffffff" },
-  { country: "Mauritania", code: "MR", flag: "🇲🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mauritius", code: "MU", flag: "🇲🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mexico", code: "MX", flag: "🇲🇽", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Moldova", code: "MD", flag: "🇲🇩", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Mongolia", code: "MN", flag: "🇲🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Montenegro", code: "ME", flag: "🇲🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Morocco", code: "MA", flag: "🇲🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mozambique", code: "MZ", flag: "🇲🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Myanmar", code: "MM", flag: "🇲🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Namibia", code: "NA", flag: "🇳🇦", w: 37, h: 52, bg: "#ffffff" },
-  { country: "Nepal", code: "NP", flag: "🇳🇵", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Netherlands", code: "NL", flag: "🇳🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "New Zealand", code: "NZ", flag: "🇳🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Nicaragua", code: "NI", flag: "🇳🇮", w: 40, h: 50, bg: "#ffffff" },
-  { country: "Niger", code: "NE", flag: "🇳🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Nigeria", code: "NG", flag: "🇳🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "North Korea", code: "KP", flag: "🇰🇵", w: 35, h: 45, bg: "#ffffff" },
-  { country: "North Macedonia", code: "MK", flag: "🇲🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Norway", code: "NO", flag: "🇳🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Oman", code: "OM", flag: "🇴🇲", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Pakistan", code: "PK", flag: "🇵🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Palestine", code: "PS", flag: "🇵🇸", w: 35, h: 45, bg: "#add8e6" },
-  { country: "Panama", code: "PA", flag: "🇵🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Papua New Guinea", code: "PG", flag: "🇵🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Paraguay", code: "PY", flag: "🇵🇾", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Peru", code: "PE", flag: "🇵🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Philippines", code: "PH", flag: "🇵🇭", w: 35, h: 45, bg: "#0038a8" },
-  { country: "Poland", code: "PL", flag: "🇵🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Portugal", code: "PT", flag: "🇵🇹", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Qatar", code: "QA", flag: "🇶🇦", w: 38, h: 48, bg: "#ffffff" },
-  { country: "Romania", code: "RO", flag: "🇷🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Russia", code: "RU", flag: "🇷🇺", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Rwanda", code: "RW", flag: "🇷🇼", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Saint Kitts and Nevis", code: "KN", flag: "🇰🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Samoa", code: "WS", flag: "🇼🇸", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Saudi Arabia", code: "SA", flag: "🇸🇦", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Senegal", code: "SN", flag: "🇸🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Serbia", code: "RS", flag: "🇷🇸", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Seychelles", code: "SC", flag: "🇸🇨", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Sierra Leone", code: "SL", flag: "🇸🇱", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Singapore", code: "SG", flag: "🇸🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Slovakia", code: "SK", flag: "🇸🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Slovenia", code: "SI", flag: "🇸🇮", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Somalia", code: "SO", flag: "🇸🇴", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Africa", code: "ZA", flag: "🇿🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Korea", code: "KR", flag: "🇰🇷", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Sudan", code: "SS", flag: "🇸🇸", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Spain", code: "ES", flag: "🇪🇸", w: 26, h: 32, bg: "#ffffff" },
-  { country: "Sri Lanka", code: "LK", flag: "🇱🇰", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Sudan", code: "SD", flag: "🇸🇩", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Sweden", code: "SE", flag: "🇸🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Switzerland", code: "CH", flag: "🇨🇭", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Syria", code: "SY", flag: "🇸🇾", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Taiwan", code: "TW", flag: "🇹🇼", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Tajikistan", code: "TJ", flag: "🇹🇯", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Tanzania", code: "TZ", flag: "🇹🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Thailand", code: "TH", flag: "🇹🇭", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Tunisia", code: "TN", flag: "🇹🇳", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Turkey", code: "TR", flag: "🇹🇷", w: 50, h: 60, bg: "#ffffff" },
-  { country: "Turkmenistan", code: "TM", flag: "🇹🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Uganda", code: "UG", flag: "🇺🇬", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Ukraine", code: "UA", flag: "🇺🇦", w: 35, h: 45, bg: "#ffffff" },
-  { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", w: 40, h: 60, bg: "#ffffff" },
-  { country: "United Kingdom", code: "GB", flag: "🇬🇧", w: 35, h: 45, bg: "#d3d3d3" },
-  { country: "United States", code: "US", flag: "🇺🇸", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Uruguay", code: "UY", flag: "🇺🇾", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Uzbekistan", code: "UZ", flag: "🇺🇿", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Venezuela", code: "VE", flag: "🇻🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Vietnam", code: "VN", flag: "🇻🇳", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Yemen", code: "YE", flag: "🇾🇪", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Zambia", code: "ZM", flag: "🇿🇲", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Zimbabwe", code: "ZW", flag: "🇿🇼", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Afghanistan", code: "AF", flag: "\u{1F1E6}\u{1F1EB}", w: 40, h: 45, bg: "#ffffff" },
+  { country: "Albania", code: "AL", flag: "\u{1F1E6}\u{1F1F1}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Algeria", code: "DZ", flag: "\u{1F1E9}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Angola", code: "AO", flag: "\u{1F1E6}\u{1F1F4}", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Argentina", code: "AR", flag: "\u{1F1E6}\u{1F1F7}", w: 40, h: 40, bg: "#ffffff" },
+  { country: "Armenia", code: "AM", flag: "\u{1F1E6}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Australia", code: "AU", flag: "\u{1F1E6}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Austria", code: "AT", flag: "\u{1F1E6}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Azerbaijan", code: "AZ", flag: "\u{1F1E6}\u{1F1FF}", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Bahamas", code: "BS", flag: "\u{1F1E7}\u{1F1F8}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Bahrain", code: "BH", flag: "\u{1F1E7}\u{1F1ED}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Bangladesh", code: "BD", flag: "\u{1F1E7}\u{1F1E9}", w: 45, h: 55, bg: "#ffffff" },
+  { country: "Barbados", code: "BB", flag: "\u{1F1E7}\u{1F1E7}", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Belarus", code: "BY", flag: "\u{1F1E7}\u{1F1FE}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Belgium", code: "BE", flag: "\u{1F1E7}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Belize", code: "BZ", flag: "\u{1F1E7}\u{1F1FF}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Benin", code: "BJ", flag: "\u{1F1E7}\u{1F1EF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Bhutan", code: "BT", flag: "\u{1F1E7}\u{1F1F9}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Bolivia", code: "BO", flag: "\u{1F1E7}\u{1F1F4}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Bosnia and Herzegovina", code: "BA", flag: "\u{1F1E7}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Botswana", code: "BW", flag: "\u{1F1E7}\u{1F1FC}", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Brazil", code: "BR", flag: "\u{1F1E7}\u{1F1F7}", w: 50, h: 70, bg: "#ffffff" },
+  { country: "Brunei", code: "BN", flag: "\u{1F1E7}\u{1F1F3}", w: 52, h: 40, bg: "#ffffff" },
+  { country: "Bulgaria", code: "BG", flag: "\u{1F1E7}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Burkina Faso", code: "BF", flag: "\u{1F1E7}\u{1F1EB}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Cambodia", code: "KH", flag: "\u{1F1F0}\u{1F1ED}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Cameroon", code: "CM", flag: "\u{1F1E8}\u{1F1F2}", w: 40, h: 40, bg: "#ffffff" },
+  { country: "Canada", code: "CA", flag: "\u{1F1E8}\u{1F1E6}", w: 50, h: 70, bg: "#ffffff" },
+  { country: "Chad", code: "TD", flag: "\u{1F1F9}\u{1F1E9}", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Chile", code: "CL", flag: "\u{1F1E8}\u{1F1F1}", w: 45, h: 45, bg: "#ffffff" },
+  { country: "China", code: "CN", flag: "\u{1F1E8}\u{1F1F3}", w: 33, h: 48, bg: "#ffffff" },
+  { country: "Colombia", code: "CO", flag: "\u{1F1E8}\u{1F1F4}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Congo (Brazzaville)", code: "CG", flag: "\u{1F1E8}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Congo (DR)", code: "CD", flag: "\u{1F1E8}\u{1F1E9}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Costa Rica", code: "CR", flag: "\u{1F1E8}\u{1F1F7}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Croatia", code: "HR", flag: "\u{1F1ED}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Cuba", code: "CU", flag: "\u{1F1E8}\u{1F1FA}", w: 45, h: 45, bg: "#ffffff" },
+  { country: "Cyprus", code: "CY", flag: "\u{1F1E8}\u{1F1FE}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Czech Republic", code: "CZ", flag: "\u{1F1E8}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Denmark", code: "DK", flag: "\u{1F1E9}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Djibouti", code: "DJ", flag: "\u{1F1E9}\u{1F1EF}", w: 35, h: 35, bg: "#ffffff" },
+  { country: "Dominica", code: "DM", flag: "\u{1F1E9}\u{1F1F2}", w: 45, h: 38, bg: "#ffffff" },
+  { country: "Dominican Republic", code: "DO", flag: "\u{1F1E9}\u{1F1F4}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Ecuador", code: "EC", flag: "\u{1F1EA}\u{1F1E8}", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Egypt", code: "EG", flag: "\u{1F1EA}\u{1F1EC}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "El Salvador", code: "SV", flag: "\u{1F1F8}\u{1F1FB}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Equatorial Guinea", code: "GQ", flag: "\u{1F1EC}\u{1F1F6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Estonia", code: "EE", flag: "\u{1F1EA}\u{1F1EA}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Ethiopia", code: "ET", flag: "\u{1F1EA}\u{1F1F9}", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Fiji", code: "FJ", flag: "\u{1F1EB}\u{1F1EF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Finland", code: "FI", flag: "\u{1F1EB}\u{1F1EE}", w: 36, h: 47, bg: "#ffffff" },
+  { country: "France", code: "FR", flag: "\u{1F1EB}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Gabon", code: "GA", flag: "\u{1F1EC}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Georgia", code: "GE", flag: "\u{1F1EC}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Germany", code: "DE", flag: "\u{1F1E9}\u{1F1EA}", w: 35, h: 45, bg: "#d3d3d3" },
+  { country: "Ghana", code: "GH", flag: "\u{1F1EC}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Greece", code: "GR", flag: "\u{1F1EC}\u{1F1F7}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Grenada", code: "GD", flag: "\u{1F1EC}\u{1F1E9}", w: 38, h: 51, bg: "#ffffff" },
+  { country: "Guatemala", code: "GT", flag: "\u{1F1EC}\u{1F1F9}", w: 26, h: 32, bg: "#ffffff" },
+  { country: "Guinea", code: "GN", flag: "\u{1F1EC}\u{1F1F3}", w: 35, h: 50, bg: "#ffffff" },
+  { country: "Guinea-Bissau", code: "GW", flag: "\u{1F1EC}\u{1F1FC}", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Guyana", code: "GY", flag: "\u{1F1EC}\u{1F1FE}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Hong Kong", code: "HK", flag: "\u{1F1ED}\u{1F1F0}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Hungary", code: "HU", flag: "\u{1F1ED}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Iceland", code: "IS", flag: "\u{1F1EE}\u{1F1F8}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "India", code: "IN", flag: "\u{1F1EE}\u{1F1F3}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Indonesia", code: "ID", flag: "\u{1F1EE}\u{1F1E9}", w: 51, h: 51, bg: "#ff0000" },
+  { country: "Iran", code: "IR", flag: "\u{1F1EE}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Iraq", code: "IQ", flag: "\u{1F1EE}\u{1F1F6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Ireland", code: "IE", flag: "\u{1F1EE}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Israel", code: "IL", flag: "\u{1F1EE}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Italy", code: "IT", flag: "\u{1F1EE}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Ivory Coast", code: "CI", flag: "\u{1F1E8}\u{1F1EE}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Jamaica", code: "JM", flag: "\u{1F1EF}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Japan", code: "JP", flag: "\u{1F1EF}\u{1F1F5}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Jordan", code: "JO", flag: "\u{1F1EF}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Kazakhstan", code: "KZ", flag: "\u{1F1F0}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Kenya", code: "KE", flag: "\u{1F1F0}\u{1F1EA}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Kuwait", code: "KW", flag: "\u{1F1F0}\u{1F1FC}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Kyrgyzstan", code: "KG", flag: "\u{1F1F0}\u{1F1EC}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Laos", code: "LA", flag: "\u{1F1F1}\u{1F1E6}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Latvia", code: "LV", flag: "\u{1F1F1}\u{1F1FB}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Lebanon", code: "LB", flag: "\u{1F1F1}\u{1F1E7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Liberia", code: "LR", flag: "\u{1F1F1}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Libya", code: "LY", flag: "\u{1F1F1}\u{1F1FE}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Liechtenstein", code: "LI", flag: "\u{1F1F1}\u{1F1EE}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Lithuania", code: "LT", flag: "\u{1F1F1}\u{1F1F9}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Luxembourg", code: "LU", flag: "\u{1F1F1}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Macau", code: "MO", flag: "\u{1F1F2}\u{1F1F4}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Madagascar", code: "MG", flag: "\u{1F1F2}\u{1F1EC}", w: 40, h: 40, bg: "#ffffff" },
+  { country: "Malawi", code: "MW", flag: "\u{1F1F2}\u{1F1FC}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Malaysia", code: "MY", flag: "\u{1F1F2}\u{1F1FE}", w: 35, h: 50, bg: "#ffffff" },
+  { country: "Maldives", code: "MV", flag: "\u{1F1F2}\u{1F1FB}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mali", code: "ML", flag: "\u{1F1F2}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Malta", code: "MT", flag: "\u{1F1F2}\u{1F1F9}", w: 40, h: 30, bg: "#ffffff" },
+  { country: "Mauritania", code: "MR", flag: "\u{1F1F2}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mauritius", code: "MU", flag: "\u{1F1F2}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mexico", code: "MX", flag: "\u{1F1F2}\u{1F1FD}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Moldova", code: "MD", flag: "\u{1F1F2}\u{1F1E9}", w: 30, h: 40, bg: "#ffffff" },
+  { country: "Mongolia", code: "MN", flag: "\u{1F1F2}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Montenegro", code: "ME", flag: "\u{1F1F2}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Morocco", code: "MA", flag: "\u{1F1F2}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mozambique", code: "MZ", flag: "\u{1F1F2}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Myanmar", code: "MM", flag: "\u{1F1F2}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Namibia", code: "NA", flag: "\u{1F1F3}\u{1F1E6}", w: 37, h: 52, bg: "#ffffff" },
+  { country: "Nepal", code: "NP", flag: "\u{1F1F3}\u{1F1F5}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Netherlands", code: "NL", flag: "\u{1F1F3}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "New Zealand", code: "NZ", flag: "\u{1F1F3}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Nicaragua", code: "NI", flag: "\u{1F1F3}\u{1F1EE}", w: 40, h: 50, bg: "#ffffff" },
+  { country: "Niger", code: "NE", flag: "\u{1F1F3}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Nigeria", code: "NG", flag: "\u{1F1F3}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "North Korea", code: "KP", flag: "\u{1F1F0}\u{1F1F5}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "North Macedonia", code: "MK", flag: "\u{1F1F2}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Norway", code: "NO", flag: "\u{1F1F3}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Oman", code: "OM", flag: "\u{1F1F4}\u{1F1F2}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Pakistan", code: "PK", flag: "\u{1F1F5}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Palestine", code: "PS", flag: "\u{1F1F5}\u{1F1F8}", w: 35, h: 45, bg: "#add8e6" },
+  { country: "Panama", code: "PA", flag: "\u{1F1F5}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Papua New Guinea", code: "PG", flag: "\u{1F1F5}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Paraguay", code: "PY", flag: "\u{1F1F5}\u{1F1FE}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Peru", code: "PE", flag: "\u{1F1F5}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Philippines", code: "PH", flag: "\u{1F1F5}\u{1F1ED}", w: 35, h: 45, bg: "#0038a8" },
+  { country: "Poland", code: "PL", flag: "\u{1F1F5}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Portugal", code: "PT", flag: "\u{1F1F5}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Qatar", code: "QA", flag: "\u{1F1F6}\u{1F1E6}", w: 38, h: 48, bg: "#ffffff" },
+  { country: "Romania", code: "RO", flag: "\u{1F1F7}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Russia", code: "RU", flag: "\u{1F1F7}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Rwanda", code: "RW", flag: "\u{1F1F7}\u{1F1FC}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Saint Kitts and Nevis", code: "KN", flag: "\u{1F1F0}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Samoa", code: "WS", flag: "\u{1F1FC}\u{1F1F8}", w: 45, h: 35, bg: "#ffffff" },
+  { country: "Saudi Arabia", code: "SA", flag: "\u{1F1F8}\u{1F1E6}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Senegal", code: "SN", flag: "\u{1F1F8}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Serbia", code: "RS", flag: "\u{1F1F7}\u{1F1F8}", w: 50, h: 50, bg: "#ffffff" },
+  { country: "Seychelles", code: "SC", flag: "\u{1F1F8}\u{1F1E8}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Sierra Leone", code: "SL", flag: "\u{1F1F8}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Singapore", code: "SG", flag: "\u{1F1F8}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Slovakia", code: "SK", flag: "\u{1F1F8}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Slovenia", code: "SI", flag: "\u{1F1F8}\u{1F1EE}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Somalia", code: "SO", flag: "\u{1F1F8}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Africa", code: "ZA", flag: "\u{1F1FF}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Korea", code: "KR", flag: "\u{1F1F0}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Sudan", code: "SS", flag: "\u{1F1F8}\u{1F1F8}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Spain", code: "ES", flag: "\u{1F1EA}\u{1F1F8}", w: 26, h: 32, bg: "#ffffff" },
+  { country: "Sri Lanka", code: "LK", flag: "\u{1F1F1}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Sudan", code: "SD", flag: "\u{1F1F8}\u{1F1E9}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Sweden", code: "SE", flag: "\u{1F1F8}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Switzerland", code: "CH", flag: "\u{1F1E8}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Syria", code: "SY", flag: "\u{1F1F8}\u{1F1FE}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Taiwan", code: "TW", flag: "\u{1F1F9}\u{1F1FC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Tajikistan", code: "TJ", flag: "\u{1F1F9}\u{1F1EF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Tanzania", code: "TZ", flag: "\u{1F1F9}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Thailand", code: "TH", flag: "\u{1F1F9}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Tunisia", code: "TN", flag: "\u{1F1F9}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Turkey", code: "TR", flag: "\u{1F1F9}\u{1F1F7}", w: 50, h: 60, bg: "#ffffff" },
+  { country: "Turkmenistan", code: "TM", flag: "\u{1F1F9}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Uganda", code: "UG", flag: "\u{1F1FA}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Ukraine", code: "UA", flag: "\u{1F1FA}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "United Arab Emirates", code: "AE", flag: "\u{1F1E6}\u{1F1EA}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "United Kingdom", code: "GB", flag: "\u{1F1EC}\u{1F1E7}", w: 35, h: 45, bg: "#d3d3d3" },
+  { country: "United States", code: "US", flag: "\u{1F1FA}\u{1F1F8}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Uruguay", code: "UY", flag: "\u{1F1FA}\u{1F1FE}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Uzbekistan", code: "UZ", flag: "\u{1F1FA}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Venezuela", code: "VE", flag: "\u{1F1FB}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Vietnam", code: "VN", flag: "\u{1F1FB}\u{1F1F3}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Yemen", code: "YE", flag: "\u{1F1FE}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Zambia", code: "ZM", flag: "\u{1F1FF}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Zimbabwe", code: "ZW", flag: "\u{1F1FF}\u{1F1FC}", w: 35, h: 45, bg: "#ffffff" },
 ]
 
 // DPI for print-quality output
@@ -222,9 +222,12 @@ let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States'
 let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
-let processedImg = null
-let removeBgFn = null
-let personBounds = null
+
+// Manual crop box state
+let cropBox = { x: 0, y: 0, w: 100, h: 100 }
+let dragging = null // 'move' | 'nw' | 'ne' | 'sw' | 'se' | null
+let dragStart = { mx: 0, my: 0, box: null }
+let displayScale = 1 // ratio of display canvas to original image
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' + bg + ';'
 const style = document.createElement('style')
@@ -244,10 +247,8 @@ style.textContent = `
   .pp-dropzone svg{margin-bottom:8px;color:#C4B8A8}
   .pp-dropzone:hover svg{color:#C84B31}
   .pp-dropzone p{margin:0;font-family:'DM Sans',sans-serif;font-size:14px;color:#9A8A7A}
-  .pp-hero{text-align:center;margin-bottom:24px}
-  .pp-hero img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
   .pp-canvas-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
-  .pp-canvas-inner canvas{display:block;max-width:100%;height:auto;pointer-events:none;user-select:none;margin:0 auto}
+  .pp-canvas-inner canvas{display:block;max-width:100%;height:auto;cursor:crosshair;user-select:none;margin:0 auto}
   .pp-panel{display:flex;flex-direction:column;gap:14px}
   .pp-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:16px}
   .pp-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#2C1810;margin:0 0 10px}
@@ -272,7 +273,7 @@ style.textContent = `
   .pp-color-row{display:flex;align-items:center;gap:8px;margin-top:8px}
   .pp-color-input{width:36px;height:36px;border:1.5px solid #DDD5C8;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
   .pp-color-label{font-size:12px;color:#5A4A3A}
-  .pp-status{font-size:13px;color:#7A6A5A;text-align:center;padding:10px 0;font-family:'DM Sans',sans-serif}
+  .pp-crop-hint{font-size:12px;color:#7A6A5A;text-align:center;padding:8px 0;font-family:'DM Sans',sans-serif}
   .pp-dl-btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;text-align:center;text-decoration:none}
   .pp-dl-primary{background:#C84B31;color:#fff}
   .pp-dl-primary:hover{background:#A63D26}
@@ -309,14 +310,11 @@ document.querySelector('#app').innerHTML = `
           <div class="pp-canvas-inner" id="canvasWrap">
             <canvas id="ppCanvas"></canvas>
           </div>
-          <div class="pp-status" id="ppStatus" style="display:none"></div>
+          <div class="pp-crop-hint" id="cropHint" style="display:none">${ppRepositionLbl}</div>
         </div>
         <div id="dropZone" class="pp-dropzone">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
-        </div>
-        <div class="pp-hero" id="heroSection">
-          <img src="/passport-before-after.jpg" alt="Passport photo before and after example" />
         </div>
       </div>
       <div class="pp-panel">
@@ -340,9 +338,9 @@ document.querySelector('#app').innerHTML = `
           </div>
           <div class="pp-card-title" style="margin-top:12px">${ppDocTypeLbl}</div>
           <select class="pp-doc-select" id="docTypeSelect">
-            <option value="passport">${ppPassportLbl} (${selectedCountry.w}×${selectedCountry.h}mm)</option>
+            <option value="passport">${ppPassportLbl} (${selectedCountry.w}\u00d7${selectedCountry.h}mm)</option>
           </select>
-          <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}×${selectedCountry.h} mm</div>
+          <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}\u00d7${selectedCountry.h} mm</div>
           <input type="hidden" id="bgColor" value="#ffffff" />
         </div>
         <div class="pp-card" id="downloadCard" style="display:none">
@@ -381,64 +379,46 @@ const nextSteps     = document.getElementById('nextSteps')
 const nextBtns      = document.getElementById('nextBtns')
 const docTypeSelect = document.getElementById('docTypeSelect')
 const triggerFlag   = document.getElementById('triggerFlag')
-const ppStatus      = document.getElementById('ppStatus')
+const cropHint      = document.getElementById('cropHint')
+
+function initCropBox() {
+  if (!uploadedImg) return
+  const imgW = uploadedImg.naturalWidth
+  const imgH = uploadedImg.naturalHeight
+  const aspect = activeW / activeH
+
+  // Fit crop box centered on image, as large as possible
+  let bw, bh
+  if (imgW / imgH > aspect) {
+    // Image is wider than crop aspect — fit by height
+    bh = imgH * 0.8
+    bw = bh * aspect
+  } else {
+    // Image is taller — fit by width
+    bw = imgW * 0.8
+    bh = bw / aspect
+  }
+  cropBox.w = bw
+  cropBox.h = bh
+  cropBox.x = (imgW - bw) / 2
+  cropBox.y = (imgH - bh) / 2
+}
 
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   const img = new Image()
   const url = URL.createObjectURL(file)
-  img.onload = async () => {
+  img.onload = () => {
     uploadedImg = img
-    processedImg = null
-    personBounds = null
     dropZoneEl.style.display = 'none'
-    document.getElementById('heroSection').style.display = 'none'
     canvasArea.classList.add('visible')
-    downloadCard.style.display = 'none'
-    ppStatus.style.display = ''
+    cropHint.style.display = ''
+    downloadCard.style.display = ''
+    initCropBox()
     renderCanvas()
-
-    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
-
-    try {
-      if (!removeBgFn) {
-        ppStatus.textContent = t.pp_loading_model || 'Loading AI model...'
-        const mod = await import('@imgly/background-removal')
-        removeBgFn = mod.removeBackground
-      }
-      ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
-      const blob = await removeBgFn(file, {
-        model: 'isnet_quint8',
-        output: { format: 'image/png' },
-      })
-      const bgImg = new Image()
-      bgImg.onload = () => {
-        processedImg = bgImg
-        personBounds = null  // reset so getCropRegion rescans
-        ppStatus.style.display = 'none'
-        downloadCard.style.display = ''
-        renderCanvas()
-        buildNextSteps()
-      }
-      bgImg.onerror = () => showWithoutBgRemoval()
-      bgImg.src = URL.createObjectURL(blob)
-    } catch (err) {
-      console.error('Background removal failed:', err)
-      ppStatus.textContent = 'Background removal failed — using original photo.'
-      ppStatus.style.color = '#C84B31'
-      setTimeout(() => { ppStatus.style.display = 'none'; ppStatus.style.color = '' }, 5000)
-      showWithoutBgRemoval()
-    }
+    buildNextSteps()
   }
   img.src = url
-}
-
-function showWithoutBgRemoval() {
-  processedImg = null
-  ppStatus.style.display = 'none'
-  downloadCard.style.display = ''
-  renderCanvas()
-  buildNextSteps()
 }
 
 uploadBtn.addEventListener('click', () => fileInput.click())
@@ -457,17 +437,18 @@ function flagUrl(code, size) { return 'https://flagcdn.com/w' + (size || 40) + '
 
 function updateDocTypes() {
   const c = selectedCountry
-  docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '×' + c.h + 'mm)</option>'
+  docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '\u00d7' + c.h + 'mm)</option>'
   DOC_TYPES.visa.sizes.forEach(function(s, i) {
-    docTypeSelect.innerHTML += '<option value="visa_' + i + '">' + ppVisaLbl + ' — ' + s.name + '</option>'
+    docTypeSelect.innerHTML += '<option value="visa_' + i + '">' + ppVisaLbl + ' \u2014 ' + s.name + '</option>'
   })
   DOC_TYPES.id_card.sizes.forEach(function(s, i) {
-    docTypeSelect.innerHTML += '<option value="id_' + i + '">' + ppIdCardLbl + ' — ' + s.name + '</option>'
+    docTypeSelect.innerHTML += '<option value="id_' + i + '">' + ppIdCardLbl + ' \u2014 ' + s.name + '</option>'
   })
   docTypeSelect.value = 'passport'
   selectedDocType = 'passport'
   activeW = c.w; activeH = c.h
-  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
+  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
+  if (uploadedImg) { initCropBox(); renderCanvas() }
 }
 
 docTypeSelect.addEventListener('change', () => {
@@ -481,7 +462,8 @@ docTypeSelect.addEventListener('change', () => {
     const s = DOC_TYPES.id_card.sizes[parseInt(val.split('_')[1])]
     activeW = s.w; activeH = s.h
   }
-  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '×' + activeH + ' mm'
+  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
+  if (uploadedImg) { initCropBox() }
   renderCanvas()
 })
 
@@ -492,7 +474,7 @@ function renderCountryList(filter) {
     '<div class="pp-dropdown-item' + (c.country === selectedCountry.country ? ' active' : '') + '" data-country="' + c.country + '">' +
     '<img class="flag-img" src="' + flagUrl(c.code, 40) + '" alt="' + c.code + '" />' +
     '<span>' + c.country + '</span>' +
-    '<span class="size">' + c.w + '×' + c.h + 'mm</span></div>'
+    '<span class="size">' + c.w + '\u00d7' + c.h + 'mm</span></div>'
   ).join('')
   countryList.querySelectorAll('.pp-dropdown-item').forEach(el => {
     el.addEventListener('click', () => {
@@ -525,140 +507,242 @@ document.addEventListener('click', (e) => {
   }
 })
 
-function findPersonBounds(img) {
-  const imgW = img.naturalWidth
-  const imgH = img.naturalHeight
-  const sc = document.createElement('canvas')
-  sc.width = imgW; sc.height = imgH
-  const sctx = sc.getContext('2d')
-  sctx.drawImage(img, 0, 0)
-  const data = sctx.getImageData(0, 0, imgW, imgH).data
-  let topY = imgH, bottomY = 0, leftX = imgW, rightX = 0
-  for (let y = 0; y < imgH; y += 2) {
-    for (let x = 0; x < imgW; x += 2) {
-      const i = (y * imgW + x) * 4
-      if (data[i + 3] > 30) {
-        if (y < topY) topY = y
-        if (y > bottomY) bottomY = y
-        if (x < leftX) leftX = x
-        if (x > rightX) rightX = x
-      }
-    }
-  }
-  if (topY >= bottomY) return null
-  return { topY, bottomY, leftX, rightX }
-}
-
-function getCropRegion(img, aspect) {
-  const imgW = img.naturalWidth
-  const imgH = img.naturalHeight
-
-  // After bg removal: scan alpha to find person, crop head+shoulders
-  if (processedImg) {
-    if (!personBounds) personBounds = findPersonBounds(img)
-    if (personBounds) {
-      const { topY, bottomY, leftX, rightX } = personBounds
-      const personH = bottomY - topY
-      const personCx = leftX + (rightX - leftX) / 2
-
-      // Use person shape to determine photo type
-      const personW = rightX - leftX
-      const personAspect = personH / personW  // tall=body, square=head
-
-      // Calculate how much of the person to show (head + shoulders)
-      let headTop = topY
-      let cropBottom
-      if (personAspect > 3.0) {
-        // Very tall & narrow = full body → crop head + shoulders (top 22%)
-        cropBottom = topY + personH * 0.22
-      } else if (personAspect > 2.0) {
-        // Tall = 3/4 body → top 35%
-        cropBottom = topY + personH * 0.35
-      } else if (personAspect > 1.4) {
-        // Medium = half body → top 55%
-        cropBottom = topY + personH * 0.55
-      } else {
-        // Square-ish = already headshot → use full person bounds
-        cropBottom = bottomY
-      }
-
-      // Add small margin above head (5% of crop height)
-      const cropH = cropBottom - headTop
-      const marginTop = cropH * 0.12
-      let srcY = Math.max(0, headTop - marginTop)
-      let srcH = cropH + marginTop
-
-      // Apply aspect ratio
-      let srcW = srcH * aspect
-      let srcX = personCx - srcW / 2
-
-      // Clamp: if wider than image, expand height to fill
-      if (srcW > imgW) {
-        srcW = imgW
-        srcH = srcW / aspect
-        srcX = 0
-      }
-      // Clamp all bounds
-      if (srcX < 0) srcX = 0
-      if (srcX + srcW > imgW) srcX = imgW - srcW
-      if (srcY < 0) srcY = 0
-      if (srcY + srcH > imgH) { srcH = imgH - srcY }
-
-      return { srcX, srcY, srcW, srcH }
-    }
-  }
-
-  // Before bg removal: show original image, rough center crop
-  let srcW, srcH, srcX, srcY
-  if (aspect >= 1) {
-    // Wide or square: crop from top, width = image width
-    srcW = imgW
-    srcH = srcW / aspect
-    srcX = 0
-    srcY = 0
-  } else {
-    // Tall: crop centered
-    srcH = imgH * 0.5
-    srcW = srcH * aspect
-    srcX = (imgW - srcW) / 2
-    srcY = 0
-  }
-  if (srcW > imgW) { srcW = imgW; srcH = srcW / aspect }
-  if (srcH > imgH) { srcH = imgH; srcW = srcH * aspect }
-  if (srcX < 0) srcX = 0
-  if (srcY < 0) srcY = 0
-  return { srcX, srcY, srcW, srcH }
-}
+// ---- Render canvas with crop box overlay ----
 
 function renderCanvas() {
-  const aspect = activeW / activeH
-  const dispW = 400
-  const dispH = Math.round(dispW / aspect)
+  if (!uploadedImg) {
+    ppCanvas.width = 400
+    ppCanvas.height = 500
+    ctx.fillStyle = '#f5f0e8'
+    ctx.fillRect(0, 0, 400, 500)
+    return
+  }
+
+  const imgW = uploadedImg.naturalWidth
+  const imgH = uploadedImg.naturalHeight
+  const maxW = 500
+  const scale = Math.min(maxW / imgW, maxW / imgH, 1)
+  const dispW = Math.round(imgW * scale)
+  const dispH = Math.round(imgH * scale)
+  displayScale = scale
+
   ppCanvas.width = dispW
   ppCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
   canvasArea.style.maxWidth = dispW + 'px'
-  ctx.fillStyle = selectedCountry.bg || '#ffffff'
+
+  // 1. Draw full uploaded image
+  ctx.drawImage(uploadedImg, 0, 0, dispW, dispH)
+
+  // 2. Draw semi-transparent dark overlay over entire canvas
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)'
   ctx.fillRect(0, 0, dispW, dispH)
-  if (!uploadedImg) return
-  const img = processedImg || uploadedImg
-  const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, dispW, dispH)
+
+  // 3. Clear overlay inside crop box (show original image through)
+  const bx = Math.round(cropBox.x * scale)
+  const by = Math.round(cropBox.y * scale)
+  const bw = Math.round(cropBox.w * scale)
+  const bh = Math.round(cropBox.h * scale)
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(bx, by, bw, bh)
+  ctx.clip()
+  ctx.drawImage(uploadedImg, 0, 0, dispW, dispH)
+  ctx.restore()
+
+  // 4. Draw dashed border around crop box
+  ctx.setLineDash([6, 4])
+  ctx.strokeStyle = '#ffffff'
+  ctx.lineWidth = 2
+  ctx.strokeRect(bx, by, bw, bh)
+  ctx.setLineDash([])
+
+  // 5. Draw corner handles
+  const hs = 8 // handle size
+  ctx.fillStyle = '#C84B31'
+  // NW
+  ctx.fillRect(bx - hs / 2, by - hs / 2, hs, hs)
+  // NE
+  ctx.fillRect(bx + bw - hs / 2, by - hs / 2, hs, hs)
+  // SW
+  ctx.fillRect(bx - hs / 2, by + bh - hs / 2, hs, hs)
+  // SE
+  ctx.fillRect(bx + bw - hs / 2, by + bh - hs / 2, hs, hs)
 }
+
+// ---- Mouse / touch interaction ----
+
+function getCanvasPos(e) {
+  const rect = ppCanvas.getBoundingClientRect()
+  const scaleX = ppCanvas.width / rect.width
+  const scaleY = ppCanvas.height / rect.height
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  }
+}
+
+function hitTest(pos) {
+  const scale = displayScale
+  const bx = cropBox.x * scale
+  const by = cropBox.y * scale
+  const bw = cropBox.w * scale
+  const bh = cropBox.h * scale
+  const hs = 12 // hit area for handles
+
+  // Check corners
+  if (Math.abs(pos.x - bx) < hs && Math.abs(pos.y - by) < hs) return 'nw'
+  if (Math.abs(pos.x - (bx + bw)) < hs && Math.abs(pos.y - by) < hs) return 'ne'
+  if (Math.abs(pos.x - bx) < hs && Math.abs(pos.y - (by + bh)) < hs) return 'sw'
+  if (Math.abs(pos.x - (bx + bw)) < hs && Math.abs(pos.y - (by + bh)) < hs) return 'se'
+
+  // Check inside box
+  if (pos.x >= bx && pos.x <= bx + bw && pos.y >= by && pos.y <= by + bh) return 'move'
+
+  return null
+}
+
+function clampCropBox() {
+  if (!uploadedImg) return
+  const imgW = uploadedImg.naturalWidth
+  const imgH = uploadedImg.naturalHeight
+  // Clamp size
+  if (cropBox.w > imgW) cropBox.w = imgW
+  if (cropBox.h > imgH) cropBox.h = imgH
+  if (cropBox.w < 20) cropBox.w = 20
+  if (cropBox.h < 20) cropBox.h = 20
+  // Clamp position
+  if (cropBox.x < 0) cropBox.x = 0
+  if (cropBox.y < 0) cropBox.y = 0
+  if (cropBox.x + cropBox.w > imgW) cropBox.x = imgW - cropBox.w
+  if (cropBox.y + cropBox.h > imgH) cropBox.y = imgH - cropBox.h
+}
+
+ppCanvas.addEventListener('mousedown', (e) => {
+  if (!uploadedImg) return
+  e.preventDefault()
+  const pos = getCanvasPos(e)
+  const hit = hitTest(pos)
+  if (!hit) return
+  dragging = hit
+  dragStart = { mx: pos.x, my: pos.y, box: { ...cropBox } }
+  ppCanvas.style.cursor = hit === 'move' ? 'grabbing' : 'nwse-resize'
+})
+
+window.addEventListener('mousemove', (e) => {
+  if (!dragging || !uploadedImg) return
+  e.preventDefault()
+  const pos = getCanvasPos(e)
+  const dx = (pos.x - dragStart.mx) / displayScale
+  const dy = (pos.y - dragStart.my) / displayScale
+  const orig = dragStart.box
+  const aspect = activeW / activeH
+
+  if (dragging === 'move') {
+    cropBox.x = orig.x + dx
+    cropBox.y = orig.y + dy
+    cropBox.w = orig.w
+    cropBox.h = orig.h
+  } else {
+    // Corner resize with aspect ratio lock
+    // The opposite corner stays fixed
+    let fixedX, fixedY
+    if (dragging === 'nw') { fixedX = orig.x + orig.w; fixedY = orig.y + orig.h }
+    else if (dragging === 'ne') { fixedX = orig.x; fixedY = orig.y + orig.h }
+    else if (dragging === 'sw') { fixedX = orig.x + orig.w; fixedY = orig.y }
+    else { fixedX = orig.x; fixedY = orig.y } // se
+
+    let draggedX, draggedY
+    if (dragging === 'nw') { draggedX = orig.x + dx; draggedY = orig.y + dy }
+    else if (dragging === 'ne') { draggedX = orig.x + orig.w + dx; draggedY = orig.y + dy }
+    else if (dragging === 'sw') { draggedX = orig.x + dx; draggedY = orig.y + orig.h + dy }
+    else { draggedX = orig.x + orig.w + dx; draggedY = orig.y + orig.h + dy }
+
+    // Calculate new width/height maintaining aspect ratio
+    let newW = Math.abs(draggedX - fixedX)
+    let newH = newW / aspect
+
+    // Also check if height-driven gives smaller box
+    const newH2 = Math.abs(draggedY - fixedY)
+    const newW2 = newH2 * aspect
+    if (newW2 < newW) {
+      newW = newW2
+      newH = newH2
+    }
+
+    if (newW < 20) { newW = 20; newH = newW / aspect }
+
+    cropBox.w = newW
+    cropBox.h = newH
+    cropBox.x = Math.min(fixedX, fixedX - newW + (draggedX > fixedX ? newW : 0))
+    cropBox.y = Math.min(fixedY, fixedY - newH + (draggedY > fixedY ? newH : 0))
+
+    // Simpler: position based on which corner is fixed
+    if (draggedX < fixedX) { cropBox.x = fixedX - newW } else { cropBox.x = fixedX }
+    if (draggedY < fixedY) { cropBox.y = fixedY - newH } else { cropBox.y = fixedY }
+  }
+
+  clampCropBox()
+  renderCanvas()
+})
+
+window.addEventListener('mouseup', () => {
+  if (dragging) {
+    dragging = null
+    ppCanvas.style.cursor = 'crosshair'
+  }
+})
+
+// Update cursor on hover
+ppCanvas.addEventListener('mousemove', (e) => {
+  if (dragging || !uploadedImg) return
+  const pos = getCanvasPos(e)
+  const hit = hitTest(pos)
+  if (hit === 'move') ppCanvas.style.cursor = 'grab'
+  else if (hit) ppCanvas.style.cursor = 'nwse-resize'
+  else ppCanvas.style.cursor = 'crosshair'
+})
+
+// Touch support
+function touchToMouse(type) {
+  return function(e) {
+    if (e.touches.length !== 1) return
+    const touch = e.touches[0] || e.changedTouches[0]
+    const mouseEvent = new MouseEvent(type, {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      bubbles: true
+    })
+    if (type === 'mousedown') {
+      ppCanvas.dispatchEvent(mouseEvent)
+    } else {
+      window.dispatchEvent(mouseEvent)
+    }
+    if (dragging) e.preventDefault()
+  }
+}
+
+ppCanvas.addEventListener('touchstart', touchToMouse('mousedown'), { passive: false })
+window.addEventListener('touchmove', touchToMouse('mousemove'), { passive: false })
+window.addEventListener('touchend', (e) => {
+  const mouseEvent = new MouseEvent('mouseup', { bubbles: true })
+  window.dispatchEvent(mouseEvent)
+})
+
+// ---- Generate output photo from crop box ----
 
 function generatePhoto() {
   const wPx = Math.round(activeW / MM_PER_INCH * DPI)
   const hPx = Math.round(activeH / MM_PER_INCH * DPI)
-  const aspect = activeW / activeH
   const outCanvas = document.createElement('canvas')
   outCanvas.width = wPx; outCanvas.height = hPx
   const octx = outCanvas.getContext('2d')
   octx.fillStyle = selectedCountry.bg || '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
   if (uploadedImg) {
-    const img = processedImg || uploadedImg
-    const { srcX, srcY, srcW, srcH } = getCropRegion(img, aspect)
-    octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, wPx, hPx)
+    // Use cropBox coordinates (in original image space) to crop
+    octx.drawImage(uploadedImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, wPx, hPx)
   }
   return outCanvas
 }
