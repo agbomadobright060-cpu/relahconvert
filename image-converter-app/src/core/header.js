@@ -1,15 +1,6 @@
 import { tools } from '../tools/configs.js'
 import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug, englishKeyFromSlug } from './i18n.js'
 
-// Inject Trustpilot bootstrap script once
-if (!document.querySelector('script[src*="trustpilot"]')) {
-  const tp = document.createElement('script')
-  tp.type = 'text/javascript'
-  tp.src = '//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js'
-  tp.async = true
-  document.head.appendChild(tp)
-}
-
 // Review prompt — shown once per session after a download
 function showReviewPrompt() {
   if (sessionStorage.getItem('reviewShown')) return
@@ -18,27 +9,32 @@ function showReviewPrompt() {
     const el = document.createElement('div')
     el.style.cssText = `
       position:fixed;bottom:20px;right:20px;
-      background:#fff;border-radius:10px;
-      padding:10px 14px;
-      box-shadow:0 4px 16px rgba(0,0,0,0.12);
+      background:#fff;border-radius:12px;
+      padding:16px 20px;
+      box-shadow:0 6px 24px rgba(0,0,0,0.15);
       z-index:9999;
       font-family:'DM Sans',sans-serif;
       border:1px solid #E8E0D5;
-      display:flex;align-items:center;gap:10px;
-      font-size:12px;
+      max-width:280px;
+      animation:fadeUp 0.3s ease both;
     `
     el.innerHTML = `
-      <span>\u2b50 Enjoying RelahConvert?</span>
-      <a href="https://www.trustpilot.com/review/relahconvert.com" target="_blank"
-        style="color:#C84B31;font-weight:600;text-decoration:none;white-space:nowrap">
-        Review us
-      </a>
-      <button id="closeReview" style="background:none;border:none;cursor:pointer;color:#9A8A7A;font-size:16px;padding:0;line-height:1">\u00d7</button>
+      <div style="font-size:14px;font-weight:700;color:#2C1810;margin-bottom:4px;">\u2b50 Enjoying RelahConvert?</div>
+      <div style="font-size:12px;color:#7A6A5A;margin-bottom:12px;">Leave a quick review</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="reviewSkip" style="padding:6px 14px;border:1.5px solid #DDD5C8;border-radius:6px;background:#fff;color:#7A6A5A;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Skip</button>
+        <a href="https://www.trustpilot.com/review/relahconvert.com" target="_blank" rel="noopener"
+          id="reviewLink"
+          style="padding:6px 14px;border:none;border-radius:6px;background:#C84B31;color:#fff;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:4px;">
+          Review us \u2197
+        </a>
+      </div>
     `
     document.body.appendChild(el)
-    document.getElementById('closeReview').onclick = () => el.remove()
-    setTimeout(() => el.remove(), 10000)
-  }, 2000)
+    document.getElementById('reviewSkip').onclick = () => el.remove()
+    document.getElementById('reviewLink').addEventListener('click', () => setTimeout(() => el.remove(), 500))
+    setTimeout(() => { if (el.parentNode) el.remove() }, 8000)
+  }, 1500)
 }
 window.showReviewPrompt = showReviewPrompt
 
@@ -410,9 +406,6 @@ export function injectHeader() {
   footer.id = 'site-footer'
   footer.innerHTML = `
     <p class="footer-copy">${t.footer_copy}</p>
-    <div class="trustpilot-widget" data-locale="en-US" data-template-id="56278e9abfbbba0bdcd568bc" data-businessunit-id="69c02828de293e4354ec375a" data-style-height="52px" data-style-width="100%" data-token="6d278a16-058f-445f-b8cd-04a1fac93984">
-      <a href="https://www.trustpilot.com/review/relahconvert.com" target="_blank" rel="noopener">Trustpilot</a>
-    </div>
     <div class="lang-bar">
       <button class="lang-toggle" id="langToggle">
         <span>🌐</span>
