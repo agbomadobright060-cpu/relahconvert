@@ -245,8 +245,8 @@ style.textContent = `
   .pp-desc{font-size:13px;color:#7A6A5A;margin:0 0 20px}
   .pp-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
   @media(max-width:700px){.pp-grid{grid-template-columns:1fr}}
-  .pp-canvas-area{background:#fff;border-radius:12px;overflow:hidden;position:relative;display:none}
-  .pp-canvas-area.visible{display:block}
+  .pp-canvas-area{background:transparent;border-radius:12px;overflow:hidden;position:relative;display:none}
+  .pp-canvas-area.visible{display:inline-block}
   .pp-dropzone{border:2px dashed #DDD5C8;border-radius:12px;padding:24px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#FAFAF8;max-width:500px}
   .pp-dropzone:hover{border-color:#C84B31;background:#FDE8E3}
   .pp-dropzone svg{margin-bottom:8px;color:#C4B8A8}
