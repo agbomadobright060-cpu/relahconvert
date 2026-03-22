@@ -247,7 +247,7 @@ style.textContent = `
   @media(max-width:700px){.pp-grid{grid-template-columns:1fr}}
   .pp-canvas-area{background:#fff;border-radius:12px;overflow:hidden;position:relative;display:none}
   .pp-canvas-area.visible{display:block}
-  .pp-dropzone{border:2px dashed #DDD5C8;border-radius:12px;padding:48px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#FAFAF8}
+  .pp-dropzone{border:2px dashed #DDD5C8;border-radius:12px;padding:24px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#FAFAF8;max-width:500px}
   .pp-dropzone:hover{border-color:#C84B31;background:#FDE8E3}
   .pp-dropzone svg{margin-bottom:8px;color:#C4B8A8}
   .pp-dropzone:hover svg{color:#C84B31}
@@ -318,8 +318,8 @@ document.querySelector('#app').innerHTML = `
         <button class="pp-upload-btn" style="margin-top:12px;width:auto;display:inline-flex"><span style="font-size:18px">+</span> ${selectLbl}</button>
       </div>
       <input type="file" id="fileInput" accept="image/*" style="display:none" />
-      <div id="heroSection" style="text-align:center;margin-top:20px">
-        <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="max-width:400px;width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)" />
+      <div id="heroSection" style="margin-top:16px;max-width:400px">
+        <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08)" />
       </div>
       <div id="processingArea" style="display:none">
         <div style="position:relative;display:inline-block;width:100%;text-align:center">
