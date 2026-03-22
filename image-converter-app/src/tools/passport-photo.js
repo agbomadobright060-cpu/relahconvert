@@ -502,12 +502,11 @@ function handleFile(file) {
         removeBgFn = mod.removeBackground
       }
       progressText.textContent = bgLabel + ' 0%'
-      let maxPct = 0
+      let displayedPct = 0
       const resultBlob = await removeBgFn(file, {
         model: 'isnet_quint8',
         output: { format: 'image/png' },
         progress: (key, current, total) => {
-          // Map phases to overall progress ranges
           let phasePct = total > 0 ? (current / total) : 0
           let overallPct = 0
           if (key === 'compute:inference') {
@@ -515,9 +514,12 @@ function handleFile(file) {
           } else {
             overallPct = phasePct * 50
           }
-          overallPct = Math.round(overallPct)
-          if (overallPct > maxPct) maxPct = overallPct
-          progressText.textContent = bgLabel + ' ' + Math.min(maxPct, 99) + '%'
+          // Round down to nearest 10 so it jumps in visible steps
+          const stepped = Math.floor(overallPct / 10) * 10
+          if (stepped > displayedPct && stepped <= 90) {
+            displayedPct = stepped
+            progressText.textContent = bgLabel + ' ' + displayedPct + '%'
+          }
         },
       })
       const bgImg = new Image()
