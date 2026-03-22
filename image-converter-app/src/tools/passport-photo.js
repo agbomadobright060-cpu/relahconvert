@@ -502,12 +502,22 @@ function handleFile(file) {
         removeBgFn = mod.removeBackground
       }
       progressText.textContent = bgLabel + ' 0%'
+      let maxPct = 0
       const resultBlob = await removeBgFn(file, {
         model: 'isnet_quint8',
         output: { format: 'image/png' },
         progress: (key, current, total) => {
-          const pct = total > 0 ? Math.round((current / total) * 100) : 0
-          progressText.textContent = bgLabel + ' ' + pct + '%'
+          // Map phases to overall progress ranges
+          let phasePct = total > 0 ? (current / total) : 0
+          let overallPct = 0
+          if (key === 'compute:inference') {
+            overallPct = 50 + phasePct * 50
+          } else {
+            overallPct = phasePct * 50
+          }
+          overallPct = Math.round(overallPct)
+          if (overallPct > maxPct) maxPct = overallPct
+          progressText.textContent = bgLabel + ' ' + Math.min(maxPct, 99) + '%'
         },
       })
       const bgImg = new Image()
