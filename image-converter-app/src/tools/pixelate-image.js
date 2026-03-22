@@ -87,7 +87,7 @@ if (document.head) {
   document.title = 'Pixelate Image Online \u2014 Pixelate Face or Full Image Free | RelahConvert'
   const metaDesc = document.createElement('meta')
   metaDesc.name = 'description'
-  metaDesc.content = 'Pixelate image online free \u2014 pixelate a face, region, or entire image with adjustable intensity. Browser-only, no upload, completely private.'
+  metaDesc.content = 'Pixelate image free \u2014 pixelate a face, region, or entire image with adjustable intensity. Batch process up to 25 files. Browser-only, no upload, completely private.'
   document.head.appendChild(metaDesc)
 }
 
