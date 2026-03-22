@@ -70,13 +70,16 @@ style.textContent = `
   .seo-section ol{padding-left:20px;margin:0 0 12px;}
   .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
   .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
-  .seo-faq{border-top:1px solid #E8E0D5;padding:10px 0;}
-  .seo-faq:last-child{border-bottom:1px solid #E8E0D5;}
-  .seo-faq-q{font-size:13px;font-weight:700;color:#2C1810;margin:0 0 4px;font-family:'DM Sans',sans-serif;}
-  .seo-faq-a{font-size:13px;color:#5A4A3A;margin:0;line-height:1.6;}
+  
+  
+  
+  
   .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
   .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
   .seo-link:hover{border-color:#C84B31;color:#C84B31;}
+    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
 document.title = `${toolName} Free & Private | RelahConvert`
@@ -484,6 +487,6 @@ document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.
   const div = document.createElement('div')
   div.className = 'seo-section'
   injectFaqSchema(seo.faqs)
-  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="seo-faq"><p class="seo-faq-q">${f.q}</p><p class="seo-faq-a">${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
+  div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s=>`<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f=>`<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l=>`<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
   document.querySelector('#app').appendChild(div)
 })()
