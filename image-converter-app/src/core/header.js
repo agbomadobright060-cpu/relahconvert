@@ -19,19 +19,29 @@ function showReviewPrompt() {
       animation:fadeUp 0.3s ease both;
     `
     el.innerHTML = `
-      <div style="font-size:14px;font-weight:700;color:#2C1810;margin-bottom:4px;">\u2b50 Enjoying RelahConvert?</div>
-      <div style="font-size:12px;color:#7A6A5A;margin-bottom:12px;">Leave a quick review</div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button id="reviewSkip" style="padding:6px 14px;border:1.5px solid #DDD5C8;border-radius:6px;background:#fff;color:#7A6A5A;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Skip</button>
-        <a href="https://www.trustpilot.com/review/relahconvert.com" target="_blank" rel="noopener"
+      <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:#2C1810">
+        Enjoying RelahConvert?
+      </div>
+      <div style="font-size:12px;color:#7A6A5A;margin-bottom:10px">
+        Rate us on
+        <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/logo-white.svg"
+             style="height:16px;vertical-align:middle;filter:invert(1) sepia(1) saturate(5) hue-rotate(100deg);"
+             alt="Trustpilot"/>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="closeReview"
+          style="flex:1;padding:7px;border:1px solid #DDD5C8;border-radius:8px;background:#fff;cursor:pointer;font-size:12px;color:#7A6A5A">
+          Skip
+        </button>
+        <a href="https://www.trustpilot.com/review/relahconvert.com" target="_blank"
           id="reviewLink"
-          style="padding:6px 14px;border:none;border-radius:6px;background:#C84B31;color:#fff;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:4px;">
-          Review us \u2197
+          style="flex:2;padding:7px;background:#00b67a;color:#fff;text-align:center;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
+          \u2605 Write a Review
         </a>
       </div>
     `
     document.body.appendChild(el)
-    document.getElementById('reviewSkip').onclick = () => el.remove()
+    document.getElementById('closeReview').onclick = () => el.remove()
     document.getElementById('reviewLink').addEventListener('click', () => setTimeout(() => el.remove(), 500))
     setTimeout(() => { if (el.parentNode) el.remove() }, 8000)
   }, 1500)
