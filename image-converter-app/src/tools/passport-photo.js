@@ -501,19 +501,22 @@ function handleFile(file) {
         const mod = await import('@imgly/background-removal')
         removeBgFn = mod.removeBackground
       }
-      progressText.textContent = bgLabel + ' 0%'
-      let simPct = 0
-      const simInterval = setInterval(() => {
-        if (simPct < 90) {
-          simPct += 10
-          progressText.textContent = bgLabel + ' ' + simPct + '%'
-        }
-      }, 3000)
+      progressText.textContent = bgLabel + ' 10%'
+      let lastPct = 10
       const resultBlob = await removeBgFn(file, {
         model: 'isnet_quint8',
         output: { format: 'image/png' },
+        progress: (key, current, total) => {
+          if (total <= 0) return
+          const raw = Math.round((current / total) * 100)
+          // Round up to next multiple of 10
+          const stepped = Math.min(Math.ceil(raw / 10) * 10, 90)
+          if (stepped > lastPct) {
+            lastPct = stepped
+            progressText.textContent = bgLabel + ' ' + lastPct + '%'
+          }
+        },
       })
-      clearInterval(simInterval)
       progressText.textContent = bgLabel + ' 100%'
       const bgImg = new Image()
       bgImg.onload = async () => {
