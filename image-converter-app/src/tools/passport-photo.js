@@ -239,6 +239,10 @@ const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes hintPulse{0%,100%{opacity:0;transform:translateY(6px)}15%,85%{opacity:1;transform:translateY(0)}}
+  .pp-hint{background:#2C1810;color:#fff;font-size:12px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;animation:hintPulse 4s ease both;box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+  .pp-hint-icon{font-size:16px;flex-shrink:0}
+  .pp-crop-example{position:absolute;top:12px;right:12px;width:120px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2);border:2px solid #fff;z-index:10;animation:hintPulse 5s ease 1s both;pointer-events:none}
   #app>div{animation:fadeUp 0.4s ease both}
   .pp-wrap{max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
   .pp-h1{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em}
@@ -337,10 +341,12 @@ document.querySelector('#app').innerHTML = `
 
     <!-- Step 2: Crop -->
     <div id="step2" style="display:none">
-      <div class="pp-canvas-area visible">
+      <div class="pp-hint" id="step2Hint"><span class="pp-hint-icon">\u2702\ufe0f</span> ${t.pp_crop_hint || 'Crop head and shoulders only \u2014 drag the box to frame your face'}</div>
+      <div class="pp-canvas-area visible" style="position:relative">
         <div class="pp-canvas-inner" id="canvasWrap">
           <canvas id="cropCanvas"></canvas>
         </div>
+        <img src="/passport-before-after.jpg" class="pp-crop-example" id="cropExample" alt="example" />
         <div class="pp-crop-hint">${ppRepositionLbl}</div>
       </div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
@@ -351,6 +357,7 @@ document.querySelector('#app').innerHTML = `
 
     <!-- Step 3: Country & Download -->
     <div id="step3" style="display:none">
+      <div class="pp-hint" id="step3Hint"><span class="pp-hint-icon">\ud83c\uddf3</span> ${t.pp_country_hint || 'Select your country to apply the correct photo dimensions'}</div>
       <div class="pp-grid">
         <div>
           <div style="text-align:center">
@@ -439,6 +446,18 @@ function showStep(n) {
   step1El.style.display = n === 1 ? '' : 'none'
   step2El.style.display = n === 2 ? '' : 'none'
   step3El.style.display = n === 3 ? '' : 'none'
+  // Re-trigger hint animations by removing and re-adding the element
+  const hints = { 2: 'step2Hint', 3: 'step3Hint' }
+  const hintId = hints[n]
+  if (hintId) {
+    const el = document.getElementById(hintId)
+    if (el) { el.style.animation = 'none'; el.offsetHeight; el.style.animation = '' }
+  }
+  // Re-trigger crop example animation
+  if (n === 2) {
+    const ex = document.getElementById('cropExample')
+    if (ex) { ex.style.animation = 'none'; ex.offsetHeight; ex.style.animation = '' }
+  }
 }
 
 // ---- Step 1: Upload & Background Removal ----
