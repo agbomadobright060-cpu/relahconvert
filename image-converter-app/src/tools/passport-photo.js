@@ -238,6 +238,7 @@ document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:' 
 const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
   #app>div{animation:fadeUp 0.4s ease both}
   .pp-wrap{max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
   .pp-h1{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em}
@@ -321,11 +322,12 @@ document.querySelector('#app').innerHTML = `
       <div id="heroSection" style="margin-top:16px;max-width:400px">
         <img src="/passport-before-after.jpg" alt="${ppExampleLbl}" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08)" />
       </div>
-      <div id="processingArea" style="display:none">
-        <div style="position:relative;display:inline-block;width:100%;text-align:center">
-          <canvas id="uploadPreview" style="max-width:100%;border-radius:12px;display:block;margin:0 auto"></canvas>
-          <div id="loadingOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;border-radius:12px">
-            <span style="color:#fff;font-size:14px;font-weight:600">${t.pp_removing_bg || 'Removing background...'}</span>
+      <div id="processingArea" style="display:none;max-width:500px">
+        <div style="position:relative;display:inline-block">
+          <canvas id="uploadPreview" style="max-width:500px;border-radius:12px;display:block"></canvas>
+          <div id="loadingOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;gap:8px">
+            <div style="width:48px;height:48px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+            <span id="progressText" style="color:#fff;font-size:14px;font-weight:600">${t.pp_removing_bg || 'Removing background...'} 0%</span>
           </div>
         </div>
         <div id="step1Error" style="display:none;color:#C84B31;font-size:13px;text-align:center;margin-top:8px"></div>
@@ -492,15 +494,21 @@ function handleFile(file) {
     drawUploadPreview(img)
 
     try {
+      const progressText = document.getElementById('progressText')
+      const bgLabel = t.pp_removing_bg || 'Removing background...'
       if (!removeBgFn) {
-        loadingOverlay.querySelector('span').textContent = t.pp_loading_model || 'Loading AI model...'
+        progressText.textContent = (t.pp_loading_model || 'Loading AI model...') + ' 0%'
         const mod = await import('@imgly/background-removal')
         removeBgFn = mod.removeBackground
       }
-      loadingOverlay.querySelector('span').textContent = t.pp_removing_bg || 'Removing background...'
+      progressText.textContent = bgLabel + ' 0%'
       const resultBlob = await removeBgFn(file, {
         model: 'isnet_quint8',
         output: { format: 'image/png' },
+        progress: (key, current, total) => {
+          const pct = total > 0 ? Math.round((current / total) * 100) : 0
+          progressText.textContent = bgLabel + ' ' + pct + '%'
+        },
       })
       const bgImg = new Image()
       bgImg.onload = async () => {
