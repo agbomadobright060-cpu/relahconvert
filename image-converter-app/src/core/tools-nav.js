@@ -11,6 +11,8 @@ const icons = {
   'resize': '↔️',
   'resize-in-kb': '📏',
   'pixelate-image': '🟦',
+  'svg-to-png': '🖼️',
+  'svg-to-jpg': '🖼️',
   'jpg-to-pdf': '📄',
   'png-to-pdf': '📄',
 }

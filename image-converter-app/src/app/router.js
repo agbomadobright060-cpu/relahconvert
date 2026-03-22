@@ -24,6 +24,8 @@ const standaloneModules = {
   'image-splitter':    () => import('../tools/image-splitter.js'),
   'resize-in-kb':      () => import('../tools/resize-in-kb.js'),
   'pixelate-image':    () => import('../tools/pixelate-image.js'),
+  'svg-to-png':        () => import('../tools/svg-to-png.js'),
+  'svg-to-jpg':        () => import('../tools/svg-to-jpg.js'),
   'jpg-to-pdf':        () => import('../jpg-to-pdf.js'),
   'png-to-pdf':        () => import('../png-to-pdf.js'),
 }

@@ -244,4 +244,18 @@ export const tools = {
     outputFormat: null,
     slug: 'pixelate-image'
   },
+  'svg-to-png': {
+    title: 'SVG to PNG Converter',
+    description: 'Convert SVG to PNG free. Set custom width. No upload required.',
+    inputFormats: ['image/svg+xml'],
+    outputFormat: 'image/png',
+    slug: 'svg-to-png'
+  },
+  'svg-to-jpg': {
+    title: 'SVG to JPG Converter',
+    description: 'Convert SVG to JPG free. Set custom width. White background for transparency. No upload required.',
+    inputFormats: ['image/svg+xml'],
+    outputFormat: 'image/jpeg',
+    slug: 'svg-to-jpg'
+  },
 }
