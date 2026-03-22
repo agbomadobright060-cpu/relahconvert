@@ -66,10 +66,9 @@ if (document.head) {
     .file-thumb .thumb-x:hover { background:#C84B31; }
     .add-thumb { flex-shrink:0; width:64px; height:64px; border-radius:8px; border:1.5px dashed #DDD5C8; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; color:#9A8A7A; transition:all 0.15s; }
     .add-thumb:hover { border-color:#C84B31; color:#C84B31; }
-    .pix-canvas-wrap { position:relative; overflow:hidden; display:block; cursor:crosshair; width:100%; }
-    .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; }
+    .pix-canvas-wrap { position:relative; overflow:hidden; display:block; width:100%; }
+    .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; cursor:crosshair; touch-action:none; }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
-    .pix-selection { position:absolute; border:2px dashed #C84B31; background:rgba(200,75,49,0.1); z-index:1; }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
     .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
     .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
@@ -189,6 +188,310 @@ const seoPixelate = {
       { q: '\u0645\u0627 \u0627\u0644\u0635\u064a\u063a \u0627\u0644\u0645\u062f\u0639\u0648\u0645\u0629\u061f', a: '\u064a\u0645\u0643\u0646\u0643 \u0631\u0641\u0639 \u0635\u0648\u0631 JPG \u0648PNG \u0648WebP. \u064a\u062a\u0637\u0627\u0628\u0642 \u062a\u0646\u0633\u064a\u0642 \u0627\u0644\u0625\u062e\u0631\u0627\u062c \u0645\u0639 \u0627\u0644\u0625\u062f\u062e\u0627\u0644 \u2014 JPG \u064a\u0628\u0642\u0649 JPG\u060c PNG \u064a\u0628\u0642\u0649 PNG.' },
     ],
     links: [{ href: '/blur-face', label: '\u062a\u0645\u0648\u064a\u0647 \u0627\u0644\u0648\u062c\u0647' },{ href: '/crop', label: '\u0642\u0635' },{ href: '/compress', label: '\u0636\u063a\u0637' },{ href: '/resize', label: '\u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u062d\u062c\u0645' }],
+  },
+  it: {
+    h2a: 'Come pixelare un\'immagine online',
+    steps: ['<strong>Carica la tua immagine</strong> — fai clic su "Seleziona immagine" oppure trascina e rilascia un file JPG, PNG o WebP.','<strong>Scegli una modalità</strong> — seleziona "Immagine intera" per pixelare tutto, oppure "Seleziona area" per disegnare un riquadro sopra un volto o una zona che vuoi pixelare.','<strong>Regola il cursore</strong> — sposta il cursore del livello di pixelatura da basso (mosaico leggero) ad alto (blocchi pesanti). L\'anteprima si aggiorna in tempo reale mentre regoli.','<strong>Scarica</strong> — salva l\'immagine pixelata sul tuo dispositivo.'],
+    h2b: 'Il miglior strumento gratuito per pixelare immagini e volti online',
+    body: '<p>Hai bisogno di nascondere un volto, una targa o informazioni sensibili in una foto? Lo strumento Pixela immagine di RelahConvert ti permette di applicare un effetto mosaico all\'intera immagine o solo a un\'area specifica — tutto direttamente nel tuo browser. Nessun caricamento, nessun server, completamente gratuito e privato.</p><p>Usa il cursore regolabile per controllare l\'intensità della pixelatura da un mosaico leggero a blocchi pesanti. Disegna un riquadro di selezione per pixelare solo un volto o una zona mantenendo il resto dell\'immagine nitido. Perfetto per la protezione della privacy, l\'offuscamento di dati sensibili, i post sui social media e l\'anonimizzazione delle foto prima della condivisione.</p>',
+    h3why: 'Perché pixelare le immagini?',
+    why: 'La pixelatura è il modo più riconoscibile per nascondere contenuti sensibili nelle immagini. A differenza della sfocatura, la pixelatura non può essere invertita — il dettaglio originale viene sostituito permanentemente con blocchi di colore solido. Questo la rende ideale per proteggere la privacy, nascondere volti, targhe, indirizzi e informazioni riservate.',
+    faqs: [
+      { q: 'Cos\'è la pixelatura delle immagini?', a: 'La pixelatura delle immagini sostituisce aree di un\'immagine con grandi blocchi di colore solido, creando un effetto mosaico che nasconde il dettaglio originale. A differenza della sfocatura, la pixelatura è irreversibile — i pixel originali vengono sostituiti permanentemente, rendendola un modo sicuro per nascondere contenuti sensibili.' },
+      { q: 'Posso pixelare solo un volto o un\'area specifica?', a: 'Sì — passa alla modalità "Seleziona area" e disegna un rettangolo sopra il volto o la zona che vuoi pixelare. Il resto dell\'immagine rimane nitido e inalterato. Puoi regolare il livello di pixelatura con il cursore.' },
+      { q: 'Come controllo l\'intensità della pixelatura?', a: 'Usa il cursore per regolare la dimensione dei blocchi da basso (blocchi piccoli, effetto leggero) ad alto (blocchi grandi, pixelatura pesante). L\'anteprima si aggiorna in tempo reale mentre muovi il cursore.' },
+      { q: 'La pixelatura è reversibile?', a: 'No — una volta scaricata l\'immagine pixelata, il dettaglio originale nelle aree pixelate è perso permanentemente. Questo è ciò che rende la pixelatura più sicura della sfocatura per nascondere informazioni sensibili.' },
+      { q: 'Quali formati sono supportati?', a: 'Puoi caricare immagini JPG, PNG e WebP. Il formato di output corrisponde a quello di input — JPG resta JPG, PNG resta PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Sfoca volto' },{ href: '/crop', label: 'Ritaglia' },{ href: '/compress', label: 'Comprimi' },{ href: '/resize', label: 'Ridimensiona' }],
+  },
+  ja: {
+    h2a: 'オンラインで画像をピクセル化する方法',
+    steps: ['<strong>画像をアップロード</strong> — 「画像を選択」をクリックするか、JPG、PNG、またはWebPファイルをドラッグ＆ドロップします。','<strong>モードを選択</strong> — 「画像全体」を選択してすべてをピクセル化するか、「エリアを選択」を選択して顔やピクセル化したい領域にボックスを描きます。','<strong>スライダーを調整</strong> — ピクセル化レベルのスライダーを低（薄いモザイク）から高（大きなブロック）まで動かします。調整するとプレビューがリアルタイムで更新されます。','<strong>ダウンロード</strong> — ピクセル化された画像をデバイスに保存します。'],
+    h2b: '画像と顔をオンラインでピクセル化する最高の無料ツール',
+    body: '<p>写真の中の顔、ナンバープレート、または機密情報を隠す必要がありますか？RelahConvertのピクセル化ツールを使えば、画像全体または特定のエリアにモザイク効果を適用できます — すべてブラウザ内で完結します。アップロード不要、サーバー不要、完全に無料でプライベートです。</p><p>調整可能なスライダーを使って、薄いモザイクから大きなブロックまでピクセル化の強度を制御できます。選択ボックスを描いて、顔や領域のみをピクセル化し、画像の残りの部分はシャープに保ちます。プライバシー保護、機密データのぼかし、ソーシャルメディアの投稿、共有前の写真の匿名化に最適です。</p>',
+    h3why: 'なぜ画像をピクセル化するのか？',
+    why: 'ピクセル化は、画像内の機密コンテンツを隠す最も認知度の高い方法です。ぼかしとは異なり、ピクセル化は元に戻すことができません — 元のディテールは単色ブロックで永久に置き換えられます。これにより、プライバシーの保護、顔、ナンバープレート、住所、機密情報の隠蔽に最適です。',
+    faqs: [
+      { q: '画像のピクセル化とは何ですか？', a: '画像のピクセル化とは、画像の領域を大きな単色ブロックに置き換え、元のディテールを隠すモザイク効果を作り出すことです。ぼかしとは異なり、ピクセル化は不可逆です — 元のピクセルは永久に置き換えられるため、機密コンテンツを隠す安全な方法です。' },
+      { q: '顔や特定のエリアだけをピクセル化できますか？', a: 'はい — 「エリアを選択」モードに切り替えて、ピクセル化したい顔や領域の上に長方形を描きます。画像の残りの部分はシャープで影響を受けません。スライダーでピクセル化レベルを調整できます。' },
+      { q: 'ピクセル化の強度はどのように制御しますか？', a: 'スライダーを使って、ブロックサイズを低（小さなブロック、控えめな効果）から高（大きなブロック、強いピクセル化）まで調整します。スライダーを動かすとプレビューがリアルタイムで更新されます。' },
+      { q: 'ピクセル化は元に戻せますか？', a: 'いいえ — ピクセル化された画像をダウンロードすると、ピクセル化された領域の元のディテールは永久に失われます。これが、機密情報を隠す際にピクセル化がぼかしよりも安全である理由です。' },
+      { q: 'どのフォーマットに対応していますか？', a: 'JPG、PNG、WebP画像をアップロードできます。出力フォーマットは入力に一致します — JPGはJPGのまま、PNGはPNGのままです。' },
+    ],
+    links: [{ href: '/blur-face', label: '顔をぼかす' },{ href: '/crop', label: '切り抜き' },{ href: '/compress', label: '圧縮' },{ href: '/resize', label: 'リサイズ' }],
+  },
+  ru: {
+    h2a: 'Как пикселизировать изображение онлайн',
+    steps: ['<strong>Загрузите изображение</strong> — нажмите «Выбрать изображение» или перетащите файл JPG, PNG или WebP.','<strong>Выберите режим</strong> — выберите «Всё изображение», чтобы пикселизировать всё, или «Выбрать область», чтобы нарисовать рамку вокруг лица или области, которую хотите пикселизировать.','<strong>Настройте ползунок</strong> — перемещайте ползунок уровня пикселизации от низкого (лёгкая мозаика) до высокого (крупные блоки). Предварительный просмотр обновляется в реальном времени при настройке.','<strong>Скачайте</strong> — сохраните пикселизированное изображение на своё устройство.'],
+    h2b: 'Лучший бесплатный инструмент для пикселизации изображений и лиц онлайн',
+    body: '<p>Нужно скрыть лицо, номерной знак или конфиденциальную информацию на фото? Инструмент пикселизации изображений от RelahConvert позволяет применить эффект мозаики ко всему изображению или только к определённой области — всё прямо в вашем браузере. Без загрузки на сервер, полностью бесплатно и конфиденциально.</p><p>Используйте регулируемый ползунок для управления интенсивностью пикселизации от лёгкой мозаики до крупных блоков. Нарисуйте рамку выделения, чтобы пикселизировать только лицо или область, сохраняя остальную часть изображения чёткой. Идеально подходит для защиты конфиденциальности, скрытия персональных данных, публикаций в социальных сетях и анонимизации фотографий перед отправкой.</p>',
+    h3why: 'Зачем пикселизировать изображения?',
+    why: 'Пикселизация — самый узнаваемый способ скрыть конфиденциальное содержимое на изображениях. В отличие от размытия, пикселизацию невозможно отменить — исходные детали навсегда заменяются сплошными цветными блоками. Это делает её идеальной для защиты конфиденциальности, скрытия лиц, номерных знаков, адресов и секретной информации.',
+    faqs: [
+      { q: 'Что такое пикселизация изображений?', a: 'Пикселизация изображений заменяет области изображения крупными одноцветными блоками, создавая эффект мозаики, который скрывает исходные детали. В отличие от размытия, пикселизация необратима — исходные пиксели навсегда заменяются, что делает её надёжным способом скрытия конфиденциального содержимого.' },
+      { q: 'Можно ли пикселизировать только лицо или определённую область?', a: 'Да — переключитесь в режим «Выбрать область» и нарисуйте прямоугольник поверх лица или области, которую хотите пикселизировать. Остальная часть изображения остаётся чёткой и нетронутой. Вы можете настроить уровень пикселизации с помощью ползунка.' },
+      { q: 'Как управлять интенсивностью пикселизации?', a: 'Используйте ползунок для настройки размера блоков от низкого (мелкие блоки, лёгкий эффект) до высокого (крупные блоки, сильная пикселизация). Предварительный просмотр обновляется в реальном времени при перемещении ползунка.' },
+      { q: 'Можно ли отменить пикселизацию?', a: 'Нет — после скачивания пикселизированного изображения исходные детали в пикселизированных областях теряются навсегда. Именно это делает пикселизацию более надёжной, чем размытие, для скрытия конфиденциальной информации.' },
+      { q: 'Какие форматы поддерживаются?', a: 'Вы можете загружать изображения в форматах JPG, PNG и WebP. Формат вывода соответствует формату ввода — JPG остаётся JPG, PNG остаётся PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Размытие лица' },{ href: '/crop', label: 'Обрезка' },{ href: '/compress', label: 'Сжатие' },{ href: '/resize', label: 'Изменить размер' }],
+  },
+  ko: {
+    h2a: '온라인에서 이미지를 픽셀화하는 방법',
+    steps: ['<strong>이미지 업로드</strong> — "이미지 선택"을 클릭하거나 JPG, PNG 또는 WebP 파일을 드래그 앤 드롭하세요.','<strong>모드 선택</strong> — "전체 이미지"를 선택하여 모든 것을 픽셀화하거나, "영역 선택"을 선택하여 픽셀화하려는 얼굴이나 영역 위에 상자를 그리세요.','<strong>슬라이더 조절</strong> — 픽셀화 수준 슬라이더를 낮음(은은한 모자이크)에서 높음(큰 블록)까지 이동하세요. 조절하는 동안 미리보기가 실시간으로 업데이트됩니다.','<strong>다운로드</strong> — 픽셀화된 이미지를 기기에 저장하세요.'],
+    h2b: '온라인에서 이미지와 얼굴을 픽셀화하는 최고의 무료 도구',
+    body: '<p>사진에서 얼굴, 번호판 또는 민감한 정보를 숨겨야 하나요? RelahConvert의 이미지 픽셀화 도구를 사용하면 전체 이미지 또는 특정 영역에만 모자이크 효과를 적용할 수 있습니다 — 모든 것이 브라우저 내에서 처리됩니다. 업로드 없음, 서버 없음, 완전히 무료이며 프라이버시가 보장됩니다.</p><p>조절 가능한 슬라이더를 사용하여 은은한 모자이크에서 큰 블록까지 픽셀화 강도를 제어하세요. 선택 상자를 그려 얼굴이나 영역만 픽셀화하고 나머지 이미지는 선명하게 유지하세요. 프라이버시 보호, 민감한 데이터 흐림 처리, 소셜 미디어 게시물, 공유 전 사진 익명화에 완벽합니다.</p>',
+    h3why: '왜 이미지를 픽셀화하나요?',
+    why: '픽셀화는 이미지에서 민감한 콘텐츠를 숨기는 가장 잘 알려진 방법입니다. 흐림과 달리 픽셀화는 되돌릴 수 없습니다 — 원본 디테일이 단색 블록으로 영구적으로 대체됩니다. 이는 프라이버시 보호, 얼굴, 번호판, 주소 및 기밀 정보를 숨기는 데 이상적입니다.',
+    faqs: [
+      { q: '이미지 픽셀화란 무엇인가요?', a: '이미지 픽셀화는 이미지의 영역을 큰 단색 블록으로 대체하여 원본 디테일을 숨기는 모자이크 효과를 만드는 것입니다. 흐림과 달리 픽셀화는 되돌릴 수 없습니다 — 원본 픽셀이 영구적으로 대체되어 민감한 콘텐츠를 숨기는 안전한 방법입니다.' },
+      { q: '얼굴이나 특정 영역만 픽셀화할 수 있나요?', a: '네 — "영역 선택" 모드로 전환하고 픽셀화하려는 얼굴이나 영역 위에 직사각형을 그리세요. 나머지 이미지는 선명하고 영향을 받지 않습니다. 슬라이더로 픽셀화 수준을 조절할 수 있습니다.' },
+      { q: '픽셀화 강도는 어떻게 제어하나요?', a: '슬라이더를 사용하여 블록 크기를 낮음(작은 블록, 은은한 효과)에서 높음(큰 블록, 강한 픽셀화)까지 조절하세요. 슬라이더를 움직이면 미리보기가 실시간으로 업데이트됩니다.' },
+      { q: '픽셀화는 되돌릴 수 있나요?', a: '아니요 — 픽셀화된 이미지를 다운로드하면 픽셀화된 영역의 원본 디테일은 영구적으로 사라집니다. 이것이 민감한 정보를 숨길 때 픽셀화가 흐림보다 더 안전한 이유입니다.' },
+      { q: '어떤 형식이 지원되나요?', a: 'JPG, PNG, WebP 이미지를 업로드할 수 있습니다. 출력 형식은 입력과 동일합니다 — JPG는 JPG로, PNG는 PNG로 유지됩니다.' },
+    ],
+    links: [{ href: '/blur-face', label: '얼굴 흐림' },{ href: '/crop', label: '자르기' },{ href: '/compress', label: '압축' },{ href: '/resize', label: '크기 조절' }],
+  },
+  zh: {
+    h2a: '如何在线像素化图片',
+    steps: ['<strong>上传图片</strong> — 点击"选择图片"或拖放JPG、PNG或WebP文件。','<strong>选择模式</strong> — 选择"整张图片"来像素化所有内容，或选择"选择区域"在要像素化的面部或区域上绘制方框。','<strong>调整滑块</strong> — 将像素化级别滑块从低（轻微马赛克）移动到高（大块马赛克）。调整时预览会实时更新。','<strong>下载</strong> — 将像素化后的图片保存到您的设备。'],
+    h2b: '在线像素化图片和面部的最佳免费工具',
+    body: '<p>需要在照片中隐藏面部、车牌或敏感信息吗？RelahConvert的图片像素化工具让您可以对整张图片或特定区域应用马赛克效果 — 全部在浏览器中完成。无需上传，无需服务器，完全免费且保护隐私。</p><p>使用可调节的滑块控制像素化强度，从轻微马赛克到大块马赛克。绘制选择框仅对面部或区域进行像素化，同时保持图片其余部分清晰。非常适合隐私保护、模糊敏感数据、社交媒体帖子以及分享前的照片匿名化处理。</p>',
+    h3why: '为什么要像素化图片？',
+    why: '像素化是隐藏图片中敏感内容最常见的方式。与模糊不同，像素化无法逆转 — 原始细节会被纯色块永久替换。这使其成为保护隐私、隐藏面部、车牌、地址和机密信息的理想选择。',
+    faqs: [
+      { q: '什么是图片像素化？', a: '图片像素化是将图片的区域替换为大的纯色块，产生隐藏原始细节的马赛克效果。与模糊不同，像素化是不可逆的 — 原始像素被永久替换，使其成为隐藏敏感内容的安全方式。' },
+      { q: '我可以只像素化面部或特定区域吗？', a: '可以 — 切换到"选择区域"模式，在要像素化的面部或区域上绘制一个矩形。图片的其余部分保持清晰且不受影响。您可以使用滑块调整像素化级别。' },
+      { q: '如何控制像素化强度？', a: '使用滑块调整块大小，从低（小块，轻微效果）到高（大块，强烈像素化）。移动滑块时预览会实时更新。' },
+      { q: '像素化可以逆转吗？', a: '不能 — 一旦下载像素化后的图片，像素化区域中的原始细节就永久消失了。这就是为什么像素化比模糊更安全地隐藏敏感信息的原因。' },
+      { q: '支持哪些格式？', a: '您可以上传JPG、PNG和WebP图片。输出格式与输入格式一致 — JPG保持JPG，PNG保持PNG。' },
+    ],
+    links: [{ href: '/blur-face', label: '模糊面部' },{ href: '/crop', label: '裁剪' },{ href: '/compress', label: '压缩' },{ href: '/resize', label: '调整大小' }],
+  },
+  'zh-TW': {
+    h2a: '如何在線上像素化圖片',
+    steps: ['<strong>上傳圖片</strong> — 點擊「選擇圖片」或拖放JPG、PNG或WebP檔案。','<strong>選擇模式</strong> — 選擇「整張圖片」來像素化所有內容，或選擇「選擇區域」在要像素化的臉部或區域上繪製方框。','<strong>調整滑桿</strong> — 將像素化級別滑桿從低（輕微馬賽克）移動到高（大塊馬賽克）。調整時預覽會即時更新。','<strong>下載</strong> — 將像素化後的圖片儲存到您的裝置。'],
+    h2b: '線上像素化圖片和臉部的最佳免費工具',
+    body: '<p>需要在照片中隱藏臉部、車牌或敏感資訊嗎？RelahConvert的圖片像素化工具讓您可以對整張圖片或特定區域套用馬賽克效果 — 全部在瀏覽器中完成。無需上傳，無需伺服器，完全免費且保護隱私。</p><p>使用可調節的滑桿控制像素化強度，從輕微馬賽克到大塊馬賽克。繪製選擇框僅對臉部或區域進行像素化，同時保持圖片其餘部分清晰。非常適合隱私保護、模糊敏感資料、社群媒體貼文以及分享前的照片匿名化處理。</p>',
+    h3why: '為什麼要像素化圖片？',
+    why: '像素化是隱藏圖片中敏感內容最常見的方式。與模糊不同，像素化無法逆轉 — 原始細節會被純色塊永久替換。這使其成為保護隱私、隱藏臉部、車牌、地址和機密資訊的理想選擇。',
+    faqs: [
+      { q: '什麼是圖片像素化？', a: '圖片像素化是將圖片的區域替換為大的純色塊，產生隱藏原始細節的馬賽克效果。與模糊不同，像素化是不可逆的 — 原始像素被永久替換，使其成為隱藏敏感內容的安全方式。' },
+      { q: '我可以只像素化臉部或特定區域嗎？', a: '可以 — 切換到「選擇區域」模式，在要像素化的臉部或區域上繪製一個矩形。圖片的其餘部分保持清晰且不受影響。您可以使用滑桿調整像素化級別。' },
+      { q: '如何控制像素化強度？', a: '使用滑桿調整塊大小，從低（小塊，輕微效果）到高（大塊，強烈像素化）。移動滑桿時預覽會即時更新。' },
+      { q: '像素化可以逆轉嗎？', a: '不能 — 一旦下載像素化後的圖片，像素化區域中的原始細節就永久消失了。這就是為什麼像素化比模糊更安全地隱藏敏感資訊的原因。' },
+      { q: '支援哪些格式？', a: '您可以上傳JPG、PNG和WebP圖片。輸出格式與輸入格式一致 — JPG保持JPG，PNG保持PNG。' },
+    ],
+    links: [{ href: '/blur-face', label: '模糊臉部' },{ href: '/crop', label: '裁切' },{ href: '/compress', label: '壓縮' },{ href: '/resize', label: '調整大小' }],
+  },
+  pl: {
+    h2a: 'Jak pikselować obraz online',
+    steps: ['<strong>Prześlij swój obraz</strong> — kliknij „Wybierz obraz" lub przeciągnij i upuść plik JPG, PNG lub WebP.','<strong>Wybierz tryb</strong> — wybierz „Cały obraz", aby pikselować wszystko, lub „Zaznacz obszar", aby narysować ramkę wokół twarzy lub regionu, który chcesz pikselować.','<strong>Dostosuj suwak</strong> — przesuń suwak poziomu pikselacji od niskiego (subtelna mozaika) do wysokiego (duże bloki). Podgląd aktualizuje się na żywo w miarę regulacji.','<strong>Pobierz</strong> — zapisz spikselowany obraz na swoim urządzeniu.'],
+    h2b: 'Najlepsze darmowe narzędzie do pikselowania obrazów i twarzy online',
+    body: '<p>Musisz ukryć twarz, tablicę rejestracyjną lub poufne informacje na zdjęciu? Narzędzie Pikselacja od RelahConvert pozwala zastosować efekt mozaiki do całego obrazu lub tylko do wybranego obszaru — wszystko w przeglądarce. Bez przesyłania, bez serwera, całkowicie za darmo i prywatnie.</p><p>Użyj regulowanego suwaka, aby kontrolować intensywność pikselacji od subtelnej mozaiki do dużych bloków. Narysuj ramkę zaznaczenia, aby pikselować tylko twarz lub region, zachowując resztę obrazu ostrą. Idealne do ochrony prywatności, ukrywania wrażliwych danych, postów w mediach społecznościowych i anonimizacji zdjęć przed udostępnieniem.</p>',
+    h3why: 'Dlaczego warto pikselować obrazy?',
+    why: 'Pikselacja to najbardziej rozpoznawalny sposób ukrywania wrażliwych treści w obrazach. W przeciwieństwie do rozmycia, pikselacja jest nieodwracalna — oryginalne szczegóły zostają trwale zastąpione jednolitymi blokami kolorów. To czyni ją idealną do ochrony prywatności, ukrywania twarzy, tablic rejestracyjnych, adresów i poufnych informacji.',
+    faqs: [
+      { q: 'Czym jest pikselacja obrazu?', a: 'Pikselacja obrazu polega na zastępowaniu obszarów obrazu dużymi jednokolorowymi blokami, tworząc efekt mozaiki ukrywający oryginalne szczegóły. W przeciwieństwie do rozmycia, pikselacja jest nieodwracalna — oryginalne piksele są trwale zastępowane, co czyni ją bezpiecznym sposobem ukrywania wrażliwych treści.' },
+      { q: 'Czy mogę pikselować tylko twarz lub określony obszar?', a: 'Tak — przełącz się na tryb „Zaznacz obszar" i narysuj prostokąt wokół twarzy lub regionu, który chcesz pikselować. Reszta obrazu pozostaje ostra i nienaruszona. Możesz dostosować poziom pikselacji za pomocą suwaka.' },
+      { q: 'Jak kontrolować intensywność pikselacji?', a: 'Użyj suwaka, aby dostosować rozmiar bloków od niskiego (małe bloki, subtelny efekt) do wysokiego (duże bloki, silna pikselacja). Podgląd aktualizuje się w czasie rzeczywistym podczas przesuwania suwaka.' },
+      { q: 'Czy pikselacja jest odwracalna?', a: 'Nie — po pobraniu spikselowanego obrazu oryginalne szczegóły w pikselowanych obszarach są trwale utracone. To właśnie sprawia, że pikselacja jest bezpieczniejsza niż rozmycie do ukrywania wrażliwych informacji.' },
+      { q: 'Jakie formaty są obsługiwane?', a: 'Możesz przesłać obrazy JPG, PNG i WebP. Format wyjściowy odpowiada formatowi wejściowemu — JPG pozostaje JPG, PNG pozostaje PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Rozmyj twarz' },{ href: '/crop', label: 'Przytnij' },{ href: '/compress', label: 'Kompresuj' },{ href: '/resize', label: 'Zmień rozmiar' }],
+  },
+  sv: {
+    h2a: 'Hur man pixelerar en bild online',
+    steps: ['<strong>Ladda upp din bild</strong> — klicka på "Välj bild" eller dra och släpp en JPG-, PNG- eller WebP-fil.','<strong>Välj ett läge</strong> — välj "Hela bilden" för att pixelera allt, eller "Välj område" för att rita en ruta över ett ansikte eller en region du vill pixelera.','<strong>Justera reglaget</strong> — flytta reglaget för pixeleringsnivå från låg (subtil mosaik) till hög (stora block). Förhandsgranskningen uppdateras live medan du justerar.','<strong>Ladda ner</strong> — spara den pixelerade bilden till din enhet.'],
+    h2b: 'Bästa gratisverktyget för att pixelera bilder och ansikten online',
+    body: '<p>Behöver du dölja ett ansikte, en registreringsskylt eller känslig information i ett foto? RelahConverts pixeleringsverktyg låter dig applicera en mosaikeffekt på hela bilden eller bara ett specifikt område — allt i din webbläsare. Ingen uppladdning, ingen server, helt gratis och privat.</p><p>Använd det justerbara reglaget för att styra pixeleringsintensiteten från en subtil mosaik till stora block. Rita en markeringsruta för att pixelera bara ett ansikte eller en region medan resten av bilden förblir skarp. Perfekt för integritetsskydd, dölja känsliga uppgifter, inlägg på sociala medier och anonymisering av foton innan delning.</p>',
+    h3why: 'Varför pixelera bilder?',
+    why: 'Pixelering är det mest igenkännbara sättet att dölja känsligt innehåll i bilder. Till skillnad från oskärpa är pixelering oåterkallelig — originaldetaljen ersätts permanent med enfärgade block. Detta gör det idealiskt för att skydda integriteten, dölja ansikten, registreringsskyltar, adresser och konfidentiell information.',
+    faqs: [
+      { q: 'Vad är bildpixelering?', a: 'Bildpixelering ersätter områden i en bild med stora enfärgade block, vilket skapar en mosaikeffekt som döljer originaldetaljen. Till skillnad från oskärpa är pixelering oåterkallelig — de ursprungliga pixlarna ersätts permanent, vilket gör det till ett säkert sätt att dölja känsligt innehåll.' },
+      { q: 'Kan jag pixelera bara ett ansikte eller ett specifikt område?', a: 'Ja — byt till läget "Välj område" och rita en rektangel över ansiktet eller regionen du vill pixelera. Resten av bilden förblir skarp och opåverkad. Du kan justera pixeleringsnivån med reglaget.' },
+      { q: 'Hur kontrollerar jag pixeleringsintensiteten?', a: 'Använd reglaget för att justera blockstorleken från låg (små block, subtil effekt) till hög (stora block, kraftig pixelering). Förhandsgranskningen uppdateras i realtid när du flyttar reglaget.' },
+      { q: 'Är pixelering reversibel?', a: 'Nej — när du har laddat ner den pixelerade bilden är originaldetaljen i de pixelerade områdena permanent borta. Det är detta som gör pixelering säkrare än oskärpa för att dölja känslig information.' },
+      { q: 'Vilka format stöds?', a: 'Du kan ladda upp JPG-, PNG- och WebP-bilder. Utdataformatet matchar ditt indata — JPG förblir JPG, PNG förblir PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Oskärpa ansikte' },{ href: '/crop', label: 'Beskär' },{ href: '/compress', label: 'Komprimera' },{ href: '/resize', label: 'Ändra storlek' }],
+  },
+  th: {
+    h2a: 'วิธีทำให้ภาพเป็นพิกเซลออนไลน์',
+    steps: ['<strong>อัปโหลดภาพของคุณ</strong> — คลิก "เลือกภาพ" หรือลากและวางไฟล์ JPG, PNG หรือ WebP','<strong>เลือกโหมด</strong> — เลือก "ทั้งภาพ" เพื่อทำพิกเซลทั้งหมด หรือ "เลือกพื้นที่" เพื่อวาดกรอบรอบใบหน้าหรือบริเวณที่คุณต้องการทำพิกเซล','<strong>ปรับแถบเลื่อน</strong> — เลื่อนแถบระดับพิกเซลจากต่ำ (โมเสกบาง ๆ) ไปสูง (บล็อกใหญ่) ตัวอย่างจะอัปเดตแบบสดขณะที่คุณปรับ','<strong>ดาวน์โหลด</strong> — บันทึกภาพที่ทำพิกเซลแล้วลงอุปกรณ์ของคุณ'],
+    h2b: 'เครื่องมือฟรีที่ดีที่สุดสำหรับทำพิกเซลภาพและใบหน้าออนไลน์',
+    body: '<p>ต้องการซ่อนใบหน้า ป้ายทะเบียน หรือข้อมูลที่ละเอียดอ่อนในภาพถ่าย? เครื่องมือทำพิกเซลของ RelahConvert ช่วยให้คุณใส่เอฟเฟกต์โมเสกบนภาพทั้งหมดหรือเฉพาะพื้นที่ที่เลือก — ทั้งหมดในเบราว์เซอร์ของคุณ ไม่ต้องอัปโหลด ไม่มีเซิร์ฟเวอร์ ฟรีและเป็นส่วนตัวอย่างสมบูรณ์</p><p>ใช้แถบเลื่อนที่ปรับได้เพื่อควบคุมความเข้มของพิกเซลตั้งแต่โมเสกบาง ๆ ไปจนถึงบล็อกใหญ่ วาดกรอบเลือกเพื่อทำพิกเซลเฉพาะใบหน้าหรือบริเวณที่ต้องการในขณะที่ภาพส่วนที่เหลือยังคมชัด เหมาะสำหรับการปกป้องความเป็นส่วนตัว ซ่อนข้อมูลที่ละเอียดอ่อน โพสต์บนโซเชียลมีเดีย และทำให้ภาพถ่ายไม่ระบุตัวตนก่อนแชร์</p>',
+    h3why: 'ทำไมต้องทำพิกเซลภาพ?',
+    why: 'การทำพิกเซลเป็นวิธีที่เป็นที่รู้จักมากที่สุดในการซ่อนเนื้อหาที่ละเอียดอ่อนในภาพ ต่างจากการเบลอ การทำพิกเซลไม่สามารถย้อนกลับได้ — รายละเอียดเดิมถูกแทนที่อย่างถาวรด้วยบล็อกสีทึบ เหมาะอย่างยิ่งสำหรับการปกป้องความเป็นส่วนตัว ซ่อนใบหน้า ป้ายทะเบียน ที่อยู่ และข้อมูลที่เป็นความลับ',
+    faqs: [
+      { q: 'การทำพิกเซลภาพคืออะไร?', a: 'การทำพิกเซลภาพจะแทนที่พื้นที่ของภาพด้วยบล็อกสีทึบขนาดใหญ่ สร้างเอฟเฟกต์โมเสกที่ซ่อนรายละเอียดเดิม ต่างจากการเบลอ การทำพิกเซลไม่สามารถย้อนกลับได้ — พิกเซลเดิมถูกแทนที่อย่างถาวร ทำให้เป็นวิธีที่ปลอดภัยในการซ่อนเนื้อหาที่ละเอียดอ่อน' },
+      { q: 'ฉันสามารถทำพิกเซลเฉพาะใบหน้าหรือพื้นที่เฉพาะได้ไหม?', a: 'ได้ — สลับไปที่โหมด "เลือกพื้นที่" แล้ววาดสี่เหลี่ยมผืนผ้ารอบใบหน้าหรือบริเวณที่คุณต้องการทำพิกเซล ภาพส่วนที่เหลือจะยังคมชัดและไม่ได้รับผลกระทบ คุณสามารถปรับระดับพิกเซลด้วยแถบเลื่อน' },
+      { q: 'ฉันจะควบคุมความเข้มของพิกเซลได้อย่างไร?', a: 'ใช้แถบเลื่อนเพื่อปรับขนาดบล็อกจากต่ำ (บล็อกเล็ก เอฟเฟกต์บาง ๆ) ไปสูง (บล็อกใหญ่ พิกเซลหนัก) ตัวอย่างจะอัปเดตแบบเรียลไทม์ขณะที่คุณเลื่อนแถบ' },
+      { q: 'การทำพิกเซลย้อนกลับได้ไหม?', a: 'ไม่ได้ — เมื่อคุณดาวน์โหลดภาพที่ทำพิกเซลแล้ว รายละเอียดเดิมในพื้นที่ที่ทำพิกเซลจะหายไปอย่างถาวร นี่คือสิ่งที่ทำให้การทำพิกเซลปลอดภัยกว่าการเบลอสำหรับการซ่อนข้อมูลที่ละเอียดอ่อน' },
+      { q: 'รองรับรูปแบบไฟล์ใดบ้าง?', a: 'คุณสามารถอัปโหลดภาพ JPG, PNG และ WebP รูปแบบไฟล์ขาออกจะตรงกับไฟล์ขาเข้า — JPG ยังคงเป็น JPG, PNG ยังคงเป็น PNG' },
+    ],
+    links: [{ href: '/blur-face', label: 'เบลอใบหน้า' },{ href: '/crop', label: 'ครอป' },{ href: '/compress', label: 'บีบอัด' },{ href: '/resize', label: 'ปรับขนาด' }],
+  },
+  tr: {
+    h2a: 'Bir Görüntüyü Çevrimiçi Nasıl Pikselleştirilir',
+    steps: ['<strong>Görüntünüzü yükleyin</strong> — "Görüntü Seç"e tıklayın veya bir JPG, PNG ya da WebP dosyasını sürükleyip bırakın.','<strong>Bir mod seçin</strong> — her şeyi pikselleştirmek için "Tüm Görüntü"yü veya bir yüz ya da bölge üzerine kutu çizmek için "Alan Seç"i seçin.','<strong>Kaydırıcıyı ayarlayın</strong> — pikselleştirme seviyesi kaydırıcısını düşükten (hafif mozaik) yükseğe (büyük bloklar) hareket ettirin. Önizleme, siz ayarladıkça canlı olarak güncellenir.','<strong>İndirin</strong> — pikselleştirilmiş görüntüyü cihazınıza kaydedin.'],
+    h2b: 'Görüntüleri ve Yüzleri Çevrimiçi Pikselleştirmek İçin En İyi Ücretsiz Araç',
+    body: '<p>Bir fotoğrafta yüzü, plakayı veya hassas bilgileri gizlemeniz mi gerekiyor? RelahConvert\'ın Pikselleştirme aracı, tüm görüntüye veya yalnızca belirli bir alana mozaik efekti uygulamanıza olanak tanır — tamamı tarayıcınızda. Yükleme yok, sunucu yok, tamamen ücretsiz ve gizli.</p><p>Ayarlanabilir kaydırıcıyı kullanarak pikselleştirme yoğunluğunu hafif mozaikten büyük bloklara kadar kontrol edin. Görüntünün geri kalanını keskin tutarken yalnızca bir yüzü veya bölgeyi pikselleştirmek için seçim kutusu çizin. Gizlilik koruması, hassas verileri gizleme, sosyal medya paylaşımları ve paylaşmadan önce fotoğrafları anonimleştirme için mükemmel.</p>',
+    h3why: 'Neden Görüntüleri Pikselleştirmeliyiz?',
+    why: 'Pikselleştirme, görüntülerdeki hassas içeriği gizlemenin en tanınmış yoludur. Bulanıklaştırmanın aksine, pikselleştirme geri alınamaz — orijinal detay kalıcı olarak düz renkli bloklarla değiştirilir. Bu, gizliliği korumak, yüzleri, plakaları, adresleri ve gizli bilgileri gizlemek için ideal kılar.',
+    faqs: [
+      { q: 'Görüntü pikselleştirme nedir?', a: 'Görüntü pikselleştirme, bir görüntünün alanlarını büyük düz renkli bloklarla değiştirerek orijinal detayı gizleyen bir mozaik efekti oluşturur. Bulanıklaştırmanın aksine, pikselleştirme geri alınamaz — orijinal pikseller kalıcı olarak değiştirilir, bu da hassas içeriği gizlemenin güvenli bir yolunu sağlar.' },
+      { q: 'Sadece bir yüzü veya belirli bir alanı pikselleştirebilir miyim?', a: 'Evet — "Alan Seç" moduna geçin ve pikselleştirmek istediğiniz yüz veya bölge üzerine bir dikdörtgen çizin. Görüntünün geri kalanı keskin ve etkilenmemiş kalır. Pikselleştirme seviyesini kaydırıcıyla ayarlayabilirsiniz.' },
+      { q: 'Pikselleştirme yoğunluğunu nasıl kontrol ederim?', a: 'Blok boyutunu düşükten (küçük bloklar, hafif efekt) yükseğe (büyük bloklar, yoğun pikselleştirme) ayarlamak için kaydırıcıyı kullanın. Önizleme, kaydırıcıyı hareket ettirdikçe gerçek zamanlı olarak güncellenir.' },
+      { q: 'Pikselleştirme geri alınabilir mi?', a: 'Hayır — pikselleştirilmiş görüntüyü indirdikten sonra, pikselleştirilmiş alanlardaki orijinal detay kalıcı olarak kaybolur. Pikselleştirmeyi hassas bilgileri gizlemek için bulanıklaştırmadan daha güvenli kılan da budur.' },
+      { q: 'Hangi formatlar destekleniyor?', a: 'JPG, PNG ve WebP görüntüleri yükleyebilirsiniz. Çıktı formatı girdilerinizle eşleşir — JPG olarak kalır JPG, PNG olarak kalır PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Yüz Bulanıklaştır' },{ href: '/crop', label: 'Kırp' },{ href: '/compress', label: 'Sıkıştır' },{ href: '/resize', label: 'Yeniden Boyutlandır' }],
+  },
+  uk: {
+    h2a: 'Як піксельувати зображення онлайн',
+    steps: ['<strong>Завантажте своє зображення</strong> — натисніть «Вибрати зображення» або перетягніть файл JPG, PNG чи WebP.','<strong>Виберіть режим</strong> — оберіть «Все зображення», щоб піксельувати все, або «Вибрати область», щоб намалювати рамку навколо обличчя чи ділянки, яку потрібно піксельувати.','<strong>Налаштуйте повзунок</strong> — перемістіть повзунок рівня піксельування від низького (легка мозаїка) до високого (великі блоки). Попередній перегляд оновлюється в реальному часі.','<strong>Завантажте</strong> — збережіть піксельоване зображення на свій пристрій.'],
+    h2b: 'Найкращий безкоштовний інструмент для піксельування зображень та облич онлайн',
+    body: '<p>Потрібно приховати обличчя, номерний знак або конфіденційну інформацію на фотографії? Інструмент піксельування від RelahConvert дозволяє застосувати ефект мозаїки до всього зображення або лише до певної області — все у вашому браузері. Без завантаження, без сервера, повністю безкоштовно та приватно.</p><p>Використовуйте регульований повзунок для керування інтенсивністю піксельування від легкої мозаїки до великих блоків. Намалюйте рамку виділення, щоб піксельувати лише обличчя або ділянку, зберігаючи решту зображення чіткою. Ідеально підходить для захисту конфіденційності, приховування чутливих даних, публікацій у соціальних мережах та анонімізації фотографій перед поширенням.</p>',
+    h3why: 'Навіщо піксельувати зображення?',
+    why: 'Піксельування — це найбільш впізнаваний спосіб приховати конфіденційний вміст у зображеннях. На відміну від розмиття, піксельування є незворотним — оригінальні деталі назавжди замінюються суцільними кольоровими блоками. Це робить його ідеальним для захисту приватності, приховування облич, номерних знаків, адрес та конфіденційної інформації.',
+    faqs: [
+      { q: 'Що таке піксельування зображення?', a: 'Піксельування зображення замінює ділянки зображення великими одноколірними блоками, створюючи ефект мозаїки, який приховує оригінальні деталі. На відміну від розмиття, піксельування є незворотним — оригінальні пікселі назавжди замінюються, що робить його безпечним способом приховування конфіденційного вмісту.' },
+      { q: 'Чи можу я піксельувати лише обличчя або певну область?', a: 'Так — переключіться на режим «Вибрати область» і намалюйте прямокутник навколо обличчя або ділянки, яку потрібно піксельувати. Решта зображення залишається чіткою та незміненою. Ви можете налаштувати рівень піксельування за допомогою повзунка.' },
+      { q: 'Як контролювати інтенсивність піксельування?', a: 'Використовуйте повзунок для налаштування розміру блоків від низького (малі блоки, легкий ефект) до високого (великі блоки, сильне піксельування). Попередній перегляд оновлюється в реальному часі під час переміщення повзунка.' },
+      { q: 'Чи є піксельування зворотним?', a: 'Ні — після завантаження піксельованого зображення оригінальні деталі в піксельованих областях назавжди втрачені. Саме це робить піксельування безпечнішим за розмиття для приховування конфіденційної інформації.' },
+      { q: 'Які формати підтримуються?', a: 'Ви можете завантажити зображення JPG, PNG та WebP. Формат виведення відповідає вхідному — JPG залишається JPG, PNG залишається PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Розмити обличчя' },{ href: '/crop', label: 'Обрізати' },{ href: '/compress', label: 'Стиснути' },{ href: '/resize', label: 'Змінити розмір' }],
+  },
+  vi: {
+    h2a: 'Cách tạo hiệu ứng pixel cho ảnh trực tuyến',
+    steps: ['<strong>Tải ảnh lên</strong> — nhấp vào "Chọn ảnh" hoặc kéo và thả tệp JPG, PNG hoặc WebP.','<strong>Chọn chế độ</strong> — chọn "Toàn bộ ảnh" để tạo pixel cho toàn bộ, hoặc "Chọn vùng" để vẽ khung quanh khuôn mặt hoặc vùng bạn muốn tạo pixel.','<strong>Điều chỉnh thanh trượt</strong> — di chuyển thanh trượt mức pixel từ thấp (khảm nhẹ) đến cao (khối lớn). Bản xem trước cập nhật trực tiếp khi bạn điều chỉnh.','<strong>Tải xuống</strong> — lưu ảnh đã tạo pixel về thiết bị của bạn.'],
+    h2b: 'Công cụ miễn phí tốt nhất để tạo pixel cho ảnh và khuôn mặt trực tuyến',
+    body: '<p>Cần ẩn khuôn mặt, biển số xe hoặc thông tin nhạy cảm trong ảnh? Công cụ Tạo pixel của RelahConvert cho phép bạn áp dụng hiệu ứng khảm lên toàn bộ ảnh hoặc chỉ một vùng cụ thể — tất cả trong trình duyệt của bạn. Không cần tải lên, không có máy chủ, hoàn toàn miễn phí và riêng tư.</p><p>Sử dụng thanh trượt có thể điều chỉnh để kiểm soát cường độ pixel từ khảm nhẹ đến các khối lớn. Vẽ khung chọn để chỉ tạo pixel cho khuôn mặt hoặc vùng cần thiết trong khi giữ phần còn lại của ảnh sắc nét. Hoàn hảo để bảo vệ quyền riêng tư, ẩn dữ liệu nhạy cảm, đăng bài trên mạng xã hội và ẩn danh ảnh trước khi chia sẻ.</p>',
+    h3why: 'Tại sao nên tạo pixel cho ảnh?',
+    why: 'Tạo pixel là cách dễ nhận biết nhất để ẩn nội dung nhạy cảm trong ảnh. Khác với làm mờ, tạo pixel không thể đảo ngược — chi tiết gốc được thay thế vĩnh viễn bằng các khối màu đặc. Điều này làm cho nó lý tưởng để bảo vệ quyền riêng tư, ẩn khuôn mặt, biển số xe, địa chỉ và thông tin bí mật.',
+    faqs: [
+      { q: 'Tạo pixel ảnh là gì?', a: 'Tạo pixel ảnh thay thế các vùng của ảnh bằng các khối màu đặc lớn, tạo ra hiệu ứng khảm che giấu chi tiết gốc. Khác với làm mờ, tạo pixel không thể đảo ngược — các pixel gốc được thay thế vĩnh viễn, biến nó thành cách an toàn để ẩn nội dung nhạy cảm.' },
+      { q: 'Tôi có thể tạo pixel chỉ cho khuôn mặt hoặc vùng cụ thể không?', a: 'Có — chuyển sang chế độ "Chọn vùng" và vẽ hình chữ nhật quanh khuôn mặt hoặc vùng bạn muốn tạo pixel. Phần còn lại của ảnh vẫn sắc nét và không bị ảnh hưởng. Bạn có thể điều chỉnh mức pixel bằng thanh trượt.' },
+      { q: 'Làm thế nào để kiểm soát cường độ pixel?', a: 'Sử dụng thanh trượt để điều chỉnh kích thước khối từ thấp (khối nhỏ, hiệu ứng nhẹ) đến cao (khối lớn, pixel đậm). Bản xem trước cập nhật theo thời gian thực khi bạn di chuyển thanh trượt.' },
+      { q: 'Tạo pixel có thể đảo ngược không?', a: 'Không — khi bạn tải xuống ảnh đã tạo pixel, chi tiết gốc trong các vùng đã tạo pixel sẽ mất vĩnh viễn. Đây là điều làm cho tạo pixel an toàn hơn làm mờ khi cần ẩn thông tin nhạy cảm.' },
+      { q: 'Những định dạng nào được hỗ trợ?', a: 'Bạn có thể tải lên ảnh JPG, PNG và WebP. Định dạng đầu ra khớp với đầu vào của bạn — JPG vẫn là JPG, PNG vẫn là PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Làm mờ khuôn mặt' },{ href: '/crop', label: 'Cắt ảnh' },{ href: '/compress', label: 'Nén ảnh' },{ href: '/resize', label: 'Thay đổi kích thước' }],
+  },
+  bg: {
+    h2a: 'Как да пикселизирате изображение онлайн',
+    steps: ['<strong>Качете вашето изображение</strong> — кликнете върху «Избор на изображение» или плъзнете и пуснете JPG, PNG или WebP файл.','<strong>Изберете режим</strong> — изберете «Цяло изображение», за да пикселизирате всичко, или «Избор на зона», за да начертаете рамка върху лице или област, която искате да пикселизирате.','<strong>Настройте плъзгача</strong> — преместете плъзгача за ниво на пикселизация от ниско (фина мозайка) до високо (големи блокове). Визуализацията се обновява в реално време, докато регулирате.','<strong>Изтеглете</strong> — запазете пикселизираното изображение на вашето устройство.'],
+    h2b: 'Най-добрият безплатен инструмент за пикселизиране на изображения и лица онлайн',
+    body: '<p>Трябва да скриете лице, регистрационен номер или чувствителна информация в снимка? Инструментът за пикселизация на RelahConvert ви позволява да приложите мозаечен ефект върху цялото изображение или само върху определена зона — изцяло в браузъра ви. Без качване, без сървър, напълно безплатно и поверително.</p><p>Използвайте регулируемия плъзгач, за да контролирате интензивността на пикселизацията от фина мозайка до големи блокове. Начертайте рамка за избор, за да пикселизирате само лице или област, като останалата част от изображението остава ясна. Идеално за защита на поверителността, скриване на чувствителни данни, публикации в социалните мрежи и анонимизиране на снимки преди споделяне.</p>',
+    h3why: 'Защо да пикселизирате изображения?',
+    why: 'Пикселизацията е най-разпознаваемият начин за скриване на чувствително съдържание в изображения. За разлика от размазването, пикселизацията е необратима — оригиналният детайл се заменя завинаги с блокове от плътен цвят. Това я прави идеална за защита на поверителността, скриване на лица, регистрационни номера, адреси и поверителна информация.',
+    faqs: [
+      { q: 'Какво е пикселизация на изображение?', a: 'Пикселизацията на изображение заменя области от изображението с големи блокове от плътен цвят, създавайки мозаечен ефект, който скрива оригиналния детайл. За разлика от размазването, пикселизацията е необратима — оригиналните пиксели се заменят завинаги, което я прави сигурен начин за скриване на чувствително съдържание.' },
+      { q: 'Мога ли да пикселизирам само лице или определена зона?', a: 'Да — превключете в режим «Избор на зона» и начертайте правоъгълник върху лицето или областта, която искате да пикселизирате. Останалата част от изображението остава ясна и незасегната. Можете да регулирате нивото на пикселизация с плъзгача.' },
+      { q: 'Как да контролирам интензивността на пикселизацията?', a: 'Използвайте плъзгача, за да регулирате размера на блоковете от ниско (малки блокове, фин ефект) до високо (големи блокове, силна пикселизация). Визуализацията се обновява в реално време, докато местите плъзгача.' },
+      { q: 'Обратима ли е пикселизацията?', a: 'Не — след като изтеглите пикселизираното изображение, оригиналният детайл в пикселизираните зони е загубен завинаги. Именно това прави пикселизацията по-сигурна от размазването за скриване на чувствителна информация.' },
+      { q: 'Кои формати се поддържат?', a: 'Можете да качите JPG, PNG и WebP изображения. Изходният формат съвпада с входния — JPG остава JPG, PNG остава PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Размазване на лице' },{ href: '/crop', label: 'Изрязване' },{ href: '/compress', label: 'Компресиране' },{ href: '/resize', label: 'Преоразмеряване' }],
+  },
+  ca: {
+    h2a: 'Com pixelar una imatge en línia',
+    steps: ['<strong>Pugeu la vostra imatge</strong> — feu clic a «Seleccionar imatge» o arrossegueu i deixeu anar un fitxer JPG, PNG o WebP.','<strong>Trieu un mode</strong> — seleccioneu «Imatge sencera» per pixelar-ho tot, o «Seleccionar àrea» per dibuixar un quadre sobre una cara o una zona que vulgueu pixelar.','<strong>Ajusteu el control lliscant</strong> — moveu el control del nivell de pixelació de baix (mosaic subtil) a alt (blocs grans). La previsualització s\'actualitza en temps real mentre ajusteu.','<strong>Descarregueu</strong> — deseu la imatge pixelada al vostre dispositiu.'],
+    h2b: 'La millor eina gratuïta per pixelar imatges i cares en línia',
+    body: '<p>Necessiteu amagar una cara, una matrícula o informació sensible en una foto? L\'eina de pixelació de RelahConvert us permet aplicar un efecte mosaic a tota la imatge o només a una àrea específica — tot dins del vostre navegador. Sense pujada, sense servidor, completament gratuït i privat.</p><p>Utilitzeu el control lliscant ajustable per controlar la intensitat de la pixelació des d\'un mosaic subtil fins a blocs grans. Dibuixeu un quadre de selecció per pixelar només una cara o una zona mentre manteniu la resta de la imatge nítida. Perfecte per a la protecció de la privadesa, amagar dades sensibles, publicacions a xarxes socials i anonimitzar fotos abans de compartir.</p>',
+    h3why: 'Per què pixelar imatges?',
+    why: 'La pixelació és la manera més reconeixible d\'amagar contingut sensible en imatges. A diferència del desenfocament, la pixelació és irreversible — el detall original se substitueix permanentment per blocs de color sòlid. Això la fa ideal per protegir la privadesa, amagar cares, matrícules, adreces i informació confidencial.',
+    faqs: [
+      { q: 'Què és la pixelació d\'imatges?', a: 'La pixelació d\'imatges substitueix àrees d\'una imatge amb grans blocs de color sòlid, creant un efecte mosaic que amaga el detall original. A diferència del desenfocament, la pixelació és irreversible — els píxels originals se substitueixen permanentment, cosa que la converteix en una manera segura d\'amagar contingut sensible.' },
+      { q: 'Puc pixelar només una cara o una àrea específica?', a: 'Sí — canvieu al mode «Seleccionar àrea» i dibuixeu un rectangle sobre la cara o la zona que vulgueu pixelar. La resta de la imatge es manté nítida i sense afectar. Podeu ajustar el nivell de pixelació amb el control lliscant.' },
+      { q: 'Com controlo la intensitat de la pixelació?', a: 'Utilitzeu el control lliscant per ajustar la mida dels blocs de baix (blocs petits, efecte subtil) a alt (blocs grans, pixelació forta). La previsualització s\'actualitza en temps real quan moveu el control lliscant.' },
+      { q: 'La pixelació és reversible?', a: 'No — un cop descarregueu la imatge pixelada, el detall original a les zones pixelades s\'ha perdut permanentment. Això és el que fa que la pixelació sigui més segura que el desenfocament per amagar informació sensible.' },
+      { q: 'Quins formats són compatibles?', a: 'Podeu pujar imatges JPG, PNG i WebP. El format de sortida coincideix amb l\'entrada — JPG continua sent JPG, PNG continua sent PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Desenfocar cara' },{ href: '/crop', label: 'Retallar' },{ href: '/compress', label: 'Comprimir' },{ href: '/resize', label: 'Redimensionar' }],
+  },
+  nl: {
+    h2a: 'Hoe een afbeelding online te pixeleren',
+    steps: ['<strong>Upload uw afbeelding</strong> — klik op «Afbeelding selecteren» of sleep een JPG-, PNG- of WebP-bestand.','<strong>Kies een modus</strong> — selecteer «Volledige afbeelding» om alles te pixeleren, of «Gebied selecteren» om een kader te tekenen over een gezicht of gebied dat u wilt pixeleren.','<strong>Pas de schuifregelaar aan</strong> — verplaats de schuifregelaar voor het pixelatieniveau van laag (subtiel mozaïek) naar hoog (grote blokken). Het voorbeeld wordt in realtime bijgewerkt terwijl u aanpast.','<strong>Downloaden</strong> — sla de gepixelde afbeelding op naar uw apparaat.'],
+    h2b: 'Beste gratis tool om afbeeldingen en gezichten online te pixeleren',
+    body: '<p>Moet u een gezicht, kenteken of gevoelige informatie in een foto verbergen? De Pixeleren-tool van RelahConvert laat u een mozaïekeffect toepassen op de hele afbeelding of alleen op een specifiek gebied — volledig in uw browser. Geen upload, geen server, volledig gratis en privé.</p><p>Gebruik de aanpasbare schuifregelaar om de pixelatie-intensiteit te regelen van een subtiel mozaïek tot grote blokken. Teken een selectiekader om alleen een gezicht of gebied te pixeleren terwijl de rest van de afbeelding scherp blijft. Perfect voor privacybescherming, het verbergen van gevoelige gegevens, berichten op sociale media en het anonimiseren van foto\'s voor het delen.</p>',
+    h3why: 'Waarom afbeeldingen pixeleren?',
+    why: 'Pixelatie is de meest herkenbare manier om gevoelige inhoud in afbeeldingen te verbergen. In tegenstelling tot vervaging is pixelatie onomkeerbaar — het originele detail wordt permanent vervangen door blokken van effen kleur. Dit maakt het ideaal voor het beschermen van privacy, het verbergen van gezichten, kentekens, adressen en vertrouwelijke informatie.',
+    faqs: [
+      { q: 'Wat is beeldpixelatie?', a: 'Beeldpixelatie vervangt gebieden van een afbeelding door grote blokken van effen kleur, waardoor een mozaïekeffect ontstaat dat het originele detail verbergt. In tegenstelling tot vervaging is pixelatie onomkeerbaar — de originele pixels worden permanent vervangen, wat het een veilige manier maakt om gevoelige inhoud te verbergen.' },
+      { q: 'Kan ik alleen een gezicht of specifiek gebied pixeleren?', a: 'Ja — schakel over naar de modus «Gebied selecteren» en teken een rechthoek over het gezicht of het gebied dat u wilt pixeleren. De rest van de afbeelding blijft scherp en onaangetast. U kunt het pixelatieniveau aanpassen met de schuifregelaar.' },
+      { q: 'Hoe regel ik de pixelatie-intensiteit?', a: 'Gebruik de schuifregelaar om de blokgrootte aan te passen van laag (kleine blokken, subtiel effect) tot hoog (grote blokken, sterke pixelatie). Het voorbeeld wordt in realtime bijgewerkt terwijl u de schuifregelaar verplaatst.' },
+      { q: 'Is pixelatie omkeerbaar?', a: 'Nee — zodra u de gepixelde afbeelding downloadt, is het originele detail in de gepixelde gebieden permanent verdwenen. Dit is wat pixelatie veiliger maakt dan vervaging voor het verbergen van gevoelige informatie.' },
+      { q: 'Welke formaten worden ondersteund?', a: 'U kunt JPG-, PNG- en WebP-afbeeldingen uploaden. Het uitvoerformaat komt overeen met uw invoer — JPG blijft JPG, PNG blijft PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Gezicht vervagen' },{ href: '/crop', label: 'Bijsnijden' },{ href: '/compress', label: 'Comprimeren' },{ href: '/resize', label: 'Formaat wijzigen' }],
+  },
+  el: {
+    h2a: 'Πώς να πιξελοποιήσετε μια εικόνα online',
+    steps: ['<strong>Ανεβάστε την εικόνα σας</strong> — κάντε κλικ στο «Επιλογή εικόνας» ή σύρετε και αφήστε ένα αρχείο JPG, PNG ή WebP.','<strong>Επιλέξτε λειτουργία</strong> — επιλέξτε «Ολόκληρη εικόνα» για να πιξελοποιήσετε τα πάντα, ή «Επιλογή περιοχής» για να σχεδιάσετε ένα πλαίσιο πάνω σε πρόσωπο ή περιοχή που θέλετε να πιξελοποιήσετε.','<strong>Ρυθμίστε το ρυθμιστικό</strong> — μετακινήστε το ρυθμιστικό επιπέδου πιξελοποίησης από χαμηλό (διακριτικό μωσαϊκό) σε υψηλό (μεγάλα τετράγωνα). Η προεπισκόπηση ενημερώνεται σε πραγματικό χρόνο καθώς ρυθμίζετε.','<strong>Λήψη</strong> — αποθηκεύστε την πιξελοποιημένη εικόνα στη συσκευή σας.'],
+    h2b: 'Το καλύτερο δωρεάν εργαλείο για πιξελοποίηση εικόνων και προσώπων online',
+    body: '<p>Χρειάζεται να κρύψετε ένα πρόσωπο, πινακίδα κυκλοφορίας ή ευαίσθητες πληροφορίες σε μια φωτογραφία; Το εργαλείο πιξελοποίησης του RelahConvert σας επιτρέπει να εφαρμόσετε εφέ μωσαϊκού σε ολόκληρη την εικόνα ή μόνο σε μια συγκεκριμένη περιοχή — εξ ολοκλήρου στον περιηγητή σας. Χωρίς μεταφόρτωση, χωρίς διακομιστή, εντελώς δωρεάν και ιδιωτικό.</p><p>Χρησιμοποιήστε το ρυθμιζόμενο ρυθμιστικό για να ελέγξετε την ένταση της πιξελοποίησης από διακριτικό μωσαϊκό έως μεγάλα τετράγωνα. Σχεδιάστε ένα πλαίσιο επιλογής για να πιξελοποιήσετε μόνο ένα πρόσωπο ή μια περιοχή, ενώ η υπόλοιπη εικόνα παραμένει ευκρινής. Ιδανικό για προστασία απορρήτου, απόκρυψη ευαίσθητων δεδομένων, αναρτήσεις σε κοινωνικά δίκτυα και ανωνυμοποίηση φωτογραφιών πριν τη δημοσίευση.</p>',
+    h3why: 'Γιατί να πιξελοποιήσετε εικόνες;',
+    why: 'Η πιξελοποίηση είναι ο πιο αναγνωρίσιμος τρόπος απόκρυψης ευαίσθητου περιεχομένου σε εικόνες. Σε αντίθεση με το θόλωμα, η πιξελοποίηση είναι μη αναστρέψιμη — η αρχική λεπτομέρεια αντικαθίσταται μόνιμα με τετράγωνα μονόχρωμου χρώματος. Αυτό την καθιστά ιδανική για την προστασία του απορρήτου, την απόκρυψη προσώπων, πινακίδων κυκλοφορίας, διευθύνσεων και εμπιστευτικών πληροφοριών.',
+    faqs: [
+      { q: 'Τι είναι η πιξελοποίηση εικόνας;', a: 'Η πιξελοποίηση εικόνας αντικαθιστά περιοχές μιας εικόνας με μεγάλα τετράγωνα μονόχρωμου χρώματος, δημιουργώντας ένα εφέ μωσαϊκού που κρύβει την αρχική λεπτομέρεια. Σε αντίθεση με το θόλωμα, η πιξελοποίηση είναι μη αναστρέψιμη — τα αρχικά pixel αντικαθίστανται μόνιμα, καθιστώντας την ασφαλή μέθοδο απόκρυψης ευαίσθητου περιεχομένου.' },
+      { q: 'Μπορώ να πιξελοποιήσω μόνο ένα πρόσωπο ή μια συγκεκριμένη περιοχή;', a: 'Ναι — μεταβείτε στη λειτουργία «Επιλογή περιοχής» και σχεδιάστε ένα ορθογώνιο πάνω στο πρόσωπο ή την περιοχή που θέλετε να πιξελοποιήσετε. Η υπόλοιπη εικόνα παραμένει ευκρινής και ανεπηρέαστη. Μπορείτε να ρυθμίσετε το επίπεδο πιξελοποίησης με το ρυθμιστικό.' },
+      { q: 'Πώς ελέγχω την ένταση της πιξελοποίησης;', a: 'Χρησιμοποιήστε το ρυθμιστικό για να ρυθμίσετε το μέγεθος των τετραγώνων από χαμηλό (μικρά τετράγωνα, διακριτικό εφέ) σε υψηλό (μεγάλα τετράγωνα, έντονη πιξελοποίηση). Η προεπισκόπηση ενημερώνεται σε πραγματικό χρόνο καθώς μετακινείτε το ρυθμιστικό.' },
+      { q: 'Είναι η πιξελοποίηση αναστρέψιμη;', a: 'Όχι — μόλις κατεβάσετε την πιξελοποιημένη εικόνα, η αρχική λεπτομέρεια στις πιξελοποιημένες περιοχές έχει χαθεί μόνιμα. Αυτό είναι που κάνει την πιξελοποίηση πιο ασφαλή από το θόλωμα για την απόκρυψη ευαίσθητων πληροφοριών.' },
+      { q: 'Ποιες μορφές αρχείων υποστηρίζονται;', a: 'Μπορείτε να ανεβάσετε εικόνες JPG, PNG και WebP. Η μορφή εξόδου αντιστοιχεί στην είσοδό σας — JPG παραμένει JPG, PNG παραμένει PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Θόλωμα προσώπου' },{ href: '/crop', label: 'Περικοπή' },{ href: '/compress', label: 'Συμπίεση' },{ href: '/resize', label: 'Αλλαγή μεγέθους' }],
+  },
+  hi: {
+    h2a: 'ऑनलाइन किसी छवि को पिक्सेलेट कैसे करें',
+    steps: ['<strong>अपनी छवि अपलोड करें</strong> — «छवि चुनें» पर क्लिक करें या JPG, PNG या WebP फ़ाइल को खींचकर छोड़ें।','<strong>एक मोड चुनें</strong> — सब कुछ पिक्सेलेट करने के लिए «संपूर्ण छवि» चुनें, या किसी चेहरे या क्षेत्र पर बॉक्स बनाने के लिए «क्षेत्र चुनें» चुनें जिसे आप पिक्सेलेट करना चाहते हैं।','<strong>स्लाइडर समायोजित करें</strong> — पिक्सेलेशन स्तर स्लाइडर को निम्न (सूक्ष्म मोज़ेक) से उच्च (बड़े ब्लॉक) तक ले जाएँ। जैसे ही आप समायोजित करते हैं, पूर्वावलोकन लाइव अपडेट होता है।','<strong>डाउनलोड करें</strong> — पिक्सेलेटेड छवि को अपने डिवाइस पर सहेजें।'],
+    h2b: 'ऑनलाइन छवियों और चेहरों को पिक्सेलेट करने का सबसे अच्छा मुफ़्त टूल',
+    body: '<p>क्या आपको किसी फ़ोटो में चेहरा, लाइसेंस प्लेट या संवेदनशील जानकारी छिपानी है? RelahConvert का पिक्सेलेट इमेज टूल आपको पूरी छवि या केवल एक विशिष्ट क्षेत्र पर मोज़ेक प्रभाव लागू करने देता है — सब कुछ आपके ब्राउज़र में। कोई अपलोड नहीं, कोई सर्वर नहीं, पूरी तरह मुफ़्त और निजी।</p><p>सूक्ष्म मोज़ेक से लेकर बड़े ब्लॉक तक पिक्सेलेशन तीव्रता को नियंत्रित करने के लिए समायोज्य स्लाइडर का उपयोग करें। केवल एक चेहरे या क्षेत्र को पिक्सेलेट करने के लिए चयन बॉक्स बनाएँ जबकि बाकी छवि स्पष्ट रहे। गोपनीयता सुरक्षा, संवेदनशील डेटा छिपाने, सोशल मीडिया पोस्ट और साझा करने से पहले फ़ोटो को गुमनाम बनाने के लिए एकदम सही।</p>',
+    h3why: 'छवियों को पिक्सेलेट क्यों करें?',
+    why: 'पिक्सेलेशन छवियों में संवेदनशील सामग्री छिपाने का सबसे पहचानने योग्य तरीका है। धुंधलापन के विपरीत, पिक्सेलेशन अपरिवर्तनीय है — मूल विवरण स्थायी रूप से ठोस रंग ब्लॉक से बदल दिया जाता है। यह गोपनीयता की रक्षा, चेहरे, लाइसेंस प्लेट, पते और गोपनीय जानकारी छिपाने के लिए आदर्श है।',
+    faqs: [
+      { q: 'इमेज पिक्सेलेशन क्या है?', a: 'इमेज पिक्सेलेशन किसी छवि के क्षेत्रों को बड़े ठोस रंग के ब्लॉक से बदल देता है, जिससे एक मोज़ेक प्रभाव बनता है जो मूल विवरण को छिपा देता है। धुंधलापन के विपरीत, पिक्सेलेशन अपरिवर्तनीय है — मूल पिक्सेल स्थायी रूप से बदल दिए जाते हैं, जो इसे संवेदनशील सामग्री छिपाने का एक सुरक्षित तरीका बनाता है।' },
+      { q: 'क्या मैं केवल एक चेहरे या विशिष्ट क्षेत्र को पिक्सेलेट कर सकता हूँ?', a: 'हाँ — «क्षेत्र चुनें» मोड पर स्विच करें और उस चेहरे या क्षेत्र पर एक आयत बनाएँ जिसे आप पिक्सेलेट करना चाहते हैं। बाकी छवि स्पष्ट और अप्रभावित रहती है। आप स्लाइडर से पिक्सेलेशन स्तर समायोजित कर सकते हैं।' },
+      { q: 'मैं पिक्सेलेशन तीव्रता कैसे नियंत्रित करूँ?', a: 'ब्लॉक आकार को निम्न (छोटे ब्लॉक, सूक्ष्म प्रभाव) से उच्च (बड़े ब्लॉक, मजबूत पिक्सेलेशन) तक समायोजित करने के लिए स्लाइडर का उपयोग करें। जब आप स्लाइडर को हिलाते हैं तो पूर्वावलोकन वास्तविक समय में अपडेट होता है।' },
+      { q: 'क्या पिक्सेलेशन उलटा किया जा सकता है?', a: 'नहीं — एक बार जब आप पिक्सेलेटेड छवि डाउनलोड कर लेते हैं, तो पिक्सेलेटेड क्षेत्रों में मूल विवरण स्थायी रूप से खो जाता है। यही वह बात है जो संवेदनशील जानकारी छिपाने के लिए पिक्सेलेशन को धुंधलेपन से अधिक सुरक्षित बनाती है।' },
+      { q: 'कौन से प्रारूप समर्थित हैं?', a: 'आप JPG, PNG और WebP छवियाँ अपलोड कर सकते हैं। आउटपुट प्रारूप आपके इनपुट से मेल खाता है — JPG, JPG रहता है, PNG, PNG रहता है।' },
+    ],
+    links: [{ href: '/blur-face', label: 'चेहरा धुंधला करें' },{ href: '/crop', label: 'क्रॉप करें' },{ href: '/compress', label: 'संपीड़ित करें' },{ href: '/resize', label: 'आकार बदलें' }],
+  },
+  id: {
+    h2a: 'Cara Mempikselasi Gambar Secara Online',
+    steps: ['<strong>Unggah gambar Anda</strong> — klik «Pilih Gambar» atau seret dan lepas file JPG, PNG, atau WebP.','<strong>Pilih mode</strong> — pilih «Seluruh Gambar» untuk mempikselasi semuanya, atau «Pilih Area» untuk menggambar kotak di atas wajah atau area yang ingin Anda pikselasi.','<strong>Atur penggeser</strong> — geser penggeser tingkat pikselasi dari rendah (mosaik halus) ke tinggi (blok besar). Pratinjau diperbarui secara langsung saat Anda mengatur.','<strong>Unduh</strong> — simpan gambar yang telah dipikselasi ke perangkat Anda.'],
+    h2b: 'Alat Gratis Terbaik untuk Mempikselasi Gambar dan Wajah Secara Online',
+    body: '<p>Perlu menyembunyikan wajah, plat nomor, atau informasi sensitif dalam foto? Alat Pikselasi Gambar dari RelahConvert memungkinkan Anda menerapkan efek mosaik ke seluruh gambar atau hanya pada area tertentu — semuanya di dalam browser Anda. Tanpa unggahan, tanpa server, sepenuhnya gratis dan pribadi.</p><p>Gunakan penggeser yang dapat disesuaikan untuk mengontrol intensitas pikselasi dari mosaik halus hingga blok besar. Gambar kotak seleksi untuk mempikselasi hanya wajah atau area tertentu sambil menjaga sisa gambar tetap tajam. Sempurna untuk perlindungan privasi, menyembunyikan data sensitif, postingan media sosial, dan menganonimkan foto sebelum dibagikan.</p>',
+    h3why: 'Mengapa Mempikselasi Gambar?',
+    why: 'Pikselasi adalah cara paling dikenal untuk menyembunyikan konten sensitif dalam gambar. Tidak seperti pengaburan, pikselasi tidak dapat dibalik — detail asli diganti secara permanen dengan blok warna solid. Ini menjadikannya ideal untuk melindungi privasi, menyembunyikan wajah, plat nomor, alamat, dan informasi rahasia.',
+    faqs: [
+      { q: 'Apa itu pikselasi gambar?', a: 'Pikselasi gambar mengganti area gambar dengan blok warna solid besar, menciptakan efek mosaik yang menyembunyikan detail asli. Tidak seperti pengaburan, pikselasi tidak dapat dibalik — piksel asli diganti secara permanen, menjadikannya cara aman untuk menyembunyikan konten sensitif.' },
+      { q: 'Bisakah saya mempikselasi hanya wajah atau area tertentu?', a: 'Ya — beralih ke mode «Pilih Area» dan gambar persegi panjang di atas wajah atau area yang ingin Anda pikselasi. Sisa gambar tetap tajam dan tidak terpengaruh. Anda dapat menyesuaikan tingkat pikselasi dengan penggeser.' },
+      { q: 'Bagaimana cara mengontrol intensitas pikselasi?', a: 'Gunakan penggeser untuk menyesuaikan ukuran blok dari rendah (blok kecil, efek halus) ke tinggi (blok besar, pikselasi kuat). Pratinjau diperbarui secara langsung saat Anda menggeser penggeser.' },
+      { q: 'Apakah pikselasi dapat dibalik?', a: 'Tidak — setelah Anda mengunduh gambar yang dipikselasi, detail asli di area yang dipikselasi hilang secara permanen. Inilah yang membuat pikselasi lebih aman daripada pengaburan untuk menyembunyikan informasi sensitif.' },
+      { q: 'Format apa saja yang didukung?', a: 'Anda dapat mengunggah gambar JPG, PNG, dan WebP. Format output sesuai dengan input Anda — JPG tetap JPG, PNG tetap PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Blur Wajah' },{ href: '/crop', label: 'Potong' },{ href: '/compress', label: 'Kompres' },{ href: '/resize', label: 'Ubah Ukuran' }],
+  },
+  ms: {
+    h2a: 'Cara Mempikselkan Imej Dalam Talian',
+    steps: ['<strong>Muat naik imej anda</strong> — klik «Pilih Imej» atau seret dan lepas fail JPG, PNG atau WebP.','<strong>Pilih mod</strong> — pilih «Seluruh Imej» untuk mempikselkan semuanya, atau «Pilih Kawasan» untuk melukis kotak pada muka atau kawasan yang ingin anda pikselkan.','<strong>Laraskan peluncur</strong> — gerakkan peluncur tahap pikselasi dari rendah (mozek halus) ke tinggi (blok besar). Pratonton dikemas kini secara langsung semasa anda melaraskan.','<strong>Muat turun</strong> — simpan imej yang telah dipikselkan ke peranti anda.'],
+    h2b: 'Alat Percuma Terbaik untuk Mempikselkan Imej dan Wajah Dalam Talian',
+    body: '<p>Perlu menyembunyikan wajah, plat nombor atau maklumat sensitif dalam foto? Alat Pikselasi Imej daripada RelahConvert membolehkan anda menggunakan kesan mozek pada seluruh imej atau hanya pada kawasan tertentu — semuanya dalam pelayar anda. Tanpa muat naik, tanpa pelayan, percuma sepenuhnya dan peribadi.</p><p>Gunakan peluncur boleh laras untuk mengawal keamatan pikselasi dari mozek halus hingga blok besar. Lukis kotak pemilihan untuk mempikselkan hanya wajah atau kawasan tertentu sambil mengekalkan bahagian imej yang lain dengan jelas. Sempurna untuk perlindungan privasi, menyembunyikan data sensitif, siaran media sosial dan menamakan foto sebelum dikongsi.</p>',
+    h3why: 'Mengapa Mempikselkan Imej?',
+    why: 'Pikselasi adalah cara paling mudah dikenali untuk menyembunyikan kandungan sensitif dalam imej. Tidak seperti pengaburan, pikselasi tidak boleh diterbalikkan — butiran asal diganti secara kekal dengan blok warna pepejal. Ini menjadikannya ideal untuk melindungi privasi, menyembunyikan wajah, plat nombor, alamat dan maklumat sulit.',
+    faqs: [
+      { q: 'Apakah pikselasi imej?', a: 'Pikselasi imej menggantikan kawasan imej dengan blok warna pepejal yang besar, mencipta kesan mozek yang menyembunyikan butiran asal. Tidak seperti pengaburan, pikselasi tidak boleh diterbalikkan — piksel asal diganti secara kekal, menjadikannya cara selamat untuk menyembunyikan kandungan sensitif.' },
+      { q: 'Bolehkah saya mempikselkan hanya wajah atau kawasan tertentu?', a: 'Ya — tukar ke mod «Pilih Kawasan» dan lukis segi empat tepat pada wajah atau kawasan yang ingin anda pikselkan. Bahagian imej yang lain kekal jelas dan tidak terjejas. Anda boleh melaraskan tahap pikselasi dengan peluncur.' },
+      { q: 'Bagaimana cara mengawal keamatan pikselasi?', a: 'Gunakan peluncur untuk melaraskan saiz blok dari rendah (blok kecil, kesan halus) ke tinggi (blok besar, pikselasi kuat). Pratonton dikemas kini secara langsung semasa anda menggerakkan peluncur.' },
+      { q: 'Adakah pikselasi boleh diterbalikkan?', a: 'Tidak — setelah anda memuat turun imej yang dipikselkan, butiran asal di kawasan yang dipikselkan hilang secara kekal. Inilah yang menjadikan pikselasi lebih selamat daripada pengaburan untuk menyembunyikan maklumat sensitif.' },
+      { q: 'Format apa yang disokong?', a: 'Anda boleh memuat naik imej JPG, PNG dan WebP. Format output sepadan dengan input anda — JPG kekal JPG, PNG kekal PNG.' },
+    ],
+    links: [{ href: '/blur-face', label: 'Kabur Wajah' },{ href: '/crop', label: 'Pangkas' },{ href: '/compress', label: 'Mampat' },{ href: '/resize', label: 'Ubah Saiz' }],
   },
 }
 
@@ -317,18 +620,19 @@ modeWhole.addEventListener('click', () => {
   modeWhole.classList.add('active')
   modeArea.classList.remove('active')
   if (!isApplyAll) { perFileSelections[activeFileIdx] = []; perFileMode[activeFileIdx] = 'whole' }
-  canvasWrap.style.cursor = 'default'
-  applyPixelation()
+  selectedRegion = null
+  pixCanvas.style.cursor = 'default'
+  render()
 })
 
 modeArea.addEventListener('click', () => {
-  if (isApplyAll) return // Select Area only available in Individual mode
+  if (isApplyAll) return
   isWholeMode = false
   modeArea.classList.add('active')
   modeWhole.classList.remove('active')
   perFileMode[activeFileIdx] = 'area'
-  canvasWrap.style.cursor = 'crosshair'
-  applyPixelation()
+  pixCanvas.style.cursor = 'crosshair'
+  render()
 })
 
 modeAllBtn.addEventListener('click', () => {
@@ -341,7 +645,7 @@ modeAllBtn.addEventListener('click', () => {
   modeArea.classList.remove('active')
   modeArea.style.opacity = '0.5'
   modeArea.style.pointerEvents = 'none'
-  canvasWrap.style.cursor = 'default'
+  pixCanvas.style.cursor = 'default'
   applyPixelation()
 })
 
@@ -454,8 +758,8 @@ function openEditor(idx) {
   pixCanvas.width = img.naturalWidth
   pixCanvas.height = img.naturalHeight
   editorArea.style.display = 'block'
-  currentDrag = null
-  activeSelIdx = -1
+  drawing = null
+  selectedRegion = null
   // Restore per-file state in Individual mode
   if (!isApplyAll) {
     isWholeMode = perFileMode[idx] === 'whole'
@@ -463,9 +767,9 @@ function openEditor(idx) {
     pixelVal.textContent = pixelSlider.value
     modeWhole.classList.toggle('active', isWholeMode)
     modeArea.classList.toggle('active', !isWholeMode)
-    canvasWrap.style.cursor = isWholeMode ? 'default' : 'crosshair'
+    pixCanvas.style.cursor = isWholeMode ? 'default' : 'crosshair'
   }
-  applyPixelation()
+  render()
   // Update active thumbnail highlight
   fileChips.querySelectorAll('.file-thumb[data-idx]').forEach((thumb, i) => {
     thumb.classList.toggle('active', i === idx)
@@ -484,149 +788,139 @@ document.addEventListener('drop', e => {
   if (files && files.length) addFiles(files)
 })
 
-// ── Selection drawing ───────────────────────────────────────────────────────
-function getCanvasCoords(e) {
-  const rect = pixCanvas.getBoundingClientRect()
-  const scaleX = pixCanvas.width / rect.width
-  const scaleY = pixCanvas.height / rect.height
+// ── Canvas interaction (blur-face pattern) ──────────────────────────────────
+function coords(e) {
+  const r = pixCanvas.getBoundingClientRect()
   const clientX = e.touches ? e.touches[0].clientX : e.clientX
   const clientY = e.touches ? e.touches[0].clientY : e.clientY
-  return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }
+  return { cx: (clientX - r.left) * pixCanvas.width / r.width, cy: (clientY - r.top) * pixCanvas.height / r.height }
 }
 
-canvasWrap.addEventListener('mousedown', startDrag)
-canvasWrap.addEventListener('touchstart', startDrag, { passive: false })
-function startDrag(e) {
+let drawing = null
+let selectedRegion = null
+
+function setupCanvasEvents() {
+  pixCanvas.addEventListener('mousedown', onDown)
+  pixCanvas.addEventListener('mousemove', onMove)
+  pixCanvas.addEventListener('mouseup', onUp)
+  pixCanvas.addEventListener('touchstart', e => { const t = e.touches[0]; pixCanvas.dispatchEvent(new MouseEvent('mousedown', { clientX: t.clientX, clientY: t.clientY })) }, { passive: false })
+  pixCanvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; pixCanvas.dispatchEvent(new MouseEvent('mousemove', { clientX: t.clientX, clientY: t.clientY })) }, { passive: false })
+  pixCanvas.addEventListener('touchend', e => { const t = e.changedTouches[0]; pixCanvas.dispatchEvent(new MouseEvent('mouseup', { clientX: t.clientX, clientY: t.clientY })) })
+}
+
+function onDown(e) {
   if (isWholeMode || isApplyAll) return
-  if (!loadedImages[activeFileIdx]) return
-  if (e.target.closest('.pix-selection')) return
+  const { cx, cy } = coords(e)
+  const entry = perFileSelections[activeFileIdx] || []
+
+  // Check X delete on selected region
+  if (selectedRegion && selectedRegion._xBtn) {
+    const xb = selectedRegion._xBtn
+    if (Math.hypot(cx - xb.cx, cy - xb.cy) <= xb.r + 4) {
+      perFileSelections[activeFileIdx] = entry.filter(r => r !== selectedRegion)
+      selectedRegion = null
+      render()
+      e.preventDefault()
+      return
+    }
+  }
+
+  // Check if clicking inside an existing region to select it
+  for (let i = entry.length - 1; i >= 0; i--) {
+    const r = entry[i]
+    if (cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h) {
+      selectedRegion = r
+      pixelSlider.value = r.blockSize || 12
+      pixelVal.textContent = pixelSlider.value
+      render()
+      e.preventDefault()
+      return
+    }
+  }
+
+  // Clicked empty area — deselect and start drawing
+  selectedRegion = null
+  drawing = { startX: cx, startY: cy, curX: cx, curY: cy }
   e.preventDefault()
-
-  // Check if click is inside an existing pixelated region
-  const coords = getCanvasCoords(e)
-  const sels = perFileSelections[activeFileIdx] || []
-  const clickedIdx = sels.findIndex(s =>
-    coords.x >= s.x && coords.x <= s.x + s.w &&
-    coords.y >= s.y && coords.y <= s.y + s.h
-  )
-  if (clickedIdx >= 0) {
-    // Clicked on a pixelated area — show its box and restore its slider level
-    activeSelIdx = clickedIdx
-    const selBlockSize = sels[clickedIdx].blockSize || 12
-    pixelSlider.value = selBlockSize
-    pixelVal.textContent = selBlockSize
-    renderSelectionBoxes()
-    applyPixelation()
-    return
-  }
-
-  // Clicked on empty area — hide any active box and start new drag
-  activeSelIdx = -1
-  renderSelectionBoxes()
-  isDragging = true
-  dragStart = coords
 }
 
-document.addEventListener('mousemove', moveDrag)
-document.addEventListener('touchmove', moveDrag, { passive: false })
-function moveDrag(e) {
-  if (!isDragging) return
-  e.preventDefault()
-  const pos = getCanvasCoords(e)
-  currentDrag = {
-    x: Math.min(dragStart.x, pos.x), y: Math.min(dragStart.y, pos.y),
-    w: Math.abs(pos.x - dragStart.x), h: Math.abs(pos.y - dragStart.y)
-  }
-  renderSelectionBoxes()
-  applyPixelation()
+function onMove(e) {
+  if (!drawing) return
+  const { cx, cy } = coords(e)
+  drawing.curX = cx
+  drawing.curY = cy
+  render()
 }
 
-document.addEventListener('mouseup', endDrag)
-document.addEventListener('touchend', endDrag)
-function endDrag() {
-  if (!isDragging) return
-  isDragging = false
-  if (currentDrag && currentDrag.w > 5 && currentDrag.h > 5) {
-    perFileSelections[activeFileIdx].push({ ...currentDrag, blockSize: parseInt(pixelSlider.value) })
-    activeSelIdx = perFileSelections[activeFileIdx].length - 1
+function onUp(e) {
+  if (!drawing) return
+  const { cx, cy } = coords(e)
+  const x = Math.min(drawing.startX, cx), y = Math.min(drawing.startY, cy)
+  const w = Math.abs(cx - drawing.startX), h = Math.abs(cy - drawing.startY)
+  drawing = null
+  if (w > 10 && h > 10) {
+    const newRegion = { x, y, w, h, blockSize: parseInt(pixelSlider.value) }
+    selectedRegion = newRegion
+    if (!perFileSelections[activeFileIdx]) perFileSelections[activeFileIdx] = []
+    perFileSelections[activeFileIdx].push(newRegion)
   }
-  currentDrag = null
-  renderSelectionBoxes()
-  applyPixelation()
+  render()
 }
 
-function renderSelectionBoxes() {
-  canvasWrap.querySelectorAll('.pix-selection').forEach(el => el.remove())
-  if (isApplyAll) return
-  const canvasRect = pixCanvas.getBoundingClientRect()
-  const wrapRect = canvasWrap.getBoundingClientRect()
-  const offsetX = canvasRect.left - wrapRect.left
-  const offsetY = canvasRect.top - wrapRect.top
-  const scaleX = canvasRect.width / pixCanvas.width
-  const scaleY = canvasRect.height / pixCanvas.height
-
-  // Show box for current drag (while drawing)
-  if (currentDrag) {
-    const div = document.createElement('div')
-    div.className = 'pix-selection'
-    div.style.left = (offsetX + currentDrag.x * scaleX) + 'px'
-    div.style.top = (offsetY + currentDrag.y * scaleY) + 'px'
-    div.style.width = (currentDrag.w * scaleX) + 'px'
-    div.style.height = (currentDrag.h * scaleY) + 'px'
-    div.style.display = 'block'
-    canvasWrap.appendChild(div)
-  }
-
-  // Show box only for the active selection (if any)
-  const savedSels = perFileSelections[activeFileIdx] || []
-  if (activeSelIdx >= 0 && activeSelIdx < savedSels.length) {
-    const sel = savedSels[activeSelIdx]
-    const div = document.createElement('div')
-    div.className = 'pix-selection'
-    div.style.left = (offsetX + sel.x * scaleX) + 'px'
-    div.style.top = (offsetY + sel.y * scaleY) + 'px'
-    div.style.width = (sel.w * scaleX) + 'px'
-    div.style.height = (sel.h * scaleY) + 'px'
-    div.style.display = 'block'
-    div.addEventListener('mousedown', e => e.stopPropagation())
-    // X delete button
-    const xBtn = document.createElement('button')
-    xBtn.textContent = '\u00d7'
-    xBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(200,75,49,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;line-height:1;padding:0;'
-    xBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault() })
-    xBtn.addEventListener('click', e => {
-      e.stopPropagation()
-      perFileSelections[activeFileIdx].splice(activeSelIdx, 1)
-      activeSelIdx = -1
-      renderSelectionBoxes()
-      applyPixelation()
-    })
-    div.appendChild(xBtn)
-    canvasWrap.appendChild(div)
-  }
-}
-
-// ── Pixelation logic ────────────────────────────────────────────────────────
-function applyPixelation() {
+// ── Render (blur-face pattern) ──────────────────────────────────────────────
+function render() {
   const img = loadedImages[activeFileIdx]
   if (!img) return
   const blockSize = parseInt(pixelSlider.value)
+  ctx.clearRect(0, 0, pixCanvas.width, pixCanvas.height)
   ctx.drawImage(img, 0, 0)
+
   if (isWholeMode) {
     pixelateRegion(0, 0, pixCanvas.width, pixCanvas.height, blockSize)
   } else {
     const sels = perFileSelections[activeFileIdx] || []
-    // Pixelate all saved selections — each with its own blockSize
-    sels.forEach((sel, i) => {
-      const bs = (i === activeSelIdx) ? blockSize : (sel.blockSize || blockSize)
-      pixelateRegion(Math.round(sel.x), Math.round(sel.y), Math.round(sel.w), Math.round(sel.h), bs)
+    // Pixelate ALL regions
+    sels.forEach(r => {
+      const bs = (r === selectedRegion) ? blockSize : (r.blockSize || blockSize)
+      pixelateRegion(Math.round(r.x), Math.round(r.y), Math.round(r.w), Math.round(r.h), bs)
     })
-    // Also pixelate current drag (while drawing)
-    if (currentDrag && currentDrag.w > 2 && currentDrag.h > 2) {
-      pixelateRegion(Math.round(currentDrag.x), Math.round(currentDrag.y), Math.round(currentDrag.w), Math.round(currentDrag.h), blockSize)
+    // Draw outline + X only for selected region
+    sels.forEach(r => {
+      r._xBtn = null
+      if (r !== selectedRegion) return
+      ctx.save()
+      ctx.strokeStyle = 'rgba(200,75,49,0.9)'
+      ctx.lineWidth = Math.max(2, pixCanvas.width / 300)
+      ctx.setLineDash([5, 3])
+      ctx.strokeRect(r.x, r.y, r.w, r.h)
+      ctx.setLineDash([])
+      // X delete circle
+      const xr = Math.max(10, pixCanvas.width / 80)
+      const xcx = r.x + r.w + xr + 2, xcy = r.y - xr - 2
+      ctx.fillStyle = '#C84B31'
+      ctx.beginPath(); ctx.arc(xcx, xcy, xr, 0, Math.PI * 2); ctx.fill()
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2
+      ctx.beginPath(); ctx.moveTo(xcx - 5, xcy - 5); ctx.lineTo(xcx + 5, xcy + 5); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(xcx + 5, xcy - 5); ctx.lineTo(xcx - 5, xcy + 5); ctx.stroke()
+      r._xBtn = { cx: xcx, cy: xcy, r: xr }
+      ctx.restore()
+    })
+    // Draw current drag outline
+    if (drawing) {
+      ctx.save()
+      ctx.strokeStyle = '#C84B31'
+      ctx.lineWidth = Math.max(2, pixCanvas.width / 200)
+      ctx.setLineDash([5, 3])
+      const x = Math.min(drawing.startX, drawing.curX), y = Math.min(drawing.startY, drawing.curY)
+      ctx.strokeRect(x, y, Math.abs(drawing.curX - drawing.startX), Math.abs(drawing.curY - drawing.startY))
+      ctx.setLineDash([])
+      ctx.restore()
     }
   }
 }
+
+// Keep old name for compatibility
+function applyPixelation() { render() }
 
 function pixelateRegion(rx, ry, rw, rh, blockSize) {
   const x0 = Math.max(0, rx), y0 = Math.max(0, ry)
@@ -699,11 +993,8 @@ function pixelateImageToBlob(img, file, blockSize, sels) {
 pixelSlider.addEventListener('input', () => {
   pixelVal.textContent = pixelSlider.value
   if (!isApplyAll) perFileLevel[activeFileIdx] = parseInt(pixelSlider.value)
-  // Update active selection's blockSize
-  if (activeSelIdx >= 0 && perFileSelections[activeFileIdx] && perFileSelections[activeFileIdx][activeSelIdx]) {
-    perFileSelections[activeFileIdx][activeSelIdx].blockSize = parseInt(pixelSlider.value)
-  }
-  if (loadedImages[activeFileIdx] && editorArea.style.display !== 'none') applyPixelation()
+  if (selectedRegion) selectedRegion.blockSize = parseInt(pixelSlider.value)
+  if (loadedImages[activeFileIdx] && editorArea.style.display !== 'none') render()
 })
 
 // ── Download ────────────────────────────────────────────────────────────────
@@ -835,4 +1126,5 @@ function buildNextSteps() {
 }
 
 // ── Init ────────────────────────────────────────────────────────────────────
+setupCanvasEvents()
 loadPendingFiles()
