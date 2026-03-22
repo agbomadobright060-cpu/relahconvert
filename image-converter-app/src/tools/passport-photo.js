@@ -222,6 +222,8 @@ let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States'
 let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
+let processedImg = null // bg-removed version of cropped area
+let removeBgFn = null
 
 // Manual crop box state
 let cropBox = { x: 0, y: 0, w: 100, h: 100 }
@@ -311,6 +313,13 @@ document.querySelector('#app').innerHTML = `
             <canvas id="ppCanvas"></canvas>
           </div>
           <div class="pp-crop-hint" id="cropHint" style="display:none">${ppRepositionLbl}</div>
+          <button class="pp-upload-btn" id="applyCropBtn" style="display:none;margin:10px auto;width:auto;padding:10px 28px">${t.pp_apply_crop || 'Apply Crop'}</button>
+        </div>
+        <div id="previewArea" style="display:none;margin-top:16px;">
+          <div style="text-align:center">
+            <canvas id="previewCanvas" style="max-width:250px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
+          </div>
+          <div class="pp-status" id="ppStatus" style="display:none;margin-top:8px"></div>
         </div>
         <div id="dropZone" class="pp-dropzone">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -380,6 +389,11 @@ const nextBtns      = document.getElementById('nextBtns')
 const docTypeSelect = document.getElementById('docTypeSelect')
 const triggerFlag   = document.getElementById('triggerFlag')
 const cropHint      = document.getElementById('cropHint')
+const applyCropBtn  = document.getElementById('applyCropBtn')
+const previewArea   = document.getElementById('previewArea')
+const previewCanvas = document.getElementById('previewCanvas')
+const previewCtx    = previewCanvas.getContext('2d')
+const ppStatus      = document.getElementById('ppStatus')
 
 function initCropBox() {
   if (!uploadedImg) return
@@ -410,13 +424,16 @@ function handleFile(file) {
   const url = URL.createObjectURL(file)
   img.onload = () => {
     uploadedImg = img
+    processedImg = null
     dropZoneEl.style.display = 'none'
     canvasArea.classList.add('visible')
     cropHint.style.display = ''
-    downloadCard.style.display = ''
+    applyCropBtn.style.display = 'block'
+    downloadCard.style.display = 'none'
+    previewArea.style.display = 'none'
+    ppStatus.style.display = 'none'
     initCropBox()
     renderCanvas()
-    buildNextSteps()
   }
   img.src = url
 }
@@ -730,6 +747,91 @@ window.addEventListener('touchend', (e) => {
   window.dispatchEvent(mouseEvent)
 })
 
+// ---- Apply Crop + Background Removal ----
+
+applyCropBtn.addEventListener('click', async () => {
+  if (!uploadedImg) return
+  processedImg = null
+
+  // Show preview area with cropped result (before bg removal)
+  previewArea.style.display = 'block'
+  const aspect = activeW / activeH
+  const prevW = 250
+  const prevH = Math.round(prevW / aspect)
+  previewCanvas.width = prevW
+  previewCanvas.height = prevH
+  previewCtx.fillStyle = selectedCountry.bg || '#ffffff'
+  previewCtx.fillRect(0, 0, prevW, prevH)
+  previewCtx.drawImage(uploadedImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, prevW, prevH)
+
+  // Show status, hide download while processing
+  ppStatus.style.display = ''
+  ppStatus.style.color = '#7A6A5A'
+  ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
+  downloadCard.style.display = 'none'
+  applyCropBtn.disabled = true
+  applyCropBtn.style.opacity = '0.6'
+
+  try {
+    // Create a cropped blob from the original image at full resolution
+    const cropCanvas = document.createElement('canvas')
+    cropCanvas.width = Math.round(cropBox.w)
+    cropCanvas.height = Math.round(cropBox.h)
+    cropCanvas.getContext('2d').drawImage(uploadedImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, cropCanvas.width, cropCanvas.height)
+    const cropBlob = await new Promise(res => cropCanvas.toBlob(res, 'image/png'))
+
+    // Load bg removal model if needed
+    if (!removeBgFn) {
+      ppStatus.textContent = t.pp_loading_model || 'Loading AI model...'
+      const mod = await import('@imgly/background-removal')
+      removeBgFn = mod.removeBackground
+    }
+
+    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
+    const resultBlob = await removeBgFn(cropBlob, {
+      model: 'isnet_quint8',
+      output: { format: 'image/png' },
+    })
+
+    // Load the bg-removed image
+    const bgRemovedImg = new Image()
+    bgRemovedImg.onload = () => {
+      processedImg = bgRemovedImg
+
+      // Redraw preview with bg color + processed image
+      previewCtx.fillStyle = selectedCountry.bg || '#ffffff'
+      previewCtx.fillRect(0, 0, prevW, prevH)
+      previewCtx.drawImage(bgRemovedImg, 0, 0, prevW, prevH)
+
+      ppStatus.style.display = 'none'
+      downloadCard.style.display = ''
+      applyCropBtn.disabled = false
+      applyCropBtn.style.opacity = '1'
+      buildNextSteps()
+    }
+    bgRemovedImg.onerror = () => {
+      // Fallback — use original cropped image
+      finishWithoutBgRemoval(prevW, prevH)
+    }
+    bgRemovedImg.src = URL.createObjectURL(resultBlob)
+
+  } catch (err) {
+    console.error('Background removal failed:', err)
+    ppStatus.textContent = t.pp_bg_failed || 'Background removal failed — using original crop.'
+    ppStatus.style.color = '#C84B31'
+    setTimeout(() => { ppStatus.style.display = 'none'; ppStatus.style.color = '' }, 4000)
+    finishWithoutBgRemoval(prevW, prevH)
+  }
+})
+
+function finishWithoutBgRemoval(prevW, prevH) {
+  processedImg = null
+  downloadCard.style.display = ''
+  applyCropBtn.disabled = false
+  applyCropBtn.style.opacity = '1'
+  buildNextSteps()
+}
+
 // ---- Generate output photo from crop box ----
 
 function generatePhoto() {
@@ -740,8 +842,11 @@ function generatePhoto() {
   const octx = outCanvas.getContext('2d')
   octx.fillStyle = selectedCountry.bg || '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
-  if (uploadedImg) {
-    // Use cropBox coordinates (in original image space) to crop
+  if (processedImg) {
+    // Use bg-removed image (already cropped)
+    octx.drawImage(processedImg, 0, 0, wPx, hPx)
+  } else if (uploadedImg) {
+    // Fallback: crop from original
     octx.drawImage(uploadedImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, wPx, hPx)
   }
   return outCanvas
