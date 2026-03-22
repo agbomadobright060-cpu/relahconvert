@@ -222,8 +222,10 @@ let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States'
 let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
+let uploadedFile = null
 let bgRemovedImg = null   // bg-removed version of FULL image
-let croppedResultCanvas = null // final cropped+bg-filled output
+let bgWhiteImg = null      // bg-removed with white background filled (used in step 2 & 3)
+let croppedImg = null       // the cropped portion from step 2
 let removeBgFn = null
 
 // Manual crop box state
@@ -307,59 +309,79 @@ document.querySelector('#app').innerHTML = `
   <div class="pp-wrap">
     <h1 class="pp-h1">${h1Main} <em>${h1Em}</em></h1>
     <p class="pp-desc">${descText}</p>
-    <div class="pp-grid">
-      <div>
-        <div class="pp-canvas-area" id="canvasArea">
-          <div class="pp-canvas-inner" id="canvasWrap">
-            <canvas id="ppCanvas"></canvas>
-          </div>
-          <div class="pp-crop-hint" id="cropHint" style="display:none">${ppRepositionLbl}</div>
-          <button class="pp-upload-btn" id="applyCropBtn" style="display:none;margin:10px auto;width:auto;padding:10px 28px">${t.pp_apply_crop || 'Apply Crop'}</button>
-        </div>
-        <div id="previewArea" style="display:none;margin-top:16px;">
-          <div style="text-align:center">
-            <canvas id="previewCanvas" style="max-width:250px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
-          </div>
-          <div class="pp-status" id="ppStatus" style="display:none;margin-top:8px"></div>
-        </div>
-        <div id="dropZone" class="pp-dropzone">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
-        </div>
+
+    <!-- Step 1: Upload & Background Removal -->
+    <div id="step1">
+      <div id="dropZone" class="pp-dropzone">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
+        <button class="pp-upload-btn" style="margin-top:12px;width:auto;display:inline-flex"><span style="font-size:18px">+</span> ${selectLbl}</button>
       </div>
-      <div class="pp-panel">
-        <div class="pp-card">
-          <div class="pp-card-title">${ppUploadLbl}</div>
-          <button class="pp-upload-btn" id="uploadBtn"><span style="font-size:18px">+</span> ${selectLbl}</button>
-          <input type="file" id="fileInput" accept="image/*" style="display:none" />
-        </div>
-        <div class="pp-card">
-          <div class="pp-card-title">${ppCountryLbl}</div>
-          <div style="position:relative" id="countryWrap">
-            <button class="pp-country-trigger" id="countryTrigger">
-              <img class="flag-img" id="triggerFlag" src="https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png" alt="${selectedCountry.code}" />
-              <span id="countryName">${selectedCountry.country}</span>
-              <span class="arrow">&#9660;</span>
-            </button>
-            <div class="pp-dropdown" id="countryDropdown">
-              <input class="pp-dropdown-search" id="countrySearch" type="text" placeholder="${ppSearchLbl}" />
-              <div class="pp-dropdown-list" id="countryList"></div>
-            </div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" />
+      <div id="processingArea" style="display:none">
+        <div style="position:relative;display:inline-block;width:100%;text-align:center">
+          <canvas id="uploadPreview" style="max-width:100%;border-radius:12px;display:block;margin:0 auto"></canvas>
+          <div id="loadingOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;border-radius:12px">
+            <span style="color:#fff;font-size:14px;font-weight:600">${t.pp_removing_bg || 'Removing background...'}</span>
           </div>
-          <div class="pp-card-title" style="margin-top:12px">${ppDocTypeLbl}</div>
-          <select class="pp-doc-select" id="docTypeSelect">
-            <option value="passport">${ppPassportLbl} (${selectedCountry.w}\u00d7${selectedCountry.h}mm)</option>
-          </select>
-          <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}\u00d7${selectedCountry.h} mm</div>
-          <input type="hidden" id="bgColor" value="#ffffff" />
         </div>
-        <div class="pp-card" id="downloadCard" style="display:none">
-          <button class="pp-dl-btn pp-dl-primary" id="dlPhoto">${ppDownloadLbl}</button>
-          <button class="pp-dl-btn pp-dl-secondary" id="dlSheet">${ppPrintSheetLbl}</button>
+        <div id="step1Error" style="display:none;color:#C84B31;font-size:13px;text-align:center;margin-top:8px"></div>
+        <button class="pp-upload-btn" id="step1NextBtn" style="display:none;margin:12px auto;width:auto;padding:10px 28px">Next \u2192</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Crop -->
+    <div id="step2" style="display:none">
+      <div class="pp-canvas-area visible">
+        <div class="pp-canvas-inner" id="canvasWrap">
+          <canvas id="cropCanvas"></canvas>
         </div>
-        <div id="nextSteps" style="display:none" class="pp-next">
-          <div class="pp-next-label">${t.whats_next || "What's Next?"}</div>
-          <div class="pp-next-btns" id="nextBtns"></div>
+        <div class="pp-crop-hint">${ppRepositionLbl}</div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+        <button class="pp-next-btn" id="step2BackBtn">\u2190 Back</button>
+        <button class="pp-upload-btn" id="step2NextBtn" style="width:auto;padding:10px 28px">Next \u2192</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Country & Download -->
+    <div id="step3" style="display:none">
+      <div class="pp-grid">
+        <div>
+          <div style="text-align:center">
+            <canvas id="finalPreview" style="max-width:100%;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
+          </div>
+        </div>
+        <div class="pp-panel">
+          <div class="pp-card">
+            <div class="pp-card-title">${ppCountryLbl}</div>
+            <div style="position:relative" id="countryWrap">
+              <button class="pp-country-trigger" id="countryTrigger">
+                <img class="flag-img" id="triggerFlag" src="https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png" alt="${selectedCountry.code}" />
+                <span id="countryName">${selectedCountry.country}</span>
+                <span class="arrow">&#9660;</span>
+              </button>
+              <div class="pp-dropdown" id="countryDropdown">
+                <input class="pp-dropdown-search" id="countrySearch" type="text" placeholder="${ppSearchLbl}" />
+                <div class="pp-dropdown-list" id="countryList"></div>
+              </div>
+            </div>
+            <div class="pp-card-title" style="margin-top:12px">${ppDocTypeLbl}</div>
+            <select class="pp-doc-select" id="docTypeSelect">
+              <option value="passport">${ppPassportLbl} (${selectedCountry.w}\u00d7${selectedCountry.h}mm)</option>
+            </select>
+            <div class="pp-size-info" id="sizeInfo">${ppSizeLbl}: ${selectedCountry.w}\u00d7${selectedCountry.h} mm</div>
+            <input type="hidden" id="bgColor" value="#ffffff" />
+          </div>
+          <div class="pp-card" id="downloadCard">
+            <button class="pp-dl-btn pp-dl-primary" id="dlPhoto">${ppDownloadLbl}</button>
+            <button class="pp-dl-btn pp-dl-secondary" id="dlSheet">${ppPrintSheetLbl}</button>
+          </div>
+          <button class="pp-next-btn" id="step3BackBtn" style="margin-top:4px">\u2190 Back</button>
+          <div id="nextSteps" style="display:none" class="pp-next">
+            <div class="pp-next-label">${t.whats_next || "What's Next?"}</div>
+            <div class="pp-next-btns" id="nextBtns"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -368,126 +390,146 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput     = document.getElementById('fileInput')
-const uploadBtn     = document.getElementById('uploadBtn')
-const canvasWrap    = document.getElementById('canvasWrap')
-const ppCanvas      = document.getElementById('ppCanvas')
-const ctx           = ppCanvas.getContext('2d')
+// ---- DOM refs ----
+const fileInput      = document.getElementById('fileInput')
+const dropZoneEl     = document.getElementById('dropZone')
+const processingArea = document.getElementById('processingArea')
+const uploadPreview  = document.getElementById('uploadPreview')
+const uploadPreviewCtx = uploadPreview.getContext('2d')
+const loadingOverlay = document.getElementById('loadingOverlay')
+const step1Error     = document.getElementById('step1Error')
+const step1NextBtn   = document.getElementById('step1NextBtn')
+
+const step1El        = document.getElementById('step1')
+const step2El        = document.getElementById('step2')
+const step3El        = document.getElementById('step3')
+
+const canvasWrap     = document.getElementById('canvasWrap')
+const cropCanvas     = document.getElementById('cropCanvas')
+const ctx            = cropCanvas.getContext('2d')
+const step2BackBtn   = document.getElementById('step2BackBtn')
+const step2NextBtn   = document.getElementById('step2NextBtn')
+
+const finalPreview   = document.getElementById('finalPreview')
+const finalPreviewCtx = finalPreview.getContext('2d')
 const countryTrigger = document.getElementById('countryTrigger')
 const countryDropdown = document.getElementById('countryDropdown')
-const countrySearch = document.getElementById('countrySearch')
-const countryList   = document.getElementById('countryList')
-const countryNameEl = document.getElementById('countryName')
-const sizeInfo      = document.getElementById('sizeInfo')
-const bgColorInput  = document.getElementById('bgColor')
-const downloadCard  = document.getElementById('downloadCard')
-const dlPhoto       = document.getElementById('dlPhoto')
-const dlSheet       = document.getElementById('dlSheet')
-const canvasArea    = document.getElementById('canvasArea')
-const dropZoneEl    = document.getElementById('dropZone')
-const nextSteps     = document.getElementById('nextSteps')
-const nextBtns      = document.getElementById('nextBtns')
-const docTypeSelect = document.getElementById('docTypeSelect')
-const triggerFlag   = document.getElementById('triggerFlag')
-const cropHint      = document.getElementById('cropHint')
-const applyCropBtn  = document.getElementById('applyCropBtn')
-const previewArea   = document.getElementById('previewArea')
-const previewCanvas = document.getElementById('previewCanvas')
-const previewCtx    = previewCanvas.getContext('2d')
-const ppStatus      = document.getElementById('ppStatus')
+const countrySearch  = document.getElementById('countrySearch')
+const countryList    = document.getElementById('countryList')
+const countryNameEl  = document.getElementById('countryName')
+const sizeInfo       = document.getElementById('sizeInfo')
+const bgColorInput   = document.getElementById('bgColor')
+const downloadCard   = document.getElementById('downloadCard')
+const dlPhoto        = document.getElementById('dlPhoto')
+const dlSheet        = document.getElementById('dlSheet')
+const nextSteps      = document.getElementById('nextSteps')
+const nextBtns       = document.getElementById('nextBtns')
+const docTypeSelect  = document.getElementById('docTypeSelect')
+const triggerFlag    = document.getElementById('triggerFlag')
+const step3BackBtn   = document.getElementById('step3BackBtn')
 
-function initCropBox() {
-  const sourceImg = bgRemovedImg || uploadedImg
-  if (!sourceImg) return
-  const imgW = sourceImg.naturalWidth
-  const imgH = sourceImg.naturalHeight
-  const aspect = activeW / activeH
+// ---- Step navigation ----
 
-  // Fit crop box centered on image, as large as possible
-  let bw, bh
-  if (imgW / imgH > aspect) {
-    // Image is wider than crop aspect — fit by height
-    bh = imgH * 0.8
-    bw = bh * aspect
-  } else {
-    // Image is taller — fit by width
-    bw = imgW * 0.8
-    bh = bw / aspect
-  }
-  cropBox.w = bw
-  cropBox.h = bh
-  cropBox.x = (imgW - bw) / 2
-  cropBox.y = (imgH - bh) / 2
+function showStep(n) {
+  step1El.style.display = n === 1 ? '' : 'none'
+  step2El.style.display = n === 2 ? '' : 'none'
+  step3El.style.display = n === 3 ? '' : 'none'
+}
+
+// ---- Step 1: Upload & Background Removal ----
+
+function drawUploadPreview(img) {
+  const maxW = 500
+  const scale = Math.min(maxW / img.naturalWidth, maxW / img.naturalHeight, 1)
+  const w = Math.round(img.naturalWidth * scale)
+  const h = Math.round(img.naturalHeight * scale)
+  uploadPreview.width = w
+  uploadPreview.height = h
+  uploadPreviewCtx.drawImage(img, 0, 0, w, h)
+}
+
+function drawBgWhiteImage(sourceImg) {
+  // Create a canvas with the bg-removed image on white background
+  const c = document.createElement('canvas')
+  c.width = sourceImg.naturalWidth
+  c.height = sourceImg.naturalHeight
+  const cctx = c.getContext('2d')
+  cctx.fillStyle = '#ffffff'
+  cctx.fillRect(0, 0, c.width, c.height)
+  cctx.drawImage(sourceImg, 0, 0)
+  // Convert to image
+  const img = new Image()
+  img.src = c.toDataURL('image/png')
+  return new Promise(resolve => {
+    img.onload = () => resolve(img)
+  })
 }
 
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return
+  uploadedFile = file
   const img = new Image()
   const url = URL.createObjectURL(file)
   img.onload = async () => {
     uploadedImg = img
     bgRemovedImg = null
-    croppedResultCanvas = null
+    bgWhiteImg = null
+    croppedImg = null
+
+    // Show processing area, hide dropzone
     dropZoneEl.style.display = 'none'
-    canvasArea.classList.add('visible')
-    cropHint.style.display = 'none'
-    applyCropBtn.style.display = 'none'
-    downloadCard.style.display = 'none'
-    previewArea.style.display = 'none'
+    processingArea.style.display = ''
+    step1NextBtn.style.display = 'none'
+    step1Error.style.display = 'none'
+    loadingOverlay.style.display = 'flex'
+    loadingOverlay.querySelector('span').textContent = t.pp_removing_bg || 'Removing background...'
 
-    // Show status while removing bg
-    ppStatus.style.display = ''
-    ppStatus.style.color = '#7A6A5A'
-    ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
-    previewArea.style.display = 'block'
-
-    // Show original image on canvas while processing
-    initCropBox()
-    renderCanvas()
+    // Draw uploaded image as preview
+    drawUploadPreview(img)
 
     try {
       if (!removeBgFn) {
-        ppStatus.textContent = t.pp_loading_model || 'Loading AI model...'
+        loadingOverlay.querySelector('span').textContent = t.pp_loading_model || 'Loading AI model...'
         const mod = await import('@imgly/background-removal')
         removeBgFn = mod.removeBackground
       }
-      ppStatus.textContent = t.pp_removing_bg || 'Removing background...'
+      loadingOverlay.querySelector('span').textContent = t.pp_removing_bg || 'Removing background...'
       const resultBlob = await removeBgFn(file, {
         model: 'isnet_quint8',
         output: { format: 'image/png' },
       })
       const bgImg = new Image()
-      bgImg.onload = () => {
+      bgImg.onload = async () => {
         bgRemovedImg = bgImg
-        ppStatus.style.display = 'none'
-        cropHint.style.display = ''
-        applyCropBtn.style.display = 'block'
-        initCropBox()
-        renderCanvas()
+        // Fill bg-removed with white background
+        bgWhiteImg = await drawBgWhiteImage(bgImg)
+        // Redraw preview with white-bg version
+        drawUploadPreview(bgWhiteImg)
+        loadingOverlay.style.display = 'none'
+        step1NextBtn.style.display = ''
       }
       bgImg.onerror = () => {
         bgRemovedImg = null
-        ppStatus.textContent = t.pp_bg_failed || 'Background removal failed — using original photo.'
-        ppStatus.style.color = '#C84B31'
-        setTimeout(() => { ppStatus.style.display = 'none' }, 4000)
-        cropHint.style.display = ''
-        applyCropBtn.style.display = 'block'
+        bgWhiteImg = null
+        loadingOverlay.style.display = 'none'
+        step1Error.style.display = ''
+        step1Error.textContent = t.pp_bg_failed || 'Background removal failed \u2014 using original photo.'
+        step1NextBtn.style.display = ''
       }
       bgImg.src = URL.createObjectURL(resultBlob)
     } catch (err) {
       console.error('Background removal failed:', err)
       bgRemovedImg = null
-      ppStatus.textContent = t.pp_bg_failed || 'Background removal failed — using original photo.'
-      ppStatus.style.color = '#C84B31'
-      setTimeout(() => { ppStatus.style.display = 'none' }, 4000)
-      cropHint.style.display = ''
-      applyCropBtn.style.display = 'block'
+      bgWhiteImg = null
+      loadingOverlay.style.display = 'none'
+      step1Error.style.display = ''
+      step1Error.textContent = t.pp_bg_failed || 'Background removal failed \u2014 using original photo.'
+      step1NextBtn.style.display = ''
     }
   }
   img.src = url
 }
 
-uploadBtn.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('click', () => fileInput.click())
 dropZoneEl.addEventListener('dragover', e => { e.preventDefault(); dropZoneEl.style.borderColor = '#C84B31'; dropZoneEl.style.background = '#FDE8E3' })
 dropZoneEl.addEventListener('dragleave', () => { dropZoneEl.style.borderColor = ''; dropZoneEl.style.background = '' })
@@ -499,95 +541,39 @@ fileInput.addEventListener('change', () => {
   fileInput.value = ''
 })
 
-function flagUrl(code, size) { return 'https://flagcdn.com/w' + (size || 40) + '/' + code.toLowerCase() + '.png' }
+step1NextBtn.addEventListener('click', () => {
+  // Go to Step 2: Crop
+  showStep(2)
+  initCropBox()
+  renderCropCanvas()
+})
 
-function updateDocTypes() {
-  const c = selectedCountry
-  docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '\u00d7' + c.h + 'mm)</option>'
-  DOC_TYPES.visa.sizes.forEach(function(s, i) {
-    docTypeSelect.innerHTML += '<option value="visa_' + i + '">' + ppVisaLbl + ' \u2014 ' + s.name + '</option>'
-  })
-  DOC_TYPES.id_card.sizes.forEach(function(s, i) {
-    docTypeSelect.innerHTML += '<option value="id_' + i + '">' + ppIdCardLbl + ' \u2014 ' + s.name + '</option>'
-  })
-  docTypeSelect.value = 'passport'
-  selectedDocType = 'passport'
-  activeW = c.w; activeH = c.h
-  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
-  croppedResultCanvas = null
-  downloadCard.style.display = 'none'
-  previewArea.style.display = 'none'
-  if (uploadedImg) { initCropBox(); renderCanvas() }
+// ---- Step 2: Crop ----
+
+function getCropSourceImg() {
+  // Use white-bg image if available, otherwise original
+  return bgWhiteImg || uploadedImg
 }
 
-docTypeSelect.addEventListener('change', () => {
-  const val = docTypeSelect.value
-  if (val === 'passport') {
-    activeW = selectedCountry.w; activeH = selectedCountry.h
-  } else if (val.startsWith('visa_')) {
-    const s = DOC_TYPES.visa.sizes[parseInt(val.split('_')[1])]
-    activeW = s.w; activeH = s.h
-  } else if (val.startsWith('id_')) {
-    const s = DOC_TYPES.id_card.sizes[parseInt(val.split('_')[1])]
-    activeW = s.w; activeH = s.h
-  }
-  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
-  if (uploadedImg) { initCropBox() }
-  renderCanvas()
-})
+function initCropBox() {
+  const sourceImg = getCropSourceImg()
+  if (!sourceImg) return
+  const imgW = sourceImg.naturalWidth
+  const imgH = sourceImg.naturalHeight
 
-function renderCountryList(filter) {
-  const q = (filter || '').toLowerCase()
-  const filtered = PASSPORT_COUNTRIES.filter(c => c.country.toLowerCase().indexOf(q) !== -1)
-  countryList.innerHTML = filtered.map(c =>
-    '<div class="pp-dropdown-item' + (c.country === selectedCountry.country ? ' active' : '') + '" data-country="' + c.country + '">' +
-    '<img class="flag-img" src="' + flagUrl(c.code, 40) + '" alt="' + c.code + '" />' +
-    '<span>' + c.country + '</span>' +
-    '<span class="size">' + c.w + '\u00d7' + c.h + 'mm</span></div>'
-  ).join('')
-  countryList.querySelectorAll('.pp-dropdown-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const c = PASSPORT_COUNTRIES.find(x => x.country === el.dataset.country)
-      if (!c) return
-      selectedCountry = c
-      countryNameEl.textContent = c.country
-      triggerFlag.src = flagUrl(c.code, 40)
-      triggerFlag.alt = c.code
-      countryDropdown.classList.remove('open')
-      updateDocTypes()
-      renderCanvas()
-    })
-  })
+  // FREE aspect ratio — default to 80% of image centered
+  let bw = imgW * 0.8
+  let bh = imgH * 0.8
+  cropBox.w = bw
+  cropBox.h = bh
+  cropBox.x = (imgW - bw) / 2
+  cropBox.y = (imgH - bh) / 2
 }
 
-countryTrigger.addEventListener('click', (e) => {
-  e.stopPropagation()
-  countryDropdown.classList.toggle('open')
-  if (countryDropdown.classList.contains('open')) {
-    countrySearch.value = ''
-    renderCountryList('')
-    setTimeout(() => countrySearch.focus(), 50)
-  }
-})
-countrySearch.addEventListener('input', () => renderCountryList(countrySearch.value))
-document.addEventListener('click', (e) => {
-  if (!document.getElementById('countryWrap').contains(e.target)) {
-    countryDropdown.classList.remove('open')
-  }
-})
+function renderCropCanvas() {
+  const sourceImg = getCropSourceImg()
+  if (!sourceImg) return
 
-// ---- Render canvas with crop box overlay ----
-
-function renderCanvas() {
-  if (!uploadedImg) {
-    ppCanvas.width = 400
-    ppCanvas.height = 500
-    ctx.fillStyle = '#f5f0e8'
-    ctx.fillRect(0, 0, 400, 500)
-    return
-  }
-
-  const sourceImg = bgRemovedImg || uploadedImg
   const imgW = sourceImg.naturalWidth
   const imgH = sourceImg.naturalHeight
   const maxW = 500
@@ -596,12 +582,11 @@ function renderCanvas() {
   const dispH = Math.round(imgH * scale)
   displayScale = scale
 
-  ppCanvas.width = dispW
-  ppCanvas.height = dispH
+  cropCanvas.width = dispW
+  cropCanvas.height = dispH
   canvasWrap.style.maxWidth = dispW + 'px'
-  canvasArea.style.maxWidth = dispW + 'px'
 
-  // 1. Draw full image (bg-removed if available)
+  // 1. Draw full image
   ctx.drawImage(sourceImg, 0, 0, dispW, dispH)
 
   // 2. Draw semi-transparent dark overlay over entire canvas
@@ -618,8 +603,7 @@ function renderCanvas() {
   ctx.beginPath()
   ctx.rect(bx, by, bw, bh)
   ctx.clip()
-  // Fill country bg color first, then draw bg-removed image on top
-  ctx.fillStyle = selectedCountry.bg || '#ffffff'
+  ctx.fillStyle = '#ffffff'
   ctx.fillRect(bx, by, bw, bh)
   ctx.drawImage(sourceImg, 0, 0, dispW, dispH)
   ctx.restore()
@@ -644,12 +628,12 @@ function renderCanvas() {
   ctx.fillRect(bx + bw - hs / 2, by + bh - hs / 2, hs, hs)
 }
 
-// ---- Mouse / touch interaction ----
+// ---- Mouse / touch interaction for crop canvas ----
 
 function getCanvasPos(e) {
-  const rect = ppCanvas.getBoundingClientRect()
-  const scaleX = ppCanvas.width / rect.width
-  const scaleY = ppCanvas.height / rect.height
+  const rect = cropCanvas.getBoundingClientRect()
+  const scaleX = cropCanvas.width / rect.width
+  const scaleY = cropCanvas.height / rect.height
   return {
     x: (e.clientX - rect.left) * scaleX,
     y: (e.clientY - rect.top) * scaleY
@@ -677,7 +661,7 @@ function hitTest(pos) {
 }
 
 function clampCropBox() {
-  const sourceImg = bgRemovedImg || uploadedImg
+  const sourceImg = getCropSourceImg()
   if (!sourceImg) return
   const imgW = sourceImg.naturalWidth
   const imgH = sourceImg.naturalHeight
@@ -693,25 +677,27 @@ function clampCropBox() {
   if (cropBox.y + cropBox.h > imgH) cropBox.y = imgH - cropBox.h
 }
 
-ppCanvas.addEventListener('mousedown', (e) => {
-  if (!uploadedImg) return
+cropCanvas.addEventListener('mousedown', (e) => {
+  const sourceImg = getCropSourceImg()
+  if (!sourceImg) return
   e.preventDefault()
   const pos = getCanvasPos(e)
   const hit = hitTest(pos)
   if (!hit) return
   dragging = hit
   dragStart = { mx: pos.x, my: pos.y, box: { ...cropBox } }
-  ppCanvas.style.cursor = hit === 'move' ? 'grabbing' : 'nwse-resize'
+  cropCanvas.style.cursor = hit === 'move' ? 'grabbing' : 'nwse-resize'
 })
 
 window.addEventListener('mousemove', (e) => {
-  if (!dragging || !uploadedImg) return
+  if (!dragging) return
+  const sourceImg = getCropSourceImg()
+  if (!sourceImg) return
   e.preventDefault()
   const pos = getCanvasPos(e)
   const dx = (pos.x - dragStart.mx) / displayScale
   const dy = (pos.y - dragStart.my) / displayScale
   const orig = dragStart.box
-  const aspect = activeW / activeH
 
   if (dragging === 'move') {
     cropBox.x = orig.x + dx
@@ -719,8 +705,7 @@ window.addEventListener('mousemove', (e) => {
     cropBox.w = orig.w
     cropBox.h = orig.h
   } else {
-    // Corner resize with aspect ratio lock
-    // The opposite corner stays fixed
+    // Corner resize — FREE aspect ratio (no lock)
     let fixedX, fixedY
     if (dragging === 'nw') { fixedX = orig.x + orig.w; fixedY = orig.y + orig.h }
     else if (dragging === 'ne') { fixedX = orig.x; fixedY = orig.y + orig.h }
@@ -733,49 +718,40 @@ window.addEventListener('mousemove', (e) => {
     else if (dragging === 'sw') { draggedX = orig.x + dx; draggedY = orig.y + orig.h + dy }
     else { draggedX = orig.x + orig.w + dx; draggedY = orig.y + orig.h + dy }
 
-    // Calculate new width/height maintaining aspect ratio
+    // Free aspect ratio: width and height move independently
     let newW = Math.abs(draggedX - fixedX)
-    let newH = newW / aspect
+    let newH = Math.abs(draggedY - fixedY)
 
-    // Also check if height-driven gives smaller box
-    const newH2 = Math.abs(draggedY - fixedY)
-    const newW2 = newH2 * aspect
-    if (newW2 < newW) {
-      newW = newW2
-      newH = newH2
-    }
-
-    if (newW < 20) { newW = 20; newH = newW / aspect }
+    if (newW < 20) newW = 20
+    if (newH < 20) newH = 20
 
     cropBox.w = newW
     cropBox.h = newH
-    cropBox.x = Math.min(fixedX, fixedX - newW + (draggedX > fixedX ? newW : 0))
-    cropBox.y = Math.min(fixedY, fixedY - newH + (draggedY > fixedY ? newH : 0))
-
-    // Simpler: position based on which corner is fixed
     if (draggedX < fixedX) { cropBox.x = fixedX - newW } else { cropBox.x = fixedX }
     if (draggedY < fixedY) { cropBox.y = fixedY - newH } else { cropBox.y = fixedY }
   }
 
   clampCropBox()
-  renderCanvas()
+  renderCropCanvas()
 })
 
 window.addEventListener('mouseup', () => {
   if (dragging) {
     dragging = null
-    ppCanvas.style.cursor = 'crosshair'
+    cropCanvas.style.cursor = 'crosshair'
   }
 })
 
 // Update cursor on hover
-ppCanvas.addEventListener('mousemove', (e) => {
-  if (dragging || !uploadedImg) return
+cropCanvas.addEventListener('mousemove', (e) => {
+  if (dragging) return
+  const sourceImg = getCropSourceImg()
+  if (!sourceImg) return
   const pos = getCanvasPos(e)
   const hit = hitTest(pos)
-  if (hit === 'move') ppCanvas.style.cursor = 'grab'
-  else if (hit) ppCanvas.style.cursor = 'nwse-resize'
-  else ppCanvas.style.cursor = 'crosshair'
+  if (hit === 'move') cropCanvas.style.cursor = 'grab'
+  else if (hit) cropCanvas.style.cursor = 'nwse-resize'
+  else cropCanvas.style.cursor = 'crosshair'
 })
 
 // Touch support
@@ -789,91 +765,61 @@ function touchToMouse(type) {
       bubbles: true
     })
     if (type === 'mousedown') {
-      ppCanvas.dispatchEvent(mouseEvent)
+      cropCanvas.dispatchEvent(mouseEvent)
     } else {
       window.dispatchEvent(mouseEvent)
     }
     if (dragging) e.preventDefault()
   }
 }
-
-ppCanvas.addEventListener('touchstart', touchToMouse('mousedown'), { passive: false })
+cropCanvas.addEventListener('touchstart', touchToMouse('mousedown'), { passive: false })
 window.addEventListener('touchmove', touchToMouse('mousemove'), { passive: false })
 window.addEventListener('touchend', (e) => {
   const mouseEvent = new MouseEvent('mouseup', { bubbles: true })
   window.dispatchEvent(mouseEvent)
 })
 
-// ---- Apply Crop + Background Removal ----
-
-applyCropBtn.addEventListener('click', () => {
-  if (!uploadedImg) return
-  const sourceImg = bgRemovedImg || uploadedImg
-
-  // Output dimensions at 300 DPI
-  const wPx = Math.round(activeW / MM_PER_INCH * DPI)
-  const hPx = Math.round(activeH / MM_PER_INCH * DPI)
-
-  // Create final cropped+bg-filled canvas at output resolution
-  croppedResultCanvas = document.createElement('canvas')
-  croppedResultCanvas.width = wPx
-  croppedResultCanvas.height = hPx
-  const octx = croppedResultCanvas.getContext('2d')
-
-  // Fill with country background color first
-  octx.fillStyle = selectedCountry.bg || '#ffffff'
-  octx.fillRect(0, 0, wPx, hPx)
-
-  // Draw cropped region fitted (centered, maintain aspect ratio) into passport dimensions
-  const cropAspect = cropBox.w / cropBox.h
-  const outAspect = wPx / hPx
-  let dw, dh, dx, dy
-  if (cropAspect > outAspect) {
-    // Crop is wider — fit by width, center vertically
-    dw = wPx
-    dh = wPx / cropAspect
-    dx = 0
-    dy = (hPx - dh) / 2
-  } else {
-    // Crop is taller — fit by height, center horizontally
-    dh = hPx
-    dw = hPx * cropAspect
-    dx = (wPx - dw) / 2
-    dy = 0
-  }
-  octx.drawImage(sourceImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, dx, dy, dw, dh)
-
-  // Show preview
-  previewArea.style.display = 'block'
-  ppStatus.style.display = 'none'
-  const aspect = activeW / activeH
-  const prevW = 250
-  const prevH = Math.round(prevW / aspect)
-  previewCanvas.width = prevW
-  previewCanvas.height = prevH
-  previewCtx.drawImage(croppedResultCanvas, 0, 0, prevW, prevH)
-
-  // Show download buttons
-  downloadCard.style.display = ''
-  buildNextSteps()
+step2BackBtn.addEventListener('click', () => {
+  showStep(1)
 })
 
-// ---- Generate output photo from crop box ----
+step2NextBtn.addEventListener('click', () => {
+  // Apply crop: extract the cropped region from the white-bg image
+  const sourceImg = getCropSourceImg()
+  if (!sourceImg) return
+
+  const c = document.createElement('canvas')
+  c.width = Math.round(cropBox.w)
+  c.height = Math.round(cropBox.h)
+  const cctx = c.getContext('2d')
+  cctx.drawImage(sourceImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, c.width, c.height)
+
+  // Convert to image for step 3
+  const img = new Image()
+  img.onload = () => {
+    croppedImg = img
+    showStep(3)
+    updateDocTypes()
+    generateAndShowPreview()
+    buildNextSteps()
+  }
+  img.src = c.toDataURL('image/png')
+})
+
+// ---- Step 3: Country Selection & Download ----
+
+function flagUrl(code, size) { return 'https://flagcdn.com/w' + (size || 40) + '/' + code.toLowerCase() + '.png' }
 
 function generatePhoto() {
-  if (croppedResultCanvas) return croppedResultCanvas
-
-  // Fallback: generate on the fly if Apply Crop wasn't clicked
   const wPx = Math.round(activeW / MM_PER_INCH * DPI)
   const hPx = Math.round(activeH / MM_PER_INCH * DPI)
-  const outCanvas = document.createElement('canvas')
-  outCanvas.width = wPx; outCanvas.height = hPx
-  const octx = outCanvas.getContext('2d')
+  const out = document.createElement('canvas')
+  out.width = wPx; out.height = hPx
+  const octx = out.getContext('2d')
   octx.fillStyle = selectedCountry.bg || '#ffffff'
   octx.fillRect(0, 0, wPx, hPx)
-  const sourceImg = bgRemovedImg || uploadedImg
-  if (sourceImg) {
-    const cropAspect = cropBox.w / cropBox.h
+  if (croppedImg) {
+    const cropAspect = croppedImg.naturalWidth / croppedImg.naturalHeight
     const outAspect = wPx / hPx
     let dw, dh, dx, dy
     if (cropAspect > outAspect) {
@@ -881,10 +827,90 @@ function generatePhoto() {
     } else {
       dh = hPx; dw = hPx * cropAspect; dx = (wPx - dw) / 2; dy = 0
     }
-    octx.drawImage(sourceImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, dx, dy, dw, dh)
+    octx.drawImage(croppedImg, dx, dy, dw, dh)
   }
-  return outCanvas
+  return out
 }
+
+function generateAndShowPreview() {
+  const photoCanvas = generatePhoto()
+  const aspect = activeW / activeH
+  const prevW = 300
+  const prevH = Math.round(prevW / aspect)
+  finalPreview.width = prevW
+  finalPreview.height = prevH
+  finalPreviewCtx.drawImage(photoCanvas, 0, 0, prevW, prevH)
+}
+
+function updateDocTypes() {
+  const c = selectedCountry
+  docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '\u00d7' + c.h + 'mm)</option>'
+  DOC_TYPES.visa.sizes.forEach(function(s, i) {
+    docTypeSelect.innerHTML += '<option value="visa_' + i + '">' + ppVisaLbl + ' \u2014 ' + s.name + '</option>'
+  })
+  DOC_TYPES.id_card.sizes.forEach(function(s, i) {
+    docTypeSelect.innerHTML += '<option value="id_' + i + '">' + ppIdCardLbl + ' \u2014 ' + s.name + '</option>'
+  })
+  docTypeSelect.value = 'passport'
+  selectedDocType = 'passport'
+  activeW = c.w; activeH = c.h
+  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
+}
+
+docTypeSelect.addEventListener('change', () => {
+  const val = docTypeSelect.value
+  if (val === 'passport') {
+    activeW = selectedCountry.w; activeH = selectedCountry.h
+  } else if (val.startsWith('visa_')) {
+    const s = DOC_TYPES.visa.sizes[parseInt(val.split('_')[1])]
+    activeW = s.w; activeH = s.h
+  } else if (val.startsWith('id_')) {
+    const s = DOC_TYPES.id_card.sizes[parseInt(val.split('_')[1])]
+    activeW = s.w; activeH = s.h
+  }
+  sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
+  if (croppedImg) generateAndShowPreview()
+})
+
+function renderCountryList(filter) {
+  const q = (filter || '').toLowerCase()
+  const filtered = PASSPORT_COUNTRIES.filter(c => c.country.toLowerCase().indexOf(q) !== -1)
+  countryList.innerHTML = filtered.map(c =>
+    '<div class="pp-dropdown-item' + (c.country === selectedCountry.country ? ' active' : '') + '" data-country="' + c.country + '">' +
+    '<img class="flag-img" src="' + flagUrl(c.code, 40) + '" alt="' + c.code + '" />' +
+    '<span>' + c.country + '</span>' +
+    '<span class="size">' + c.w + '\u00d7' + c.h + 'mm</span></div>'
+  ).join('')
+  countryList.querySelectorAll('.pp-dropdown-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const c = PASSPORT_COUNTRIES.find(x => x.country === el.dataset.country)
+      if (!c) return
+      selectedCountry = c
+      countryNameEl.textContent = c.country
+      triggerFlag.src = flagUrl(c.code, 40)
+      triggerFlag.alt = c.code
+      countryDropdown.classList.remove('open')
+      updateDocTypes()
+      if (croppedImg) generateAndShowPreview()
+    })
+  })
+}
+
+countryTrigger.addEventListener('click', (e) => {
+  e.stopPropagation()
+  countryDropdown.classList.toggle('open')
+  if (countryDropdown.classList.contains('open')) {
+    countrySearch.value = ''
+    renderCountryList('')
+    setTimeout(() => countrySearch.focus(), 50)
+  }
+})
+countrySearch.addEventListener('input', () => renderCountryList(countrySearch.value))
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('countryWrap').contains(e.target)) {
+    countryDropdown.classList.remove('open')
+  }
+})
 
 dlPhoto.addEventListener('click', () => {
   const photoCanvas = generatePhoto()
@@ -931,6 +957,11 @@ dlSheet.addEventListener('click', () => {
   }, 'image/jpeg', 0.95)
 })
 
+step3BackBtn.addEventListener('click', () => {
+  showStep(2)
+  renderCropCanvas()
+})
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -950,10 +981,12 @@ function buildNextSteps() {
   nextSteps.style.display = ''
 }
 
+// ---- Init ----
 renderCountryList('')
 updateDocTypes()
-renderCanvas()
+showStep(1)
 
+// ---- SEO section (always visible at bottom) ----
 ;(function injectSEO() {
   const seo = t.seo && t.seo['passport-photo']
   if (!seo) return
