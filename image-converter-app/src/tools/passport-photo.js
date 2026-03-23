@@ -992,10 +992,8 @@ step3BackBtn.addEventListener('click', () => {
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
-    { label: ns.crop || 'Crop', href: localHref('crop') },
     { label: ns.resize || 'Resize', href: localHref('resize') },
     { label: ns.compress || 'Compress', href: localHref('compress') },
-    { label: ns['jpg-to-pdf'] || 'JPG to PDF', href: localHref('jpg-to-pdf') },
   ]
   nextBtns.innerHTML = ''
   buttons.forEach(b => {
