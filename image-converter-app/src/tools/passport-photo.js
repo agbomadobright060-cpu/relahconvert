@@ -314,12 +314,12 @@ document.querySelector('#app').innerHTML = `
     <!-- Step 1: Upload & Background Removal -->
     <div id="step1">
       <div id="step1Top" style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
-        <div id="dropZone" class="pp-dropzone" style="flex:1;min-width:250px">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#F5F0E8"/><circle cx="14" cy="18" r="2.5" stroke="currentColor" stroke-width="1.5" fill="#DDD5C8"/><path d="M6 26l7-6 5 4 6-5 10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <p>${t.pp_drop || 'Upload a portrait photo to get started'}</p>
-          <button class="pp-upload-btn" style="margin-top:12px;width:auto;display:inline-flex"><span style="font-size:18px">+</span> ${selectLbl}</button>
+        <div id="dropZone" class="pp-dropzone" style="flex-shrink:0;width:220px;padding:16px">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/><path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p style="font-size:12px">${t.pp_drop || 'Upload a portrait photo'}</p>
+          <button class="pp-upload-btn" style="margin-top:8px;width:auto;display:inline-flex;font-size:12px;padding:8px 16px"><span style="font-size:14px">+</span> ${selectLbl}</button>
         </div>
-        <div id="heroSection" style="flex:1;min-width:250px;max-width:350px">
+        <div id="heroSection" style="flex:1;min-width:300px;max-width:500px">
           <video autoplay loop muted playsinline style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
             <source src="/passport-demo.mp4" type="video/mp4" />
           </video>
