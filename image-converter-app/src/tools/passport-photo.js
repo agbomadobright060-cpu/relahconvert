@@ -461,36 +461,37 @@ function drawUploadPreview(img) {
 }
 
 function drawBgWhiteImage(sourceImg) {
-  // Create a canvas with the bg-removed image on white background
   const c = document.createElement('canvas')
   c.width = sourceImg.naturalWidth
   c.height = sourceImg.naturalHeight
   const cctx = c.getContext('2d')
 
-  // First draw the bg-removed image to clean up its alpha channel
+  // Draw bg-removed image and clean up semi-transparent edge pixels
   cctx.drawImage(sourceImg, 0, 0)
   const imgData = cctx.getImageData(0, 0, c.width, c.height)
   const d = imgData.data
-  // Threshold alpha: pixels with low alpha become fully transparent,
-  // others become fully opaque. This removes semi-transparent patches
-  // that cause uneven backgrounds after compositing.
+  // Soft threshold: pixels below 20 alpha become transparent,
+  // pixels above 230 become fully opaque, middle values are kept
+  // to preserve natural anti-aliased edges (hair, etc.)
   for (let i = 3; i < d.length; i += 4) {
-    d[i] = d[i] < 128 ? 0 : 255
+    if (d[i] < 20) d[i] = 0
+    else if (d[i] > 230) d[i] = 255
   }
-  // Now composite: fill white, then put cleaned image on top
-  cctx.fillStyle = '#ffffff'
-  cctx.fillRect(0, 0, c.width, c.height)
+  // Composite cleaned image onto white background
+  cctx.clearRect(0, 0, c.width, c.height)
   cctx.putImageData(imgData, 0, 0)
   cctx.globalCompositeOperation = 'destination-over'
   cctx.fillStyle = '#ffffff'
   cctx.fillRect(0, 0, c.width, c.height)
   cctx.globalCompositeOperation = 'source-over'
 
-  // Convert to image
-  const img = new Image()
-  img.src = c.toDataURL('image/png')
+  // Use toBlob + createObjectURL to avoid quality loss from dataURL encoding
   return new Promise(resolve => {
-    img.onload = () => resolve(img)
+    c.toBlob(blob => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.src = URL.createObjectURL(blob)
+    }, 'image/png')
   })
 }
 
@@ -527,7 +528,7 @@ function handleFile(file) {
       progressText.textContent = bgLabel + ' 10%'
       let lastPct = 10
       const resultBlob = await removeBgFn(file, {
-        model: 'isnet_quint8',
+        model: 'isnet_fp16',
         output: { format: 'image/png' },
         progress: (key, current, total) => {
           if (total <= 0) return
@@ -837,16 +838,18 @@ step2NextBtn.addEventListener('click', () => {
   const cctx = c.getContext('2d')
   cctx.drawImage(sourceImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, c.width, c.height)
 
-  // Convert to image for step 3
-  const img = new Image()
-  img.onload = () => {
-    croppedImg = img
-    showStep(3)
-    updateDocTypes()
-    generateAndShowPreview()
-    buildNextSteps()
-  }
-  img.src = c.toDataURL('image/png')
+  // Convert to image for step 3 — use blob to preserve quality
+  c.toBlob(blob => {
+    const img = new Image()
+    img.onload = () => {
+      croppedImg = img
+      showStep(3)
+      updateDocTypes()
+      generateAndShowPreview()
+      buildNextSteps()
+    }
+    img.src = URL.createObjectURL(blob)
+  }, 'image/png')
 })
 
 // ---- Step 3: Country Selection & Download ----
