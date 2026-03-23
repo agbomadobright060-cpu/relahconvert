@@ -220,7 +220,6 @@ let uploadedFile = null
 let bgRemovedImg = null   // bg-removed version of FULL image
 let bgWhiteImg = null      // bg-removed with white background filled (used in step 2 & 3)
 let croppedImg = null       // the cropped portion from step 2
-let removeBgFn = null
 
 // Manual crop box state
 let cropBox = { x: 0, y: 0, w: 100, h: 100 }
@@ -465,27 +464,9 @@ function drawBgWhiteImage(sourceImg) {
   c.width = sourceImg.naturalWidth
   c.height = sourceImg.naturalHeight
   const cctx = c.getContext('2d')
-
-  // Draw bg-removed image and clean up semi-transparent edge pixels
-  cctx.drawImage(sourceImg, 0, 0)
-  const imgData = cctx.getImageData(0, 0, c.width, c.height)
-  const d = imgData.data
-  // Soft threshold: pixels below 20 alpha become transparent,
-  // pixels above 230 become fully opaque, middle values are kept
-  // to preserve natural anti-aliased edges (hair, etc.)
-  for (let i = 3; i < d.length; i += 4) {
-    if (d[i] < 20) d[i] = 0
-    else if (d[i] > 230) d[i] = 255
-  }
-  // Composite cleaned image onto white background
-  cctx.clearRect(0, 0, c.width, c.height)
-  cctx.putImageData(imgData, 0, 0)
-  cctx.globalCompositeOperation = 'destination-over'
   cctx.fillStyle = '#ffffff'
   cctx.fillRect(0, 0, c.width, c.height)
-  cctx.globalCompositeOperation = 'source-over'
-
-  // Use toBlob + createObjectURL to avoid quality loss from dataURL encoding
+  cctx.drawImage(sourceImg, 0, 0)
   return new Promise(resolve => {
     c.toBlob(blob => {
       const img = new Image()
@@ -520,34 +501,20 @@ function handleFile(file) {
     try {
       const progressText = document.getElementById('progressText')
       const bgLabel = t.pp_removing_bg || 'Removing background...'
-      if (!removeBgFn) {
-        progressText.textContent = (t.pp_loading_model || 'Loading AI model...') + ' 0%'
-        const mod = await import('@imgly/background-removal')
-        removeBgFn = mod.removeBackground
-      }
-      progressText.textContent = bgLabel + ' 10%'
-      let lastPct = 10
-      const resultBlob = await removeBgFn(file, {
-        model: 'isnet_fp16',
-        output: { format: 'image/png' },
-        progress: (key, current, total) => {
-          if (total <= 0) return
-          const raw = Math.round((current / total) * 100)
-          // Round up to next multiple of 10
-          const stepped = Math.min(Math.ceil(raw / 10) * 10, 90)
-          if (stepped > lastPct) {
-            lastPct = stepped
-            progressText.textContent = bgLabel + ' ' + lastPct + '%'
-          }
-        },
-      })
+      progressText.textContent = bgLabel
+
+      // Use server-side Remove.bg API for high-quality background removal
+      const formData = new FormData()
+      formData.append('image', file)
+      const response = await fetch('/api/remove-bg', { method: 'POST', body: formData })
+      if (!response.ok) throw new Error('API returned ' + response.status)
+      const resultBlob = await response.blob()
+
       progressText.textContent = bgLabel + ' 100%'
       const bgImg = new Image()
       bgImg.onload = async () => {
         bgRemovedImg = bgImg
-        // Fill bg-removed with white background
         bgWhiteImg = await drawBgWhiteImage(bgImg)
-        // Redraw preview with white-bg version
         drawUploadPreview(bgWhiteImg)
         loadingOverlay.style.display = 'none'
         step1NextBtn.style.display = ''

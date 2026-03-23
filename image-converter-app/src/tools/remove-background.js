@@ -147,7 +147,7 @@ const navCounter   = document.getElementById('navCounter')
 const navFname     = document.getElementById('navFname')
 const thumbStrip   = document.getElementById('thumbStrip')
 
-let entries = [], currentIdx = 0, removeBackgroundFn = null
+let entries = [], currentIdx = 0
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
@@ -238,18 +238,16 @@ async function startProcessing(entry) {
     procOverlay.classList.add('on'); procBar.style.width = '10%'; procLabel.textContent = 'Loading AI model…'
   }
   try {
-    if (!removeBackgroundFn) {
-      const mod = await import('@imgly/background-removal')
-      removeBackgroundFn = mod.removeBackground
-    }
     if (entries[currentIdx] === entry) { procBar.style.width = '30%'; procLabel.textContent = 'Removing background…' }
-    const blob = await removeBackgroundFn(entry.file, {
-      model: 'small',
-      cacheMode: 'cache-first',
-      progress: (key, cur, tot) => {
-        if (tot > 0 && entries[currentIdx] === entry) procBar.style.width = (30 + Math.round((cur / tot) * 60)) + '%'
-      },
-    })
+
+    // Use server-side Remove.bg API for high-quality background removal
+    const formData = new FormData()
+    formData.append('image', entry.file)
+    const response = await fetch('/api/remove-bg', { method: 'POST', body: formData })
+    if (!response.ok) throw new Error('API returned ' + response.status)
+    const blob = await response.blob()
+
+    if (entries[currentIdx] === entry) { procBar.style.width = '90%' }
     await new Promise(resolve => {
       const img = new Image()
       img.onload = () => {
