@@ -28,22 +28,6 @@ const ppPassportLbl   = t.pp_passport || 'Passport'
 const ppVisaLbl       = t.pp_visa || 'Visa'
 const ppIdCardLbl     = t.pp_id_card || 'ID Card'
 
-// Common document type sizes (mm) that apply across countries
-const DOC_TYPES = {
-  passport: { label: ppPassportLbl },
-  visa:     { label: ppVisaLbl, sizes: [
-    { name: 'US Visa (2x2 in)', w: 51, h: 51 },
-    { name: 'Schengen Visa (35x45mm)', w: 35, h: 45 },
-    { name: 'China Visa (33x48mm)', w: 33, h: 48 },
-    { name: 'India Visa (51x51mm)', w: 51, h: 51 },
-  ]},
-  id_card:  { label: ppIdCardLbl, sizes: [
-    { name: 'Standard ID (35x45mm)', w: 35, h: 45 },
-    { name: 'US Green Card (51x51mm)', w: 51, h: 51 },
-    { name: 'EU ID Card (35x45mm)', w: 35, h: 45 },
-  ]},
-}
-
 const PASSPORT_COUNTRIES = [
   { country: "Afghanistan", code: "AF", flag: "\u{1F1E6}\u{1F1EB}", w: 40, h: 45, bg: "#ffffff" },
   { country: "Albania", code: "AL", flag: "\u{1F1E6}\u{1F1F1}", w: 40, h: 50, bg: "#ffffff" },
@@ -51,12 +35,12 @@ const PASSPORT_COUNTRIES = [
   { country: "Angola", code: "AO", flag: "\u{1F1E6}\u{1F1F4}", w: 30, h: 40, bg: "#ffffff" },
   { country: "Argentina", code: "AR", flag: "\u{1F1E6}\u{1F1F7}", w: 40, h: 40, bg: "#ffffff" },
   { country: "Armenia", code: "AM", flag: "\u{1F1E6}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Australia", code: "AU", flag: "\u{1F1E6}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Australia", code: "AU", flag: "\u{1F1E6}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Australia Passport (35×45mm)', w: 35, h: 45 }, { name: 'Australia Visa (35×45mm)', w: 35, h: 45 }, { name: 'Australia Driving Licence (35×45mm)', w: 35, h: 45 }, { name: 'Australia Citizenship (35×45mm)', w: 35, h: 45 }] },
   { country: "Austria", code: "AT", flag: "\u{1F1E6}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Azerbaijan", code: "AZ", flag: "\u{1F1E6}\u{1F1FF}", w: 30, h: 40, bg: "#ffffff" },
   { country: "Bahamas", code: "BS", flag: "\u{1F1E7}\u{1F1F8}", w: 51, h: 51, bg: "#ffffff" },
   { country: "Bahrain", code: "BH", flag: "\u{1F1E7}\u{1F1ED}", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Bangladesh", code: "BD", flag: "\u{1F1E7}\u{1F1E9}", w: 45, h: 55, bg: "#ffffff" },
+  { country: "Bangladesh", code: "BD", flag: "\u{1F1E7}\u{1F1E9}", w: 45, h: 55, bg: "#ffffff", docs: [{ name: 'Bangladesh Passport (45×55mm)', w: 45, h: 55 }, { name: 'Bangladesh Visa (45×55mm)', w: 45, h: 55 }, { name: 'Bangladesh NID Card (30×36mm)', w: 30, h: 36 }] },
   { country: "Barbados", code: "BB", flag: "\u{1F1E7}\u{1F1E7}", w: 50, h: 50, bg: "#ffffff" },
   { country: "Belarus", code: "BY", flag: "\u{1F1E7}\u{1F1FE}", w: 40, h: 50, bg: "#ffffff" },
   { country: "Belgium", code: "BE", flag: "\u{1F1E7}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
@@ -66,16 +50,16 @@ const PASSPORT_COUNTRIES = [
   { country: "Bolivia", code: "BO", flag: "\u{1F1E7}\u{1F1F4}", w: 40, h: 50, bg: "#ffffff" },
   { country: "Bosnia and Herzegovina", code: "BA", flag: "\u{1F1E7}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Botswana", code: "BW", flag: "\u{1F1E7}\u{1F1FC}", w: 30, h: 40, bg: "#ffffff" },
-  { country: "Brazil", code: "BR", flag: "\u{1F1E7}\u{1F1F7}", w: 50, h: 70, bg: "#ffffff" },
+  { country: "Brazil", code: "BR", flag: "\u{1F1E7}\u{1F1F7}", w: 50, h: 70, bg: "#ffffff", docs: [{ name: 'Brazil Passport (50×70mm)', w: 50, h: 70 }, { name: 'Brazil Visa (50×70mm)', w: 50, h: 70 }, { name: 'Brazil ID Card (30×40mm)', w: 30, h: 40 }, { name: 'Brazil Driving Licence (30×40mm)', w: 30, h: 40 }] },
   { country: "Brunei", code: "BN", flag: "\u{1F1E7}\u{1F1F3}", w: 52, h: 40, bg: "#ffffff" },
   { country: "Bulgaria", code: "BG", flag: "\u{1F1E7}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Burkina Faso", code: "BF", flag: "\u{1F1E7}\u{1F1EB}", w: 45, h: 35, bg: "#ffffff" },
   { country: "Cambodia", code: "KH", flag: "\u{1F1F0}\u{1F1ED}", w: 40, h: 60, bg: "#ffffff" },
   { country: "Cameroon", code: "CM", flag: "\u{1F1E8}\u{1F1F2}", w: 40, h: 40, bg: "#ffffff" },
-  { country: "Canada", code: "CA", flag: "\u{1F1E8}\u{1F1E6}", w: 50, h: 70, bg: "#ffffff" },
+  { country: "Canada", code: "CA", flag: "\u{1F1E8}\u{1F1E6}", w: 50, h: 70, bg: "#ffffff", docs: [{ name: 'Canada Passport (50×70mm)', w: 50, h: 70 }, { name: 'Canada Visa (35×45mm)', w: 35, h: 45 }, { name: 'Canada Permanent Resident Card (50×70mm)', w: 50, h: 70 }, { name: 'Canada Citizenship (50×70mm)', w: 50, h: 70 }, { name: 'Canada Driving Licence (50×70mm)', w: 50, h: 70 }] },
   { country: "Chad", code: "TD", flag: "\u{1F1F9}\u{1F1E9}", w: 50, h: 50, bg: "#ffffff" },
   { country: "Chile", code: "CL", flag: "\u{1F1E8}\u{1F1F1}", w: 45, h: 45, bg: "#ffffff" },
-  { country: "China", code: "CN", flag: "\u{1F1E8}\u{1F1F3}", w: 33, h: 48, bg: "#ffffff" },
+  { country: "China", code: "CN", flag: "\u{1F1E8}\u{1F1F3}", w: 33, h: 48, bg: "#ffffff", docs: [{ name: 'China Passport (33×48mm)', w: 33, h: 48 }, { name: 'China Visa (33×48mm)', w: 33, h: 48 }, { name: 'China ID Card (26×32mm)', w: 26, h: 32 }, { name: 'China Driving Licence (22×32mm)', w: 22, h: 32 }] },
   { country: "Colombia", code: "CO", flag: "\u{1F1E8}\u{1F1F4}", w: 40, h: 50, bg: "#ffffff" },
   { country: "Congo (Brazzaville)", code: "CG", flag: "\u{1F1E8}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Congo (DR)", code: "CD", flag: "\u{1F1E8}\u{1F1E9}", w: 35, h: 45, bg: "#ffffff" },
@@ -89,18 +73,18 @@ const PASSPORT_COUNTRIES = [
   { country: "Dominica", code: "DM", flag: "\u{1F1E9}\u{1F1F2}", w: 45, h: 38, bg: "#ffffff" },
   { country: "Dominican Republic", code: "DO", flag: "\u{1F1E9}\u{1F1F4}", w: 51, h: 51, bg: "#ffffff" },
   { country: "Ecuador", code: "EC", flag: "\u{1F1EA}\u{1F1E8}", w: 50, h: 50, bg: "#ffffff" },
-  { country: "Egypt", code: "EG", flag: "\u{1F1EA}\u{1F1EC}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Egypt", code: "EG", flag: "\u{1F1EA}\u{1F1EC}", w: 40, h: 60, bg: "#ffffff", docs: [{ name: 'Egypt Passport (40×60mm)', w: 40, h: 60 }, { name: 'Egypt Visa (40×60mm)', w: 40, h: 60 }, { name: 'Egypt ID Card (40×60mm)', w: 40, h: 60 }] },
   { country: "El Salvador", code: "SV", flag: "\u{1F1F8}\u{1F1FB}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Equatorial Guinea", code: "GQ", flag: "\u{1F1EC}\u{1F1F6}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Estonia", code: "EE", flag: "\u{1F1EA}\u{1F1EA}", w: 40, h: 50, bg: "#ffffff" },
   { country: "Ethiopia", code: "ET", flag: "\u{1F1EA}\u{1F1F9}", w: 30, h: 40, bg: "#ffffff" },
   { country: "Fiji", code: "FJ", flag: "\u{1F1EB}\u{1F1EF}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Finland", code: "FI", flag: "\u{1F1EB}\u{1F1EE}", w: 36, h: 47, bg: "#ffffff" },
-  { country: "France", code: "FR", flag: "\u{1F1EB}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "France", code: "FR", flag: "\u{1F1EB}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'France Passport (35×45mm)', w: 35, h: 45 }, { name: 'France Visa (35×45mm)', w: 35, h: 45 }, { name: 'France ID Card (35×45mm)', w: 35, h: 45 }, { name: 'France Driving Licence (35×45mm)', w: 35, h: 45 }, { name: 'France Residence Permit (35×45mm)', w: 35, h: 45 }] },
   { country: "Gabon", code: "GA", flag: "\u{1F1EC}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Georgia", code: "GE", flag: "\u{1F1EC}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Germany", code: "DE", flag: "\u{1F1E9}\u{1F1EA}", w: 35, h: 45, bg: "#d3d3d3" },
-  { country: "Ghana", code: "GH", flag: "\u{1F1EC}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Germany", code: "DE", flag: "\u{1F1E9}\u{1F1EA}", w: 35, h: 45, bg: "#d3d3d3", docs: [{ name: 'Germany Passport (35×45mm)', w: 35, h: 45 }, { name: 'Germany Visa (35×45mm)', w: 35, h: 45 }, { name: 'Germany ID Card (35×45mm)', w: 35, h: 45 }, { name: 'Germany Driving Licence (35×45mm)', w: 35, h: 45 }, { name: 'Germany Residence Permit (35×45mm)', w: 35, h: 45 }] },
+  { country: "Ghana", code: "GH", flag: "\u{1F1EC}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Ghana Passport (35×45mm)', w: 35, h: 45 }, { name: 'Ghana Visa (35×45mm)', w: 35, h: 45 }, { name: 'Ghana ID Card (35×45mm)', w: 35, h: 45 }] },
   { country: "Greece", code: "GR", flag: "\u{1F1EC}\u{1F1F7}", w: 40, h: 60, bg: "#ffffff" },
   { country: "Grenada", code: "GD", flag: "\u{1F1EC}\u{1F1E9}", w: 38, h: 51, bg: "#ffffff" },
   { country: "Guatemala", code: "GT", flag: "\u{1F1EC}\u{1F1F9}", w: 26, h: 32, bg: "#ffffff" },
@@ -110,19 +94,19 @@ const PASSPORT_COUNTRIES = [
   { country: "Hong Kong", code: "HK", flag: "\u{1F1ED}\u{1F1F0}", w: 40, h: 50, bg: "#ffffff" },
   { country: "Hungary", code: "HU", flag: "\u{1F1ED}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Iceland", code: "IS", flag: "\u{1F1EE}\u{1F1F8}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "India", code: "IN", flag: "\u{1F1EE}\u{1F1F3}", w: 51, h: 51, bg: "#ffffff" },
-  { country: "Indonesia", code: "ID", flag: "\u{1F1EE}\u{1F1E9}", w: 51, h: 51, bg: "#ff0000" },
+  { country: "India", code: "IN", flag: "\u{1F1EE}\u{1F1F3}", w: 51, h: 51, bg: "#ffffff", docs: [{ name: 'India Passport (51×51mm)', w: 51, h: 51 }, { name: 'India Passport Seva (35×45mm)', w: 35, h: 45 }, { name: 'India OCI Passport (51×51mm)', w: 51, h: 51 }, { name: 'India Visa (51×51mm)', w: 51, h: 51 }, { name: 'India Driving Licence (35×45mm)', w: 35, h: 45 }, { name: 'India PAN Card (25×35mm)', w: 25, h: 35 }, { name: 'India Voter ID (35×45mm)', w: 35, h: 45 }, { name: 'India Aadhaar Card (35×45mm)', w: 35, h: 45 }] },
+  { country: "Indonesia", code: "ID", flag: "\u{1F1EE}\u{1F1E9}", w: 51, h: 51, bg: "#ff0000", docs: [{ name: 'Indonesia Passport (51×51mm)', w: 51, h: 51 }, { name: 'Indonesia Visa (51×51mm)', w: 51, h: 51 }, { name: 'Indonesia KTP (30×40mm)', w: 30, h: 40 }] },
   { country: "Iran", code: "IR", flag: "\u{1F1EE}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Iraq", code: "IQ", flag: "\u{1F1EE}\u{1F1F6}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Ireland", code: "IE", flag: "\u{1F1EE}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Israel", code: "IL", flag: "\u{1F1EE}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Italy", code: "IT", flag: "\u{1F1EE}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Italy", code: "IT", flag: "\u{1F1EE}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Italy Passport (35×45mm)', w: 35, h: 45 }, { name: 'Italy Visa (35×45mm)', w: 35, h: 45 }, { name: 'Italy ID Card (35×45mm)', w: 35, h: 45 }, { name: 'Italy Driving Licence (35×45mm)', w: 35, h: 45 }] },
   { country: "Ivory Coast", code: "CI", flag: "\u{1F1E8}\u{1F1EE}", w: 45, h: 35, bg: "#ffffff" },
   { country: "Jamaica", code: "JM", flag: "\u{1F1EF}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Japan", code: "JP", flag: "\u{1F1EF}\u{1F1F5}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Japan", code: "JP", flag: "\u{1F1EF}\u{1F1F5}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Japan Passport (35×45mm)', w: 35, h: 45 }, { name: 'Japan Visa (35×45mm)', w: 35, h: 45 }, { name: 'Japan Residence Card (24×30mm)', w: 24, h: 30 }, { name: 'Japan Driving Licence (24×30mm)', w: 24, h: 30 }, { name: 'Japan My Number Card (35×45mm)', w: 35, h: 45 }] },
   { country: "Jordan", code: "JO", flag: "\u{1F1EF}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Kazakhstan", code: "KZ", flag: "\u{1F1F0}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Kenya", code: "KE", flag: "\u{1F1F0}\u{1F1EA}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "Kenya", code: "KE", flag: "\u{1F1F0}\u{1F1EA}", w: 51, h: 51, bg: "#ffffff", docs: [{ name: 'Kenya Passport (51×51mm)', w: 51, h: 51 }, { name: 'Kenya Visa (51×51mm)', w: 51, h: 51 }, { name: 'Kenya ID Card (35×45mm)', w: 35, h: 45 }] },
   { country: "Kuwait", code: "KW", flag: "\u{1F1F0}\u{1F1FC}", w: 40, h: 60, bg: "#ffffff" },
   { country: "Kyrgyzstan", code: "KG", flag: "\u{1F1F0}\u{1F1EC}", w: 40, h: 60, bg: "#ffffff" },
   { country: "Laos", code: "LA", flag: "\u{1F1F1}\u{1F1E6}", w: 40, h: 60, bg: "#ffffff" },
@@ -136,13 +120,13 @@ const PASSPORT_COUNTRIES = [
   { country: "Macau", code: "MO", flag: "\u{1F1F2}\u{1F1F4}", w: 45, h: 35, bg: "#ffffff" },
   { country: "Madagascar", code: "MG", flag: "\u{1F1F2}\u{1F1EC}", w: 40, h: 40, bg: "#ffffff" },
   { country: "Malawi", code: "MW", flag: "\u{1F1F2}\u{1F1FC}", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Malaysia", code: "MY", flag: "\u{1F1F2}\u{1F1FE}", w: 35, h: 50, bg: "#ffffff" },
+  { country: "Malaysia", code: "MY", flag: "\u{1F1F2}\u{1F1FE}", w: 35, h: 50, bg: "#ffffff", docs: [{ name: 'Malaysia Passport (35×50mm)', w: 35, h: 50 }, { name: 'Malaysia Visa (35×50mm)', w: 35, h: 50 }, { name: 'Malaysia MyKad ID (25×32mm)', w: 25, h: 32 }, { name: 'Malaysia Driving Licence (25×32mm)', w: 25, h: 32 }] },
   { country: "Maldives", code: "MV", flag: "\u{1F1F2}\u{1F1FB}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Mali", code: "ML", flag: "\u{1F1F2}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Malta", code: "MT", flag: "\u{1F1F2}\u{1F1F9}", w: 40, h: 30, bg: "#ffffff" },
   { country: "Mauritania", code: "MR", flag: "\u{1F1F2}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Mauritius", code: "MU", flag: "\u{1F1F2}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Mexico", code: "MX", flag: "\u{1F1F2}\u{1F1FD}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Mexico", code: "MX", flag: "\u{1F1F2}\u{1F1FD}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Mexico Passport (35×45mm)', w: 35, h: 45 }, { name: 'Mexico Visa (35×45mm)', w: 35, h: 45 }, { name: 'Mexico Voter ID (25×30mm)', w: 25, h: 30 }, { name: 'Mexico Driving Licence (25×30mm)', w: 25, h: 30 }] },
   { country: "Moldova", code: "MD", flag: "\u{1F1F2}\u{1F1E9}", w: 30, h: 40, bg: "#ffffff" },
   { country: "Mongolia", code: "MN", flag: "\u{1F1F2}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Montenegro", code: "ME", flag: "\u{1F1F2}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
@@ -155,27 +139,27 @@ const PASSPORT_COUNTRIES = [
   { country: "New Zealand", code: "NZ", flag: "\u{1F1F3}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Nicaragua", code: "NI", flag: "\u{1F1F3}\u{1F1EE}", w: 40, h: 50, bg: "#ffffff" },
   { country: "Niger", code: "NE", flag: "\u{1F1F3}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Nigeria", code: "NG", flag: "\u{1F1F3}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Nigeria", code: "NG", flag: "\u{1F1F3}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Nigeria Passport (35×45mm)', w: 35, h: 45 }, { name: 'Nigeria Visa (35×45mm)', w: 35, h: 45 }, { name: 'Nigeria NIN Card (35×45mm)', w: 35, h: 45 }, { name: 'Nigeria Voter Card (35×45mm)', w: 35, h: 45 }, { name: 'Nigeria Driving Licence (35×45mm)', w: 35, h: 45 }] },
   { country: "North Korea", code: "KP", flag: "\u{1F1F0}\u{1F1F5}", w: 35, h: 45, bg: "#ffffff" },
   { country: "North Macedonia", code: "MK", flag: "\u{1F1F2}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Norway", code: "NO", flag: "\u{1F1F3}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Oman", code: "OM", flag: "\u{1F1F4}\u{1F1F2}", w: 40, h: 60, bg: "#ffffff" },
-  { country: "Pakistan", code: "PK", flag: "\u{1F1F5}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Pakistan", code: "PK", flag: "\u{1F1F5}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Pakistan Passport (35×45mm)', w: 35, h: 45 }, { name: 'Pakistan CNIC (35×45mm)', w: 35, h: 45 }, { name: 'Pakistan Visa (35×45mm)', w: 35, h: 45 }, { name: 'Pakistan Driving Licence (35×45mm)', w: 35, h: 45 }] },
   { country: "Palestine", code: "PS", flag: "\u{1F1F5}\u{1F1F8}", w: 35, h: 45, bg: "#add8e6" },
   { country: "Panama", code: "PA", flag: "\u{1F1F5}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Papua New Guinea", code: "PG", flag: "\u{1F1F5}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Paraguay", code: "PY", flag: "\u{1F1F5}\u{1F1FE}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Peru", code: "PE", flag: "\u{1F1F5}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Philippines", code: "PH", flag: "\u{1F1F5}\u{1F1ED}", w: 35, h: 45, bg: "#0038a8" },
+  { country: "Philippines", code: "PH", flag: "\u{1F1F5}\u{1F1ED}", w: 35, h: 45, bg: "#0038a8", docs: [{ name: 'Philippines Passport (35×45mm)', w: 35, h: 45 }, { name: 'Philippines Visa (35×45mm)', w: 35, h: 45 }, { name: 'Philippines ID Card (35×45mm)', w: 35, h: 45 }, { name: 'Philippines Driving Licence (35×45mm)', w: 35, h: 45 }] },
   { country: "Poland", code: "PL", flag: "\u{1F1F5}\u{1F1F1}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Portugal", code: "PT", flag: "\u{1F1F5}\u{1F1F9}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Qatar", code: "QA", flag: "\u{1F1F6}\u{1F1E6}", w: 38, h: 48, bg: "#ffffff" },
   { country: "Romania", code: "RO", flag: "\u{1F1F7}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Russia", code: "RU", flag: "\u{1F1F7}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Russia", code: "RU", flag: "\u{1F1F7}\u{1F1FA}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Russia Passport (35×45mm)', w: 35, h: 45 }, { name: 'Russia Internal Passport (35×45mm)', w: 35, h: 45 }, { name: 'Russia Visa (35×45mm)', w: 35, h: 45 }, { name: 'Russia Driving Licence (30×40mm)', w: 30, h: 40 }] },
   { country: "Rwanda", code: "RW", flag: "\u{1F1F7}\u{1F1FC}", w: 51, h: 51, bg: "#ffffff" },
   { country: "Saint Kitts and Nevis", code: "KN", flag: "\u{1F1F0}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Samoa", code: "WS", flag: "\u{1F1FC}\u{1F1F8}", w: 45, h: 35, bg: "#ffffff" },
-  { country: "Saudi Arabia", code: "SA", flag: "\u{1F1F8}\u{1F1E6}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Saudi Arabia", code: "SA", flag: "\u{1F1F8}\u{1F1E6}", w: 40, h: 60, bg: "#ffffff", docs: [{ name: 'Saudi Arabia Passport (40×60mm)', w: 40, h: 60 }, { name: 'Saudi Arabia Visa (40×60mm)', w: 40, h: 60 }, { name: 'Saudi Arabia ID Card (40×60mm)', w: 40, h: 60 }, { name: 'Saudi Arabia Driving Licence (40×60mm)', w: 40, h: 60 }] },
   { country: "Senegal", code: "SN", flag: "\u{1F1F8}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Serbia", code: "RS", flag: "\u{1F1F7}\u{1F1F8}", w: 50, h: 50, bg: "#ffffff" },
   { country: "Seychelles", code: "SC", flag: "\u{1F1F8}\u{1F1E8}", w: 35, h: 45, bg: "#ffffff" },
@@ -184,10 +168,10 @@ const PASSPORT_COUNTRIES = [
   { country: "Slovakia", code: "SK", flag: "\u{1F1F8}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Slovenia", code: "SI", flag: "\u{1F1F8}\u{1F1EE}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Somalia", code: "SO", flag: "\u{1F1F8}\u{1F1F4}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Africa", code: "ZA", flag: "\u{1F1FF}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "South Korea", code: "KR", flag: "\u{1F1F0}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "South Africa", code: "ZA", flag: "\u{1F1FF}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'South Africa Passport (35×45mm)', w: 35, h: 45 }, { name: 'South Africa Visa (35×45mm)', w: 35, h: 45 }, { name: 'South Africa ID Card (35×45mm)', w: 35, h: 45 }, { name: 'South Africa Driving Licence (35×45mm)', w: 35, h: 45 }] },
+  { country: "South Korea", code: "KR", flag: "\u{1F1F0}\u{1F1F7}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'South Korea Passport (35×45mm)', w: 35, h: 45 }, { name: 'South Korea Visa (35×45mm)', w: 35, h: 45 }, { name: 'South Korea ID Card (35×45mm)', w: 35, h: 45 }, { name: 'South Korea Driving Licence (35×45mm)', w: 35, h: 45 }] },
   { country: "South Sudan", code: "SS", flag: "\u{1F1F8}\u{1F1F8}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Spain", code: "ES", flag: "\u{1F1EA}\u{1F1F8}", w: 26, h: 32, bg: "#ffffff" },
+  { country: "Spain", code: "ES", flag: "\u{1F1EA}\u{1F1F8}", w: 26, h: 32, bg: "#ffffff", docs: [{ name: 'Spain Passport (26×32mm)', w: 26, h: 32 }, { name: 'Spain Visa (26×32mm)', w: 26, h: 32 }, { name: 'Spain ID Card (26×32mm)', w: 26, h: 32 }, { name: 'Spain Driving Licence (26×32mm)', w: 26, h: 32 }] },
   { country: "Sri Lanka", code: "LK", flag: "\u{1F1F1}\u{1F1F0}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Sudan", code: "SD", flag: "\u{1F1F8}\u{1F1E9}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Sweden", code: "SE", flag: "\u{1F1F8}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
@@ -196,30 +180,40 @@ const PASSPORT_COUNTRIES = [
   { country: "Taiwan", code: "TW", flag: "\u{1F1F9}\u{1F1FC}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Tajikistan", code: "TJ", flag: "\u{1F1F9}\u{1F1EF}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Tanzania", code: "TZ", flag: "\u{1F1F9}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Thailand", code: "TH", flag: "\u{1F1F9}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff" },
+  { country: "Thailand", code: "TH", flag: "\u{1F1F9}\u{1F1ED}", w: 35, h: 45, bg: "#ffffff", docs: [{ name: 'Thailand Passport (35×45mm)', w: 35, h: 45 }, { name: 'Thailand Visa (35×45mm)', w: 35, h: 45 }, { name: 'Thailand ID Card (25×30mm)', w: 25, h: 30 }, { name: 'Thailand Driving Licence (25×30mm)', w: 25, h: 30 }] },
   { country: "Tunisia", code: "TN", flag: "\u{1F1F9}\u{1F1F3}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Turkey", code: "TR", flag: "\u{1F1F9}\u{1F1F7}", w: 50, h: 60, bg: "#ffffff" },
+  { country: "Turkey", code: "TR", flag: "\u{1F1F9}\u{1F1F7}", w: 50, h: 60, bg: "#ffffff", docs: [{ name: 'Turkey Passport (50×60mm)', w: 50, h: 60 }, { name: 'Turkey Visa (50×60mm)', w: 50, h: 60 }, { name: 'Turkey ID Card (50×60mm)', w: 50, h: 60 }, { name: 'Turkey Driving Licence (50×60mm)', w: 50, h: 60 }] },
   { country: "Turkmenistan", code: "TM", flag: "\u{1F1F9}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Uganda", code: "UG", flag: "\u{1F1FA}\u{1F1EC}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Ukraine", code: "UA", flag: "\u{1F1FA}\u{1F1E6}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "United Arab Emirates", code: "AE", flag: "\u{1F1E6}\u{1F1EA}", w: 40, h: 60, bg: "#ffffff" },
-  { country: "United Kingdom", code: "GB", flag: "\u{1F1EC}\u{1F1E7}", w: 35, h: 45, bg: "#d3d3d3" },
-  { country: "United States", code: "US", flag: "\u{1F1FA}\u{1F1F8}", w: 51, h: 51, bg: "#ffffff" },
+  { country: "United Arab Emirates", code: "AE", flag: "\u{1F1E6}\u{1F1EA}", w: 40, h: 60, bg: "#ffffff", docs: [{ name: 'UAE Passport (40×60mm)', w: 40, h: 60 }, { name: 'UAE Visa (40×60mm)', w: 40, h: 60 }, { name: 'UAE Emirates ID (40×60mm)', w: 40, h: 60 }, { name: 'UAE Driving Licence (40×60mm)', w: 40, h: 60 }] },
+  { country: "United Kingdom", code: "GB", flag: "\u{1F1EC}\u{1F1E7}", w: 35, h: 45, bg: "#d3d3d3", docs: [{ name: 'UK Passport (35×45mm)', w: 35, h: 45 }, { name: 'UK Visa (35×45mm)', w: 35, h: 45 }, { name: 'UK Driving Licence (35×45mm)', w: 35, h: 45 }, { name: 'UK ID Card (35×45mm)', w: 35, h: 45 }] },
+  { country: "United States", code: "US", flag: "\u{1F1FA}\u{1F1F8}", w: 51, h: 51, bg: "#ffffff", docs: [{ name: 'US Passport (51×51mm)', w: 51, h: 51 }, { name: 'US Visa (51×51mm)', w: 51, h: 51 }, { name: 'US Green Card (51×51mm)', w: 51, h: 51 }, { name: 'US Citizenship (51×51mm)', w: 51, h: 51 }, { name: "US Driver's License (51×51mm)", w: 51, h: 51 }] },
   { country: "Uruguay", code: "UY", flag: "\u{1F1FA}\u{1F1FE}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Uzbekistan", code: "UZ", flag: "\u{1F1FA}\u{1F1FF}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Venezuela", code: "VE", flag: "\u{1F1FB}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
-  { country: "Vietnam", code: "VN", flag: "\u{1F1FB}\u{1F1F3}", w: 40, h: 60, bg: "#ffffff" },
+  { country: "Vietnam", code: "VN", flag: "\u{1F1FB}\u{1F1F3}", w: 40, h: 60, bg: "#ffffff", docs: [{ name: 'Vietnam Passport (40×60mm)', w: 40, h: 60 }, { name: 'Vietnam Visa (40×60mm)', w: 40, h: 60 }, { name: 'Vietnam ID Card (30×40mm)', w: 30, h: 40 }] },
   { country: "Yemen", code: "YE", flag: "\u{1F1FE}\u{1F1EA}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Zambia", code: "ZM", flag: "\u{1F1FF}\u{1F1F2}", w: 35, h: 45, bg: "#ffffff" },
   { country: "Zimbabwe", code: "ZW", flag: "\u{1F1FF}\u{1F1FC}", w: 35, h: 45, bg: "#ffffff" },
 ]
+
+// Add generic docs to countries that don't have specific ones
+PASSPORT_COUNTRIES.forEach(c => {
+  if (!c.docs) {
+    c.docs = [
+      { name: c.country + ' Passport (' + c.w + '×' + c.h + 'mm)', w: c.w, h: c.h },
+      { name: c.country + ' Visa (' + c.w + '×' + c.h + 'mm)', w: c.w, h: c.h },
+      { name: c.country + ' ID Card (' + c.w + '×' + c.h + 'mm)', w: c.w, h: c.h },
+    ]
+  }
+})
 
 // DPI for print-quality output
 const DPI = 300
 const MM_PER_INCH = 25.4
 
 let selectedCountry = PASSPORT_COUNTRIES.find(c => c.country === 'United States')
-let selectedDocType = 'passport'
 let activeW = selectedCountry.w, activeH = selectedCountry.h
 let uploadedImg = null
 let uploadedFile = null
@@ -871,32 +865,24 @@ function generateAndShowPreview() {
 
 function updateDocTypes() {
   const c = selectedCountry
-  docTypeSelect.innerHTML = '<option value="passport">' + ppPassportLbl + ' (' + c.w + '\u00d7' + c.h + 'mm)</option>'
-  DOC_TYPES.visa.sizes.forEach(function(s, i) {
-    docTypeSelect.innerHTML += '<option value="visa_' + i + '">' + ppVisaLbl + ' \u2014 ' + s.name + '</option>'
-  })
-  DOC_TYPES.id_card.sizes.forEach(function(s, i) {
-    docTypeSelect.innerHTML += '<option value="id_' + i + '">' + ppIdCardLbl + ' \u2014 ' + s.name + '</option>'
-  })
-  docTypeSelect.value = 'passport'
-  selectedDocType = 'passport'
-  activeW = c.w; activeH = c.h
+  const docs = c.docs || [{ name: c.country + ' Passport (' + c.w + '\u00d7' + c.h + 'mm)', w: c.w, h: c.h }]
+  docTypeSelect.innerHTML = docs.map((d, i) =>
+    '<option value="' + i + '">' + d.name + '</option>'
+  ).join('')
+  docTypeSelect.value = '0'
+  activeW = docs[0].w; activeH = docs[0].h
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
+  if (uploadedImg) { initCropBox(); renderCropCanvas() }
 }
 
 docTypeSelect.addEventListener('change', () => {
-  const val = docTypeSelect.value
-  if (val === 'passport') {
-    activeW = selectedCountry.w; activeH = selectedCountry.h
-  } else if (val.startsWith('visa_')) {
-    const s = DOC_TYPES.visa.sizes[parseInt(val.split('_')[1])]
-    activeW = s.w; activeH = s.h
-  } else if (val.startsWith('id_')) {
-    const s = DOC_TYPES.id_card.sizes[parseInt(val.split('_')[1])]
-    activeW = s.w; activeH = s.h
-  }
+  const docs = selectedCountry.docs || [{ w: selectedCountry.w, h: selectedCountry.h }]
+  const idx = parseInt(docTypeSelect.value) || 0
+  const doc = docs[idx] || docs[0]
+  activeW = doc.w; activeH = doc.h
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
-  if (croppedImg) generateAndShowPreview()
+  if (uploadedImg) { initCropBox() }
+  renderCropCanvas()
 })
 
 function renderCountryList(filter) {
