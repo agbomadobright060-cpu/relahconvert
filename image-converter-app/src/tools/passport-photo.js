@@ -989,6 +989,47 @@ step3BackBtn.addEventListener('click', () => {
   renderCropCanvas()
 })
 
+// ---- IndexedDB helpers ----
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const file = new File([records[0].blob], records[0].name, { type: records[0].type })
+    handleFile(file)
+  } catch (e) {}
+}
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -1000,7 +1041,18 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'pp-next-btn'
     btn.textContent = b.label
-    btn.addEventListener('click', () => { window.location.href = b.href })
+    btn.addEventListener('click', async () => {
+      // Save final photo to IDB so next tool auto-loads it
+      try {
+        const photoCanvas = generatePhoto()
+        const blob = await new Promise(res => photoCanvas.toBlob(res, 'image/jpeg', 0.95))
+        if (blob) {
+          await saveFilesToIDB([{ blob, name: 'passport-photo.jpg', type: 'image/jpeg' }])
+          sessionStorage.setItem('pendingFromIDB', '1')
+        }
+      } catch (e) {}
+      window.location.href = b.href
+    })
     nextBtns.appendChild(btn)
   })
   nextSteps.style.display = ''
@@ -1010,6 +1062,7 @@ function buildNextSteps() {
 renderCountryList('')
 updateDocTypes()
 showStep(1)
+loadPendingFiles()
 
 // ---- SEO section (always visible at bottom) ----
 ;(function injectSEO() {
