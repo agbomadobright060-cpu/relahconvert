@@ -298,7 +298,15 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = toolName + ' Free & Private | RelahConvert'
+document.title = 'Passport Photo Maker \u2014 Create Passport Photos for 170+ Countries Free | RelahConvert'
+const metaDesc = document.createElement('meta')
+metaDesc.name = 'description'
+metaDesc.content = 'Free passport photo maker for 170+ countries. Auto background removal, crop to official dimensions, download single photo or print sheet. Browser-only \u2014 your files never leave your device.'
+document.head.appendChild(metaDesc)
+const metaKeywords = document.createElement('meta')
+metaKeywords.name = 'keywords'
+metaKeywords.content = 'passport photo maker, passport photo online free, passport size photo, passport photo creator, visa photo maker, ID photo maker, passport photo background removal, passport photo dimensions'
+document.head.appendChild(metaKeywords)
 
 document.querySelector('#app').innerHTML = `
   <div class="pp-wrap">
