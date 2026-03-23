@@ -84,10 +84,10 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = 'Pixelate Image Online \u2014 Pixelate Face or Full Image Free | RelahConvert'
+  document.title = t.pix_page_title || 'Pixelate Image Online \u2014 Pixelate Face or Full Image Free | RelahConvert'
   const metaDesc = document.createElement('meta')
   metaDesc.name = 'description'
-  metaDesc.content = 'Pixelate image free \u2014 pixelate a face, region, or entire image with adjustable intensity. Batch process up to 25 files. Browser-only, no upload, completely private.'
+  metaDesc.content = t.pix_meta_desc || 'Pixelate image free \u2014 pixelate a face, region, or entire image with adjustable intensity. Batch process up to 25 files. Browser-only, no upload, completely private.'
   document.head.appendChild(metaDesc)
 }
 

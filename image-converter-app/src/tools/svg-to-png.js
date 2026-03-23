@@ -58,7 +58,10 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = seoData ? seoData.page_title : 'SVG to PNG Converter Free | No Upload \u2014 RelahConvert'
+document.title = t.svgpng_page_title || (seoData ? seoData.page_title : 'SVG to PNG Converter Free | No Upload \u2014 RelahConvert')
+const _metaDesc = document.createElement('meta'); _metaDesc.name = 'description'
+_metaDesc.content = t.svgpng_meta_desc || 'Convert SVG to PNG free. Set custom width, batch convert up to 25 files. Browser-only, no upload required.'
+document.head.appendChild(_metaDesc)
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
