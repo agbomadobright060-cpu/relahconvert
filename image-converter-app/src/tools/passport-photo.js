@@ -880,7 +880,6 @@ function updateDocTypes() {
   docTypeSelect.value = '0'
   activeW = docs[0].w; activeH = docs[0].h
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
-  if (croppedImg) { generateAndShowPreview() }
   if (uploadedImg) { initCropBox(); renderCropCanvas() }
 }
 
@@ -890,8 +889,8 @@ docTypeSelect.addEventListener('change', () => {
   const doc = docs[idx] || docs[0]
   activeW = doc.w; activeH = doc.h
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
-  if (croppedImg) { generateAndShowPreview() }
-  if (uploadedImg) { initCropBox(); renderCropCanvas() }
+  if (uploadedImg) { initCropBox() }
+  renderCropCanvas()
 })
 
 function renderCountryList(filter) {
