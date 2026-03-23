@@ -889,6 +889,10 @@ docTypeSelect.addEventListener('change', () => {
   const doc = docs[idx] || docs[0]
   activeW = doc.w; activeH = doc.h
   sizeInfo.textContent = ppSizeLbl + ': ' + activeW + '\u00d7' + activeH + ' mm'
+  // Re-render preview if on step 3 with a cropped image
+  if (step3El.style.display !== 'none' && croppedImg) {
+    try { generateAndShowPreview() } catch(e) {}
+  }
   if (uploadedImg) { initCropBox() }
   renderCropCanvas()
 })
