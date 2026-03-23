@@ -466,9 +466,26 @@ function drawBgWhiteImage(sourceImg) {
   c.width = sourceImg.naturalWidth
   c.height = sourceImg.naturalHeight
   const cctx = c.getContext('2d')
+
+  // First draw the bg-removed image to clean up its alpha channel
+  cctx.drawImage(sourceImg, 0, 0)
+  const imgData = cctx.getImageData(0, 0, c.width, c.height)
+  const d = imgData.data
+  // Threshold alpha: pixels with low alpha become fully transparent,
+  // others become fully opaque. This removes semi-transparent patches
+  // that cause uneven backgrounds after compositing.
+  for (let i = 3; i < d.length; i += 4) {
+    d[i] = d[i] < 128 ? 0 : 255
+  }
+  // Now composite: fill white, then put cleaned image on top
   cctx.fillStyle = '#ffffff'
   cctx.fillRect(0, 0, c.width, c.height)
-  cctx.drawImage(sourceImg, 0, 0)
+  cctx.putImageData(imgData, 0, 0)
+  cctx.globalCompositeOperation = 'destination-over'
+  cctx.fillStyle = '#ffffff'
+  cctx.fillRect(0, 0, c.width, c.height)
+  cctx.globalCompositeOperation = 'source-over'
+
   // Convert to image
   const img = new Image()
   img.src = c.toDataURL('image/png')
