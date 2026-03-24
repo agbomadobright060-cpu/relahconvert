@@ -10,7 +10,7 @@ const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')
 
 document.title = `${toolName} Free | RelahConvert`
-document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
+document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
 const style = document.createElement('style')
 style.textContent = `
@@ -19,70 +19,70 @@ style.textContent = `
   #app > div { animation: fadeUp 0.4s ease both }
   .url-input {
     width: 100%; box-sizing: border-box; padding: 12px 16px;
-    border: 1.5px solid #DDD5C8; border-radius: 10px;
+    border: 1.5px solid var(--border-light); border-radius: 10px;
     font-size: 15px; font-family: 'DM Sans', sans-serif;
-    color: #2C1810; background: #fff; outline: none; transition: border-color 0.15s;
+    color: var(--text-primary); background: var(--bg-card); outline: none; transition: border-color 0.15s;
   }
-  .url-input:focus { border-color: #C84B31; }
+  .url-input:focus { border-color: var(--accent); }
   .opt-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
   .opt-group { flex: 1; min-width: 140px; }
   .opt-label {
-    font-size: 11px; font-weight: 600; color: #9A8A7A;
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.08em;
     margin-bottom: 6px; font-family: 'DM Sans', sans-serif; display: block;
   }
   .opt-select {
-    width: 100%; padding: 10px 12px; border: 1.5px solid #DDD5C8;
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-light);
     border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif;
-    color: #2C1810; background: #fff; outline: none; cursor: pointer;
+    color: var(--text-primary); background: var(--bg-card); outline: none; cursor: pointer;
     transition: border-color 0.15s;
   }
-  .opt-select:focus { border-color: #C84B31; }
+  .opt-select:focus { border-color: var(--accent); }
   .capture-btn {
     width: 100%; padding: 13px; border: none; border-radius: 10px;
-    background: #C84B31; color: #fff; font-size: 15px;
+    background: var(--accent); color: var(--text-on-accent); font-size: 15px;
     font-family: 'Fraunces', serif; font-weight: 700;
     cursor: pointer; transition: all 0.18s; margin-bottom: 16px; display: block;
   }
-  .capture-btn:hover  { background: #A63D26; transform: translateY(-1px); }
-  .capture-btn:disabled { background: #C4B8A8; cursor: not-allowed; opacity: 0.7; transform: none; }
+  .capture-btn:hover  { background: var(--accent-hover); transform: translateY(-1px); }
+  .capture-btn:disabled { background: var(--btn-disabled); cursor: not-allowed; opacity: 0.7; transform: none; }
   .loading-overlay {
     text-align: center; padding: 40px 0; display: none;
-    font-family: 'DM Sans', sans-serif; color: #7A6A5A; margin-bottom: 16px;
+    font-family: 'DM Sans', sans-serif; color: var(--text-tertiary); margin-bottom: 16px;
   }
   .spinner {
     display: block; width: 32px; height: 32px; margin: 0 auto 12px;
-    border: 3px solid #E8E0D5; border-top-color: #C84B31;
+    border: 3px solid var(--border); border-top-color: var(--accent);
     border-radius: 50%; animation: spin 0.8s linear infinite;
   }
   .preview-box {
-    background: #fff; border-radius: 12px; border: 1.5px solid #E8E0D5;
+    background: var(--bg-card); border-radius: 12px; border: 1.5px solid var(--border);
     overflow: hidden; margin-bottom: 16px; display: none;
   }
   .preview-box img { width: 100%; display: block; }
   .download-btn {
     display: none; width: 100%; box-sizing: border-box; text-align: center;
-    padding: 13px; border-radius: 10px; background: #2C1810;
-    text-decoration: none; color: #F5F0E8; font-family: 'Fraunces', serif;
+    padding: 13px; border-radius: 10px; background: var(--btn-dark);
+    text-decoration: none; color: var(--text-on-dark-btn); font-family: 'Fraunces', serif;
     font-weight: 700; font-size: 15px; margin-bottom: 10px;
   }
-  .download-btn:hover { background: #1a0f09; }
+  .download-btn:hover { background: var(--btn-dark-hover); }
   .error-msg {
-    color: #C84B31; font-size: 13px; font-family: 'DM Sans', sans-serif;
-    margin-bottom: 12px; padding: 10px 14px; background: #FDE8E3;
+    color: var(--accent); font-size: 13px; font-family: 'DM Sans', sans-serif;
+    margin-bottom: 12px; padding: 10px 14px; background: var(--accent-bg);
     border-radius: 8px; display: none;
   }
   .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-  .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
-  .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
+  .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--text-primary); margin:32px 0 10px; }
+  .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:24px 0 8px; }
   .seo-section ol { padding-left:20px; margin:0 0 12px; }
-  .seo-section ol li { font-size:13px; color:#5A4A3A; line-height:1.6; margin-bottom:6px; }
-  .seo-section p { font-size:13px; color:#5A4A3A; line-height:1.6; margin:0 0 12px; }
+  .seo-section ol li { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:6px; }
+  .seo-section p { font-size:13px; color:var(--text-secondary); line-height:1.6; margin:0 0 12px; }
 .seo-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
-  .seo-link { padding:7px 14px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-  .seo-link:hover { border-color:#C84B31; color:#C84B31; }
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+  .seo-link { padding:7px 14px; background:var(--bg-card); border:1.5px solid var(--border-light); border-radius:8px; font-size:13px; font-weight:600; color:var(--text-primary); text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+  .seo-link:hover { border-color:var(--accent); color:var(--accent); }
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
@@ -90,8 +90,8 @@ document.head.appendChild(style)
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:24px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:#C84B31;">${titlePart2}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0;">${t.hti_desc || 'Capture any website as an image. Enter a URL and download the screenshot.'}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0;">${t.hti_desc || 'Capture any website as an image. Enter a URL and download the screenshot.'}</p>
     </div>
     <div style="margin-bottom:16px;">
       <label class="opt-label" for="urlInput">${t.hti_url_label || 'Website URL'}</label>

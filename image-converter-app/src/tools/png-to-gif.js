@@ -20,52 +20,52 @@ const h1Main = parts[0]
 const h1Em   = parts.slice(1).join(' ')
 const GIF_MAX = 600
 
-document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
+document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
-  .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
-  .upload-label:hover{background:#A63D26;}
-  .mode-tab{flex:1;padding:10px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;color:#5A4A3A;cursor:pointer;transition:all 0.15s;text-align:center;}
-  .mode-tab.active{border-color:#C84B31;background:#FDE8E3;color:#C84B31;}
+  .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
+  .upload-label:hover{background:var(--accent-hover);}
+  .mode-tab{flex:1;padding:10px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;text-align:center;}
+  .mode-tab.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
-  .file-card{background:#fff;border-radius:10px;border:1.5px solid #E8E0D5;overflow:hidden;position:relative;}
+  .file-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;position:relative;}
   .file-card img{width:100%;height:90px;object-fit:cover;display:block;}
-  .file-card .card-name{font-size:10px;color:#5A4A3A;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif;}
+  .file-card .card-name{font-size:10px;color:var(--text-secondary);padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif;}
   .file-card .rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  .main-btn{width:100%;padding:13px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:15px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-bottom:10px;}
-  .main-btn:hover{background:#A63D26;}
-  .main-btn:disabled{background:#C4B8A8;cursor:not-allowed;opacity:0.7;}
-  .dark-btn{background:#2C1810;color:#F5F0E8;}
-  .dark-btn:hover{background:#1a0f09 !important;}
-  .count-badge{display:inline-block;background:#FDE8E3;color:#C84B31;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;margin-left:10px;}
-  .option-row{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #E8E0D5;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-family:'DM Sans',sans-serif;}
-  .option-label{font-size:13px;font-weight:600;color:#2C1810;}
-  .option-val{font-size:13px;color:#C84B31;font-weight:700;min-width:40px;text-align:right;}
-  input[type=range]{accent-color:#C84B31;}
+  .main-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:15px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-bottom:10px;}
+  .main-btn:hover{background:var(--accent-hover);}
+  .main-btn:disabled{background:var(--btn-disabled);cursor:not-allowed;opacity:0.7;}
+  .dark-btn{background:var(--btn-dark);color:var(--text-on-dark-btn);}
+  .dark-btn:hover{background:var(--btn-dark-hover) !important;}
+  .count-badge{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;margin-left:10px;}
+  .option-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-family:'DM Sans',sans-serif;}
+  .option-label{font-size:13px;font-weight:600;color:var(--text-primary);}
+  .option-val{font-size:13px;color:var(--accent);font-weight:700;min-width:40px;text-align:right;}
+  input[type=range]{accent-color:var(--accent);}
   .toggle-wrap{display:flex;align-items:center;gap:8px;}
-  .toggle{width:36px;height:20px;background:#DDD5C8;border-radius:20px;position:relative;cursor:pointer;transition:background 0.2s;border:none;outline:none;}
-  .toggle.on{background:#C84B31;}
+  .toggle{width:36px;height:20px;background:var(--border-light);border-radius:20px;position:relative;cursor:pointer;transition:background 0.2s;border:none;outline:none;}
+  .toggle.on{background:var(--accent);}
   .toggle::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left 0.2s;}
   .toggle.on::after{left:19px;}
   #animatedPreview{display:none;text-align:center;margin-bottom:12px;}
-  #animatedPreview img{max-width:100%;max-height:200px;border-radius:8px;border:1.5px solid #E8E0D5;}
+  #animatedPreview img{max-width:100%;max-height:200px;border-radius:8px;border:1.5px solid var(--border);}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
+  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
   .seo-section ol{padding-left:20px;margin:0 0 12px;}
-  .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-  .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
-  
-  
-  
-  
+  .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
+  .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
+
+
+
+
   .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-  .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-  .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+  .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .seo-link:hover{border-color:var(--accent);color:var(--accent);}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
@@ -74,12 +74,12 @@ document.title = `${toolName} Free | No Upload — RelahConvert`
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:#C84B31;">${h1Em}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:var(--accent);">${h1Em}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;">${dropHint} — up to 25 files</span>
+      <span style="font-size:12px;color:var(--text-muted);">${dropHint} — up to 25 files</span>
       <span class="count-badge" id="countBadge" style="display:none;"></span>
     </div>
     <input type="file" id="fileInput" accept="image/png" multiple style="display:none;" />
@@ -88,7 +88,7 @@ document.querySelector('#app').innerHTML = `
 
     <!-- Mode toggle — only shown for 2+ files -->
     <div id="modeWrap" style="display:none;margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;font-family:'DM Sans',sans-serif;">GIF Mode</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;font-family:'DM Sans',sans-serif;">GIF Mode</div>
       <div style="display:flex;gap:8px;">
         <button class="mode-tab active" id="tabStatic">🖼 Static GIF</button>
         <button class="mode-tab" id="tabAnimated">🎬 Animated GIF</button>
@@ -108,21 +108,21 @@ document.querySelector('#app').innerHTML = `
         <span class="option-label">🔁 Loop</span>
         <div class="toggle-wrap">
           <button class="toggle on" id="loopToggle"></button>
-          <span style="font-size:13px;color:#5A4A3A;font-family:'DM Sans',sans-serif;" id="loopLabel">On</span>
+          <span style="font-size:13px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;" id="loopLabel">On</span>
         </div>
       </div>
     </div>
 
     <!-- Animated preview -->
     <div id="animatedPreview">
-      <p style="font-size:12px;color:#9A8A7A;margin:0 0 6px;font-family:'DM Sans',sans-serif;">Preview</p>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 6px;font-family:'DM Sans',sans-serif;">Preview</p>
       <img id="previewGif" src="" alt="animated preview" />
     </div>
 
     <button class="main-btn" id="convertBtn" disabled>Convert to GIF</button>
     <a id="downloadLink" class="main-btn dark-btn" style="display:none;text-align:center;text-decoration:none;"></a>
     <button class="main-btn dark-btn" id="zipBtn" style="display:none;">⬇ ${dlZipBtn}</button>
-    <p id="statusNote" style="font-size:12px;color:#9A8A7A;text-align:center;margin:4px 0 0;font-family:'DM Sans',sans-serif;min-height:16px;"></p>
+    <p id="statusNote" style="font-size:12px;color:var(--text-muted);text-align:center;margin:4px 0 0;font-family:'DM Sans',sans-serif;min-height:16px;"></p>
   </div>
 `
 

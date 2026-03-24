@@ -26,21 +26,21 @@ let allTemplates = [], templatePage = 0
 const PER_PAGE = 20
 
 if (document.head) {
-  document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
+  document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
   const style = document.createElement('style')
   style.textContent = `
     *{box-sizing:border-box}
     .tool-wrap{max-width:1200px;margin:0 auto;padding:24px 16px 60px;font-family:'DM Sans',sans-serif}
     .tool-hero{margin-bottom:16px}
-    .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:#2C1810;margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
-    .brand-em{font-style:italic;color:#C84B31}
-    .tool-sub{font-size:13px;color:#7A6A5A;margin:0}
+    .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--text-primary);margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
+    .brand-em{font-style:italic;color:var(--accent)}
+    .tool-sub{font-size:13px;color:var(--text-tertiary);margin:0}
 
     /* source row */
     .meme-source-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-    .meme-source-btn{flex:1;max-width:200px;padding:10px 14px;border:none;border-radius:9px;background:#C84B31;color:#fff;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
-    .meme-source-btn:hover{background:#A63D26;transform:translateY(-1px)}
-    .meme-or{font-size:12px;font-weight:700;color:#B0A090;font-family:'DM Sans',sans-serif}
+    .meme-source-btn{flex:1;max-width:200px;padding:10px 14px;border:none;border-radius:9px;background:var(--accent);color:var(--text-on-accent);font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
+    .meme-source-btn:hover{background:var(--accent-hover);transform:translateY(-1px)}
+    .meme-or{font-size:12px;font-weight:700;color:var(--text-muted);font-family:'DM Sans',sans-serif}
 
     /* main layout: canvas left, panel right */
     .meme-layout{display:none;grid-template-columns:1fr 280px;gap:16px;align-items:start}
@@ -51,113 +51,113 @@ if (document.head) {
     .meme-canvas-col{display:flex;flex-direction:column;gap:8px}
 
     /* floating toolbar */
-    .ftb{display:none;background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);align-items:center;gap:3px;flex-wrap:wrap;overflow:visible}
+    .ftb{display:none;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);align-items:center;gap:3px;flex-wrap:wrap;overflow:visible}
     .ftb.show{display:flex}
     .ftb-div{width:1px;height:22px;background:#E0D8D0;margin:0 3px;flex-shrink:0}
-    .ftb-font{height:30px;padding:0 6px;border:1.5px solid #DDD5C8;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#fff;cursor:pointer;outline:none;flex-shrink:0;min-width:110px}
-    .ftb-font:focus{border-color:#C84B31}
-    .ftb-size{height:30px;width:58px;padding:0 4px;border:1.5px solid #DDD5C8;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#fff;cursor:pointer;outline:none;flex-shrink:0}
-    .ftb-size:focus{border-color:#C84B31}
-    .ftb-btn{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#2C1810;transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700}
-    .ftb-btn:hover{background:#F5EDE8;color:#C84B31}
-    .ftb-btn.on{background:#C84B31;color:#fff}
-    .ftb-align{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;color:#2C1810;transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-    .ftb-align:hover{background:#F5EDE8}
-    .ftb-align.on{background:#C84B31;color:#fff}
+    .ftb-font{height:30px;padding:0 6px;border:1.5px solid var(--border-light);border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);cursor:pointer;outline:none;flex-shrink:0;min-width:110px}
+    .ftb-font:focus{border-color:var(--accent)}
+    .ftb-size{height:30px;width:58px;padding:0 4px;border:1.5px solid var(--border-light);border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);cursor:pointer;outline:none;flex-shrink:0}
+    .ftb-size:focus{border-color:var(--accent)}
+    .ftb-btn{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:var(--text-primary);transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700}
+    .ftb-btn:hover{background:var(--bg-surface);color:var(--accent)}
+    .ftb-btn.on{background:var(--accent);color:var(--text-on-accent)}
+    .ftb-align{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;color:var(--text-primary);transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .ftb-align:hover{background:var(--bg-surface)}
+    .ftb-align.on{background:var(--accent);color:var(--text-on-accent)}
 
     /* color swatch buttons in toolbar */
     .ftb-color-wrap{position:relative;flex-shrink:0}
-    .ftb-swatch-btn{width:30px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px}
-    .ftb-swatch-btn:hover{border-color:#C84B31}
-    .ftb-swatch-letter{font-size:12px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none}
+    .ftb-swatch-btn{width:30px;height:30px;border:1.5px solid var(--border-light);border-radius:6px;cursor:pointer;background:var(--bg-card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px}
+    .ftb-swatch-btn:hover{border-color:var(--accent)}
+    .ftb-swatch-letter{font-size:12px;font-weight:700;color:var(--text-primary);line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none}
     .ftb-swatch-bar{width:16px;height:3px;border-radius:1px;pointer-events:none}
-    .ftb-swatch-panel{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #E0D8D0;border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,0.14);z-index:100;width:192px}
+    .ftb-swatch-panel{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,0.14);z-index:100;width:192px}
     .ftb-swatch-panel.open{display:block}
-    .ftb-swatch-panel p{font-size:10px;font-weight:700;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;font-family:'DM Sans',sans-serif}
+    .ftb-swatch-panel p{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;font-family:'DM Sans',sans-serif}
     .ftb-grid{display:flex;flex-wrap:wrap;gap:4px}
     .ftb-dot{width:20px;height:20px;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,0.1);transition:transform 0.1s;flex-shrink:0}
     .ftb-dot:hover{transform:scale(1.3);position:relative;z-index:1}
-    .ftb-del{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:14px;color:#C84B31;transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-    .ftb-del:hover{background:#FDE8E3}
+    .ftb-del{width:30px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:14px;color:var(--accent);transition:all 0.12s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .ftb-del:hover{background:var(--accent-bg)}
 
     /* canvas wrapper — for overlay hit testing */
-    .meme-canvas-wrap{position:relative;background:#fff;border-radius:14px;border:1.5px solid #E8E0D5;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:300px}
+    .meme-canvas-wrap{position:relative;background:var(--bg-card);border-radius:14px;border:1.5px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:300px}
     .meme-canvas-wrap canvas{display:block;max-width:100%}
-    .meme-placeholder{color:#C4B8A8;font-size:14px;font-family:'DM Sans',sans-serif;padding:60px 20px;text-align:center}
+    .meme-placeholder{color:var(--btn-disabled);font-size:14px;font-family:'DM Sans',sans-serif;padding:60px 20px;text-align:center}
 
     /* RIGHT PANEL */
-    .meme-panel{background:#fff;border-radius:14px;border:1.5px solid #E8E0D5;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:20px;position:sticky;top:84px;display:flex;flex-direction:column;gap:0}
-    .panel-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:0 0 14px;text-align:center}
+    .meme-panel{background:var(--bg-card);border-radius:14px;border:1.5px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:20px;position:sticky;top:84px;display:flex;flex-direction:column;gap:0}
+    .panel-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 14px;text-align:center}
     .panel-section{padding:14px 0;border-bottom:1px solid #F0EAE4}
     .panel-section:last-child{border-bottom:none;padding-bottom:0}
-    .panel-label{font-size:10px;font-weight:700;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:block;font-family:'DM Sans',sans-serif}
+    .panel-label{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:block;font-family:'DM Sans',sans-serif}
 
     /* text inside/outside toggle with icons */
     .pos-toggle{display:flex;gap:8px;margin-bottom:0}
-    .pos-btn{flex:1;padding:10px 6px;border:1.5px solid #DDD5C8;border-radius:10px;background:#fff;font-size:11px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .pos-btn{flex:1;padding:10px 6px;border:1.5px solid var(--border-light);border-radius:10px;background:var(--bg-card);font-size:11px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
     .pos-btn svg{opacity:0.5}
-    .pos-btn:hover{border-color:#C84B31;color:#C84B31}
+    .pos-btn:hover{border-color:var(--accent);color:var(--accent)}
     .pos-btn:hover svg{opacity:1}
-    .pos-btn.active{background:#FDE8E3;border-color:#C84B31;color:#C84B31}
+    .pos-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
     .pos-btn.active svg{opacity:1}
 
     /* text inputs */
-    .meme-input{width:100%;padding:9px 11px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;transition:border-color 0.15s;margin-bottom:6px}
+    .meme-input{width:100%;padding:9px 11px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-surface);outline:none;transition:border-color 0.15s;margin-bottom:6px}
     .meme-input:last-child{margin-bottom:0}
-    .meme-input:focus{border-color:#C84B31;background:#fff}
-    .meme-input::placeholder{color:#C4B8A8;font-size:12px}
+    .meme-input:focus{border-color:var(--accent);background:var(--bg-card)}
+    .meme-input::placeholder{color:var(--btn-disabled);font-size:12px}
 
     /* outside band color */
     .band-color-row{display:flex;align-items:center;gap:8px;margin-top:8px}
-    .band-color-label{font-size:12px;color:#5A4A3A;font-family:'DM Sans',sans-serif}
-    .band-color-pick{width:36px;height:26px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;padding:2px;background:#fff}
+    .band-color-label{font-size:12px;color:var(--text-secondary);font-family:'DM Sans',sans-serif}
+    .band-color-pick{width:36px;height:26px;border:1.5px solid var(--border-light);border-radius:6px;cursor:pointer;padding:2px;background:var(--bg-card)}
 
     /* action buttons */
-    .panel-action-btn{width:100%;padding:11px;border:1.5px solid #DDD5C8;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#2C1810;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .panel-action-btn{width:100%;padding:11px;border:1.5px solid var(--border-light);border-radius:10px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-primary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;margin-bottom:8px}
     .panel-action-btn:last-of-type{margin-bottom:0}
-    .panel-action-btn:hover{border-color:#C84B31;color:#C84B31;background:#FDE8E3}
+    .panel-action-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
     .panel-action-btn svg{flex-shrink:0;opacity:0.7}
     .panel-action-btn:hover svg{opacity:1}
 
     /* download */
     .fmt-row{display:flex;gap:6px;margin-bottom:10px}
-    .fmt-btn{flex:1;padding:7px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
-    .fmt-btn.active{background:#C84B31;border-color:#C84B31;color:#fff}
-    .download-btn{width:100%;padding:13px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s}
-    .download-btn:hover{background:#A63D26;transform:translateY(-1px)}
+    .fmt-btn{flex:1;padding:7px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+    .fmt-btn.active{background:var(--accent);border-color:var(--accent);color:var(--text-on-accent)}
+    .download-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s}
+    .download-btn:hover{background:var(--accent-hover);transform:translateY(-1px)}
 
     /* modal */
     .meme-modal-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
-    .meme-modal{background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
-    .meme-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid #E8E0D5;flex-shrink:0}
-    .meme-modal-header h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:0}
-    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:#F5F0E8;color:#5A4A3A;font-size:14px;cursor:pointer}
-    .meme-modal-close:hover{background:#C84B31;color:#fff}
-    .meme-search{width:100%;padding:11px 16px;border:none;border-bottom:1px solid #E8E0D5;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;background:#FAFAF8;outline:none;flex-shrink:0}
-    .meme-search::placeholder{color:#C4B8A8}
+    .meme-modal{background:var(--bg-card);border-radius:16px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
+    .meme-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .meme-modal-header h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:0}
+    .meme-modal-close{width:30px;height:30px;border:none;border-radius:8px;background:var(--bg-surface);color:var(--text-secondary);font-size:14px;cursor:pointer}
+    .meme-modal-close:hover{background:var(--accent);color:var(--text-on-accent)}
+    .meme-search{width:100%;padding:11px 16px;border:none;border-bottom:1px solid var(--border);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-surface);outline:none;flex-shrink:0}
+    .meme-search::placeholder{color:var(--btn-disabled)}
     .meme-template-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;overflow-y:auto;flex:1}
     @media(max-width:600px){.meme-template-grid{grid-template-columns:repeat(2,1fr)}}
-    .meme-template-item{border:1.5px solid #E8E0D5;border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.15s;background:#FAFAF8}
-    .meme-template-item:hover{border-color:#C84B31;box-shadow:0 4px 12px rgba(200,75,49,0.15);transform:translateY(-2px)}
+    .meme-template-item{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.15s;background:var(--bg-surface)}
+    .meme-template-item:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(200,75,49,0.15);transform:translateY(-2px)}
     .meme-template-item img{width:100%;height:110px;object-fit:cover;display:block;background:#F0EAE4}
-    .meme-template-item span{display:block;font-size:10px;font-weight:600;color:#5A4A3A;padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif}
-    .meme-pagination{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;border-top:1px solid #E8E0D5;flex-shrink:0}
-    .meme-page-btn{padding:7px 16px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#2C1810;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
-    .meme-page-btn:hover:not(:disabled){border-color:#C84B31;color:#C84B31}
+    .meme-template-item span{display:block;font-size:10px;font-weight:600;color:var(--text-secondary);padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif}
+    .meme-pagination{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0}
+    .meme-page-btn{padding:7px 16px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:12px;font-weight:600;color:var(--text-primary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+    .meme-page-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
     .meme-page-btn:disabled{opacity:0.4;cursor:not-allowed}
-    .meme-page-info{font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif}
+    .meme-page-info{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif}
 
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif}
-    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px}
-    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px}
     .seo-section ol{padding-left:20px;margin:0 0 12px}
-    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px}
-    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px}
+    .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px}
+    .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px}
 .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
-    .seo-link:hover{border-color:#C84B31;color:#C84B31}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+    .seo-link:hover{border-color:var(--accent);color:var(--accent)}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
   `
   document.head.appendChild(style)
@@ -226,14 +226,14 @@ document.getElementById('app').innerHTML = `
         <div class="ftb-div"></div>
 
         <!-- text color -->
-        <label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0;position:relative;width:30px;height:30px;justify-content:center;border:1.5px solid #DDD5C8;border-radius:6px;background:#fff" title="Text color">
-          <span style="font-size:13px;font-weight:700;color:#2C1810;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">A</span>
+        <label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0;position:relative;width:30px;height:30px;justify-content:center;border:1.5px solid var(--border-light);border-radius:6px;background:var(--bg-card)" title="Text color">
+          <span style="font-size:13px;font-weight:700;color:var(--text-primary);line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">A</span>
           <div id="tcBar" style="width:16px;height:3px;border-radius:1px;background:#000000;pointer-events:none"></div>
           <input type="color" id="tcInput" value="#000000" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0">
         </label>
 
         <!-- stroke color -->
-        <label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0;position:relative;width:30px;height:30px;justify-content:center;border:1.5px solid #DDD5C8;border-radius:6px;background:#fff" title="Stroke color">
+        <label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;flex-shrink:0;position:relative;width:30px;height:30px;justify-content:center;border:1.5px solid var(--border-light);border-radius:6px;background:var(--bg-card)" title="Stroke color">
           <span style="font-size:9px;font-weight:700;color:#888;line-height:1;font-family:'DM Sans',sans-serif;pointer-events:none">STR</span>
           <div id="scBar" style="width:16px;height:3px;border-radius:1px;background:#ffffff;border:1px solid #ddd;pointer-events:none"></div>
           <input type="color" id="scInput" value="#ffffff" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0">
@@ -299,7 +299,7 @@ document.getElementById('app').innerHTML = `
         </div>
         <button class="download-btn" id="downloadBtn">⬇ ${ui.download}</button>
         <div id="nextSteps" style="display:none;margin-top:14px">
-          <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'DM Sans',sans-serif">${t.whats_next||"What's Next?"}</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'DM Sans',sans-serif">${t.whats_next||"What's Next?"}</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px" id="nextStepsButtons"></div>
         </div>
       </div>
@@ -993,10 +993,10 @@ function buildNextSteps(blob, mime) {
   container.innerHTML = ''
   buttons.forEach(b => {
     const btn = document.createElement('button')
-    btn.style.cssText = 'padding:7px 13px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:12px;font-weight:600;color:#2C1810;background:#fff;cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.15s'
+    btn.style.cssText = 'padding:7px 13px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-primary);background:var(--bg-card);cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.15s'
     btn.textContent = b.label
-    btn.onmouseover = () => { btn.style.borderColor='#C84B31'; btn.style.color='#C84B31' }
-    btn.onmouseout  = () => { btn.style.borderColor='#DDD5C8'; btn.style.color='#2C1810' }
+    btn.onmouseover = () => { btn.style.borderColor='var(--accent)'; btn.style.color='var(--accent)' }
+    btn.onmouseout  = () => { btn.style.borderColor='var(--border-light)'; btn.style.color='var(--text-primary)' }
     btn.onclick = async () => {
       try {
         await saveToIDB(blob, `meme.${ext}`, mime)
@@ -1036,12 +1036,12 @@ $('downloadBtn').onclick = () => {
 $('templateBtn').onclick = async () => {
   $('templateModal').style.display = 'flex'
   if (allTemplates.length) { filteredTemplates = allTemplates; showPage(0); return }
-  $('templateGrid').innerHTML = '<p style="padding:24px;color:#9A8A7A;font-size:13px;grid-column:1/-1">Loading templates…</p>'
+  $('templateGrid').innerHTML = '<p style="padding:24px;color:var(--text-muted);font-size:13px;grid-column:1/-1">Loading templates…</p>'
   try {
     const res = await fetch('https://api.imgflip.com/get_memes')
     const json = await res.json()
     allTemplates = json.data.memes; filteredTemplates = allTemplates; showPage(0)
-  } catch { $('templateGrid').innerHTML = '<p style="padding:24px;color:#C84B31;font-size:13px;grid-column:1/-1">Failed to load.</p>' }
+  } catch { $('templateGrid').innerHTML = '<p style="padding:24px;color:var(--accent);font-size:13px;grid-column:1/-1">Failed to load.</p>' }
 }
 $('closeModal').onclick = () => { $('templateModal').style.display = 'none' }
 $('templateModal').onclick = e => { if (e.target === $('templateModal')) $('templateModal').style.display = 'none' }

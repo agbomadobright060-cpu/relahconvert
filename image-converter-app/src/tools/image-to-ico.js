@@ -5,7 +5,7 @@ injectHreflang('image-to-ico')
 
 const t = getT()
 
-const bg = '#F2F2F2'
+const bg = 'var(--bg-page)'
 const toolName  = (t.nav_short && t.nav_short['image-to-ico']) || 'Image to ICO'
 const seoData   = t.seo && t.seo['image-to-ico']
 const descText  = seoData ? seoData.h2a : 'Convert any image to ICO favicon free. No upload. Files never leave your device.'
@@ -19,32 +19,32 @@ if (document.head) {
   style.textContent = `
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     #app>div{animation:fadeUp 0.4s ease both}
-    .opt-btn{width:100%;padding:13px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:15px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-bottom:10px;}
-    .opt-btn:hover{background:#A63D26;transform:translateY(-1px);}
-    .opt-btn:disabled{background:#C4B8A8;cursor:not-allowed;opacity:0.7;transform:none;}
-    .download-btn{display:none;width:100%;box-sizing:border-box;text-align:center;padding:13px;border-radius:10px;background:#2C1810;text-decoration:none;color:#F5F0E8;font-family:'Fraunces',serif;font-weight:700;font-size:15px;margin-bottom:10px;}
-    .download-btn:hover{background:#1a0f09;}
-    .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
+    .opt-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:15px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-bottom:10px;}
+    .opt-btn:hover{background:var(--accent-hover);transform:translateY(-1px);}
+    .opt-btn:disabled{background:var(--btn-disabled);cursor:not-allowed;opacity:0.7;transform:none;}
+    .download-btn{display:none;width:100%;box-sizing:border-box;text-align:center;padding:13px;border-radius:10px;background:var(--btn-dark);text-decoration:none;color:var(--text-on-dark-btn);font-family:'Fraunces',serif;font-weight:700;font-size:15px;margin-bottom:10px;}
+    .download-btn:hover{background:var(--btn-dark-hover);}
+    .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
     .size-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:16px;}
-    .size-btn{padding:10px 0;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all 0.15s;}
-    .size-btn.active{border-color:#C84B31;background:#FDE8E3;color:#C84B31;}
+    .size-btn{padding:10px 0;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all 0.15s;}
+    .size-btn.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
     .preview-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
     .ico-preview{background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%);background-size:12px 12px;border-radius:8px;display:inline-block;padding:8px;}
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
     .seo-section ol{padding-left:20px;margin:0 0 12px;}
-    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
+    .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
+    .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
     
     
     
     
     .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .seo-link:hover{border-color:var(--accent);color:var(--accent);}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
   `
   document.head.appendChild(style)
@@ -58,12 +58,12 @@ let selectedSizes = [16, 32, 48]
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:#C84B31;">${titlePart2}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint}</span>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:12px;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     <div id="previewArea" style="display:none;margin-bottom:16px;">
@@ -72,7 +72,7 @@ document.querySelector('#app').innerHTML = `
         <div id="icoPreviews" class="ico-preview"></div>
       </div>
       <div style="margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.ico_sizes_label || 'ICO Sizes (select all you need)'}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.ico_sizes_label || 'ICO Sizes (select all you need)'}</div>
         <div class="size-grid" id="sizeGrid">
           ${SIZES.map(s => `<button class="size-btn${selectedSizes.includes(s)?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
         </div>

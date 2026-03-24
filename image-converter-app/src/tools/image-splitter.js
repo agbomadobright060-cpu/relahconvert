@@ -12,43 +12,43 @@ const dropHint  = t.drop_hint || 'or drop image anywhere'
 const parts     = toolName.split(' ')
 const h1Main    = parts[0]
 const h1Em      = parts.slice(1).join(' ')
-const bg = '#F2F2F2'
+const bg = 'var(--bg-page)'
 
 document.body.style.cssText = `margin:0;padding:0;min-height:100vh;background:${bg};`
 const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
-  .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
-  .upload-label:hover{background:#A63D26;}
-  .sp-preview-wrap{position:relative;background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:hidden;display:inline-block;max-width:100%;}
+  .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
+  .upload-label:hover{background:var(--accent-hover);}
+  .sp-preview-wrap{position:relative;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);overflow:hidden;display:inline-block;max-width:100%;}
   .sp-preview-wrap img{display:block;max-width:100%;height:auto;}
   .sp-preview-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
   .sp-grid-presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-  .sp-preset{padding:7px 14px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:600;color:#2C1810;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-  .sp-preset:hover{border-color:#C84B31;color:#C84B31;}
-  .sp-preset.active{background:#C84B31;color:#fff;border-color:#C84B31;}
+  .sp-preset{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:600;color:var(--text-primary);background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .sp-preset:hover{border-color:var(--accent);color:var(--accent);}
+  .sp-preset.active{background:var(--accent);color:var(--text-on-accent);border-color:var(--accent);}
   .sp-custom-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-  .sp-custom-input{width:56px;padding:7px 10px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;text-align:center;outline:none;}
-  .sp-custom-input:focus{border-color:#C84B31;box-shadow:0 0 0 3px rgba(200,75,49,0.12);}
-  .sp-info{font-size:12px;color:#7A6A5A;margin-bottom:12px;}
-  .download-btn{display:none;text-align:center;padding:12px 24px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;border:none;border-radius:10px;cursor:pointer;transition:background 0.15s;width:100%;text-decoration:none;margin-top:10px;}
-  .download-btn:hover{background:#A63D26;}
+  .sp-custom-input{width:56px;padding:7px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);text-align:center;outline:none;}
+  .sp-custom-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,75,49,0.12);}
+  .sp-info{font-size:12px;color:var(--text-tertiary);margin-bottom:12px;}
+  .download-btn{display:none;text-align:center;padding:12px 24px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;border:none;border-radius:10px;cursor:pointer;transition:background 0.15s;width:100%;text-decoration:none;margin-top:10px;}
+  .download-btn:hover{background:var(--accent-hover);}
   .next-steps{display:none;margin-top:20px;}
-  .next-steps-label{font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
-  .next-link{padding:7px 14px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:600;color:#2C1810;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-decoration:none;}
-  .next-link:hover{border-color:#C84B31;color:#C84B31;}
+  .next-steps-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+  .next-link{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:600;color:var(--text-primary);background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-decoration:none;}
+  .next-link:hover{border-color:var(--accent);color:var(--accent);}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px}
-  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px}
+  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px}
+  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px}
   .seo-section ol{padding-left:20px;margin:0 0 12px}
-  .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px}
-  .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px}
+  .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px}
+  .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px}
 .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-  .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
-  .seo-link:hover{border-color:#C84B31;color:#C84B31}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+  .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+  .seo-link:hover{border-color:var(--accent);color:var(--accent)}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
@@ -67,26 +67,26 @@ const PRESETS = [
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:#C84B31;">${h1Em}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:var(--accent);">${h1Em}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint}</span>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:12px;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     <div id="previewArea" style="display:none;">
       <div style="margin-bottom:14px;">
-        <div style="font-size:13px;font-weight:700;color:#2C1810;margin-bottom:8px;">Grid presets</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Grid presets</div>
         <div class="sp-grid-presets" id="presetBtns">
           ${PRESETS.map((p, i) => `<button class="sp-preset${i === 0 ? ' active' : ''}" data-idx="${i}">${p.label}</button>`).join('')}
           <button class="sp-preset" id="customBtn">Custom</button>
         </div>
         <div class="sp-custom-row" id="customRow" style="display:none;">
-          <span style="font-size:13px;color:#5A4A3A;">Rows</span>
+          <span style="font-size:13px;color:var(--text-secondary);">Rows</span>
           <input class="sp-custom-input" id="customRows" type="number" min="1" max="20" value="2" />
-          <span style="font-size:13px;color:#5A4A3A;">×</span>
-          <span style="font-size:13px;color:#5A4A3A;">Columns</span>
+          <span style="font-size:13px;color:var(--text-secondary);">×</span>
+          <span style="font-size:13px;color:var(--text-secondary);">Columns</span>
           <input class="sp-custom-input" id="customCols" type="number" min="1" max="20" value="2" />
         </div>
         <div class="sp-info" id="splitInfo"></div>

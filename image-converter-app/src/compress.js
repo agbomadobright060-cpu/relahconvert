@@ -13,46 +13,46 @@ if (document.head) {
   fontLink.rel = 'stylesheet'
   fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
   document.head.appendChild(fontLink)
-  document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
+  document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:var(--bg-page);`
   const style = document.createElement('style')
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
-    #compressBtn:not(:disabled):hover { background: #A63D26 !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,49,0.35) !important; }
+    #compressBtn:not(:disabled):hover { background: var(--accent-hover) !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,49,0.35) !important; }
     #compressBtn { transition: all 0.18s ease; }
-    #downloadLink:hover { background: #2C1810 !important; color: #F5F0E8 !important; }
+    #downloadLink:hover { background: var(--btn-dark) !important; color: var(--text-on-dark-btn) !important; }
     #downloadLink { transition: all 0.18s ease; }
-    .preview-card { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; }
+    .preview-card { background:var(--bg-card); border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:relative; }
     .preview-card img { width:100%; height:120px; object-fit:cover; display:block; }
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-    .preview-card .remove-btn:hover { background:#C84B31; }
+    .preview-card .remove-btn:hover { background:var(--accent); }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    #addMoreBtn:hover { border-color:#C84B31 !important; color:#C84B31 !important; }
-    .result-bar { background:#fff; border-radius:14px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); display:flex; align-items:center; gap:24px; }
+    #addMoreBtn:hover { border-color:var(--accent) !important; color:var(--accent) !important; }
+    .result-bar { background:var(--bg-card); border-radius:14px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); display:flex; align-items:center; gap:24px; }
     .savings-circle { flex-shrink:0; }
     .savings-circle svg { transform: rotate(-90deg); }
-    .savings-circle .circle-bg { fill:none; stroke:#F0E8DF; stroke-width:8; }
-    .savings-circle .circle-fill { fill:none; stroke:#C84B31; stroke-width:8; stroke-linecap:round; stroke-dasharray:226; transition: stroke-dashoffset 1s ease; }
-    .circle-label { font-family:'Fraunces',serif; font-weight:900; font-size:15px; color:#2C1810; text-anchor:middle; dominant-baseline:middle; }
+    .savings-circle .circle-bg { fill:none; stroke:var(--bg-surface); stroke-width:8; }
+    .savings-circle .circle-fill { fill:none; stroke:var(--accent); stroke-width:8; stroke-linecap:round; stroke-dasharray:226; transition: stroke-dashoffset 1s ease; }
+    .circle-label { font-family:'Fraunces',serif; font-weight:900; font-size:15px; color:var(--text-primary); text-anchor:middle; dominant-baseline:middle; }
     .result-stats { flex:1; }
-    .result-saved { font-size:14px; color:#2C1810; margin:0 0 4px; font-weight:400; }
-    .result-sizes { font-size:13px; color:#7A6A5A; display:flex; align-items:center; gap:8px; }
-    .result-arrow { color:#C84B31; font-size:16px; }
-    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .next-link:hover { border-color:#C84B31; color:#C84B31; }
+    .result-saved { font-size:14px; color:var(--text-primary); margin:0 0 4px; font-weight:400; }
+    .result-sizes { font-size:13px; color:var(--text-tertiary); display:flex; align-items:center; gap:8px; }
+    .result-arrow { color:var(--accent); font-size:16px; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:500; color:var(--text-primary); text-decoration:none; background:var(--bg-card); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:var(--accent); color:var(--accent); }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
-    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
-    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.8; margin:0 0 12px; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--text-primary); margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--text-primary); margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section p { font-size:14px; color:var(--text-secondary); line-height:1.8; margin:0 0 12px; }
     .seo-section ol { padding-left:20px; margin:0 0 12px; }
-    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.8; margin-bottom:6px; }
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-section ol li { font-size:14px; color:var(--text-secondary); line-height:1.8; margin-bottom:6px; }
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
     .seo-section .internal-links { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
-    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; transition:all 0.15s; }
-    .seo-section .internal-links a:hover { border-color:#C84B31; color:#C84B31; }
-    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
+    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:500; color:var(--text-primary); text-decoration:none; background:var(--bg-card); transition:all 0.15s; }
+    .seo-section .internal-links a:hover { border-color:var(--accent); color:var(--accent); }
+    .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
   document.title = 'Image Compressor — Compress JPG, PNG and WebP Free | No Upload'
@@ -302,25 +302,25 @@ function buildSeoSection() {
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
-        ${t.compress_title} <em style="font-style:italic; color:#C84B31;">${t.compress_title_em}</em>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:var(--text-primary); margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
+        ${t.compress_title} <em style="font-style:italic; color:var(--accent);">${t.compress_title_em}</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.compress_desc}</p>
+      <p style="font-size:13px; color:var(--text-tertiary); margin:0;">${t.compress_desc}</p>
     </div>
     <div id="uploadArea" style="margin-bottom:16px;">
-      <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
+      <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--text-on-accent); font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
         <span style="font-size:18px;">+</span> ${t.select_images}
       </label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${t.drop_hint}</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:12px;">${t.drop_hint}</span>
     </div>
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/webp,image/png" style="display:none;" />
-    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
+    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:var(--accent-bg); color:var(--accent-hover); font-weight:600; font-size:13px;"></div>
     <div id="previewGrid" style="display:none; margin-bottom:16px;"></div>
-    <button id="compressBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:#C4B8A8; color:#F5F0E8; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.compress_btn}</button>
+    <button id="compressBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:var(--btn-disabled); color:var(--text-on-dark-btn); font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.compress_btn}</button>
     <div id="resultBar" style="display:none; margin-bottom:12px;"></div>
-    <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
+    <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:var(--btn-dark); text-decoration:none; color:var(--text-on-dark-btn); font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
     <div id="nextSteps" style="display:none; margin-top:20px;">
-      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
+      <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
     </div>
   </div>
@@ -417,9 +417,9 @@ function buildNextSteps() {
 
 function getOutputMime(mime) { return mime === 'image/png' ? 'image/jpeg' : mime }
 function getQuality(mime) { return mime === 'image/webp' ? 0.65 : 0.6 }
-function setDisabled() { compressBtn.disabled = true; compressBtn.textContent = t.compress_btn; compressBtn.style.background = '#C4B8A8'; compressBtn.style.cursor = 'not-allowed'; compressBtn.style.opacity = '0.7' }
-function setIdle() { compressBtn.disabled = false; compressBtn.textContent = t.compress_btn; compressBtn.style.background = '#C84B31'; compressBtn.style.cursor = 'pointer'; compressBtn.style.opacity = '1' }
-function setConverting() { compressBtn.disabled = true; compressBtn.textContent = t.compress_btn_loading; compressBtn.style.background = '#9A8A7A'; compressBtn.style.cursor = 'not-allowed'; compressBtn.style.opacity = '1' }
+function setDisabled() { compressBtn.disabled = true; compressBtn.textContent = t.compress_btn; compressBtn.style.background = 'var(--btn-disabled)'; compressBtn.style.cursor = 'not-allowed'; compressBtn.style.opacity = '0.7' }
+function setIdle() { compressBtn.disabled = false; compressBtn.textContent = t.compress_btn; compressBtn.style.background = 'var(--accent)'; compressBtn.style.cursor = 'pointer'; compressBtn.style.opacity = '1' }
+function setConverting() { compressBtn.disabled = true; compressBtn.textContent = t.compress_btn_loading; compressBtn.style.background = 'var(--text-muted)'; compressBtn.style.cursor = 'not-allowed'; compressBtn.style.opacity = '1' }
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
 function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 4000) }
 
@@ -443,7 +443,7 @@ function showResultBar(originalBytes, outputBytes) {
         <div class="result-sizes">
           <span>${formatSize(originalBytes)}</span>
           <span class="result-arrow">→</span>
-          <span style="font-weight:600; color:#2C1810;">${formatSize(outputBytes)}</span>
+          <span style="font-weight:600; color:var(--text-primary);">${formatSize(outputBytes)}</span>
         </div>
       </div>
     </div>`

@@ -1,5 +1,6 @@
 import { tools } from '../tools/configs.js'
 import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug, englishKeyFromSlug } from './i18n.js'
+import { initTheme, toggleTheme, getCurrentTheme, sunIcon, moonIcon } from './theme.js'
 
 // Review prompt — shown once per session after a download
 function showReviewPrompt() {
@@ -9,20 +10,20 @@ function showReviewPrompt() {
     const el = document.createElement('div')
     el.style.cssText = `
       position:fixed;bottom:20px;right:20px;
-      background:#fff;border-radius:12px;
+      background:var(--bg-card);border-radius:12px;
       padding:16px 20px;
       box-shadow:0 6px 24px rgba(0,0,0,0.15);
       z-index:9999;
       font-family:'DM Sans',sans-serif;
-      border:1px solid #E8E0D5;
+      border:1px solid var(--border);
       max-width:280px;
       animation:fadeUp 0.3s ease both;
     `
     el.innerHTML = `
-      <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:#2C1810">
+      <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-primary)">
         Enjoying RelahConvert?
       </div>
-      <div style="font-size:12px;color:#7A6A5A;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">
         Rate us on
         <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/logo-white.svg"
              style="height:16px;vertical-align:middle;filter:invert(1) sepia(1) saturate(5) hue-rotate(100deg);"
@@ -30,12 +31,12 @@ function showReviewPrompt() {
       </div>
       <div style="display:flex;gap:8px;">
         <button id="closeReview"
-          style="flex:1;padding:7px;border:1px solid #DDD5C8;border-radius:8px;background:#fff;cursor:pointer;font-size:12px;color:#7A6A5A">
+          style="flex:1;padding:7px;border:1px solid var(--border-light);border-radius:8px;background:var(--bg-card);cursor:pointer;font-size:12px;color:var(--text-tertiary)">
           Skip
         </button>
         <a href="https://www.trustpilot.com/review/relahconvert.com" target="_blank"
           id="reviewLink"
-          style="flex:2;padding:7px;background:#00b67a;color:#fff;text-align:center;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
+          style="flex:2;padding:7px;background:var(--trustpilot);color:#fff;text-align:center;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
           \u2605 Write a Review
         </a>
       </div>
@@ -52,6 +53,7 @@ export function injectHeader() {
   const t = getT()
   const currentLang = getLang()
   const isRTL = currentLang === 'ar'
+  initTheme()
 
   const activeToolKey = (function() {
     const path = decodeURIComponent(window.location.pathname).replace(/^\/|\/$/g, '').split('?')[0]
@@ -85,8 +87,8 @@ export function injectHeader() {
     body { display: flex; flex-direction: column; }
     #app { flex: 1; }
     #site-header {
-      background: #fff;
-      border-bottom: 1px solid #E8E0D5;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       font-family: 'DM Sans', sans-serif;
       position: sticky;
       top: 0;
@@ -105,7 +107,7 @@ export function injectHeader() {
     #site-header .logo {
       font-family: 'Fraunces', serif;
       font-size: 24px;
-      color: #2C1810;
+      color: var(--text-primary);
       text-decoration: none;
       letter-spacing: -0.02em;
       flex-shrink: 0;
@@ -117,8 +119,8 @@ export function injectHeader() {
       line-height: 1;
     }
     #site-header .logo .logo-text { display: flex; align-items: baseline; }
-    #site-header .logo .relah { font-weight: 400; color: #2C1810; }
-    #site-header .logo .convert { font-weight: 900; font-style: italic; color: #C84B31; }
+    #site-header .logo .relah { font-weight: 400; color: var(--text-primary); }
+    #site-header .logo .convert { font-weight: 900; font-style: italic; color: var(--accent); }
     #site-header .desktop-nav {
       display: flex;
       align-items: center;
@@ -132,20 +134,20 @@ export function injectHeader() {
       font-weight: 500;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #5A4A3A;
+      color: var(--text-secondary);
       text-decoration: none;
       transition: color 0.15s;
       white-space: nowrap;
     }
-    #site-header .nav-link:hover { color: #C84B31; }
-    #site-header .nav-link.active { color: #C84B31; font-weight: 600; }
+    #site-header .nav-link:hover { color: var(--accent); }
+    #site-header .nav-link.active { color: var(--accent); font-weight: 600; }
     #site-header .more-btn {
       padding: 8px 14px;
       font-size: 12px;
       font-weight: 500;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #5A4A3A;
+      color: var(--text-secondary);
       background: none;
       border: none;
       cursor: pointer;
@@ -156,7 +158,7 @@ export function injectHeader() {
       font-family: 'DM Sans', sans-serif;
       white-space: nowrap;
     }
-    #site-header .more-btn:hover { color: #C84B31; }
+    #site-header .more-btn:hover { color: var(--accent); }
     #site-header .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
     #site-header .more-btn.open .arrow { transform: rotate(180deg); }
     #site-header .hamburger {
@@ -172,7 +174,7 @@ export function injectHeader() {
       display: block;
       width: 22px;
       height: 2px;
-      background: #2C1810;
+      background: var(--text-primary);
       border-radius: 2px;
       transition: all 0.2s;
     }
@@ -182,8 +184,8 @@ export function injectHeader() {
       top: 64px;
       left: 0;
       right: 0;
-      background: #fff;
-      border-bottom: 1px solid #E8E0D5;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       z-index: 99;
       max-height: calc(100vh - 64px);
@@ -206,13 +208,13 @@ export function injectHeader() {
       border-radius: 8px;
       font-size: 13px;
       font-weight: 500;
-      color: #2C1810;
+      color: var(--text-primary);
       text-decoration: none;
       font-family: 'DM Sans', sans-serif;
       transition: all 0.15s;
     }
-    #dropdown-menu a:hover { background: #F5F0E8; color: #C84B31; }
-    #dropdown-menu a.active { background: #FDE8E3; color: #C84B31; }
+    #dropdown-menu a:hover { background: var(--bg-surface); color: var(--accent); }
+    #dropdown-menu a.active { background: var(--accent-bg); color: var(--accent); }
     @media (max-width: 768px) {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
@@ -224,13 +226,13 @@ export function injectHeader() {
       #dropdown-menu a { font-size: 12px; padding: 10px; }
     }
     #site-footer {
-      background: #F2F2F2;
+      background: var(--footer-bg);
       font-family: 'DM Sans', sans-serif;
       padding: 20px 24px;
       text-align: center;
-      border-top: 1px solid #E8E0D5;
+      border-top: 1px solid var(--border);
     }
-    #site-footer .footer-copy { font-size: 12px; color: #9A8A7A; }
+    #site-footer .footer-copy { font-size: 12px; color: var(--text-muted); }
     .lang-bar {
       display: flex;
       align-items: center;
@@ -240,9 +242,9 @@ export function injectHeader() {
       position: relative;
     }
     .lang-toggle {
-      background: #fff;
-      border: 1px solid #DDD5C8;
-      color: #5A4A3A;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
       font-size: 12px;
       font-family: 'DM Sans', sans-serif;
       padding: 5px 12px;
@@ -254,14 +256,14 @@ export function injectHeader() {
       gap: 6px;
       transition: border-color 0.15s;
     }
-    .lang-toggle:hover { border-color: #C84B31; }
+    .lang-toggle:hover { border-color: var(--accent); }
     .lang-toggle .lang-arrow { font-size: 9px; transition: transform 0.15s; display: inline-block; }
     .lang-toggle.open .lang-arrow { transform: rotate(180deg); }
     .lang-grid-wrap {
       display: none;
       position: fixed;
-      background: #fff;
-      border: 1px solid #E8E0D5;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       padding: 12px;
@@ -284,20 +286,20 @@ export function injectHeader() {
       border-radius: 6px;
       font-size: 13px;
       font-weight: 400;
-      color: #5A4A3A;
+      color: var(--text-secondary);
       text-decoration: none;
       font-family: 'DM Sans', sans-serif;
       transition: background 0.12s;
       white-space: nowrap;
       cursor: pointer;
     }
-    .lang-grid a:hover { background: #F5F0E8; color: #2C1810; }
-    .lang-grid a.active { font-weight: 600; color: #C84B31; }
+    .lang-grid a:hover { background: var(--bg-surface); color: var(--text-primary); }
+    .lang-grid a.active { font-weight: 600; color: var(--accent); }
     .lang-grid a .lang-check {
       width: 16px;
       flex-shrink: 0;
       font-size: 13px;
-      color: #C84B31;
+      color: var(--accent);
       text-align: center;
     }
     @media (max-width: 768px) {
@@ -311,6 +313,26 @@ export function injectHeader() {
     }
     @media (max-width: 360px) {
       .lang-grid { grid-template-columns: 1fr; }
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 6px 8px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      margin-left: 8px;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .mobile-theme { display: none; }
+    @media (max-width: 768px) {
+      .mobile-theme { display: flex; }
+      #themeToggle { display: none; }
     }
 
     /* RTL Arabic */
@@ -388,7 +410,9 @@ export function injectHeader() {
     <nav class="desktop-nav">
       ${mainLinks.map(slug => `<a href="${localHref(slug)}" class="nav-link ${activeToolKey === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
       <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
     </nav>
+    <button class="theme-toggle mobile-theme" id="themeToggleMobile" aria-label="Toggle dark mode"></button>
     <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>`
@@ -440,6 +464,19 @@ export function injectHeader() {
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
   document.body.appendChild(footer)
+
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle')
+  const themeToggleMobile = document.getElementById('themeToggleMobile')
+  function updateToggleIcons() {
+    const icon = getCurrentTheme() === 'dark' ? sunIcon : moonIcon
+    if (themeToggle) themeToggle.innerHTML = icon
+    if (themeToggleMobile) themeToggleMobile.innerHTML = icon
+  }
+  updateToggleIcons()
+  function handleToggle() { toggleTheme(); updateToggleIcons() }
+  if (themeToggle) themeToggle.addEventListener('click', handleToggle)
+  if (themeToggleMobile) themeToggleMobile.addEventListener('click', handleToggle)
 
   const langToggle = document.getElementById('langToggle')
   const langGridWrap = document.getElementById('langGridWrap')

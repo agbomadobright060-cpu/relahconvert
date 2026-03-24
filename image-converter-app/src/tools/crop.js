@@ -5,7 +5,7 @@ injectHreflang('crop')
 
 const t = getT()
 
-const bg = '#F2F2F2'
+const bg = 'var(--bg-page)'
 const toolName  = (t.nav_short && t.nav_short['crop']) || 'Crop Image'
 const seo       = t.seo && t.seo['crop']
 const descText  = seo ? seo.h2a : 'Crop any image free. Files never leave your device.'
@@ -24,46 +24,46 @@ if (document.head) {
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
-    .opt-btn { width:100%; padding:13px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:10px; }
-    .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
-    .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
-    .download-btn { display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:#2C1810; text-decoration:none; color:#F5F0E8; font-family:'Fraunces',serif; font-weight:700; font-size:15px; margin-bottom:10px; }
-    .download-btn:hover { background:#1a0f09; }
-    .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
+    .opt-btn { width:100%; padding:13px; border:none; border-radius:10px; background:var(--accent); color:var(--text-on-accent); font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:10px; }
+    .opt-btn:hover { background:var(--accent-hover); transform:translateY(-1px); }
+    .opt-btn:disabled { background:var(--btn-disabled); cursor:not-allowed; opacity:0.7; transform:none; }
+    .download-btn { display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:var(--btn-dark); text-decoration:none; color:var(--text-on-dark-btn); font-family:'Fraunces',serif; font-weight:700; font-size:15px; margin-bottom:10px; }
+    .download-btn:hover { background:var(--btn-dark-hover); }
+    .upload-label { display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--text-on-accent); font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
     .preview-wrap { position:relative; display:inline-block; max-width:100%; }
     .preview-wrap img { max-width:100%; max-height:400px; display:block; border-radius:8px; }
-    #cropBox { position:absolute; border:2px solid #C84B31; background:rgba(200,75,49,0.08); cursor:move; box-sizing:border-box; }
-    .crop-handle { position:absolute; width:10px; height:10px; background:#C84B31; border-radius:2px; }
+    #cropBox { position:absolute; border:2px solid var(--accent); background:rgba(200,75,49,0.08); cursor:move; box-sizing:border-box; }
+    .crop-handle { position:absolute; width:10px; height:10px; background:var(--accent); border-radius:2px; }
     .crop-handle.nw { top:-5px; left:-5px; cursor:nw-resize; }
     .crop-handle.ne { top:-5px; right:-5px; cursor:ne-resize; }
     .crop-handle.sw { bottom:-5px; left:-5px; cursor:sw-resize; }
     .crop-handle.se { bottom:-5px; right:-5px; cursor:se-resize; }
-    .crop-options { background:#fff; border-radius:12px; padding:16px; margin-top:14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .crop-options-title { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; font-family:'DM Sans',sans-serif; }
+    .crop-options { background:var(--bg-card); border-radius:12px; padding:16px; margin-top:14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .crop-options-title { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; font-family:'DM Sans',sans-serif; }
     .crop-inputs-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .crop-input-group { display:flex; flex-direction:column; gap:4px; }
-    .crop-input-label { font-size:11px; font-weight:600; color:#5A4A3A; font-family:'DM Sans',sans-serif; }
-    .crop-input { padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:#2C1810; outline:none; width:100%; box-sizing:border-box; }
-    .crop-input:focus { border-color:#C84B31; box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
+    .crop-input-label { font-size:11px; font-weight:600; color:var(--text-secondary); font-family:'DM Sans',sans-serif; }
+    .crop-input { padding:8px 10px; border:1.5px solid var(--border-light); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:var(--text-primary); outline:none; width:100%; box-sizing:border-box; }
+    .crop-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
     .next-steps { margin-top:20px; }
-    .next-steps-label { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; }
-    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .next-link:hover { border-color:#C84B31; color:#C84B31; }
+    .next-steps-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:500; color:var(--text-primary); text-decoration:none; background:var(--bg-card); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:var(--accent); color:var(--accent); }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:32px 0 10px; }
-    .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:24px 0 8px; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--text-primary); margin:32px 0 10px; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:24px 0 8px; }
     .seo-section ol { padding-left:20px; margin:0 0 12px; }
-    .seo-section ol li { font-size:13px; color:#5A4A3A; line-height:1.6; margin-bottom:6px; }
-    .seo-section p { font-size:13px; color:#5A4A3A; line-height:1.6; margin:0 0 12px; }
+    .seo-section ol li { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:6px; }
+    .seo-section p { font-size:13px; color:var(--text-secondary); line-height:1.6; margin:0 0 12px; }
 
 
 
 
     .seo-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
-    .seo-link { padding:7px 14px; background:#fff; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-weight:600; color:#2C1810; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .seo-link:hover { border-color:#C84B31; color:#C84B31; }
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-link { padding:7px 14px; background:var(--bg-card); border:1.5px solid var(--border-light); border-radius:8px; font-size:13px; font-weight:600; color:var(--text-primary); text-decoration:none; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .seo-link:hover { border-color:var(--accent); color:var(--accent); }
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
   `
   document.head.appendChild(style)
@@ -77,12 +77,12 @@ const h1Em   = parts.slice(1).join(' ')
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:var(--text-primary); margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:var(--accent);">${h1Em}</em></h1>
+      <p style="font-size:13px; color:var(--text-tertiary); margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${dropHint}</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:12px;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     <div id="previewArea" style="display:none; margin-bottom:16px;">

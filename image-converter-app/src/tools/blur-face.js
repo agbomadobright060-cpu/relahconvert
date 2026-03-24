@@ -36,68 +36,68 @@ const MAX_FILES = 25
 const MAX_BYTES = 200 * 1024 * 1024
 
 if (document.head) {
-  document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:#F2F2F2;'
+  document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
   const style = document.createElement('style')
   style.textContent = `
     *{box-sizing:border-box}
     .tool-wrap{max-width:1060px;margin:0 auto;padding:24px 16px 60px;font-family:'DM Sans',sans-serif}
     .tool-hero{margin-bottom:20px}
-    .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:#2C1810;margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
-    .brand-em{font-style:italic;color:#C84B31}
-    .tool-sub{font-size:13px;color:#7A6A5A;margin:0}
-    .bf-upload-area{border:2px dashed #DDD5C8;border-radius:14px;padding:40px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fff}
-    .bf-upload-area:hover,.bf-upload-area.drag{border-color:#C84B31;background:#FDF5F3}
+    .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--text-primary);margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
+    .brand-em{font-style:italic;color:var(--accent)}
+    .tool-sub{font-size:13px;color:var(--text-tertiary);margin:0}
+    .bf-upload-area{border:2px dashed var(--border-light);border-radius:14px;padding:40px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg-card)}
+    .bf-upload-area:hover,.bf-upload-area.drag{border-color:var(--accent);background:#FDF5F3}
     .bf-upload-icon{font-size:36px;margin-bottom:10px}
-    .bf-upload-text{font-size:15px;font-weight:700;color:#2C1810;margin:0 0 4px}
-    .bf-upload-sub{font-size:12px;color:#9A8A7A;margin:0}
-    .bf-upload-btn{margin-top:14px;padding:10px 24px;background:#C84B31;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer}
-    .bf-upload-btn:hover{background:#A63D26}
+    .bf-upload-text{font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
+    .bf-upload-sub{font-size:12px;color:var(--text-muted);margin:0}
+    .bf-upload-btn{margin-top:14px;padding:10px 24px;background:var(--accent);color:var(--text-on-accent);border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer}
+    .bf-upload-btn:hover{background:var(--accent-hover)}
     .bf-queue{display:none;margin-bottom:16px}
-    .bf-queue-title{font-size:11px;font-weight:700;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px}
+    .bf-queue-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px}
     .bf-queue-grid{display:flex;flex-wrap:wrap;gap:8px}
-    .bf-queue-item{position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #DDD5C8;cursor:pointer;flex-shrink:0;transition:border-color 0.15s}
-    .bf-queue-item.active{border-color:#C84B31}
+    .bf-queue-item{position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid var(--border-light);cursor:pointer;flex-shrink:0;transition:border-color 0.15s}
+    .bf-queue-item.active{border-color:var(--accent)}
     .bf-queue-item img{width:100%;height:100%;object-fit:cover;display:block}
     .bf-queue-item .qi-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-    .bf-queue-item .qi-del:hover{background:#C84B31}
-    .bf-queue-add{width:72px;height:72px;border-radius:8px;border:2px dashed #DDD5C8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#9A8A7A;flex-shrink:0;transition:all 0.15s;background:#fff}
-    .bf-queue-add:hover{border-color:#C84B31;color:#C84B31}
+    .bf-queue-item .qi-del:hover{background:var(--accent)}
+    .bf-queue-add{width:72px;height:72px;border-radius:8px;border:2px dashed var(--border-light);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:var(--text-muted);flex-shrink:0;transition:all 0.15s;background:var(--bg-card)}
+    .bf-queue-add:hover{border-color:var(--accent);color:var(--accent)}
     .bf-layout{display:none;gap:20px;align-items:start}
     .bf-layout.visible{display:grid;grid-template-columns:1fr 270px}
     @media(max-width:700px){.bf-layout.visible{grid-template-columns:1fr}}
-    .bf-canvas-wrap{position:relative;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+    .bf-canvas-wrap{position:relative;background:var(--bg-card);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
     .bf-canvas-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair;touch-action:none}
-    .bf-panel{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:14px}
-    .bf-panel-title{font-size:14px;font-weight:700;color:#2C1810;margin:0;font-family:'Fraunces',serif}
+    .bf-panel{background:var(--bg-card);border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:14px}
+    .bf-panel-title{font-size:14px;font-weight:700;color:var(--text-primary);margin:0;font-family:'Fraunces',serif}
     .bf-mode-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .bf-mode-btn{padding:9px 6px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:12px;font-weight:700;color:#2C1810;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center}
-    .bf-mode-btn.active{border-color:#C84B31;background:#FDF5F3;color:#C84B31}
-    .bf-label{font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px}
-    .bf-slider{width:100%;accent-color:#C84B31;cursor:pointer}
-    .bf-status{font-size:12px;color:#7A6A5A;background:#F5EDE8;border-radius:8px;padding:10px 12px;text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center}
-    .bf-status.error{background:#FDE8E3;color:#C84B31}
+    .bf-mode-btn{padding:9px 6px;border:1.5px solid var(--border-light);border-radius:8px;font-size:12px;font-weight:700;color:var(--text-primary);background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center}
+    .bf-mode-btn.active{border-color:var(--accent);background:#FDF5F3;color:var(--accent)}
+    .bf-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px}
+    .bf-slider{width:100%;accent-color:var(--accent);cursor:pointer}
+    .bf-status{font-size:12px;color:var(--text-tertiary);background:var(--bg-surface);border-radius:8px;padding:10px 12px;text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center}
+    .bf-status.error{background:var(--accent-bg);color:var(--accent)}
     .bf-status.success{background:#E8F5E9;color:#2E7D32}
     .bf-regions{display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto}
-    .bf-region-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F8F4F0;border-radius:8px;font-size:12px;color:#2C1810;font-weight:600}
-    .bf-region-del{background:none;border:none;color:#C84B31;cursor:pointer;font-size:14px;padding:0 4px;line-height:1}
+    .bf-region-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg-surface);border-radius:8px;font-size:12px;color:var(--text-primary);font-weight:600}
+    .bf-region-del{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 4px;line-height:1}
     .bf-action-row{display:flex;flex-direction:column;gap:8px}
-    .bf-download-btn{padding:12px;background:#C84B31;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center;width:100%}
-    .bf-download-btn:hover{background:#A63D26;transform:translateY(-1px)}
-    .bf-download-btn:disabled{background:#C4B8A8;cursor:not-allowed;transform:none}
-    .bf-reset-btn{padding:10px;background:#fff;color:#7A6A5A;border:1.5px solid #DDD5C8;border-radius:9px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%}
-    .bf-reset-btn:hover{border-color:#C84B31;color:#C84B31}
+    .bf-download-btn{padding:12px;background:var(--accent);color:var(--text-on-accent);border:none;border-radius:9px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center;width:100%}
+    .bf-download-btn:hover{background:var(--accent-hover);transform:translateY(-1px)}
+    .bf-download-btn:disabled{background:var(--btn-disabled);cursor:not-allowed;transform:none}
+    .bf-reset-btn{padding:10px;background:var(--bg-card);color:var(--text-tertiary);border:1.5px solid var(--border-light);border-radius:9px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%}
+    .bf-reset-btn:hover{border-color:var(--accent);color:var(--accent)}
     #nextSteps{margin-top:4px}
-    .seo-section{margin-top:48px;padding-top:32px;border-top:1.5px solid #E8DDD5}
-    .seo-section .seo-h2-large{font-family:'Fraunces',serif;font-size:clamp(15px,2vw,19px);font-weight:900;color:#2C1810;margin:0 0 14px}
-    .seo-section h3{font-family:'Fraunces',serif;font-size:16px;font-weight:800;color:#2C1810;margin:22px 0 8px}
-    .seo-section ol{padding-left:20px;color:#5A4A3A;font-size:14px;line-height:1.8}
-    .seo-section p{color:#5A4A3A;font-size:14px;line-height:1.7;margin:10px 0}
+    .seo-section{margin-top:48px;padding-top:32px;border-top:1.5px solid var(--border)}
+    .seo-section .seo-h2-large{font-family:'Fraunces',serif;font-size:clamp(15px,2vw,19px);font-weight:900;color:var(--text-primary);margin:0 0 14px}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:16px;font-weight:800;color:var(--text-primary);margin:22px 0 8px}
+    .seo-section ol{padding-left:20px;color:var(--text-secondary);font-size:14px;line-height:1.8}
+    .seo-section p{color:var(--text-secondary);font-size:14px;line-height:1.7;margin:10px 0}
     .faq-item{margin-bottom:14px}
-    .faq-q{font-weight:700;color:#2C1810;font-size:14px;margin:0 0 4px}
-    .faq-a{color:#5A4A3A;font-size:13px;line-height:1.6;margin:0}
+    .faq-q{font-weight:700;color:var(--text-primary);font-size:14px;margin:0 0 4px}
+    .faq-a{color:var(--text-secondary);font-size:13px;line-height:1.6;margin:0}
     .also-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-    .also-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:12px;font-weight:600;color:#2C1810;text-decoration:none;transition:all 0.15s}
-    .also-link:hover{border-color:#C84B31;color:#C84B31}
+    .also-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:12px;font-weight:600;color:var(--text-primary);text-decoration:none;transition:all 0.15s}
+    .also-link:hover{border-color:var(--accent);color:var(--accent)}
     @media(max-width:700px){
       .bf-mode-btn{padding:14px 8px;font-size:13px}
       .bf-download-btn{padding:16px;font-size:15px}
@@ -165,10 +165,10 @@ document.querySelector('#app').innerHTML = `
       </div>
       <div class="bf-action-row">
         <button class="bf-download-btn" id="downloadBtn">⬇ ${ui.download}</button>
-        <button class="bf-download-btn" id="batchDownloadBtn" style="display:none;background:#2C1810">⬇ ${ui.downloadZip}</button>
+        <button class="bf-download-btn" id="batchDownloadBtn" style="display:none;background:var(--btn-dark)">⬇ ${ui.downloadZip}</button>
         <button class="bf-reset-btn" id="resetBtn">↺ ${ui.reset}</button>
         <div id="nextSteps" style="display:none">
-          <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">${t.whats_next||"What's Next?"}</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">${t.whats_next||"What's Next?"}</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px" id="nextStepsButtons"></div>
         </div>
       </div>
@@ -544,10 +544,10 @@ function buildNextSteps(blob){
   const container=$('nextStepsButtons');container.innerHTML=''
   buttons.forEach(b=>{
     const btn=document.createElement('button')
-    btn.style.cssText='padding:7px 13px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:12px;font-weight:600;color:#2C1810;background:#fff;cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.15s'
+    btn.style.cssText='padding:7px 13px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-primary);background:var(--bg-card);cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.15s'
     btn.textContent=b.label
-    btn.onmouseover=()=>{btn.style.borderColor='#C84B31';btn.style.color='#C84B31'}
-    btn.onmouseout=()=>{btn.style.borderColor='#DDD5C8';btn.style.color='#2C1810'}
+    btn.onmouseover=()=>{btn.style.borderColor='var(--accent)';btn.style.color='var(--accent)'}
+    btn.onmouseout=()=>{btn.style.borderColor='var(--border-light)';btn.style.color='var(--text-primary)'}
     btn.onclick=async()=>{try{await saveToIDB(blob,'blurred.jpg','image/jpeg');sessionStorage.setItem('pendingFromIDB','1')}catch(e){}window.location.href=b.href}
     container.appendChild(btn)
   })

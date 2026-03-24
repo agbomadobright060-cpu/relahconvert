@@ -26,62 +26,62 @@ if (document.head) {
   fontLink.rel = 'stylesheet'
   fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@400;500;600&display=swap'
   document.head.appendChild(fontLink)
-  document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
+  document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:var(--bg-page);`
   const style = document.createElement('style')
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
-    #downloadBtn:not(:disabled):hover { background: #A63D26 !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,49,0.35) !important; }
+    #downloadBtn:not(:disabled):hover { background: var(--accent-hover) !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,49,0.35) !important; }
     #downloadBtn { transition: all 0.18s ease; }
-    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .next-link:hover { border-color:#C84B31; color:#C84B31; }
-    .pix-mode-btn { padding:7px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:600; color:#2C1810; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .pix-mode-btn:hover { border-color:#C84B31; color:#C84B31; }
-    .pix-mode-btn.active { background:#C84B31; color:#fff; border-color:#C84B31; }
-    .preview-card { background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); position:relative; cursor:pointer; transition:outline 0.1s; }
-    .preview-card:hover { outline:2px solid #C84B31; outline-offset:1px; }
-    .preview-card.active { outline:2px solid #C84B31; outline-offset:1px; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:500; color:var(--text-primary); text-decoration:none; background:var(--bg-card); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:var(--accent); color:var(--accent); }
+    .pix-mode-btn { padding:7px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:600; color:var(--text-primary); background:var(--bg-card); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .pix-mode-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .pix-mode-btn.active { background:var(--accent); color:var(--text-on-accent); border-color:var(--accent); }
+    .preview-card { background:var(--bg-card); border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); position:relative; cursor:pointer; transition:outline 0.1s; }
+    .preview-card:hover { outline:2px solid var(--accent); outline-offset:1px; }
+    .preview-card.active { outline:2px solid var(--accent); outline-offset:1px; }
     .preview-card img { width:100%; height:80px; object-fit:cover; display:block; }
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-    .preview-card .remove-btn:hover { background:#C84B31; }
+    .preview-card .remove-btn:hover { background:var(--accent); }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .tool-layout { display:grid; grid-template-columns:1fr 280px; gap:20px; align-items:start; }
     .image-col { min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; }
-    .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:16px; font-family:'DM Sans',sans-serif; }
-    .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:#2C1810; margin:0 0 12px; }
-    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:6px; }
-    .divider { height:1px; background:#F0EAE3; margin:12px 0; }
+    .controls-col { background:var(--bg-card); border-radius:14px; border:1.5px solid var(--border); padding:16px; font-family:'DM Sans',sans-serif; }
+    .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:var(--text-primary); margin:0 0 12px; }
+    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+    .divider { height:1px; background:var(--bg-surface); margin:12px 0; }
     .range-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
-    .range-val { font-size:12px; color:#9A8A7A; min-width:28px; text-align:right; }
-    .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; }
-    .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
-    .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
+    .range-val { font-size:12px; color:var(--text-muted); min-width:28px; text-align:right; }
+    .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:var(--accent); color:var(--text-on-accent); font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; }
+    .opt-btn:hover { background:var(--accent-hover); transform:translateY(-1px); }
+    .opt-btn:disabled { background:var(--btn-disabled); cursor:not-allowed; opacity:0.7; transform:none; }
     .file-chips { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:4px; }
     .file-thumb { position:relative; flex-shrink:0; width:64px; height:64px; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid transparent; transition:border-color 0.15s; }
-    .file-thumb:hover { border-color:#C84B31; }
-    .file-thumb.active { border-color:#C84B31; box-shadow:0 0 0 2px rgba(200,75,49,0.3); }
+    .file-thumb:hover { border-color:var(--accent); }
+    .file-thumb.active { border-color:var(--accent); box-shadow:0 0 0 2px rgba(200,75,49,0.3); }
     .file-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
     .file-thumb .thumb-x { position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; padding:0; opacity:0; transition:opacity 0.15s; }
     .file-thumb:hover .thumb-x { opacity:1; }
-    .file-thumb .thumb-x:hover { background:#C84B31; }
-    .add-thumb { flex-shrink:0; width:64px; height:64px; border-radius:8px; border:1.5px dashed #DDD5C8; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; color:#9A8A7A; transition:all 0.15s; }
-    .add-thumb:hover { border-color:#C84B31; color:#C84B31; }
+    .file-thumb .thumb-x:hover { background:var(--accent); }
+    .add-thumb { flex-shrink:0; width:64px; height:64px; border-radius:8px; border:1.5px dashed var(--border-light); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; color:var(--text-muted); transition:all 0.15s; }
+    .add-thumb:hover { border-color:var(--accent); color:var(--accent); }
     .pix-canvas-wrap { position:relative; overflow:hidden; display:block; width:100%; }
     .pix-canvas-wrap canvas { display:block; max-width:100%; max-height:500px; margin:0 auto; cursor:crosshair; touch-action:none; }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
-    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
-    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:#2C1810; margin:24px 0 8px; letter-spacing:-0.01em; }
-    .seo-section p { font-size:14px; color:#5A4A3A; line-height:1.8; margin:0 0 12px; }
+    .seo-section h2 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--text-primary); margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section h3 { font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--text-primary); margin:24px 0 8px; letter-spacing:-0.01em; }
+    .seo-section p { font-size:14px; color:var(--text-secondary); line-height:1.8; margin:0 0 12px; }
     .seo-section ol { padding-left:20px; margin:0 0 12px; }
-    .seo-section ol li { font-size:14px; color:#5A4A3A; line-height:1.8; margin-bottom:6px; }
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-section ol li { font-size:14px; color:var(--text-secondary); line-height:1.8; margin-bottom:6px; }
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
     .seo-section .internal-links { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
-    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; transition:all 0.15s; }
-    .seo-section .internal-links a:hover { border-color:#C84B31; color:#C84B31; }
-    .seo-divider { border:none; border-top:1px solid #E8E0D5; margin:0 auto 40px; max-width:700px; }
+    .seo-section .internal-links a { padding:8px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:500; color:var(--text-primary); text-decoration:none; background:var(--bg-card); transition:all 0.15s; }
+    .seo-section .internal-links a:hover { border-color:var(--accent); color:var(--accent); }
+    .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
   document.title = t.pix_page_title || 'Pixelate Image Online \u2014 Pixelate Face or Full Image Free | RelahConvert'
@@ -514,19 +514,19 @@ const downloadZipLbl = t.download_zip || 'Download ZIP'
 document.querySelector('#app').innerHTML = `
   <div style="max-width:1100px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
-        ${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:var(--text-primary); margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
+        ${h1Main} <em style="font-style:italic; color:var(--accent);">${h1Em}</em>
       </h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0;">${t.pix_desc || 'Pixelate an entire image or just a face/region. Batch process up to 25 files. Free, private, browser-only.'}</p>
+      <p style="font-size:13px; color:var(--text-tertiary); margin:0;">${t.pix_desc || 'Pixelate an entire image or just a face/region. Batch process up to 25 files. Free, private, browser-only.'}</p>
     </div>
     <div id="uploadArea" style="margin-bottom:16px;">
-      <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
+      <label for="fileInput" style="display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--text-on-accent); font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer;">
         <span style="font-size:18px;">+</span> ${selectLbl}
       </label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:12px;">${dropHint}</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:12px;">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
-    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:#FDE8E3; color:#A63D26; font-weight:600; font-size:13px;"></div>
+    <div id="warning" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:10px; border:1px solid #F5C6BC; background:var(--accent-bg); color:var(--accent-hover); font-weight:600; font-size:13px;"></div>
     <div id="workArea" style="display:none; margin-bottom:16px;">
       <div id="fileChips" class="file-chips"></div>
       <div class="tool-layout">
@@ -545,8 +545,8 @@ document.querySelector('#app').innerHTML = `
           </div>
           <div id="batchModeWrap" style="display:none; margin-bottom:12px;">
             <div style="display:flex; gap:0;">
-              <button id="modeAllBtn" style="flex:1; padding:6px 8px; border:1.5px solid #DDD5C8; border-radius:6px 0 0 6px; background:#fff; color:#2C1810; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
-              <button id="modeIndBtn" style="flex:1; padding:6px 8px; border:1.5px solid #C84B31; border-radius:0 6px 6px 0; background:#C84B31; color:#fff; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
+              <button id="modeAllBtn" style="flex:1; padding:6px 8px; border:1.5px solid var(--border-light); border-radius:6px 0 0 6px; background:var(--bg-card); color:var(--text-primary); font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${applyAllLbl}</button>
+              <button id="modeIndBtn" style="flex:1; padding:6px 8px; border:1.5px solid var(--accent); border-radius:0 6px 6px 0; background:var(--accent); color:var(--text-on-accent); font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">${individualLbl}</button>
             </div>
           </div>
           <div class="divider"></div>
@@ -556,8 +556,8 @@ document.querySelector('#app').innerHTML = `
             <span class="range-val" id="pixelVal">12</span>
           </div>
           <div style="display:flex; justify-content:space-between; margin-top:-6px; margin-bottom:12px;">
-            <span style="font-size:10px; color:#9A8A7A;">${pixLowLbl}</span>
-            <span style="font-size:10px; color:#9A8A7A;">${pixHighLbl}</span>
+            <span style="font-size:10px; color:var(--text-muted);">${pixLowLbl}</span>
+            <span style="font-size:10px; color:var(--text-muted);">${pixHighLbl}</span>
           </div>
           <div class="divider"></div>
           <button class="opt-btn" id="downloadBtn" disabled>${dlLabel}</button>
@@ -565,7 +565,7 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
     <div id="nextSteps" style="display:none; margin-top:20px;">
-      <div style="font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next || "WHAT'S NEXT?"}</div>
+      <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next || "WHAT'S NEXT?"}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
     </div>
   </div>
@@ -637,8 +637,8 @@ modeArea.addEventListener('click', () => {
 
 modeAllBtn.addEventListener('click', () => {
   isApplyAll = true
-  modeAllBtn.style.background = '#C84B31'; modeAllBtn.style.color = '#fff'; modeAllBtn.style.borderColor = '#C84B31'
-  modeIndBtn.style.background = '#fff'; modeIndBtn.style.color = '#2C1810'; modeIndBtn.style.borderColor = '#DDD5C8'
+  modeAllBtn.style.background = 'var(--accent)'; modeAllBtn.style.color = 'var(--text-on-accent)'; modeAllBtn.style.borderColor = 'var(--accent)'
+  modeIndBtn.style.background = 'var(--bg-card)'; modeIndBtn.style.color = 'var(--text-primary)'; modeIndBtn.style.borderColor = 'var(--border-light)'
   // Force Whole Image mode in Apply to All
   isWholeMode = true
   modeWhole.classList.add('active')
@@ -651,8 +651,8 @@ modeAllBtn.addEventListener('click', () => {
 
 modeIndBtn.addEventListener('click', () => {
   isApplyAll = false
-  modeIndBtn.style.background = '#C84B31'; modeIndBtn.style.color = '#fff'; modeIndBtn.style.borderColor = '#C84B31'
-  modeAllBtn.style.background = '#fff'; modeAllBtn.style.color = '#2C1810'; modeAllBtn.style.borderColor = '#DDD5C8'
+  modeIndBtn.style.background = 'var(--accent)'; modeIndBtn.style.color = 'var(--text-on-accent)'; modeIndBtn.style.borderColor = 'var(--accent)'
+  modeAllBtn.style.background = 'var(--bg-card)'; modeAllBtn.style.color = 'var(--text-primary)'; modeAllBtn.style.borderColor = 'var(--border-light)'
   // Re-enable Select Area button
   modeArea.style.opacity = '1'
   modeArea.style.pointerEvents = 'auto'

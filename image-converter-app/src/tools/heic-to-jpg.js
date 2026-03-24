@@ -5,7 +5,7 @@ injectHreflang('heic-to-jpg')
 
 const t = getT()
 
-const bg = '#F2F2F2'
+const bg = 'var(--bg-page)'
 const toolName  = (t.nav_short && t.nav_short['heic-to-jpg']) || 'HEIC to JPG'
 const seoData   = t.seo && t.seo['heic-to-jpg']
 const descText  = seoData ? seoData.h2a : 'Convert iPhone HEIC photos to JPG free. No upload. Files never leave your device.'
@@ -20,35 +20,35 @@ if (document.head) {
   style.textContent = `
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     #app>div{animation:fadeUp 0.4s ease both}
-    .opt-btn{width:100%;padding:13px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:15px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-bottom:10px;}
-    .opt-btn:hover{background:#A63D26;transform:translateY(-1px);}
-    .opt-btn:disabled{background:#C4B8A8;cursor:not-allowed;opacity:0.7;transform:none;}
-    .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
+    .opt-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:15px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;margin-bottom:10px;}
+    .opt-btn:hover{background:var(--accent-hover);transform:translateY(-1px);}
+    .opt-btn:disabled{background:var(--btn-disabled);cursor:not-allowed;opacity:0.7;transform:none;}
+    .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
     .file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;}
-    .file-card{background:#fff;border-radius:10px;border:1.5px solid #E8E0D5;overflow:hidden;text-align:center;padding:10px;}
+    .file-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;text-align:center;padding:10px;}
     .file-card img{width:100%;height:100px;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px;}
-    .file-card .name{font-size:11px;color:#7A6A5A;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .file-card .status{font-size:11px;font-weight:600;color:#C84B31;font-family:'DM Sans',sans-serif;}
+    .file-card .name{font-size:11px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .file-card .status{font-size:11px;font-weight:600;color:var(--accent);font-family:'DM Sans',sans-serif;}
     .dl-list{margin-bottom:12px;}
-    .dl-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fff;border-radius:8px;margin-bottom:6px;border:1.5px solid #E8E0D5;}
-    .dl-item a{font-size:13px;color:#C84B31;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;}
+    .dl-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-card);border-radius:8px;margin-bottom:6px;border:1.5px solid var(--border);}
+    .dl-item a{font-size:13px;color:var(--accent);font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;}
     .dl-item a:hover{text-decoration:underline;}
-    .dl-item span{font-size:11px;color:#9A8A7A;font-family:'DM Sans',sans-serif;}
+    .dl-item span{font-size:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;}
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
     .seo-section ol{padding-left:20px;margin:0 0 12px;}
-    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
+    .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
+    .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
     
     
     
     
     .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .seo-link:hover{border-color:var(--accent);color:var(--accent);}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
   `
   document.head.appendChild(style)
@@ -59,22 +59,22 @@ const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:#C84B31;">${titlePart2}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;margin-left:12px;">${dropHint} — ${t.up_to_25_files || 'up to 25 files'}</span>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:12px;">${dropHint} — ${t.up_to_25_files || 'up to 25 files'}</span>
     </div>
     <input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple style="display:none;" />
     <div id="fileGrid" class="file-grid"></div>
     <button class="opt-btn" id="convertBtn" disabled>${t.next_to_jpg || 'Convert to JPG'}</button>
     <div id="singleDl" style="display:none;margin-bottom:10px;"></div>
     <div id="zipWrap" style="display:none;margin-bottom:10px;">
-      <a id="zipBtn" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:#2C1810;color:#F5F0E8;">⬇ ${dlZipBtn}</a>
+      <a id="zipBtn" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:var(--btn-dark);color:var(--text-on-dark-btn);">⬇ ${dlZipBtn}</a>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
-      <div style="font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">What's Next?</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">What's Next?</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
     </div>
   </div>
@@ -118,8 +118,8 @@ async function loadHeic2any() {
 function renderGrid() {
   fileGrid.innerHTML = files.map((f, i) => `
     <div class="file-card" id="card-${i}">
-      <div style="width:100%;height:100px;background:#F2F2F2;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C4B8A8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <div style="width:100%;height:100px;background:var(--bg-page);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--btn-disabled)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
       </div>
       <div class="name">${f.name}</div>
       <div class="status" id="status-${i}">Ready</div>
@@ -170,14 +170,14 @@ convertBtn.addEventListener('click', async () => {
       }
       img.src = url
     } catch (e) {
-      statusEl.textContent = '✗ Failed'; statusEl.style.color = '#C84B31'
+      statusEl.textContent = '✗ Failed'; statusEl.style.color = 'var(--accent)'
     }
   }
 
   if (results.length === 1) {
     // Single file — just a download button
     const r = results[0]
-    singleDl.innerHTML = `<a href="${r.url}" download="${r.name}" onclick="setTimeout(()=>URL.revokeObjectURL(this.href),10000)" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:#2C1810;color:#F5F0E8;">⬇ ${dlBtn} (${Math.round(r.size / 1024)} KB)</a>`
+    singleDl.innerHTML = `<a href="${r.url}" download="${r.name}" onclick="setTimeout(()=>URL.revokeObjectURL(this.href),10000)" class="opt-btn" style="display:block;text-align:center;text-decoration:none;background:var(--btn-dark);color:var(--text-on-dark-btn);">⬇ ${dlBtn} (${Math.round(r.size / 1024)} KB)</a>`
     singleDl.style.display = 'block'
   } else if (results.length > 1) {
     // Multiple files — ZIP only
@@ -236,9 +236,9 @@ function buildNextSteps() {
   buttons.forEach(b => {
     const btn = document.createElement('button')
     btn.textContent = b.label
-    btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:500;color:#2C1810;background:#fff;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;'
-    btn.onmouseover = () => { btn.style.borderColor='#C84B31'; btn.style.color='#C84B31' }
-    btn.onmouseout  = () => { btn.style.borderColor='#DDD5C8'; btn.style.color='#2C1810' }
+    btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);background:var(--bg-card);cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;'
+    btn.onmouseover = () => { btn.style.borderColor='var(--accent)'; btn.style.color='var(--accent)' }
+    btn.onmouseout  = () => { btn.style.borderColor='var(--border-light)'; btn.style.color='var(--text-primary)' }
     btn.addEventListener('click', async () => {
       if (results.length) {
         try {

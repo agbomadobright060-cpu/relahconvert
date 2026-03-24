@@ -13,7 +13,7 @@ const dlBtn     = t.download || 'Download'
 const parts     = toolName.split(' ')
 const h1Main    = parts[0]
 const h1Em      = parts.slice(1).join(' ')
-const bg = '#F2F2F2'
+const bg = 'var(--bg-page)'
 
 const mergeHorizontalLbl = t.merge_horizontal || 'Horizontal'
 const mergeVerticalLbl   = t.merge_vertical || 'Vertical'
@@ -30,55 +30,55 @@ const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
-  .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
-  .upload-label:hover{background:#A63D26;}
-  .drop-zone{border:2px dashed #DDD5C8;border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:18px;background:#FAFAF8;}
-  .drop-zone:hover,.drop-zone.drag-over{border-color:#C84B31;background:#FDE8E3;}
-  .drop-zone svg{margin-bottom:6px;color:#C4B8A8;transition:color 0.2s;}
-  .drop-zone:hover svg,.drop-zone.drag-over svg{color:#C84B31;}
-  .drop-zone p{margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#9A8A7A;}
+  .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
+  .upload-label:hover{background:var(--accent-hover);}
+  .drop-zone{border:2px dashed var(--border-light);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:18px;background:var(--bg-surface);}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-bg);}
+  .drop-zone svg{margin-bottom:6px;color:var(--btn-disabled);transition:color 0.2s;}
+  .drop-zone:hover svg,.drop-zone.drag-over svg{color:var(--accent);}
+  .drop-zone p{margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-muted);}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
-  .file-card{background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;overflow:visible;position:relative;padding-bottom:8px;}
-  .card-img-wrap{position:relative;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:#F5F0E8;border-radius:10px 10px 0 0;overflow:hidden;}
+  .file-card{background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);overflow:visible;position:relative;padding-bottom:8px;}
+  .card-img-wrap{position:relative;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);border-radius:10px 10px 0 0;overflow:hidden;}
   .card-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
-  .card-fname{font-size:11px;color:#5A4A3A;font-family:'DM Sans',sans-serif;padding:4px 8px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+  .card-fname{font-size:11px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;padding:4px 8px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
   .card-rm{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.4);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;}
-  .card-order{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:#C84B31;color:#fff;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;z-index:6;}
+  .card-order{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--text-on-accent);font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;z-index:6;}
   .options-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
-  .opt-group{display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;color:#5A4A3A;}
+  .opt-group{display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-secondary);}
   .opt-group label{font-weight:600;}
-  .opt-group select{padding:6px 10px;border:1.5px solid #DDD5C8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:#fff;color:#2C1810;cursor:pointer;}
-  .opt-group select:focus{border-color:#C84B31;outline:none;box-shadow:0 0 0 3px rgba(200,75,49,0.12);}
-  .dir-btn{padding:7px 14px;border:1.5px solid #DDD5C8;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
-  .dir-btn:hover{border-color:#C84B31;color:#C84B31;}
-  .dir-btn.active{border-color:#C84B31;background:#FDE8E3;color:#C84B31;}
+  .opt-group select{padding:6px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg-card);color:var(--text-primary);cursor:pointer;}
+  .opt-group select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(200,75,49,0.12);}
+  .dir-btn{padding:7px 14px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
+  .dir-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .dir-btn.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
   #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   #actionRow.on{display:flex;}
-  .action-btn{padding:12px 20px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;min-width:160px;}
-  .action-btn:hover{background:#A63D26;}
-  .action-btn:disabled{background:#C4B8A8;cursor:not-allowed;}
-  #previewWrap{display:none;margin-bottom:16px;background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:12px;text-align:center;overflow:auto;max-height:500px;}
+  .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;min-width:160px;}
+  .action-btn:hover{background:var(--accent-hover);}
+  .action-btn:disabled{background:var(--btn-disabled);cursor:not-allowed;}
+  #previewWrap{display:none;margin-bottom:16px;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);padding:12px;text-align:center;overflow:auto;max-height:500px;}
   #previewWrap img{max-width:100%;border-radius:8px;}
-  .status-text{font-size:13px;color:#7A6A5A;font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
+  .status-text{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
   .next-steps{margin-top:20px;}
-  .next-steps-label{font-size:11px;font-weight:600;color:#9A8A7A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;}
-  .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid #DDD5C8;font-size:13px;font-weight:500;color:#2C1810;text-decoration:none;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-  .next-link:hover{border-color:#C84B31;color:#C84B31;}
+  .next-steps-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;}
+  .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .next-link:hover{border-color:var(--accent);color:var(--accent);}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
+  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
   .seo-section ol{padding-left:20px;margin:0 0 12px;}
-  .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-  .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
+  .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
+  .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
   
   
   
   
   .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-  .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-  .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+  .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .seo-link:hover{border-color:var(--accent);color:var(--accent);}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
@@ -87,8 +87,8 @@ document.title = `${toolName} Free & Private | RelahConvert`
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:24px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:#C84B31;">${h1Em}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0 0 16px;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:var(--accent);">${h1Em}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 16px;">${descText}</p>
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
     </div>
@@ -131,7 +131,7 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div id="previewWrap"><img id="previewImg" /></div>
     <div id="dlRow" style="display:none;margin-bottom:16px;">
-      <a id="dlLink" class="action-btn" style="display:inline-block;text-align:center;text-decoration:none;background:#2C1810;" download>⬇ ${dlBtn}</a>
+      <a id="dlLink" class="action-btn" style="display:inline-block;text-align:center;text-decoration:none;background:var(--btn-dark);color:var(--text-on-dark-btn);" download>⬇ ${dlBtn}</a>
     </div>
     <div id="nextSteps" style="display:none;" class="next-steps">
       <div class="next-steps-label">${t.whats_next || "What's Next?"}</div>

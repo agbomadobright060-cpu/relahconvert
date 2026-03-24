@@ -14,7 +14,7 @@ const dlZipBtn  = t.download_zip || 'Download ZIP'
 const parts     = toolName.split(' ')
 const h1Main    = parts[0]
 const h1Em      = parts.slice(1).join(' ')
-const bg = '#F2F2F2'
+const bg = 'var(--bg-page)'
 
 if (document.head) {
   document.body.style.cssText = `margin:0; padding:0; min-height:100vh; background:${bg};`
@@ -22,68 +22,68 @@ if (document.head) {
   style.textContent = `
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     #app > div { animation: fadeUp 0.4s ease both; }
-    .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:#C84B31; color:#fff; font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:8px; }
-    .opt-btn:hover { background:#A63D26; transform:translateY(-1px); }
-    .opt-btn:disabled { background:#C4B8A8; cursor:not-allowed; opacity:0.7; transform:none; }
-    .opt-btn.dark { background:#2C1810; }
-    .opt-btn.dark:hover { background:#1a0f09; }
-    .upload-label { display:inline-flex; align-items:center; gap:8px; background:#C84B31; color:#fff; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
+    .opt-btn { width:100%; padding:12px; border:none; border-radius:10px; background:var(--accent); color:var(--text-on-accent); font-size:14px; font-family:'Fraunces',serif; font-weight:700; cursor:pointer; transition:all 0.18s; margin-bottom:8px; }
+    .opt-btn:hover { background:var(--accent-hover); transform:translateY(-1px); }
+    .opt-btn:disabled { background:var(--btn-disabled); cursor:not-allowed; opacity:0.7; transform:none; }
+    .opt-btn.dark { background:var(--btn-dark); }
+    .opt-btn.dark:hover { background:var(--btn-dark-hover); }
+    .upload-label { display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--text-on-accent); font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; }
     .tool-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start; }
-    .image-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:16px; gap:10px; }
+    .image-col { background:var(--bg-card); border-radius:14px; border:1.5px solid var(--border); min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:16px; gap:10px; }
     #previewCanvas { max-width:100%; max-height:420px; border-radius:6px; display:block; cursor:move; }
-    .controls-col { background:#fff; border-radius:14px; border:1.5px solid #E8E0D5; padding:16px; font-family:'DM Sans',sans-serif; max-height:85vh; overflow-y:auto; }
-    .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:#2C1810; margin:0 0 12px; }
-    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A8A7A; margin-bottom:6px; font-family:'DM Sans',sans-serif; }
+    .controls-col { background:var(--bg-card); border-radius:14px; border:1.5px solid var(--border); padding:16px; font-family:'DM Sans',sans-serif; max-height:85vh; overflow-y:auto; }
+    .controls-col h3 { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:var(--text-primary); margin:0 0 12px; }
+    .section-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; font-family:'DM Sans',sans-serif; }
     .divider { height:1px; background:#F0EAE3; margin:12px 0; }
-    .ctrl-input { width:100%; padding:8px 10px; border:1.5px solid #DDD5C8; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:#fff; color:#2C1810; outline:none; box-sizing:border-box; }
-    .ctrl-input:focus { border-color:#C84B31; }
-    input[type=range] { width:100%; accent-color:#C84B31; margin:3px 0; }
+    .ctrl-input { width:100%; padding:8px 10px; border:1.5px solid var(--border-light); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--bg-card); color:var(--text-primary); outline:none; box-sizing:border-box; }
+    .ctrl-input:focus { border-color:var(--accent); }
+    input[type=range] { width:100%; accent-color:var(--accent); margin:3px 0; }
     .range-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-    .range-val { font-size:12px; color:#9A8A7A; min-width:36px; text-align:right; font-family:'DM Sans',sans-serif; }
+    .range-val { font-size:12px; color:var(--text-muted); min-width:36px; text-align:right; font-family:'DM Sans',sans-serif; }
     .wm-list { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
-    .wm-card { border:1.5px solid #E8E0D5; border-radius:10px; overflow:hidden; }
-    .wm-card.selected { border-color:#C84B31; }
+    .wm-card { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
+    .wm-card.selected { border-color:var(--accent); }
     .wm-card-header { display:flex; align-items:center; gap:8px; padding:8px 10px; background:#F9F6F2; cursor:pointer; }
-    .wm-card-header:hover { background:#F5F0E8; }
+    .wm-card-header:hover { background:var(--bg-surface); }
     .wm-type-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; font-family:'DM Sans',sans-serif; }
     .wm-type-badge.text { background:#EFF6FF; color:#2563EB; }
     .wm-type-badge.image { background:#F0FDF4; color:#16A34A; }
-    .wm-card-title { flex:1; font-size:12px; font-weight:600; color:#2C1810; font-family:'DM Sans',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .wm-delete { background:none; border:none; cursor:pointer; color:#C4B8A8; font-size:14px; padding:2px 4px; line-height:1; }
-    .wm-delete:hover { color:#C84B31; }
+    .wm-card-title { flex:1; font-size:12px; font-weight:600; color:var(--text-primary); font-family:'DM Sans',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wm-delete { background:none; border:none; cursor:pointer; color:var(--btn-disabled); font-size:14px; padding:2px 4px; line-height:1; }
+    .wm-delete:hover { color:var(--accent); }
     .wm-card-body { padding:10px; display:none; }
     .wm-card-body.open { display:block; }
     .add-row { display:flex; gap:8px; margin-bottom:12px; }
-    .add-btn { flex:1; padding:8px; border:1.5px dashed #DDD5C8; border-radius:8px; background:#fff; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:#5A4A3A; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.15s; }
-    .add-btn:hover { border-color:#C84B31; color:#C84B31; background:#FDE8E3; }
+    .add-btn { flex:1; padding:8px; border:1.5px dashed var(--border-light); border-radius:8px; background:var(--bg-card); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.15s; }
+    .add-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-bg); }
     .swatches { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
-    .swatch { width:20px; height:20px; border-radius:50%; border:2px solid #E8E0D5; cursor:pointer; transition:transform 0.15s; flex-shrink:0; }
+    .swatch { width:20px; height:20px; border-radius:50%; border:2px solid var(--border); cursor:pointer; transition:transform 0.15s; flex-shrink:0; }
     .swatch:hover { transform:scale(1.2); }
     .file-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-    .file-chip { display:flex; align-items:center; gap:5px; background:#F5F0E8; border-radius:20px; padding:4px 10px; font-size:11px; font-family:'DM Sans',sans-serif; color:#5A4A3A; }
-    .file-chip button { background:none; border:none; cursor:pointer; color:#9A8A7A; font-size:12px; line-height:1; padding:0; }
-    .file-chip button:hover { color:#C84B31; }
-    .drag-hint { display:flex; align-items:center; gap:6px; background:#F5F0E8; border-radius:8px; padding:8px 10px; font-size:11px; color:#7A6A5A; font-family:'DM Sans',sans-serif; }
+    .file-chip { display:flex; align-items:center; gap:5px; background:var(--bg-surface); border-radius:20px; padding:4px 10px; font-size:11px; font-family:'DM Sans',sans-serif; color:var(--text-secondary); }
+    .file-chip button { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:12px; line-height:1; padding:0; }
+    .file-chip button:hover { color:var(--accent); }
+    .drag-hint { display:flex; align-items:center; gap:6px; background:var(--bg-surface); border-radius:8px; padding:8px 10px; font-size:11px; color:var(--text-tertiary); font-family:'DM Sans',sans-serif; }
     .next-steps { margin-top:20px; }
-    .next-steps-label { font-size:11px; font-weight:600; color:#9A8A7A; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
-    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid #DDD5C8; font-size:13px; font-weight:500; color:#2C1810; text-decoration:none; background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
-    .next-link:hover { border-color:#C84B31; color:#C84B31; }
+    .next-steps-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; font-family:'DM Sans',sans-serif; }
+    .next-link { padding:8px 16px; border-radius:8px; border:1.5px solid var(--border-light); font-size:13px; font-weight:500; color:var(--text-primary); text-decoration:none; background:var(--bg-card); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+    .next-link:hover { border-color:var(--accent); color:var(--accent); }
     @media (max-width:700px) { .tool-layout { grid-template-columns:1fr; } .image-col { min-height:220px; } }
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+    .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
+    .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
     .seo-section ol{padding-left:20px;margin:0 0 12px;}
-    .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-    .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
+    .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
+    .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
     
     
     
     
     .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-    .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+    .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .seo-link:hover{border-color:var(--accent);color:var(--accent);}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
   `
   document.head.appendChild(style)
@@ -93,10 +93,10 @@ document.title = `${toolName} Free | No Upload — RelahConvert`
 document.querySelector('#app').innerHTML = `
   <div style="max-width:1000px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:#2C1810; margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:#C84B31;">${h1Em}</em></h1>
-      <p style="font-size:13px; color:#7A6A5A; margin:0 0 14px;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:var(--text-primary); margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:var(--accent);">${h1Em}</em></h1>
+      <p style="font-size:13px; color:var(--text-tertiary); margin:0 0 14px;">${descText}</p>
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px; color:#9A8A7A; margin-left:10px;">up to 25 images</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:10px;">up to 25 images</span>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
     </div>
     <div class="tool-layout" id="toolLayout" style="display:none;">
@@ -126,7 +126,7 @@ document.querySelector('#app').innerHTML = `
         <button class="opt-btn" id="applyBtn" disabled>${dlBtn}</button>
         <div id="zipWrap" style="display:none; margin-top:4px;">
           <a id="zipBtn" class="opt-btn dark" style="display:block; text-align:center; text-decoration:none;">⬇ ${dlZipBtn}</a>
-          <p id="zipNote" style="font-size:11px; color:#9A8A7A; text-align:center; margin:4px 0 0; font-family:'DM Sans',sans-serif;"></p>
+          <p id="zipNote" style="font-size:11px; color:var(--text-muted); text-align:center; margin:4px 0 0; font-family:'DM Sans',sans-serif;"></p>
         </div>
       </div>
     </div>
@@ -316,7 +316,7 @@ function renderWmList() {
     card.className = 'wm-card' + (wm.id === selectedWmId ? ' selected' : '')
     card.dataset.id = wm.id
     const previewThumb = wm.type === 'image' && wm.imgEl
-      ? `<img src="${wm.imgEl.src}" style="width:20px;height:20px;object-fit:contain;border-radius:3px;border:1px solid #E8E0D5;">`
+      ? `<img src="${wm.imgEl.src}" style="width:20px;height:20px;object-fit:contain;border-radius:3px;border:1px solid var(--border);">`
       : ''
     card.innerHTML = `
       <div class="wm-card-header">
@@ -331,7 +331,7 @@ function renderWmList() {
           <input class="ctrl-input wm-text" data-id="${wm.id}" value="${wm.text}" placeholder="Watermark text" style="margin-bottom:8px;" />
           <div class="section-label">Color</div>
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-            <input type="color" class="wm-color" data-id="${wm.id}" value="${wm.color}" style="width:36px;height:30px;border:1.5px solid #DDD5C8;border-radius:6px;cursor:pointer;padding:2px;" />
+            <input type="color" class="wm-color" data-id="${wm.id}" value="${wm.color}" style="width:36px;height:30px;border:1.5px solid var(--border-light);border-radius:6px;cursor:pointer;padding:2px;" />
             <div class="swatches">
               ${['#ffffff','#000000','#C84B31','#2563EB','#16A34A','#F59E0B'].map(c =>
                 `<div class="swatch color-swatch" data-id="${wm.id}" data-color="${c}" style="background:${c};"></div>`
@@ -512,7 +512,7 @@ function renderFileChips() {
   baseFiles.forEach((entry, idx) => {
     const chip = document.createElement('div')
     chip.className = 'file-chip'
-    chip.style.border = idx === activeFileIdx ? '1.5px solid #C84B31' : '1.5px solid transparent'
+    chip.style.border = idx === activeFileIdx ? '1.5px solid var(--accent)' : '1.5px solid transparent'
     chip.innerHTML = `<span style="cursor:pointer;">${entry.file.name.replace(/\.[^.]+$/, '').slice(0, 12)}</span><button data-idx="${idx}">✕</button>`
     chip.querySelector('span').addEventListener('click', () => { activeFileIdx = idx; renderFileChips(); renderPreview() })
     chip.querySelector('button').addEventListener('click', () => {

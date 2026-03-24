@@ -14,47 +14,47 @@ const dropHint  = t.drop_hint || 'or drop images anywhere'
 const dlBtn     = t.download || 'Download'
 const dlZipBtn  = t.download_zip || 'Download All as ZIP'
 
-document.body.style.cssText = `margin:0;padding:0;min-height:100vh;background:${bg};`
+document.body.style.cssText = `margin:0;padding:0;min-height:100vh;background:var(--bg-page);`
 const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
-  .upload-label{display:inline-flex;align-items:center;gap:8px;background:#C84B31;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
-  .upload-label:hover{background:#A63D26;}
-  .notice{font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:#fff;border-radius:8px;border:1.5px solid #E8E0D5;}
-  #widthRow{display:none;align-items:center;gap:12px;margin-bottom:14px;background:#fff;border-radius:12px;border:1.5px solid #E8E0D5;padding:12px 16px;}
+  .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
+  .upload-label:hover{background:var(--accent-hover);}
+  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
+  #widthRow{display:none;align-items:center;gap:12px;margin-bottom:14px;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);padding:12px 16px;}
   #widthRow.on{display:flex;}
-  #widthRow label{font-size:12px;font-weight:600;color:#5A4A3A;font-family:'DM Sans',sans-serif;white-space:nowrap;}
-  #outWidth{width:90px;padding:6px 10px;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:#2C1810;outline:none;}
+  #widthRow label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;white-space:nowrap;}
+  #outWidth{width:90px;padding:6px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);outline:none;}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
-  .file-card{background:#fff;border-radius:10px;border:1.5px solid #E8E0D5;overflow:hidden;position:relative;}
-  .file-card img{width:100%;height:110px;object-fit:contain;display:block;background:#F5F0E8;}
-  .file-card .fname{font-size:11px;color:#5A4A3A;font-family:'DM Sans',sans-serif;padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .file-card .dl-link{display:none;font-size:11px;font-weight:700;color:#C84B31;font-family:'DM Sans',sans-serif;padding:0 8px 7px;text-decoration:none;}
+  .file-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;position:relative;}
+  .file-card img{width:100%;height:110px;object-fit:contain;display:block;background:var(--bg-surface);}
+  .file-card .fname{font-size:11px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .file-card .dl-link{display:none;font-size:11px;font-weight:700;color:var(--accent);font-family:'DM Sans',sans-serif;padding:0 8px 7px;text-decoration:none;}
   .file-card .dl-link:hover{text-decoration:underline;}
   .file-card .rm-btn{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   #actionRow.on{display:flex;}
-  .action-btn{padding:12px 20px;border:none;border-radius:10px;background:#C84B31;color:#fff;font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;}
-  .action-btn:hover{background:#A63D26;}
-  .action-btn.dark{background:#2C1810;}
-  .action-btn.dark:hover{background:#1a0f09;}
-  .status-text{font-size:13px;color:#7A6A5A;font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
+  .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;}
+  .action-btn:hover{background:var(--accent-hover);}
+  .action-btn.dark{background:var(--btn-dark);}
+  .action-btn.dark:hover{background:var(--btn-dark-hover);}
+  .status-text{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
-  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#2C1810;margin:32px 0 10px;}
-  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#2C1810;margin:24px 0 8px;}
+  .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
+  .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
   .seo-section ol{padding-left:20px;margin:0 0 12px;}
-  .seo-section ol li{font-size:13px;color:#5A4A3A;line-height:1.6;margin-bottom:6px;}
-  .seo-section p{font-size:13px;color:#5A4A3A;line-height:1.6;margin:0 0 12px;}
-  
-  
-  
-  
+  .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
+  .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
+
+
+
+
   .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-  .seo-link{padding:7px 14px;background:#fff;border:1.5px solid #DDD5C8;border-radius:8px;font-size:13px;font-weight:600;color:#2C1810;text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-  .seo-link:hover{border-color:#C84B31;color:#C84B31;}
-    .seo-section .faq-item { background:#fff; border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:#2C1810; margin:0 0 6px; }
+  .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .seo-link:hover{border-color:var(--accent);color:var(--accent);}
+    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
@@ -66,19 +66,19 @@ const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:#2C1810;margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:#C84B31;">${titlePart2}</em></h1>
-      <p style="font-size:13px;color:#7A6A5A;margin:0 0 14px;">${descText}</p>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
+      <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
     <div class="notice">\u2139\uFE0F ${t.svg_to_png_notice || 'Upload SVG files and convert them to high-quality PNG images. Set a custom width \u2014 height scales proportionally.'}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px;color:#9A8A7A;">${dropHint}</span>
+      <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
     </div>
     <input type="file" id="fileInput" accept="image/svg+xml,.svg" multiple style="display:none;" />
     <div id="widthRow">
       <label>Output width (px):</label>
       <input type="number" id="outWidth" value="1024" min="16" max="8000" />
-      <span style="font-size:12px;color:#9A8A7A;font-family:'DM Sans',sans-serif;">Height scales proportionally</span>
+      <span style="font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">Height scales proportionally</span>
     </div>
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
