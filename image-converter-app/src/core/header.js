@@ -432,13 +432,13 @@ export function injectHeader() {
   header.innerHTML = `<div class="header-inner">${logoHTML + navHTML}</div>`
 
   const toolCategories = [
-    { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
+    { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png'] },
+    { name: 'Convert', slugs: ['gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
     { name: 'Optimize', slugs: ['compress','resize','resize-in-kb'] },
     { name: 'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
-    { name: 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark'] },
+    { name: 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
     { name: 'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
     { name: 'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
-    { name: 'Animation', slugs: ['jpg-to-gif','png-to-gif'] },
   ]
 
   function toolLink(slug) {
