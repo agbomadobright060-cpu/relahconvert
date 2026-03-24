@@ -249,18 +249,33 @@ async function startProcessing(entry) {
 
     if (entries[currentIdx] === entry) { procBar.style.width = '90%' }
     await new Promise(resolve => {
-      const img = new Image()
-      img.onload = () => {
+      const maskImg = new Image()
+      maskImg.onload = () => {
         const W = entry.origData.width, H = entry.origData.height
-        const off = document.createElement('canvas')
-        off.width = W; off.height = H
-        off.getContext('2d').drawImage(img, 0, 0, W, H)
-        const data = off.getContext('2d').getImageData(0, 0, W, H).data
+
+        // Scale mask to original dimensions and extract alpha
+        const mc = document.createElement('canvas')
+        mc.width = W; mc.height = H
+        mc.getContext('2d').drawImage(maskImg, 0, 0, W, H)
+        const maskData = mc.getContext('2d').getImageData(0, 0, W, H).data
         entry.maskData = new Uint8ClampedArray(W * H)
-        for (let i = 0; i < W * H; i++) entry.maskData[i] = data[i * 4 + 3]
-        entry.resultBlob = blob; resolve()
+        for (let i = 0; i < W * H; i++) entry.maskData[i] = maskData[i * 4 + 3]
+
+        // Build full-res result: original pixels + upscaled mask alpha
+        const out = document.createElement('canvas')
+        out.width = W; out.height = H
+        const octx = out.getContext('2d')
+        const hiRes = octx.createImageData(W, H)
+        const src = entry.origData.data, d = hiRes.data
+        for (let i = 0; i < W * H; i++) {
+          const p = i * 4
+          d[p] = src[p]; d[p+1] = src[p+1]; d[p+2] = src[p+2]
+          d[p+3] = entry.maskData[i]
+        }
+        octx.putImageData(hiRes, 0, 0)
+        out.toBlob(hiBlob => { entry.resultBlob = hiBlob; resolve() }, 'image/png')
       }
-      img.src = URL.createObjectURL(blob)
+      maskImg.src = URL.createObjectURL(blob)
     })
     entry.processing = false
     entry.badgeEl.className = 'thumb-badge done'

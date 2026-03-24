@@ -459,6 +459,37 @@ function drawUploadPreview(img) {
   uploadPreviewCtx.drawImage(img, 0, 0, w, h)
 }
 
+function applyMaskToOriginal(originalImg, maskBlob) {
+  return new Promise(resolve => {
+    const maskImg = new Image()
+    maskImg.onload = () => {
+      const W = originalImg.naturalWidth, H = originalImg.naturalHeight
+      // Draw original at full resolution
+      const c = document.createElement('canvas')
+      c.width = W; c.height = H
+      const ctx = c.getContext('2d')
+      ctx.drawImage(originalImg, 0, 0)
+      const origData = ctx.getImageData(0, 0, W, H)
+
+      // Draw mask scaled up to original dimensions to extract alpha
+      const mc = document.createElement('canvas')
+      mc.width = W; mc.height = H
+      const mctx = mc.getContext('2d')
+      mctx.drawImage(maskImg, 0, 0, W, H)
+      const maskData = mctx.getImageData(0, 0, W, H)
+
+      // Apply mask alpha to original pixels
+      const src = origData.data, m = maskData.data
+      for (let i = 3; i < src.length; i += 4) {
+        src[i] = m[i]
+      }
+      ctx.putImageData(origData, 0, 0)
+      c.toBlob(blob => resolve(blob), 'image/png')
+    }
+    maskImg.src = URL.createObjectURL(maskBlob)
+  })
+}
+
 function drawBgWhiteImage(sourceImg) {
   const c = document.createElement('canvas')
   c.width = sourceImg.naturalWidth
@@ -510,6 +541,10 @@ function handleFile(file) {
       if (!response.ok) throw new Error('API returned ' + response.status)
       const resultBlob = await response.blob()
 
+      // Apply the Remove.bg mask to the original full-res image
+      // (free tier returns low-res; this preserves original sharpness)
+      const hiResBlob = await applyMaskToOriginal(img, resultBlob)
+
       progressText.textContent = bgLabel + ' 100%'
       const bgImg = new Image()
       bgImg.onload = async () => {
@@ -527,7 +562,7 @@ function handleFile(file) {
         step1Error.textContent = t.pp_bg_failed || 'Background removal failed \u2014 using original photo.'
         step1NextBtn.style.display = ''
       }
-      bgImg.src = URL.createObjectURL(resultBlob)
+      bgImg.src = URL.createObjectURL(hiResBlob)
     } catch (err) {
       console.error('Background removal failed:', err)
       bgRemovedImg = null
