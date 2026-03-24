@@ -567,4 +567,44 @@ export function injectHeader() {
     if (moreBtn) moreBtn.classList.remove('open')
   })
   dropdown.addEventListener('click', e => e.stopPropagation())
+
+  // PWA install prompt — show after 30s if available
+  let deferredPrompt = null
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault()
+    deferredPrompt = e
+    setTimeout(() => {
+      if (!deferredPrompt || sessionStorage.getItem('pwaInstallDismissed')) return
+      const banner = document.createElement('div')
+      banner.id = 'pwa-install-banner'
+      banner.style.cssText = `
+        position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+        background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+        padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,0.15);
+        z-index:9999;font-family:'DM Sans',sans-serif;
+        display:flex;align-items:center;gap:12px;max-width:400px;
+        animation:fadeUp 0.3s ease both;
+      `
+      banner.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Install RelahConvert</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Use tools offline, faster loads</div>
+        </div>
+        <button id="pwaInstallBtn" style="padding:7px 16px;background:var(--accent);color:var(--text-on-accent);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Install</button>
+        <button id="pwaInstallDismiss" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;">✕</button>
+      `
+      document.body.appendChild(banner)
+      document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+        if (!deferredPrompt) return
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        deferredPrompt = null
+        banner.remove()
+      })
+      document.getElementById('pwaInstallDismiss').addEventListener('click', () => {
+        sessionStorage.setItem('pwaInstallDismissed', '1')
+        banner.remove()
+      })
+    }, 30000)
+  })
 }
