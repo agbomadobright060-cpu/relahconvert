@@ -171,7 +171,7 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'RelahConvert',
-        short_name: 'Relah',
+        short_name: 'RelahConvert',
         description: 'Every image tool you need, free',
         theme_color: '#C84B31',
         background_color: '#18181b',

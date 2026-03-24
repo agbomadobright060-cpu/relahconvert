@@ -624,8 +624,19 @@ export function injectHeader() {
     setTimeout(() => { if (deferredPrompt) showInstallBanner(false) }, 30000)
   })
 
-  // iOS Safari: show "Add to Home Screen" hint after 30s
+  // iOS Safari: show "Add to Home Screen" hint on first scroll or tap
   if (isIOS && !isStandalone) {
-    setTimeout(() => { if (!deferredPrompt) showInstallBanner(true) }, 30000)
+    let iosShown = false
+    function showIOSHint() {
+      if (iosShown || deferredPrompt) return
+      iosShown = true
+      window.removeEventListener('scroll', onIOSInteract)
+      window.removeEventListener('touchstart', onIOSInteract)
+      // Small delay after interaction so it doesn't feel jarring
+      setTimeout(() => showInstallBanner(true), 3000)
+    }
+    function onIOSInteract() { showIOSHint() }
+    window.addEventListener('scroll', onIOSInteract, { once: true, passive: true })
+    window.addEventListener('touchstart', onIOSInteract, { once: true, passive: true })
   }
 }
