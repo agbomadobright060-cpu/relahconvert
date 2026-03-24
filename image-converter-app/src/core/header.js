@@ -568,32 +568,23 @@ export function injectHeader() {
   })
   dropdown.addEventListener('click', e => e.stopPropagation())
 
-  // PWA install prompt — show after 30s
+  // PWA install prompt — Android only (iOS has no install API)
   let deferredPrompt = null
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
-
-  function showInstallBanner(iosMode) {
-    if (sessionStorage.getItem('pwaInstallDismissed') || isStandalone) return
-    const banner = document.createElement('div')
-    banner.id = 'pwa-install-banner'
-    banner.style.cssText = `
-      position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-      background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
-      padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,0.15);
-      z-index:9999;font-family:'DM Sans',sans-serif;
-      display:flex;align-items:center;gap:12px;max-width:420px;width:calc(100% - 32px);
-      animation:fadeUp 0.3s ease both;
-    `
-    if (iosMode) {
-      banner.innerHTML = `
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Add to Home Screen</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Tap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then <strong>"Add to Home Screen"</strong></div>
-        </div>
-        <button id="pwaInstallDismiss" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;">✕</button>
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault()
+    deferredPrompt = e
+    setTimeout(() => {
+      if (!deferredPrompt || sessionStorage.getItem('pwaInstallDismissed')) return
+      const banner = document.createElement('div')
+      banner.id = 'pwa-install-banner'
+      banner.style.cssText = `
+        position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+        background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+        padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,0.15);
+        z-index:9999;font-family:'DM Sans',sans-serif;
+        display:flex;align-items:center;gap:12px;max-width:420px;width:calc(100% - 32px);
+        animation:fadeUp 0.3s ease both;
       `
-    } else {
       banner.innerHTML = `
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Install RelahConvert</div>
@@ -602,41 +593,18 @@ export function injectHeader() {
         <button id="pwaInstallBtn" style="padding:7px 16px;background:var(--accent);color:var(--text-on-accent);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Install</button>
         <button id="pwaInstallDismiss" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;">✕</button>
       `
-      const installBtn = banner.querySelector('#pwaInstallBtn')
-      if (installBtn) installBtn.addEventListener('click', async () => {
+      document.body.appendChild(banner)
+      document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
         if (!deferredPrompt) return
         deferredPrompt.prompt()
         await deferredPrompt.userChoice
         deferredPrompt = null
         banner.remove()
       })
-    }
-    document.body.appendChild(banner)
-    banner.querySelector('#pwaInstallDismiss').addEventListener('click', () => {
-      sessionStorage.setItem('pwaInstallDismissed', '1')
-      banner.remove()
-    })
-  }
-
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault()
-    deferredPrompt = e
-    setTimeout(() => { if (deferredPrompt) showInstallBanner(false) }, 30000)
+      document.getElementById('pwaInstallDismiss').addEventListener('click', () => {
+        sessionStorage.setItem('pwaInstallDismissed', '1')
+        banner.remove()
+      })
+    }, 30000)
   })
-
-  // iOS Safari: show "Add to Home Screen" hint on first scroll or tap
-  if (isIOS && !isStandalone) {
-    let iosShown = false
-    function showIOSHint() {
-      if (iosShown || deferredPrompt) return
-      iosShown = true
-      window.removeEventListener('scroll', onIOSInteract)
-      window.removeEventListener('touchstart', onIOSInteract)
-      // Small delay after interaction so it doesn't feel jarring
-      setTimeout(() => showInstallBanner(true), 3000)
-    }
-    function onIOSInteract() { showIOSHint() }
-    window.addEventListener('scroll', onIOSInteract, { once: true, passive: true })
-    window.addEventListener('touchstart', onIOSInteract, { once: true, passive: true })
-  }
 }
