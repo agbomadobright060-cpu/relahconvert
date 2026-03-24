@@ -6,7 +6,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['passport-photo']) || 'Passport Photo'
 const seoData   = t.seo && t.seo['passport-photo']
-const descText  = seoData ? seoData.h2a : 'Create passport photos that meet official requirements. Free and private — files never leave your device.'
+const descText  = seoData ? seoData.h2a : 'Create passport photos that meet official requirements for 170+ countries.'
 const selectLbl = t.select_images || 'Select Image'
 const dlBtn     = t.download || 'Download'
 const parts     = toolName.split(' ')
@@ -300,7 +300,7 @@ document.head.appendChild(style)
 document.title = t.pp_page_title || 'Passport Photo Maker \u2014 Create Passport Photos for 170+ Countries Free | RelahConvert'
 const metaDesc = document.createElement('meta')
 metaDesc.name = 'description'
-metaDesc.content = t.pp_meta_desc || 'Free passport photo maker for 170+ countries. Auto background removal, crop to official dimensions, download single photo or print sheet. Browser-only \u2014 your files never leave your device.'
+metaDesc.content = t.pp_meta_desc || 'Free passport photo maker for 170+ countries. AI background removal, crop to official dimensions, download single photo or print sheet.'
 document.head.appendChild(metaDesc)
 const metaKeywords = document.createElement('meta')
 metaKeywords.name = 'keywords'
