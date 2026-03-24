@@ -331,7 +331,7 @@ export function injectHeader() {
       border: 1px solid var(--border-light);
       border-radius: 8px;
       cursor: pointer;
-      padding: 6px 8px;
+      padding: 4px 6px;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
