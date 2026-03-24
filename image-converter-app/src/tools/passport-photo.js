@@ -297,14 +297,14 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = t.pp_page_title || 'Passport Photo Maker \u2014 Create Passport Photos for 170+ Countries Free | RelahConvert'
+document.title = t.pp_page_title || 'Passport Photo Maker Free Online \u2014 AI Background Removal for 170+ Countries | RelahConvert'
 const metaDesc = document.createElement('meta')
 metaDesc.name = 'description'
-metaDesc.content = t.pp_meta_desc || 'Free passport photo maker for 170+ countries. AI background removal, crop to official dimensions, download single photo or print sheet.'
+metaDesc.content = t.pp_meta_desc || 'Make passport photos at home free. AI white background removal, auto-size to official 2x2, 35x45mm and 51x51mm dimensions for 170+ countries. Download or print 4x6 sheet. No watermark.'
 document.head.appendChild(metaDesc)
 const metaKeywords = document.createElement('meta')
 metaKeywords.name = 'keywords'
-metaKeywords.content = 'passport photo maker, passport photo online free, passport size photo, passport photo creator, visa photo maker, ID photo maker, passport photo background removal, passport photo dimensions'
+metaKeywords.content = 'passport photo maker, passport photo online free, passport size photo, passport photo app, visa photo maker, ID photo maker, passport photo background removal, passport photo white background, 2x2 passport photo, 35x45mm passport photo, make passport photo at home, free passport photo no watermark, US passport photo, UK passport photo, passport photo requirements, passport photo near me alternative'
 document.head.appendChild(metaKeywords)
 
 document.querySelector('#app').innerHTML = `
