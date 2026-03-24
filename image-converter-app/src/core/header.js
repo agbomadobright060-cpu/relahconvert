@@ -582,19 +582,43 @@ export function injectHeader() {
   const moreBtn = document.getElementById('moreBtn')
   const hamburgerBtn = document.getElementById('hamburgerBtn')
 
-  function toggleDropdown(e) {
-    e.stopPropagation()
-    const isOpen = dropdown.classList.toggle('open')
-    if (moreBtn) moreBtn.classList.toggle('open', isOpen)
+  function openDropdown() {
+    dropdown.classList.add('open')
+    if (moreBtn) moreBtn.classList.add('open')
   }
-
-  if (moreBtn) moreBtn.addEventListener('click', toggleDropdown)
-  if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDropdown)
-
-  document.addEventListener('click', () => {
+  function closeDropdown() {
     dropdown.classList.remove('open')
     if (moreBtn) moreBtn.classList.remove('open')
+  }
+  function toggleDropdown(e) {
+    e.stopPropagation()
+    if (dropdown.classList.contains('open')) closeDropdown()
+    else openDropdown()
+  }
+
+  // Desktop: hover to open/close
+  let hoverTimeout = null
+  if (moreBtn) {
+    moreBtn.addEventListener('mouseenter', () => {
+      clearTimeout(hoverTimeout)
+      openDropdown()
+    })
+    moreBtn.addEventListener('click', toggleDropdown)
+  }
+  dropdown.addEventListener('mouseenter', () => { clearTimeout(hoverTimeout) })
+  dropdown.addEventListener('mouseleave', () => {
+    hoverTimeout = setTimeout(closeDropdown, 200)
   })
+  if (moreBtn) {
+    moreBtn.addEventListener('mouseleave', () => {
+      hoverTimeout = setTimeout(closeDropdown, 200)
+    })
+  }
+
+  // Mobile: hamburger click
+  if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDropdown)
+
+  document.addEventListener('click', () => closeDropdown())
   dropdown.addEventListener('click', e => e.stopPropagation())
 
   // PWA install prompt — Android only (iOS has no install API)
