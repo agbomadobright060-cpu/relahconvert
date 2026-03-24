@@ -195,16 +195,26 @@ export function injectHeader() {
     #dropdown-menu .dropdown-inner {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 20px 24px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px 20px;
     }
-    #dropdown-menu a {
+    .dropdown-category h3 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 8px;
+      padding: 0 4px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .dropdown-category a {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 10px 12px;
+      padding: 7px 4px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 500;
@@ -213,17 +223,17 @@ export function injectHeader() {
       font-family: 'DM Sans', sans-serif;
       transition: all 0.15s;
     }
-    #dropdown-menu a:hover { background: var(--bg-surface); color: var(--accent); }
-    #dropdown-menu a.active { background: var(--accent-bg); color: var(--accent); }
+    .dropdown-category a:hover { background: var(--bg-surface); color: var(--accent); }
+    .dropdown-category a.active { background: var(--accent-bg); color: var(--accent); }
     @media (max-width: 768px) {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
       #dropdown-menu .dropdown-inner {
         grid-template-columns: 1fr 1fr;
         padding: 12px;
-        gap: 6px;
+        gap: 16px 12px;
       }
-      #dropdown-menu a { font-size: 12px; padding: 10px; }
+      .dropdown-category a { font-size: 12px; padding: 6px 4px; }
     }
     #site-footer {
       background: var(--footer-bg);
@@ -338,7 +348,7 @@ export function injectHeader() {
     /* RTL Arabic */
     [dir="rtl"] #site-header .desktop-nav { justify-content: flex-start; }
     [dir="rtl"] #dropdown-menu .dropdown-inner { direction: rtl; }
-    [dir="rtl"] #dropdown-menu a { flex-direction: row-reverse; }
+    [dir="rtl"] .dropdown-category a { flex-direction: row-reverse; }
     [dir="rtl"] #site-footer { direction: rtl; }
     [dir="rtl"] .lang-bar { flex-direction: row-reverse; }
     [dir="rtl"] .lang-grid a { flex-direction: row-reverse; }
@@ -421,18 +431,37 @@ export function injectHeader() {
   header.id = 'site-header'
   header.innerHTML = `<div class="header-inner">${logoHTML + navHTML}</div>`
 
+  const toolCategories = [
+    { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
+    { name: 'Optimize', slugs: ['compress','resize','resize-in-kb'] },
+    { name: 'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
+    { name: 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark'] },
+    { name: 'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
+    { name: 'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
+    { name: 'Animation', slugs: ['jpg-to-gif','png-to-gif'] },
+  ]
+
+  function toolLink(slug) {
+    const tool = tools[slug]
+    if (!tool) return ''
+    const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
+    const svgSmall = ic.svg.replace('viewBox="0 0 40 40"', 'viewBox="0 0 40 40" width="18" height="18"')
+    return `<a href="${localHref(slug)}" class="${activeToolKey === slug ? 'active' : ''}">
+      <span style="width:24px;height:24px;border-radius:6px;background:${ic.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${svgSmall}</span>
+      ${t.nav_short[slug] || tool.title}
+    </a>`
+  }
+
   const dropdown = document.createElement('div')
   dropdown.id = 'dropdown-menu'
   dropdown.innerHTML = `
     <div class="dropdown-inner" id="dropdownInner">
-      ${Object.values(tools).map(tool => {
-        const ic = svgIcons[tool.slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
-        const svgSmall = ic.svg.replace('viewBox="0 0 40 40"', 'viewBox="0 0 40 40" width="18" height="18"')
-        return `<a href="${localHref(tool.slug)}" class="${activeToolKey === tool.slug ? 'active' : ''}">
-          <span style="width:24px;height:24px;border-radius:6px;background:${ic.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${svgSmall}</span>
-          ${t.nav_short[tool.slug] || tool.title}
-        </a>`
-      }).join('')}
+      ${toolCategories.map(cat => `
+        <div class="dropdown-category">
+          <h3>${cat.name}</h3>
+          ${cat.slugs.map(s => toolLink(s)).join('')}
+        </div>
+      `).join('')}
     </div>
   `
 
