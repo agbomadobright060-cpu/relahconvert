@@ -83,7 +83,8 @@
       .hamburger span { display: block; width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; }
       #dropdown-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--bg-card); border-bottom: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 99; max-height: calc(100vh - 64px); overflow-y: auto; }
       #dropdown-menu.open { display: block; }
-      .dropdown-inner { max-width: 1100px; margin: 0 auto; padding: 20px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 24px 20px; }
+      .dropdown-inner { max-width: 1100px; margin: 0 auto; padding: 20px 24px; display: flex; gap: 12px; }
+      .dropdown-category { flex: 1; min-width: 0; }
       .dropdown-category h3 { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; padding: 0 4px; font-family: 'DM Sans', sans-serif; }
       .dropdown-category a { display: flex; align-items: center; gap: 8px; padding: 7px 4px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-primary); text-decoration: none; transition: all 0.15s; }
       .dropdown-category a:hover { background: var(--bg-surface); color: var(--accent); }
@@ -141,7 +142,8 @@
         .tool-card h2 { font-size: 13px; }
         .tool-card p { display: none; }
         .hero { padding: 36px 16px 28px; }
-        .dropdown-inner { grid-template-columns: 1fr 1fr; padding: 12px; gap: 16px 12px; }
+        .dropdown-inner { flex-wrap: wrap; padding: 12px; gap: 16px 12px; }
+        .dropdown-category { flex: 0 0 calc(50% - 6px); }
         .dropdown-category a { font-size: 12px; padding: 6px 4px; }
         .footer-bottom { flex-direction: column; align-items: flex-start; }
         .photo-block { opacity: 0.5; }
@@ -440,8 +442,7 @@
       }
 
       const toolCategories = [
-        { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png'] },
-        { name: 'Convert', slugs: ['gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
+        { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
         { name: 'Optimize', slugs: ['compress','resize','resize-in-kb'] },
         { name: 'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
         { name: 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },

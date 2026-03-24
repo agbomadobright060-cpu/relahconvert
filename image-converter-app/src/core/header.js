@@ -196,10 +196,10 @@ export function injectHeader() {
       max-width: 1100px;
       margin: 0 auto;
       padding: 20px 24px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 24px 20px;
+      display: flex;
+      gap: 12px;
     }
+    .dropdown-category { flex: 1; min-width: 0; }
     .dropdown-category h3 {
       font-size: 11px;
       font-weight: 700;
@@ -229,10 +229,11 @@ export function injectHeader() {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
       #dropdown-menu .dropdown-inner {
-        grid-template-columns: 1fr 1fr;
+        flex-wrap: wrap;
         padding: 12px;
         gap: 16px 12px;
       }
+      .dropdown-category { flex: 0 0 calc(50% - 6px); }
       .dropdown-category a { font-size: 12px; padding: 6px 4px; }
     }
     #site-footer {
@@ -432,8 +433,7 @@ export function injectHeader() {
   header.innerHTML = `<div class="header-inner">${logoHTML + navHTML}</div>`
 
   const toolCategories = [
-    { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png'] },
-    { name: 'Convert', slugs: ['gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
+    { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
     { name: 'Optimize', slugs: ['compress','resize','resize-in-kb'] },
     { name: 'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
     { name: 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
