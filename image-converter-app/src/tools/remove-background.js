@@ -40,24 +40,24 @@ style.textContent = `
   #sliderRow label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;white-space:nowrap;}
   #threshSlider{flex:1;accent-color:var(--accent);cursor:pointer;}
   #sliderVal{font-size:12px;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif;width:36px;text-align:right;}
-  #bgPanel{display:none;width:160px;flex-shrink:0;padding:14px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:12px;}
+  #bgPanel{display:none;width:120px;flex-shrink:0;padding:10px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;}
   #bgPanel.on{display:flex;flex-direction:column;}
-  .bg-panel-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;font-family:'DM Sans',sans-serif;}
-  .bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-  .bg-swatch{width:100%;aspect-ratio:1;border-radius:8px;border:2px solid var(--border-light);cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .bg-panel-label{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-family:'DM Sans',sans-serif;}
+  .bg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+  .bg-swatch{width:100%;aspect-ratio:1;border-radius:6px;border:2px solid var(--border-light);cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
   .bg-swatch:hover{border-color:var(--accent);}
   .bg-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);}
   .bg-swatch .check{display:none;position:absolute;inset:0;align-items:center;justify-content:center;}
   .bg-swatch.active .check{display:flex;}
   .bg-swatch-checker{background:repeating-conic-gradient(#ccc 0% 25%, #f0f0f0 0% 50%) 50%/10px 10px;}
-  .bg-custom-wrap{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
-  .bg-color-input{width:28px;height:28px;border:2px solid var(--border-light);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;appearance:none;flex-shrink:0;}
+  .bg-custom-wrap{display:flex;align-items:center;gap:5px;margin-bottom:10px;}
+  .bg-color-input{width:24px;height:24px;border:2px solid var(--border-light);border-radius:5px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;appearance:none;flex-shrink:0;}
   .bg-color-input::-webkit-color-swatch-wrapper{padding:0;}
   .bg-color-input::-webkit-color-swatch{border:none;border-radius:4px;}
   .bg-color-input::-moz-color-swatch{border:none;border-radius:4px;}
-  .bg-hex-input{flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border-light);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);outline:none;}
+  .bg-hex-input{flex:1;min-width:0;padding:4px 6px;border:1.5px solid var(--border-light);border-radius:5px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);outline:none;}
   .bg-hex-input:focus{border-color:var(--accent);}
-  .bg-dl-btn{width:100%;padding:10px;border-radius:8px;background:var(--accent);border:none;color:var(--text-on-accent);font-family:'Fraunces',serif;font-weight:700;font-size:13px;cursor:pointer;transition:background 0.15s;margin-top:auto;}
+  .bg-dl-btn{width:100%;padding:8px;border-radius:7px;background:var(--accent);border:none;color:var(--text-on-accent);font-family:'Fraunces',serif;font-weight:700;font-size:12px;cursor:pointer;transition:background 0.15s;margin-top:auto;}
   .bg-dl-btn:hover{background:var(--accent-hover);}
   @media(max-width:600px){
     #resultRow.on{flex-direction:column;}
@@ -404,14 +404,18 @@ bgSwatches.forEach(s => {
   })
 })
 
+let colorRafId = null
 bgColorPicker.addEventListener('input', () => {
   const hex = bgColorPicker.value
   bgHexInput.value = hex
   bgSwatches.forEach(s => s.classList.remove('active'))
   bgColorPicker.style.boxShadow = '0 0 0 2px var(--accent)'
   activeBg = hex
-  const entry = entries[currentIdx]
-  if (entry?.maskData) applyBlend(entry, entry.sliderValue / 100)
+  if (colorRafId) cancelAnimationFrame(colorRafId)
+  colorRafId = requestAnimationFrame(() => {
+    const entry = entries[currentIdx]
+    if (entry?.maskData) applyBlend(entry, entry.sliderValue / 100)
+  })
 })
 
 bgHexInput.addEventListener('input', () => {
