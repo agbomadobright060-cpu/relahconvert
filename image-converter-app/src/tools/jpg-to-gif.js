@@ -1,5 +1,4 @@
 import { injectHeader } from '../core/header.js'
-import { showError, clearAll } from '../core/notify.js'
 
 import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 import { GIFEncoder, quantize, applyPalette } from 'gifenc'
@@ -228,7 +227,6 @@ function renderGrid() {
 }
 
 function addFiles(incoming) {
-  clearAll()
   const valid = Array.from(incoming).filter(f =>
     f.type === 'image/jpeg' || f.name.toLowerCase().match(/\.jpe?g$/)
   ).slice(0, 25 - files.length)
@@ -393,7 +391,7 @@ convertBtn.addEventListener('click', async () => {
     buildNextSteps()
 
   } catch (err) {
-    showError('Error: ' + (err?.message || err))
+    alert('Error: ' + (err?.message || err))
   }
 
   convertBtn.disabled = false

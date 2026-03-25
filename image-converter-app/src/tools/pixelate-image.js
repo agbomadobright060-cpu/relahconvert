@@ -1,5 +1,4 @@
 import { injectHeader } from '../core/header.js'
-import { showError, clearAll } from '../core/notify.js'
 import { formatSize } from '../core/utils.js'
 import JSZip from 'jszip'
 import { getT, getLang, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
@@ -662,7 +661,6 @@ modeIndBtn.addEventListener('click', () => {
 
 // ── File handling ───────────────────────────────────────────────────────────
 function addFiles(files) {
-  clearAll()
   const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
   if (!arr.length) return
   if (selectedFiles.length + arr.length > MAX_FILES) {
@@ -1049,7 +1047,7 @@ downloadBtn.addEventListener('click', async () => {
     }
     buildNextSteps()
   } catch (e) {
-    showError('Error: ' + e.message)
+    alert('Error: ' + e.message)
   }
   downloadBtn.disabled = false
   downloadBtn.textContent = selectedFiles.length > 1 ? downloadZipLbl : dlLabel
@@ -1057,7 +1055,7 @@ downloadBtn.addEventListener('click', async () => {
 
 // ── UI helpers ──────────────────────────────────────────────────────────────
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
-function showWarning(msg) { showError(msg) }
+function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
 
 // ── IndexedDB helpers ───────────────────────────────────────────────────────
 function openDB() {

@@ -1,5 +1,4 @@
 import { injectHeader } from '../core/header.js'
-import { showError, clearAll } from '../core/notify.js'
 
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('blur-face')
@@ -196,7 +195,6 @@ document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); const files = Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')); if(files.length) addFiles(files) })
 
 function addFiles(files) {
-  clearAll()
   let totalBytes = images.reduce((s,im)=>s+im.file.size,0)
   const startLen = images.length
   for (const f of files) {
@@ -586,7 +584,7 @@ $('batchDownloadBtn').onclick=async()=>{
     const url=URL.createObjectURL(zipBlob)
     const a=document.createElement('a');a.href=url;a.download='blurred-faces.zip';a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(()=>URL.revokeObjectURL(url),10000)
-  }catch(e){showError(ui.batchFailed+': '+e.message)}
+  }catch(e){alert(ui.batchFailed+': '+e.message)}
   btn.disabled=false;btn.textContent='⬇ ${ui.downloadZip}'
 }
 

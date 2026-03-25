@@ -3,7 +3,6 @@ import { formatSize, totalBytes, sanitizeBaseName, LIMITS} from './core/utils.js
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
-import { showError, clearAll } from './core/notify.js'
 export function initImageToPdf({ slug: _slug } = {}) {
   const bg = '#F2F2F2'
   const t = getT()
@@ -359,7 +358,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
   function setIdle()       { convertBtn.disabled = false; convertBtn.textContent = t.pdf_btn; convertBtn.style.background = 'var(--accent)'; convertBtn.style.cursor = 'pointer';     convertBtn.style.opacity = '1'   }
   function setConverting() { convertBtn.disabled = true;  convertBtn.textContent = t.pdf_btn_loading; convertBtn.style.background = 'var(--text-muted)'; convertBtn.style.cursor = 'not-allowed'; convertBtn.style.opacity = '1' }
 
-  function showWarning(msg) { showError(msg) }
+  function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 4000) }
   function cleanupUrls()    { downloadUrls.forEach(u => URL.revokeObjectURL(u)); downloadUrls = [] }
 
   modeOne.addEventListener('click', () => { pdfMode = 'one'; modeOne.classList.add('active'); modeAll.classList.remove('active') })
@@ -386,7 +385,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
   }
 
   function validateAndAdd(incoming) {
-    clearAll()
     const valid  = incoming.filter(f => f.type === inputMime && f.size <= LIMITS.MAX_PER_FILE_BYTES)
     const wrong  = incoming.filter(f => f.type !== inputMime)
     const tooBig = incoming.filter(f => f.type === inputMime && f.size > LIMITS.MAX_PER_FILE_BYTES)
@@ -433,7 +431,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
       downloadArea.style.display = 'flex'
       setIdle()
     } catch (err) {
-      showError(err?.message || 'PDF conversion error')
+      alert(err?.message || 'PDF conversion error')
       if (selectedFiles.length) setIdle(); else setDisabled()
     }
   })

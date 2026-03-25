@@ -1,5 +1,4 @@
 import { injectHeader } from '../core/header.js'
-import { showError, clearAll } from '../core/notify.js'
 import { formatSize, totalBytes } from '../core/utils.js'
 import JSZip from 'jszip'
 import { getT, getLang, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
@@ -613,7 +612,6 @@ modeIndBtn.addEventListener('click', () => {
 
 // ── File handling ───────────────────────────────────────────────────────────
 function addFiles(files) {
-  clearAll()
   const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
   if (!arr.length) return
 
@@ -818,7 +816,7 @@ resizeBtn.addEventListener('click', async () => {
       showDownload('resized-images.zip', zipBlob)
     }
   } catch (e) {
-    showError('Error: ' + e.message)
+    alert('Error: ' + e.message)
   }
   setIdle()
 })
@@ -828,7 +826,7 @@ function setDisabled() { resizeBtn.disabled = true; resizeBtn.textContent = rikR
 function setIdle() { if (!selectedFiles.length) { setDisabled(); return } resizeBtn.disabled = false; resizeBtn.textContent = rikResizeBtn; resizeBtn.style.background = 'var(--accent)'; resizeBtn.style.cursor = 'pointer'; resizeBtn.style.opacity = '1' }
 function setResizing() { resizeBtn.disabled = true; resizeBtn.textContent = rikResizingBtn; resizeBtn.style.background = 'var(--text-muted)'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '1' }
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
-function showWarning(msg) { showError(msg) }
+function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 5000) }
 
 function showResultBar(originalBytes, outputBytes) {
   const isIncrease = outputBytes > originalBytes

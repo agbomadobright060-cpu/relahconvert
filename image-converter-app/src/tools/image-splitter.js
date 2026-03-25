@@ -1,5 +1,4 @@
 import { injectHeader } from '../core/header.js'
-import { showError, clearAll } from '../core/notify.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 injectHreflang('image-splitter')
 
@@ -128,7 +127,6 @@ let currentCols = 2
 let isCustom = false
 
 function handleFile(file) {
-  clearAll()
   if (!file || !file.type.startsWith('image/')) return
   originalFile = file
   const img = new Image()
@@ -309,7 +307,7 @@ downloadBtn.addEventListener('click', async () => {
 
     buildNextSteps()
   } catch (e) {
-    showError('ZIP failed: ' + e.message)
+    alert('ZIP failed: ' + e.message)
   }
 
   downloadBtn.textContent = 'Download All as ZIP'

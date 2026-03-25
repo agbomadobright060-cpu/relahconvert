@@ -3,7 +3,6 @@ import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool, isStandaloneRoute } from './app/router.js'
 import { injectHeader } from './core/header.js'
 import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang, injectFaqSchema} from './core/i18n.js'
-import { showError, clearAll } from './core/notify.js'
 
 // If a standalone tool was loaded via dynamic import (translated URL), stop here.
 // The dynamically imported module will render its own UI into #app.
@@ -199,7 +198,7 @@ function setDisabled() {
 }
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
 function clearResultsUI() { cleanupOldUrl(); downloadLink.style.display = 'none'; nextSteps.style.display = 'none'; sizes.textContent = '' }
-function showWarning(msg) { showError(msg) }
+function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 4000) }
 
 async function saveFilesToIDB(files) {
   const db = await openDB()
@@ -247,7 +246,6 @@ function renderPreviews() {
 }
 
 function validateAndAdd(incoming) {
-  clearAll()
   const allImages = incoming.filter(f => f.type && f.type.startsWith('image/'))
   if (currentTool && currentTool.inputFormats.length) {
     const wrong = allImages.filter(f => !currentTool.inputFormats.includes(f.type))
@@ -343,7 +341,7 @@ convertBtn.addEventListener('click', async () => {
     }
     showNextSteps(mime); setIdleEnabled()
   } catch (err) {
-    showError(err?.message || 'Conversion error')
+    alert(err?.message || 'Conversion error')
     sizes.textContent = ''
     if (selectedFiles.length) setIdleEnabled(); else setDisabled()
   }

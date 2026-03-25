@@ -1,5 +1,4 @@
 import { injectHeader } from '../core/header.js'
-import { showError, clearAll } from '../core/notify.js'
 
 import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('remove-background')
@@ -311,7 +310,6 @@ nextBtn.addEventListener('click', () => { currentIdx++; renderCurrent() })
 newBtn.addEventListener('click', () => fileInput.click())
 
 function addFiles(newFiles) {
-  clearAll()
   const fileArr = Array.from(newFiles).filter(f => f.type.startsWith('image/'))
   if (!fileArr.length) return
   const startIdx = entries.length
@@ -395,7 +393,7 @@ zipBtn.addEventListener('click', async () => {
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob); a.download = 'removed-backgrounds.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-  } catch(err) { showError('ZIP failed: ' + err.message) }
+  } catch(err) { alert('ZIP failed: ' + err.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })
 
