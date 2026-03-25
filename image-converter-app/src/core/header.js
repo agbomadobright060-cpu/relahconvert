@@ -231,11 +231,16 @@ export function injectHeader() {
       #dropdown-menu .dropdown-inner {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        grid-auto-flow: dense;
         padding: 12px;
         gap: 12px;
       }
       .dropdown-category { min-width: 0; }
+      .dropdown-category:nth-child(1) { grid-column: 1; }
+      .dropdown-category:nth-child(2) { grid-column: 2; }
+      .dropdown-category:nth-child(3) { grid-column: 2; }
+      .dropdown-category:nth-child(4) { grid-column: 1; }
+      .dropdown-category:nth-child(5) { grid-column: 1; }
+      .dropdown-category:nth-child(6) { grid-column: 2; }
       .dropdown-category a { font-size: 12px; padding: 6px 4px; }
     }
     #site-footer {
