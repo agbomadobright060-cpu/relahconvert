@@ -1,4 +1,5 @@
 import { injectHeader } from '../core/header.js'
+import { showError, clearAll } from '../core/notify.js'
 
 import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('svg-to-png')
@@ -115,6 +116,7 @@ function makeUnique(usedNames, name) {
 }
 
 function addFiles(newFiles) {
+  clearAll()
   Array.from(newFiles).forEach(file => {
     if (file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) return
     const card = document.createElement('div')
@@ -202,7 +204,7 @@ zipBtn.addEventListener('click', async () => {
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob); a.download = 'png-files.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-  } catch(e) { alert('ZIP failed: ' + e.message) }
+  } catch(e) { showError('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })
 

@@ -2,6 +2,7 @@ import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
 import { injectHeader } from './core/header.js'
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { showError, clearAll } from './core/notify.js'
 injectHreflang('resize')
 
 const bg = '#F2F2F2'
@@ -420,7 +421,7 @@ widthInput.addEventListener('input', () => { if (aspectLock.checked && aspectRat
 heightInput.addEventListener('input', () => { if (aspectLock.checked && aspectRatio && heightInput.value) widthInput.value = Math.round(heightInput.value * aspectRatio) })
 
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
-function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 4000) }
+function showWarning(msg) { showError(msg) }
 function setDisabled() { resizeBtn.disabled = true; resizeBtn.textContent = t.resize_btn; resizeBtn.style.background = 'var(--btn-disabled)'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '0.7' }
 function setIdle() { resizeBtn.disabled = false; resizeBtn.textContent = t.resize_btn; resizeBtn.style.background = 'var(--accent)'; resizeBtn.style.cursor = 'pointer'; resizeBtn.style.opacity = '1' }
 function setResizing() { resizeBtn.disabled = true; resizeBtn.textContent = t.resize_btn_loading; resizeBtn.style.background = 'var(--text-muted)'; resizeBtn.style.cursor = 'not-allowed'; resizeBtn.style.opacity = '1' }
@@ -435,6 +436,7 @@ function renderPreviews() {
 }
 
 function validateAndAdd(incoming) {
+  clearAll()
   const valid = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/png') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
   const wrongFormat = incoming.filter(f => f.type !== 'image/jpeg' && f.type !== 'image/png')
   const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/png') && f.size > LIMITS.MAX_PER_FILE_BYTES)
@@ -562,7 +564,7 @@ resizeBtn.addEventListener('click', async () => {
     }
     buildNextSteps(); setIdle(); fileInput.value = ''
   } catch (err) {
-    alert(err?.message || 'Resize error')
+    showError(err?.message || 'Resize error')
     if (selectedFiles.length) setIdle(); else setDisabled()
   }
 })

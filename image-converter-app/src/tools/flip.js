@@ -1,4 +1,5 @@
 import { injectHeader } from '../core/header.js'
+import { showError, clearAll } from '../core/notify.js'
 
 import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('flip')
@@ -186,6 +187,7 @@ function getStatus(entry) {
 }
 
 function addFiles(newFiles) {
+  clearAll()
   Array.from(newFiles).forEach(file => {
     if (!file.type.startsWith('image/')) return
     const entry = { file, img: null, flippedH: false, flippedV: false, dlLink: null }
@@ -335,7 +337,7 @@ zipBtn.addEventListener('click', async () => {
     a.download = 'flipped-images.zip'
     a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-  } catch(e) { alert('ZIP failed: ' + e.message) }
+  } catch(e) { showError('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn
   zipBtn.disabled = false
 })

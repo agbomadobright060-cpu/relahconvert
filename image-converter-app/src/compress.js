@@ -2,6 +2,7 @@ import { injectHeader } from './core/header.js'
 import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { showError, clearAll } from './core/notify.js'
 injectHreflang('compress')
 
 const bg = '#F2F2F2'
@@ -421,7 +422,7 @@ function setDisabled() { compressBtn.disabled = true; compressBtn.textContent = 
 function setIdle() { compressBtn.disabled = false; compressBtn.textContent = t.compress_btn; compressBtn.style.background = 'var(--accent)'; compressBtn.style.cursor = 'pointer'; compressBtn.style.opacity = '1' }
 function setConverting() { compressBtn.disabled = true; compressBtn.textContent = t.compress_btn_loading; compressBtn.style.background = 'var(--text-muted)'; compressBtn.style.cursor = 'not-allowed'; compressBtn.style.opacity = '1' }
 function cleanupOldUrl() { if (currentDownloadUrl) { URL.revokeObjectURL(currentDownloadUrl); currentDownloadUrl = null } }
-function showWarning(msg) { warning.style.display = 'block'; warning.textContent = msg; setTimeout(() => { warning.style.display = 'none' }, 4000) }
+function showWarning(msg) { showError(msg) }
 
 function showResultBar(originalBytes, outputBytes) {
   const saved = Math.max(0, Math.round((1 - outputBytes / originalBytes) * 100))
@@ -501,6 +502,7 @@ function renderPreviews() {
 }
 
 function validateAndAdd(incoming) {
+  clearAll()
   const valid = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp' || f.type === 'image/png') && f.size <= LIMITS.MAX_PER_FILE_BYTES)
   const wrongFormat = incoming.filter(f => f.type !== 'image/jpeg' && f.type !== 'image/webp' && f.type !== 'image/png')
   const tooBig = incoming.filter(f => (f.type === 'image/jpeg' || f.type === 'image/webp' || f.type === 'image/png') && f.size > LIMITS.MAX_PER_FILE_BYTES)
@@ -555,7 +557,7 @@ compressBtn.addEventListener('click', async () => {
     }
     setIdle(); fileInput.value = ''
   } catch (err) {
-    alert(err?.message || 'Compression error')
+    showError(err?.message || 'Compression error')
     if (selectedFiles.length) setIdle(); else setDisabled()
   }
 })
