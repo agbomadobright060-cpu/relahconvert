@@ -199,6 +199,7 @@ export function injectHeader() {
       display: flex;
       gap: 12px;
     }
+    .dropdown-col { display: contents; }
     .dropdown-category { flex: 1; min-width: 0; }
     .dropdown-category h3 {
       font-size: 11px;
@@ -229,12 +230,12 @@ export function injectHeader() {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
       #dropdown-menu .dropdown-inner {
-        display: block;
+        display: flex;
         padding: 12px;
-        column-count: 2;
-        column-gap: 12px;
+        gap: 12px;
       }
-      .dropdown-category { break-inside: avoid; margin-bottom: 12px; }
+      .dropdown-col { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+      .dropdown-category { margin-bottom: 12px; }
       .dropdown-category a { font-size: 12px; padding: 6px 4px; }
     }
     #site-footer {
@@ -453,16 +454,19 @@ export function injectHeader() {
     </a>`
   }
 
+  const leftCats = [toolCategories[0], toolCategories[2], toolCategories[4]] // Convert, Modify, Export
+  const rightCats = [toolCategories[1], toolCategories[3], toolCategories[5]] // Optimize, Create, Photo
+
+  function renderCat(cat) {
+    return `<div class="dropdown-category"><h3>${cat.name}</h3>${cat.slugs.map(s => toolLink(s)).join('')}</div>`
+  }
+
   const dropdown = document.createElement('div')
   dropdown.id = 'dropdown-menu'
   dropdown.innerHTML = `
     <div class="dropdown-inner" id="dropdownInner">
-      ${toolCategories.map(cat => `
-        <div class="dropdown-category">
-          <h3>${cat.name}</h3>
-          ${cat.slugs.map(s => toolLink(s)).join('')}
-        </div>
-      `).join('')}
+      <div class="dropdown-col">${leftCats.map(renderCat).join('')}</div>
+      <div class="dropdown-col">${rightCats.map(renderCat).join('')}</div>
     </div>
   `
 
