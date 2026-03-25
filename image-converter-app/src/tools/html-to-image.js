@@ -3,7 +3,6 @@ import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js
 injectHreflang('html-to-image')
 
 const t = getT()
-const API_KEY = 'cecb9e03ead844aeb7f6e24e6a6f6824'
 const toolName = (t.nav_short && t.nav_short['html-to-image']) || 'HTML to Image'
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
@@ -160,10 +159,12 @@ captureBtn.addEventListener('click', async () => {
   previewBox.style.display = 'none'
   downloadBtn.style.display = 'none'
 
-  const apiUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${API_KEY}&url=${encodeURIComponent(url)}&format=${fmt}&width=${width}&response_type=image&fresh=true`
-
   try {
-    const res = await fetch(apiUrl)
+    const res = await fetch('/api/screenshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, format: fmt, width }),
+    })
     if (!res.ok) throw new Error()
     const blob   = await res.blob()
     const objUrl = URL.createObjectURL(blob)
