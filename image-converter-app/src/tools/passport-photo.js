@@ -307,6 +307,20 @@ metaKeywords.name = 'keywords'
 metaKeywords.content = 'passport photo maker, passport photo online free, passport size photo, passport photo app, visa photo maker, ID photo maker, passport photo background removal, passport photo white background, 2x2 passport photo, 35x45mm passport photo, make passport photo at home, free passport photo no watermark, US passport photo, UK passport photo, passport photo requirements, passport photo near me alternative'
 document.head.appendChild(metaKeywords)
 
+const videoLd = document.createElement('script')
+videoLd.type = 'application/ld+json'
+videoLd.textContent = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: t.pp_page_title || 'Passport Photo Maker — How It Works',
+  description: t.pp_meta_desc || 'See how to make passport photos at home free with AI background removal for 170+ countries.',
+  thumbnailUrl: 'https://relahconvert.com/passport-before-after.jpg',
+  contentUrl: 'https://relahconvert.com/passport-demo.mp4',
+  uploadDate: '2026-03-20',
+  duration: 'PT30S'
+})
+document.head.appendChild(videoLd)
+
 document.querySelector('#app').innerHTML = `
   <div class="pp-wrap">
     <h1 class="pp-h1">${h1Main} <em>${h1Em}</em></h1>
