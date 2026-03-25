@@ -25,7 +25,9 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  #viewerWrap{display:none;position:relative;width:100%;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);background:var(--bg-card);margin-bottom:16px;}
+  #resultRow{display:none;gap:16px;margin-bottom:16px;align-items:flex-start;}
+  #resultRow.on{display:flex;}
+  #viewerWrap{position:relative;flex:1;min-width:0;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);background:var(--bg-card);}
   #viewerWrap canvas{display:block;width:100%;height:auto;}
   #procOverlay{display:none;position:absolute;inset:0;background:var(--overlay);z-index:20;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
   #procOverlay.on{display:flex;}
@@ -38,21 +40,30 @@ style.textContent = `
   #sliderRow label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;white-space:nowrap;}
   #threshSlider{flex:1;accent-color:var(--accent);cursor:pointer;}
   #sliderVal{font-size:12px;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif;width:36px;text-align:right;}
-  #bgPanel{display:none;margin-bottom:14px;padding:12px 14px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;}
-  #bgPanel.on{display:block;}
-  .bg-panel-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-family:'DM Sans',sans-serif;}
-  .bg-options{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .bg-swatch{width:32px;height:32px;border-radius:8px;border:2px solid var(--border-light);cursor:pointer;transition:all 0.15s;flex-shrink:0;position:relative;overflow:hidden;}
+  #bgPanel{display:none;width:160px;flex-shrink:0;padding:14px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:12px;}
+  #bgPanel.on{display:flex;flex-direction:column;}
+  .bg-panel-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;font-family:'DM Sans',sans-serif;}
+  .bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .bg-swatch{width:100%;aspect-ratio:1;border-radius:8px;border:2px solid var(--border-light);cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
   .bg-swatch:hover{border-color:var(--accent);}
   .bg-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);}
-  .bg-swatch-checker{background:repeating-conic-gradient(#ccc 0% 25%, #f0f0f0 0% 50%) 50%/12px 12px;}
-  .bg-custom-wrap{display:flex;align-items:center;gap:6px;margin-left:4px;}
-  .bg-color-input{width:32px;height:32px;border:2px solid var(--border-light);border-radius:8px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;appearance:none;}
+  .bg-swatch .check{display:none;position:absolute;inset:0;align-items:center;justify-content:center;}
+  .bg-swatch.active .check{display:flex;}
+  .bg-swatch-checker{background:repeating-conic-gradient(#ccc 0% 25%, #f0f0f0 0% 50%) 50%/10px 10px;}
+  .bg-custom-wrap{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
+  .bg-color-input{width:28px;height:28px;border:2px solid var(--border-light);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;appearance:none;flex-shrink:0;}
   .bg-color-input::-webkit-color-swatch-wrapper{padding:0;}
-  .bg-color-input::-webkit-color-swatch{border:none;border-radius:6px;}
-  .bg-color-input::-moz-color-swatch{border:none;border-radius:6px;}
-  .bg-hex-input{width:80px;padding:5px 8px;border:1.5px solid var(--border-light);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);outline:none;}
+  .bg-color-input::-webkit-color-swatch{border:none;border-radius:4px;}
+  .bg-color-input::-moz-color-swatch{border:none;border-radius:4px;}
+  .bg-hex-input{flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border-light);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);outline:none;}
   .bg-hex-input:focus{border-color:var(--accent);}
+  .bg-dl-btn{width:100%;padding:10px;border-radius:8px;background:var(--accent);border:none;color:var(--text-on-accent);font-family:'Fraunces',serif;font-weight:700;font-size:13px;cursor:pointer;transition:background 0.15s;margin-top:auto;}
+  .bg-dl-btn:hover{background:var(--accent-hover);}
+  @media(max-width:600px){
+    #resultRow.on{flex-direction:column;}
+    #bgPanel{width:100%;}
+    .bg-grid{grid-template-columns:repeat(6,1fr);}
+  }
   #navRow{display:none;align-items:center;justify-content:space-between;margin-bottom:10px;}
   #navRow.on{display:flex;}
   .nav-btn{padding:7px 16px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
@@ -68,8 +79,6 @@ style.textContent = `
   .thumb-badge{position:absolute;bottom:2px;right:2px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;}
   .thumb-badge.done{background:#22c55e;}
   .thumb-badge.proc{background:var(--accent);animation:spin 0.8s linear infinite;}
-  .dl-btn{display:none;width:100%;box-sizing:border-box;text-align:center;padding:13px;border-radius:10px;background:var(--accent);border:none;color:var(--text-on-accent);font-family:'Fraunces',serif;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px;transition:background 0.15s;}
-  .dl-btn:hover{background:var(--accent-hover);}
   .zip-btn{display:none;width:100%;padding:12px;border-radius:10px;background:var(--btn-dark);color:var(--text-on-dark-btn);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;margin-bottom:10px;border:none;transition:background 0.15s;}
   .zip-btn:hover{background:var(--btn-dark-hover);}
   .new-btn{display:none;width:100%;padding:11px;border:1.5px solid var(--accent);border-radius:10px;background:transparent;color:var(--accent);font-size:14px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;margin-bottom:16px;transition:all 0.15s;}
@@ -114,12 +123,30 @@ document.querySelector('#app').innerHTML = `
       <button class="nav-btn" id="nextBtn">Next →</button>
     </div>
     <div class="nav-fname" id="navFname"></div>
-    <div id="viewerWrap">
-      <canvas id="viewerCanvas"></canvas>
-      <div id="procOverlay">
-        <div class="spinner"></div>
-        <div class="proc-progress"><div class="proc-bar" id="procBar"></div></div>
-        <div class="proc-label" id="procLabel">Loading AI model…</div>
+    <div id="resultRow">
+      <div id="viewerWrap">
+        <canvas id="viewerCanvas"></canvas>
+        <div id="procOverlay">
+          <div class="spinner"></div>
+          <div class="proc-progress"><div class="proc-bar" id="procBar"></div></div>
+          <div class="proc-label" id="procLabel">Loading AI model…</div>
+        </div>
+      </div>
+      <div id="bgPanel">
+        <div class="bg-panel-label">${t.rb_bg_label || 'Background'}</div>
+        <div class="bg-grid">
+          <div class="bg-swatch bg-swatch-checker active" data-bg="transparent" title="Transparent"><span class="check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,8 6.5,11.5 13,4.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="bg-swatch" data-bg="#ffffff" style="background:#ffffff;" title="White"><span class="check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,8 6.5,11.5 13,4.5" stroke="#333" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="bg-swatch" data-bg="#000000" style="background:#000000;" title="Black"><span class="check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,8 6.5,11.5 13,4.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="bg-swatch" data-bg="#ff0000" style="background:#ff0000;" title="Red"><span class="check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,8 6.5,11.5 13,4.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="bg-swatch" data-bg="#0066ff" style="background:#0066ff;" title="Blue"><span class="check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,8 6.5,11.5 13,4.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="bg-swatch" data-bg="#22c55e" style="background:#22c55e;" title="Green"><span class="check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,8 6.5,11.5 13,4.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="bg-custom-wrap">
+          <input type="color" class="bg-color-input" id="bgColorPicker" value="#888888" title="Custom color" />
+          <input type="text" class="bg-hex-input" id="bgHexInput" placeholder="#hex" maxlength="7" />
+        </div>
+        <button class="bg-dl-btn" id="dlBtn">${dlBtn}</button>
       </div>
     </div>
     <div id="sliderRow">
@@ -127,23 +154,7 @@ document.querySelector('#app').innerHTML = `
       <input type="range" id="threshSlider" min="0" max="100" value="100" />
       <span id="sliderVal">100%</span>
     </div>
-    <div id="bgPanel">
-      <div class="bg-panel-label">${t.rb_bg_label || 'Background'}</div>
-      <div class="bg-options">
-        <div class="bg-swatch bg-swatch-checker active" data-bg="transparent" title="Transparent"></div>
-        <div class="bg-swatch" data-bg="#ffffff" style="background:#ffffff;" title="White"></div>
-        <div class="bg-swatch" data-bg="#000000" style="background:#000000;" title="Black"></div>
-        <div class="bg-swatch" data-bg="#ff0000" style="background:#ff0000;" title="Red"></div>
-        <div class="bg-swatch" data-bg="#0066ff" style="background:#0066ff;" title="Blue"></div>
-        <div class="bg-swatch" data-bg="#22c55e" style="background:#22c55e;" title="Green"></div>
-        <div class="bg-custom-wrap">
-          <input type="color" class="bg-color-input" id="bgColorPicker" value="#888888" title="Custom color" />
-          <input type="text" class="bg-hex-input" id="bgHexInput" placeholder="#hex" maxlength="7" />
-        </div>
-      </div>
-    </div>
     <div class="status-text" id="statusText"></div>
-    <button class="dl-btn" id="dlBtn">${dlBtn}</button>
     <button class="remove-all-btn" id="removeAllBtn" style="display:none;">⚡ Remove All Backgrounds</button>
     <button class="zip-btn" id="zipBtn">${dlZipBtn}</button>
     <button class="new-btn" id="newBtn">+ Add more images</button>
@@ -157,7 +168,6 @@ document.querySelector('#app').innerHTML = `
 injectHeader()
 
 const fileInput    = document.getElementById('fileInput')
-const viewerWrap   = document.getElementById('viewerWrap')
 const canvas       = document.getElementById('viewerCanvas')
 const procOverlay  = document.getElementById('procOverlay')
 const procBar      = document.getElementById('procBar')
@@ -248,21 +258,22 @@ function renderCurrent() {
   navFname.textContent = entry.file.name
   prevBtn.disabled = currentIdx === 0
   nextBtn.disabled = currentIdx === entries.length - 1
-  viewerWrap.style.display = 'block'; newBtn.style.display = 'block'
+  const resultRow = document.getElementById('resultRow')
+  const bgPanel = document.getElementById('bgPanel')
+  resultRow.classList.add('on'); newBtn.style.display = 'block'
   threshSlider.value = entry.sliderValue
   sliderValEl.textContent = entry.sliderValue + '%'
   document.querySelectorAll('.thumb-item').forEach((el, i) => el.classList.toggle('active', i === currentIdx))
-  const bgPanel = document.getElementById('bgPanel')
   if (entry.maskData) {
     applyBlend(entry, entry.sliderValue / 100)
-    sliderRow.classList.add('on'); bgPanel.classList.add('on'); dlBtnEl.style.display = 'block'; procOverlay.classList.remove('on')
+    sliderRow.classList.add('on'); bgPanel.classList.add('on'); procOverlay.classList.remove('on')
     statusText.textContent = 'Done — drag slider to adjust, then download.'
   } else if (entry.processing) {
-    sliderRow.classList.remove('on'); bgPanel.classList.remove('on'); dlBtnEl.style.display = 'none'; procOverlay.classList.add('on')
+    sliderRow.classList.remove('on'); bgPanel.classList.remove('on'); procOverlay.classList.add('on')
     statusText.textContent = 'Removing background…'
     if (entry.origData) { canvas.width = entry.origData.width; canvas.height = entry.origData.height; canvas.getContext('2d').putImageData(entry.origData, 0, 0) }
   } else {
-    sliderRow.classList.remove('on'); bgPanel.classList.remove('on'); dlBtnEl.style.display = 'none'
+    sliderRow.classList.remove('on'); bgPanel.classList.remove('on')
     statusText.textContent = 'Ready to process.'
     if (entry.origData) { canvas.width = entry.origData.width; canvas.height = entry.origData.height; canvas.getContext('2d').putImageData(entry.origData, 0, 0) }
     startProcessing(entry)
@@ -339,7 +350,7 @@ async function startProcessing(entry) {
     entry.badgeEl.innerHTML = `<svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`
     if (entries[currentIdx] === entry) {
       procOverlay.classList.remove('on'); applyBlend(entry, entry.sliderValue / 100)
-      sliderRow.classList.add('on'); document.getElementById('bgPanel').classList.add('on'); dlBtnEl.style.display = 'block'
+      sliderRow.classList.add('on'); document.getElementById('bgPanel').classList.add('on')
       statusText.textContent = 'Done — drag slider to adjust, then download.'
       const doneCount = entries.filter(e => e.resultBlob).length
       zipBtn.style.display = doneCount > 1 ? 'block' : 'none'
