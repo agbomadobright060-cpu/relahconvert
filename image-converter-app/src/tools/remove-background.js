@@ -8,7 +8,7 @@ const t = getT()
 const bg = 'var(--bg-page)'
 const toolName  = (t.nav_short && t.nav_short['remove-background']) || 'Remove Background'
 const seoData   = t.seo && t.seo['remove-background']
-const descText  = seoData ? seoData.h2a : 'Remove image background free. AI-powered, runs entirely in your browser.'
+const descText  = seoData ? seoData.h2a : 'Remove image background free. AI-powered, batch process up to 25 images.'
 const selectLbl = t.select_images || 'Select Images'
 const dropHint  = t.drop_hint || 'or drop images anywhere'
 const dlBtn     = t.download || 'Download'
@@ -105,7 +105,7 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = `${toolName} Free | No Upload — RelahConvert`
+document.title = t.rb_page_title || `${toolName} Free — AI Background Remover | RelahConvert`
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 24px;font-family:'DM Sans',sans-serif;">
