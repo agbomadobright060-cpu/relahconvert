@@ -38,6 +38,21 @@ style.textContent = `
   #sliderRow label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;white-space:nowrap;}
   #threshSlider{flex:1;accent-color:var(--accent);cursor:pointer;}
   #sliderVal{font-size:12px;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif;width:36px;text-align:right;}
+  #bgPanel{display:none;margin-bottom:14px;padding:12px 14px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;}
+  #bgPanel.on{display:block;}
+  .bg-panel-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-family:'DM Sans',sans-serif;}
+  .bg-options{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .bg-swatch{width:32px;height:32px;border-radius:8px;border:2px solid var(--border-light);cursor:pointer;transition:all 0.15s;flex-shrink:0;position:relative;overflow:hidden;}
+  .bg-swatch:hover{border-color:var(--accent);}
+  .bg-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);}
+  .bg-swatch-checker{background:repeating-conic-gradient(#ccc 0% 25%, #f0f0f0 0% 50%) 50%/12px 12px;}
+  .bg-custom-wrap{display:flex;align-items:center;gap:6px;margin-left:4px;}
+  .bg-color-input{width:32px;height:32px;border:2px solid var(--border-light);border-radius:8px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;appearance:none;}
+  .bg-color-input::-webkit-color-swatch-wrapper{padding:0;}
+  .bg-color-input::-webkit-color-swatch{border:none;border-radius:6px;}
+  .bg-color-input::-moz-color-swatch{border:none;border-radius:6px;}
+  .bg-hex-input{width:80px;padding:5px 8px;border:1.5px solid var(--border-light);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);outline:none;}
+  .bg-hex-input:focus{border-color:var(--accent);}
   #navRow{display:none;align-items:center;justify-content:space-between;margin-bottom:10px;}
   #navRow.on{display:flex;}
   .nav-btn{padding:7px 16px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
@@ -112,6 +127,21 @@ document.querySelector('#app').innerHTML = `
       <input type="range" id="threshSlider" min="0" max="100" value="100" />
       <span id="sliderVal">100%</span>
     </div>
+    <div id="bgPanel">
+      <div class="bg-panel-label">${t.rb_bg_label || 'Background'}</div>
+      <div class="bg-options">
+        <div class="bg-swatch bg-swatch-checker active" data-bg="transparent" title="Transparent"></div>
+        <div class="bg-swatch" data-bg="#ffffff" style="background:#ffffff;" title="White"></div>
+        <div class="bg-swatch" data-bg="#000000" style="background:#000000;" title="Black"></div>
+        <div class="bg-swatch" data-bg="#ff0000" style="background:#ff0000;" title="Red"></div>
+        <div class="bg-swatch" data-bg="#0066ff" style="background:#0066ff;" title="Blue"></div>
+        <div class="bg-swatch" data-bg="#22c55e" style="background:#22c55e;" title="Green"></div>
+        <div class="bg-custom-wrap">
+          <input type="color" class="bg-color-input" id="bgColorPicker" value="#888888" title="Custom color" />
+          <input type="text" class="bg-hex-input" id="bgHexInput" placeholder="#hex" maxlength="7" />
+        </div>
+      </div>
+    </div>
     <div class="status-text" id="statusText"></div>
     <button class="dl-btn" id="dlBtn">${dlBtn}</button>
     <button class="remove-all-btn" id="removeAllBtn" style="display:none;">⚡ Remove All Backgrounds</button>
@@ -147,7 +177,7 @@ const navCounter   = document.getElementById('navCounter')
 const navFname     = document.getElementById('navFname')
 const thumbStrip   = document.getElementById('thumbStrip')
 
-let entries = [], currentIdx = 0
+let entries = [], currentIdx = 0, activeBg = 'transparent'
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
@@ -169,18 +199,44 @@ function drawChecker(ctx, x, y, w, h, sz = 12) {
     }
 }
 
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16)
+  return [r, g, b]
+}
+
 function applyBlend(entry, intensity) {
   if (!entry.origData || !entry.maskData) return
   const W = entry.origData.width, H = entry.origData.height
   canvas.width = W; canvas.height = H
   const ctx = canvas.getContext('2d')
-  drawChecker(ctx, 0, 0, W, H)
+  const useSolid = activeBg !== 'transparent'
+
+  if (useSolid) {
+    ctx.fillStyle = activeBg
+    ctx.fillRect(0, 0, W, H)
+  } else {
+    drawChecker(ctx, 0, 0, W, H)
+  }
+
   const out = ctx.createImageData(W, H)
   const src = entry.origData.data, d = out.data
-  for (let i = 0; i < W * H; i++) {
-    const p = i * 4
-    d[p] = src[p]; d[p+1] = src[p+1]; d[p+2] = src[p+2]
-    d[p+3] = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity)
+
+  if (useSolid) {
+    const [br, bg, bb] = hexToRgb(activeBg)
+    for (let i = 0; i < W * H; i++) {
+      const p = i * 4
+      const a = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity) / 255
+      d[p]   = Math.round(src[p] * a + br * (1 - a))
+      d[p+1] = Math.round(src[p+1] * a + bg * (1 - a))
+      d[p+2] = Math.round(src[p+2] * a + bb * (1 - a))
+      d[p+3] = 255
+    }
+  } else {
+    for (let i = 0; i < W * H; i++) {
+      const p = i * 4
+      d[p] = src[p]; d[p+1] = src[p+1]; d[p+2] = src[p+2]
+      d[p+3] = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity)
+    }
   }
   ctx.putImageData(out, 0, 0)
 }
@@ -196,16 +252,17 @@ function renderCurrent() {
   threshSlider.value = entry.sliderValue
   sliderValEl.textContent = entry.sliderValue + '%'
   document.querySelectorAll('.thumb-item').forEach((el, i) => el.classList.toggle('active', i === currentIdx))
+  const bgPanel = document.getElementById('bgPanel')
   if (entry.maskData) {
     applyBlend(entry, entry.sliderValue / 100)
-    sliderRow.classList.add('on'); dlBtnEl.style.display = 'block'; procOverlay.classList.remove('on')
+    sliderRow.classList.add('on'); bgPanel.classList.add('on'); dlBtnEl.style.display = 'block'; procOverlay.classList.remove('on')
     statusText.textContent = 'Done — drag slider to adjust, then download.'
   } else if (entry.processing) {
-    sliderRow.classList.remove('on'); dlBtnEl.style.display = 'none'; procOverlay.classList.add('on')
+    sliderRow.classList.remove('on'); bgPanel.classList.remove('on'); dlBtnEl.style.display = 'none'; procOverlay.classList.add('on')
     statusText.textContent = 'Removing background…'
     if (entry.origData) { canvas.width = entry.origData.width; canvas.height = entry.origData.height; canvas.getContext('2d').putImageData(entry.origData, 0, 0) }
   } else {
-    sliderRow.classList.remove('on'); dlBtnEl.style.display = 'none'
+    sliderRow.classList.remove('on'); bgPanel.classList.remove('on'); dlBtnEl.style.display = 'none'
     statusText.textContent = 'Ready to process.'
     if (entry.origData) { canvas.width = entry.origData.width; canvas.height = entry.origData.height; canvas.getContext('2d').putImageData(entry.origData, 0, 0) }
     startProcessing(entry)
@@ -282,7 +339,7 @@ async function startProcessing(entry) {
     entry.badgeEl.innerHTML = `<svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`
     if (entries[currentIdx] === entry) {
       procOverlay.classList.remove('on'); applyBlend(entry, entry.sliderValue / 100)
-      sliderRow.classList.add('on'); dlBtnEl.style.display = 'block'
+      sliderRow.classList.add('on'); document.getElementById('bgPanel').classList.add('on'); dlBtnEl.style.display = 'block'
       statusText.textContent = 'Done — drag slider to adjust, then download.'
       const doneCount = entries.filter(e => e.resultBlob).length
       zipBtn.style.display = doneCount > 1 ? 'block' : 'none'
@@ -303,6 +360,60 @@ threshSlider.addEventListener('input', () => {
   if (!entry) return
   entry.sliderValue = v
   if (entry.maskData) applyBlend(entry, v / 100)
+})
+
+// Background panel
+const bgSwatches = document.querySelectorAll('.bg-swatch')
+const bgColorPicker = document.getElementById('bgColorPicker')
+const bgHexInput = document.getElementById('bgHexInput')
+
+function setActiveBg(color) {
+  activeBg = color
+  bgSwatches.forEach(s => s.classList.toggle('active', s.dataset.bg === color))
+  // If custom color doesn't match any swatch, deselect all swatches
+  if (!document.querySelector('.bg-swatch.active')) {
+    bgColorPicker.parentElement.querySelector('.bg-color-input').style.boxShadow = '0 0 0 2px var(--accent)'
+  } else {
+    bgColorPicker.style.boxShadow = 'none'
+  }
+  const entry = entries[currentIdx]
+  if (entry?.maskData) applyBlend(entry, entry.sliderValue / 100)
+}
+
+bgSwatches.forEach(s => {
+  s.addEventListener('click', () => {
+    bgColorPicker.style.boxShadow = 'none'
+    setActiveBg(s.dataset.bg)
+    if (s.dataset.bg !== 'transparent') {
+      bgHexInput.value = s.dataset.bg
+      bgColorPicker.value = s.dataset.bg
+    } else {
+      bgHexInput.value = ''
+    }
+  })
+})
+
+bgColorPicker.addEventListener('input', () => {
+  const hex = bgColorPicker.value
+  bgHexInput.value = hex
+  bgSwatches.forEach(s => s.classList.remove('active'))
+  bgColorPicker.style.boxShadow = '0 0 0 2px var(--accent)'
+  activeBg = hex
+  const entry = entries[currentIdx]
+  if (entry?.maskData) applyBlend(entry, entry.sliderValue / 100)
+})
+
+bgHexInput.addEventListener('input', () => {
+  let v = bgHexInput.value.trim()
+  if (!v.startsWith('#')) v = '#' + v
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+    bgColorPicker.value = v
+    bgSwatches.forEach(s => s.classList.remove('active'))
+    bgColorPicker.style.boxShadow = '0 0 0 2px var(--accent)'
+    activeBg = v
+    const entry = entries[currentIdx]
+    if (entry?.maskData) applyBlend(entry, entry.sliderValue / 100)
+  }
 })
 
 prevBtn.addEventListener('click', () => { currentIdx--; renderCurrent() })
@@ -362,18 +473,41 @@ dlBtnEl.addEventListener('click', () => {
   const ctx = off.getContext('2d')
   const intensity = entry.sliderValue / 100
   const src = entry.origData.data
-  const out = ctx.createImageData(W, H)
-  const d = out.data
-  for (let i = 0; i < W * H; i++) {
-    const p = i * 4
-    d[p] = src[p]; d[p+1] = src[p+1]; d[p+2] = src[p+2]
-    d[p+3] = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity)
+  const useSolid = activeBg !== 'transparent'
+
+  if (useSolid) {
+    ctx.fillStyle = activeBg
+    ctx.fillRect(0, 0, W, H)
+    const [br, bgc, bb] = hexToRgb(activeBg)
+    const out = ctx.createImageData(W, H)
+    const d = out.data
+    for (let i = 0; i < W * H; i++) {
+      const p = i * 4
+      const a = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity) / 255
+      d[p]   = Math.round(src[p] * a + br * (1 - a))
+      d[p+1] = Math.round(src[p+1] * a + bgc * (1 - a))
+      d[p+2] = Math.round(src[p+2] * a + bb * (1 - a))
+      d[p+3] = 255
+    }
+    ctx.putImageData(out, 0, 0)
+    const dl = document.createElement('a')
+    dl.href = off.toDataURL('image/jpeg', 0.95)
+    dl.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.jpg'
+    dl.click();if(window.showReviewPrompt)window.showReviewPrompt()
+  } else {
+    const out = ctx.createImageData(W, H)
+    const d = out.data
+    for (let i = 0; i < W * H; i++) {
+      const p = i * 4
+      d[p] = src[p]; d[p+1] = src[p+1]; d[p+2] = src[p+2]
+      d[p+3] = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity)
+    }
+    ctx.putImageData(out, 0, 0)
+    const dl = document.createElement('a')
+    dl.href = off.toDataURL('image/png')
+    dl.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
+    dl.click();if(window.showReviewPrompt)window.showReviewPrompt()
   }
-  ctx.putImageData(out, 0, 0)
-  const a = document.createElement('a')
-  a.href = off.toDataURL('image/png')
-  a.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
-  a.click();if(window.showReviewPrompt)window.showReviewPrompt()
 })
 
 zipBtn.addEventListener('click', async () => {
