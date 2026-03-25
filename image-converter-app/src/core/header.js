@@ -454,8 +454,8 @@ export function injectHeader() {
     </a>`
   }
 
-  const leftCats = [toolCategories[0], toolCategories[2], toolCategories[4]] // Convert, Modify, Export
-  const rightCats = [toolCategories[1], toolCategories[3], toolCategories[5]] // Optimize, Create, Photo
+  const leftCats = toolCategories.slice(0, 3)  // Convert, Optimize, Modify
+  const rightCats = toolCategories.slice(3)     // Create, Export, Photo
 
   function renderCat(cat) {
     return `<div class="dropdown-category"><h3>${cat.name}</h3>${cat.slugs.map(s => toolLink(s)).join('')}</div>`
