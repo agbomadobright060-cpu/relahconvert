@@ -24,7 +24,7 @@ export async function onRequestPost(context) {
 
     const fmt = format === 'jpeg' ? 'jpeg' : 'png'
     const w = parseInt(width) || 1366
-    const apiUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${apiKey}&url=${encodeURIComponent(url)}&format=${fmt}&width=${w}&response_type=image&fresh=true`
+    const apiUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${apiKey}&url=${encodeURIComponent(url)}&format=${fmt}&width=${w}&response_type=image&fresh=true&full_page=true&scroll_page=true&delay=2000&wait_until=network_idle`
 
     const response = await fetch(apiUrl)
     if (!response.ok) {
