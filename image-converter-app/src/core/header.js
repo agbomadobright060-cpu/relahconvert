@@ -229,11 +229,13 @@ export function injectHeader() {
       #site-header .desktop-nav { display: none; }
       #site-header .hamburger { display: flex; }
       #dropdown-menu .dropdown-inner {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-auto-flow: dense;
         padding: 12px;
-        gap: 16px 12px;
+        gap: 12px;
       }
-      .dropdown-category { flex: 0 0 calc(50% - 6px); }
+      .dropdown-category { min-width: 0; }
       .dropdown-category a { font-size: 12px; padding: 6px 4px; }
     }
     #site-footer {
