@@ -235,7 +235,7 @@ export function injectHeader() {
         gap: 12px;
       }
       .dropdown-col { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-      .dropdown-category { margin-bottom: 12px; }
+      .dropdown-category { flex: none; margin-bottom: 12px; }
       .dropdown-category a { font-size: 12px; padding: 6px 4px; }
     }
     #site-footer {
