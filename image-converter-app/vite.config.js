@@ -141,8 +141,9 @@ function langCopyPlugin() {
         const descTag = homeDescByLang[lang]
           ? `    <meta name="description" content="${homeDescByLang[lang]}" />\n`
           : ''
-        // Inject hreflang tags and meta description into <head>
-        homeHtml = homeHtml.replace('</head>', descTag + hreflangTags(null) + '  </head>')
+        // Inject canonical, hreflang tags and meta description into <head>
+        const homeCanonical = `    <link rel="canonical" href="${base}/${lang}/" />\n`
+        homeHtml = homeHtml.replace('</head>', homeCanonical + descTag + hreflangTags(null) + '  </head>')
 
         // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
@@ -152,7 +153,8 @@ function langCopyPlugin() {
         // Create {lang}/{slug}/index.html for each tool page
         const slugMap = slugMapByLang[lang] || {}
         for (const [enKey, localSlug] of Object.entries(slugMap)) {
-          const toolHtml = langHtml.replace('</head>', hreflangTags(enKey) + '  </head>')
+          const toolCanonical = `    <link rel="canonical" href="${base}/${lang}/${localSlug}/" />\n`
+          const toolHtml = langHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
           const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
           writeFileSync(resolve(slugDir, 'index.html'), toolHtml)
