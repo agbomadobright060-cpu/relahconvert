@@ -464,13 +464,15 @@ async function resizeFile(file, targetW, targetH) {
         const canvas = document.createElement('canvas')
         canvas.width = w; canvas.height = h
         const ctx = canvas.getContext('2d')
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
         if (file.type === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h) }
         ctx.drawImage(img, 0, 0, w, h)
         canvas.toBlob((blob) => {
           if (!blob) return reject(new Error('Resize failed'))
           const ext = file.type === 'image/jpeg' ? 'jpg' : 'png'
           resolve({ blob, filename: `${sanitizeBaseName(file.name)}-${w}x${h}.${ext}`, outputSize: blob.size, type: file.type })
-        }, file.type, file.type === 'image/jpeg' ? 0.92 : undefined)
+        }, file.type, file.type === 'image/jpeg' ? 0.95 : undefined)
       }
       img.src = e.target.result
     }
