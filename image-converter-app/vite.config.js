@@ -83,6 +83,46 @@ function langCopyPlugin() {
       const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
+      const staticSlugMap = {
+        fr: { about: 'a-propos', contact: 'contact', cookies: 'cookies', 'privacy-policy': 'politique-de-confidentialite', 'terms-and-conditions': 'conditions-generales' },
+        es: { about: 'acerca-de', contact: 'contacto', cookies: 'cookies', 'privacy-policy': 'politica-de-privacidad', 'terms-and-conditions': 'terminos-y-condiciones' },
+        pt: { about: 'sobre', contact: 'contato', cookies: 'cookies', 'privacy-policy': 'politica-de-privacidade', 'terms-and-conditions': 'termos-e-condicoes' },
+        de: { about: 'ueber-uns', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'datenschutzrichtlinie', 'terms-and-conditions': 'allgemeine-geschaeftsbedingungen' },
+        ar: { about: 'hawl', contact: 'ittisal', cookies: 'cookies', 'privacy-policy': 'siyasat-alkhususiya', 'terms-and-conditions': 'al-shurut-wal-ahkam' },
+        it: { about: 'chi-siamo', contact: 'contatti', cookies: 'cookies', 'privacy-policy': 'informativa-privacy', 'terms-and-conditions': 'termini-e-condizioni' },
+        ja: { about: 'gaiyou', contact: 'otoiawase', cookies: 'cookies', 'privacy-policy': 'puraibashii-porishii', 'terms-and-conditions': 'riyou-kiyaku' },
+        ru: { about: 'o-nas', contact: 'kontakty', cookies: 'cookies', 'privacy-policy': 'politika-konfidentsialnosti', 'terms-and-conditions': 'usloviya-ispolzovaniya' },
+        ko: { about: 'sogae', contact: 'munui', cookies: 'cookies', 'privacy-policy': 'gaein-jeongbo-cheori-bangchim', 'terms-and-conditions': 'iyong-yakgwan' },
+        zh: { about: 'guanyu', contact: 'lianxi', cookies: 'cookies', 'privacy-policy': 'yinsi-zhengce', 'terms-and-conditions': 'fuwu-tiaokuan' },
+        'zh-TW': { about: 'guanyu', contact: 'lianxi', cookies: 'cookies', 'privacy-policy': 'yinsi-zhengce', 'terms-and-conditions': 'fuwu-tiaokuan' },
+        bg: { about: 'za-nas', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'politika-za-poveritelnost', 'terms-and-conditions': 'obshti-usloviya' },
+        ca: { about: 'sobre-nosaltres', contact: 'contacte', cookies: 'cookies', 'privacy-policy': 'politica-de-privacitat', 'terms-and-conditions': 'termes-i-condicions' },
+        nl: { about: 'over-ons', contact: 'contact', cookies: 'cookies', 'privacy-policy': 'privacybeleid', 'terms-and-conditions': 'algemene-voorwaarden' },
+        el: { about: 'shetika', contact: 'epikoinonia', cookies: 'cookies', 'privacy-policy': 'politiki-aporritou', 'terms-and-conditions': 'oroi-chrisis' },
+        hi: { about: 'hamare-baare-mein', contact: 'sampark', cookies: 'cookies', 'privacy-policy': 'gopaniyata-niti', 'terms-and-conditions': 'niyam-aur-sharten' },
+        id: { about: 'tentang', contact: 'kontak', cookies: 'cookies', 'privacy-policy': 'kebijakan-privasi', 'terms-and-conditions': 'syarat-dan-ketentuan' },
+        ms: { about: 'tentang-kami', contact: 'hubungi', cookies: 'cookies', 'privacy-policy': 'dasar-privasi', 'terms-and-conditions': 'terma-dan-syarat' },
+        pl: { about: 'o-nas', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'polityka-prywatnosci', 'terms-and-conditions': 'regulamin' },
+        sv: { about: 'om-oss', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'integritetspolicy', 'terms-and-conditions': 'villkor' },
+        th: { about: 'kiew-kap-rao', contact: 'tidtaw', cookies: 'cookies', 'privacy-policy': 'nayobai-khwam-pensuantua', 'terms-and-conditions': 'khaw-taklong' },
+        tr: { about: 'hakkimizda', contact: 'iletisim', cookies: 'cookies', 'privacy-policy': 'gizlilik-politikasi', 'terms-and-conditions': 'kullanim-kosullari' },
+        uk: { about: 'pro-nas', contact: 'kontakty', cookies: 'cookies', 'privacy-policy': 'polityka-konfidentsiynosti', 'terms-and-conditions': 'umovy-vykorystannya' },
+        vi: { about: 've-chung-toi', contact: 'lien-he', cookies: 'cookies', 'privacy-policy': 'chinh-sach-bao-mat', 'terms-and-conditions': 'dieu-khoan-su-dung' },
+      }
+
+      // Helper: build hreflang tags for static pages (about, contact, etc.)
+      function staticHreflangTags(enPage) {
+        let tags = ''
+        const allLangs = ['en', ...supportedLangs]
+        for (const l of allLangs) {
+          const slug = (staticSlugMap[l] && staticSlugMap[l][enPage]) || enPage
+          const href = l === 'en' ? base + '/' + enPage : base + '/' + l + '/' + slug + '/'
+          tags += `    <link rel="alternate" hreflang="${l}" href="${href}" />\n`
+        }
+        tags += `    <link rel="alternate" hreflang="x-default" href="${base}/${enPage}" />\n`
+        return tags
+      }
+
       // Helper: build hreflang tags for a given English tool key (or null for homepage)
       function hreflangTags(enToolKey) {
         const isHome = !enToolKey
@@ -129,31 +169,15 @@ function langCopyPlugin() {
         }
       }
 
-      const staticSlugMap = {
-        fr: { about: 'a-propos', contact: 'contact', cookies: 'cookies', 'privacy-policy': 'politique-de-confidentialite', 'terms-and-conditions': 'conditions-generales' },
-        es: { about: 'acerca-de', contact: 'contacto', cookies: 'cookies', 'privacy-policy': 'politica-de-privacidad', 'terms-and-conditions': 'terminos-y-condiciones' },
-        pt: { about: 'sobre', contact: 'contato', cookies: 'cookies', 'privacy-policy': 'politica-de-privacidade', 'terms-and-conditions': 'termos-e-condicoes' },
-        de: { about: 'ueber-uns', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'datenschutzrichtlinie', 'terms-and-conditions': 'allgemeine-geschaeftsbedingungen' },
-        ar: { about: 'hawl', contact: 'ittisal', cookies: 'cookies', 'privacy-policy': 'siyasat-alkhususiya', 'terms-and-conditions': 'al-shurut-wal-ahkam' },
-        it: { about: 'chi-siamo', contact: 'contatti', cookies: 'cookies', 'privacy-policy': 'informativa-privacy', 'terms-and-conditions': 'termini-e-condizioni' },
-        ja: { about: 'gaiyou', contact: 'otoiawase', cookies: 'cookies', 'privacy-policy': 'puraibashii-porishii', 'terms-and-conditions': 'riyou-kiyaku' },
-        ru: { about: 'o-nas', contact: 'kontakty', cookies: 'cookies', 'privacy-policy': 'politika-konfidentsialnosti', 'terms-and-conditions': 'usloviya-ispolzovaniya' },
-        ko: { about: 'sogae', contact: 'munui', cookies: 'cookies', 'privacy-policy': 'gaein-jeongbo-cheori-bangchim', 'terms-and-conditions': 'iyong-yakgwan' },
-        zh: { about: 'guanyu', contact: 'lianxi', cookies: 'cookies', 'privacy-policy': 'yinsi-zhengce', 'terms-and-conditions': 'fuwu-tiaokuan' },
-        'zh-TW': { about: 'guanyu', contact: 'lianxi', cookies: 'cookies', 'privacy-policy': 'yinsi-zhengce', 'terms-and-conditions': 'fuwu-tiaokuan' },
-        bg: { about: 'za-nas', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'politika-za-poveritelnost', 'terms-and-conditions': 'obshti-usloviya' },
-        ca: { about: 'sobre-nosaltres', contact: 'contacte', cookies: 'cookies', 'privacy-policy': 'politica-de-privacitat', 'terms-and-conditions': 'termes-i-condicions' },
-        nl: { about: 'over-ons', contact: 'contact', cookies: 'cookies', 'privacy-policy': 'privacybeleid', 'terms-and-conditions': 'algemene-voorwaarden' },
-        el: { about: 'shetika', contact: 'epikoinonia', cookies: 'cookies', 'privacy-policy': 'politiki-aporritou', 'terms-and-conditions': 'oroi-chrisis' },
-        hi: { about: 'hamare-baare-mein', contact: 'sampark', cookies: 'cookies', 'privacy-policy': 'gopaniyata-niti', 'terms-and-conditions': 'niyam-aur-sharten' },
-        id: { about: 'tentang', contact: 'kontak', cookies: 'cookies', 'privacy-policy': 'kebijakan-privasi', 'terms-and-conditions': 'syarat-dan-ketentuan' },
-        ms: { about: 'tentang-kami', contact: 'hubungi', cookies: 'cookies', 'privacy-policy': 'dasar-privasi', 'terms-and-conditions': 'terma-dan-syarat' },
-        pl: { about: 'o-nas', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'polityka-prywatnosci', 'terms-and-conditions': 'regulamin' },
-        sv: { about: 'om-oss', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'integritetspolicy', 'terms-and-conditions': 'villkor' },
-        th: { about: 'kiew-kap-rao', contact: 'tidtaw', cookies: 'cookies', 'privacy-policy': 'nayobai-khwam-pensuantua', 'terms-and-conditions': 'khaw-taklong' },
-        tr: { about: 'hakkimizda', contact: 'iletisim', cookies: 'cookies', 'privacy-policy': 'gizlilik-politikasi', 'terms-and-conditions': 'kullanim-kosullari' },
-        uk: { about: 'pro-nas', contact: 'kontakty', cookies: 'cookies', 'privacy-policy': 'polityka-konfidentsiynosti', 'terms-and-conditions': 'umovy-vykorystannya' },
-        vi: { about: 've-chung-toi', contact: 'lien-he', cookies: 'cookies', 'privacy-policy': 'chinh-sach-bao-mat', 'terms-and-conditions': 'dieu-khoan-su-dung' },
+      // Inject hreflang into English static pages
+      const enStaticPages = ['about', 'contact', 'cookies', 'privacy-policy', 'terms-and-conditions']
+      for (const page of enStaticPages) {
+        const staticFile = resolve(distDir, page + '.html')
+        if (existsSync(staticFile)) {
+          const html = readFileSync(staticFile, 'utf-8')
+          const updated = html.replace('</head>', staticHreflangTags(page) + '  </head>')
+          writeFileSync(staticFile, updated)
+        }
       }
 
       for (const lang of supportedLangs) {
@@ -196,9 +220,10 @@ function langCopyPlugin() {
           let staticHtml = readFileSync(staticSrc, 'utf-8')
           staticHtml = staticHtml.replace('lang="en"', `lang="${lang}"`)
           staticHtml = staticHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
+          staticHtml = staticHtml.replace(/<link rel="alternate" hreflang="[^"]*"[^>]*\/>\n?/g, '')
           const translatedSlug = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
           const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlug}/" />\n`
-          staticHtml = staticHtml.replace('</head>', staticCanonical + '  </head>')
+          staticHtml = staticHtml.replace('</head>', staticCanonical + staticHreflangTags(page) + '  </head>')
           const staticDir = resolve(distDir, lang, translatedSlug)
           mkdirSync(staticDir, { recursive: true })
           writeFileSync(resolve(staticDir, 'index.html'), staticHtml)
