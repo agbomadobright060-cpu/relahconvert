@@ -131,10 +131,10 @@ export function injectHeader() {
     #site-header .nav-link {
       padding: 8px 14px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #1a1a1a;
+      color: #111111;
       text-decoration: none;
       transition: color 0.15s;
       white-space: nowrap;
@@ -145,10 +145,10 @@ export function injectHeader() {
     #site-header .more-btn {
       padding: 8px 14px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #1a1a1a;
+      color: #111111;
       background: none;
       border: none;
       cursor: pointer;
