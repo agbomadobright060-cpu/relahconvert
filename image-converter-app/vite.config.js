@@ -160,6 +160,21 @@ function langCopyPlugin() {
           mkdirSync(slugDir, { recursive: true })
           writeFileSync(resolve(slugDir, 'index.html'), toolHtml)
         }
+
+        // Create {lang}/{page}/index.html for static pages
+        const staticPages = ['about', 'contact', 'cookies', 'privacy-policy', 'terms-and-conditions']
+        for (const page of staticPages) {
+          const staticSrc = resolve(distDir, page + '.html')
+          if (!existsSync(staticSrc)) continue
+          let staticHtml = readFileSync(staticSrc, 'utf-8')
+          staticHtml = staticHtml.replace('lang="en"', `lang="${lang}"`)
+          staticHtml = staticHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
+          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${page}/" />\n`
+          staticHtml = staticHtml.replace('</head>', staticCanonical + '  </head>')
+          const staticDir = resolve(distDir, lang, page)
+          mkdirSync(staticDir, { recursive: true })
+          writeFileSync(resolve(staticDir, 'index.html'), staticHtml)
+        }
       }
     }
   }
