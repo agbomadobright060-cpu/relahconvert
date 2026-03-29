@@ -130,8 +130,9 @@ function langCopyPlugin() {
       }
 
       for (const lang of supportedLangs) {
-        // Replace lang="en" with the correct language
+        // Replace lang="en" with the correct language and strip English canonical
         let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
+        langHtml = langHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
 
         // Inject translated title and meta description into homepage
         let homeHtml = langHtml
