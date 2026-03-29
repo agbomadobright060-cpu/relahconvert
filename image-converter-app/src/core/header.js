@@ -123,7 +123,7 @@ export function injectHeader() {
     #site-header .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 16px;
     }
     #site-header .nav-link {
       padding: 8px 14px;
