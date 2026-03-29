@@ -134,7 +134,7 @@ export function injectHeader() {
       font-weight: 500;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: var(--text-secondary);
+      color: var(--text-primary);
       text-decoration: none;
       transition: color 0.15s;
       white-space: nowrap;
@@ -147,7 +147,7 @@ export function injectHeader() {
       font-weight: 500;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: var(--text-secondary);
+      color: var(--text-primary);
       background: none;
       border: none;
       cursor: pointer;
