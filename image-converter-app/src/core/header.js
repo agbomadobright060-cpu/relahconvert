@@ -124,12 +124,12 @@ export function injectHeader() {
     #site-header .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 0;
+      gap: 8px;
       flex: 1;
       justify-content: flex-end;
     }
     #site-header .nav-link {
-      padding: 8px 20px;
+      padding: 8px 12px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -143,7 +143,7 @@ export function injectHeader() {
     #site-header .nav-link:hover { color: var(--accent); }
     #site-header .nav-link.active { color: var(--accent); font-weight: 600; }
     #site-header .more-btn {
-      padding: 8px 20px;
+      padding: 8px 12px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
