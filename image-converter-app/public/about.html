@@ -176,6 +176,7 @@
     document.title = t.hero_h1.replace(/<[^>]+>/g,'') + ' | RelahConvert';
 
     document.getElementById('desktopNav').innerHTML = MAIN.map(function(s){ return '<a href="/'+s+'" class="nav-link">'+t.nav[s]+'</a>'; }).join('') + '<button class="more-btn" id="moreBtn">'+t.nav_more+' <span class="arrow">▼</span></button>';
+    document.querySelector('.logo').href = lang === 'en' ? '/' : '/' + lang + '/';
     document.getElementById('dropdownInner').innerHTML = ALL_SLUGS.map(function(s){ return '<a href="/'+s+'">'+ICONS[s]+' '+t.nav[s]+'</a>'; }).join('');
 
     var langToggle = document.getElementById('langToggle');
