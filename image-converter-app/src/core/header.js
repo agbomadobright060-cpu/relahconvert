@@ -124,6 +124,7 @@ export function injectHeader() {
       display: flex;
       align-items: center;
       gap: 16px;
+      flex: 1;
     }
     #site-header .nav-link {
       padding: 8px 14px;
