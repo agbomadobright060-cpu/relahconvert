@@ -95,9 +95,9 @@ export function injectHeader() {
       z-index: 100;
     }
     #site-header .header-inner {
-      max-width: 1100px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 0 24px;
+      padding: 0 32px;
       height: 64px;
       display: flex;
       align-items: center;
@@ -129,7 +129,7 @@ export function injectHeader() {
       justify-content: flex-end;
     }
     #site-header .nav-link {
-      padding: 8px 14px;
+      padding: 8px 20px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -143,7 +143,7 @@ export function injectHeader() {
     #site-header .nav-link:hover { color: var(--accent); }
     #site-header .nav-link.active { color: var(--accent); font-weight: 600; }
     #site-header .more-btn {
-      padding: 8px 14px;
+      padding: 8px 20px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
