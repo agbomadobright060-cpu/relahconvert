@@ -129,6 +129,33 @@ function langCopyPlugin() {
         }
       }
 
+      const staticSlugMap = {
+        fr: { about: 'a-propos', contact: 'contact', cookies: 'cookies', 'privacy-policy': 'politique-de-confidentialite', 'terms-and-conditions': 'conditions-generales' },
+        es: { about: 'acerca-de', contact: 'contacto', cookies: 'cookies', 'privacy-policy': 'politica-de-privacidad', 'terms-and-conditions': 'terminos-y-condiciones' },
+        pt: { about: 'sobre', contact: 'contato', cookies: 'cookies', 'privacy-policy': 'politica-de-privacidade', 'terms-and-conditions': 'termos-e-condicoes' },
+        de: { about: 'ueber-uns', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'datenschutzrichtlinie', 'terms-and-conditions': 'allgemeine-geschaeftsbedingungen' },
+        ar: { about: 'hawl', contact: 'ittisal', cookies: 'cookies', 'privacy-policy': 'siyasat-alkhususiya', 'terms-and-conditions': 'al-shurut-wal-ahkam' },
+        it: { about: 'chi-siamo', contact: 'contatti', cookies: 'cookies', 'privacy-policy': 'informativa-privacy', 'terms-and-conditions': 'termini-e-condizioni' },
+        ja: { about: 'gaiyou', contact: 'otoiawase', cookies: 'cookies', 'privacy-policy': 'puraibashii-porishii', 'terms-and-conditions': 'riyou-kiyaku' },
+        ru: { about: 'o-nas', contact: 'kontakty', cookies: 'cookies', 'privacy-policy': 'politika-konfidentsialnosti', 'terms-and-conditions': 'usloviya-ispolzovaniya' },
+        ko: { about: 'sogae', contact: 'munui', cookies: 'cookies', 'privacy-policy': 'gaein-jeongbo-cheori-bangchim', 'terms-and-conditions': 'iyong-yakgwan' },
+        zh: { about: 'guanyu', contact: 'lianxi', cookies: 'cookies', 'privacy-policy': 'yinsi-zhengce', 'terms-and-conditions': 'fuwu-tiaokuan' },
+        'zh-TW': { about: 'guanyu', contact: 'lianxi', cookies: 'cookies', 'privacy-policy': 'yinsi-zhengce', 'terms-and-conditions': 'fuwu-tiaokuan' },
+        bg: { about: 'za-nas', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'politika-za-poveritelnost', 'terms-and-conditions': 'obshti-usloviya' },
+        ca: { about: 'sobre-nosaltres', contact: 'contacte', cookies: 'cookies', 'privacy-policy': 'politica-de-privacitat', 'terms-and-conditions': 'termes-i-condicions' },
+        nl: { about: 'over-ons', contact: 'contact', cookies: 'cookies', 'privacy-policy': 'privacybeleid', 'terms-and-conditions': 'algemene-voorwaarden' },
+        el: { about: 'shetika', contact: 'epikoinonia', cookies: 'cookies', 'privacy-policy': 'politiki-aporritou', 'terms-and-conditions': 'oroi-chrisis' },
+        hi: { about: 'hamare-baare-mein', contact: 'sampark', cookies: 'cookies', 'privacy-policy': 'gopaniyata-niti', 'terms-and-conditions': 'niyam-aur-sharten' },
+        id: { about: 'tentang', contact: 'kontak', cookies: 'cookies', 'privacy-policy': 'kebijakan-privasi', 'terms-and-conditions': 'syarat-dan-ketentuan' },
+        ms: { about: 'tentang-kami', contact: 'hubungi', cookies: 'cookies', 'privacy-policy': 'dasar-privasi', 'terms-and-conditions': 'terma-dan-syarat' },
+        pl: { about: 'o-nas', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'polityka-prywatnosci', 'terms-and-conditions': 'regulamin' },
+        sv: { about: 'om-oss', contact: 'kontakt', cookies: 'cookies', 'privacy-policy': 'integritetspolicy', 'terms-and-conditions': 'villkor' },
+        th: { about: 'kiew-kap-rao', contact: 'tidtaw', cookies: 'cookies', 'privacy-policy': 'nayobai-khwam-pensuantua', 'terms-and-conditions': 'khaw-taklong' },
+        tr: { about: 'hakkimizda', contact: 'iletisim', cookies: 'cookies', 'privacy-policy': 'gizlilik-politikasi', 'terms-and-conditions': 'kullanim-kosullari' },
+        uk: { about: 'pro-nas', contact: 'kontakty', cookies: 'cookies', 'privacy-policy': 'polityka-konfidentsiynosti', 'terms-and-conditions': 'umovy-vykorystannya' },
+        vi: { about: 've-chung-toi', contact: 'lien-he', cookies: 'cookies', 'privacy-policy': 'chinh-sach-bao-mat', 'terms-and-conditions': 'dieu-khoan-su-dung' },
+      }
+
       for (const lang of supportedLangs) {
         // Replace lang="en" with the correct language and strip English canonical
         let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
@@ -161,7 +188,7 @@ function langCopyPlugin() {
           writeFileSync(resolve(slugDir, 'index.html'), toolHtml)
         }
 
-        // Create {lang}/{page}/index.html for static pages
+        // Create {lang}/{translatedPage}/index.html for static pages
         const staticPages = ['about', 'contact', 'cookies', 'privacy-policy', 'terms-and-conditions']
         for (const page of staticPages) {
           const staticSrc = resolve(distDir, page + '.html')
@@ -169,9 +196,10 @@ function langCopyPlugin() {
           let staticHtml = readFileSync(staticSrc, 'utf-8')
           staticHtml = staticHtml.replace('lang="en"', `lang="${lang}"`)
           staticHtml = staticHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
-          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${page}/" />\n`
+          const translatedSlug = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
+          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlug}/" />\n`
           staticHtml = staticHtml.replace('</head>', staticCanonical + '  </head>')
-          const staticDir = resolve(distDir, lang, page)
+          const staticDir = resolve(distDir, lang, translatedSlug)
           mkdirSync(staticDir, { recursive: true })
           writeFileSync(resolve(staticDir, 'index.html'), staticHtml)
         }
