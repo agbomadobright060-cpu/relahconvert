@@ -101,8 +101,7 @@ export function injectHeader() {
       height: 64px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 24px;
+      gap: 32px;
     }
     #site-header .logo {
       font-family: 'Fraunces', serif;
@@ -124,12 +123,10 @@ export function injectHeader() {
     #site-header .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex: 1;
-      justify-content: flex-end;
+      gap: 6px;
     }
     #site-header .nav-link {
-      padding: 8px 12px;
+      padding: 8px 14px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -143,7 +140,7 @@ export function injectHeader() {
     #site-header .nav-link:hover { color: var(--accent); }
     #site-header .nav-link.active { color: var(--accent); font-weight: 600; }
     #site-header .more-btn {
-      padding: 8px 12px;
+      padding: 8px 14px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -341,7 +338,7 @@ export function injectHeader() {
       align-items: center;
       justify-content: center;
       transition: all 0.15s;
-      margin-left: 8px;
+      margin-left: auto;
     }
     .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
     .mobile-theme { display: none; }
