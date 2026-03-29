@@ -131,23 +131,24 @@ export function injectHeader() {
     #site-header .nav-link {
       padding: 8px 14px;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: var(--text-primary);
+      color: #1a1a1a;
       text-decoration: none;
       transition: color 0.15s;
       white-space: nowrap;
     }
+    [data-theme="dark"] #site-header .nav-link { color: var(--text-primary); }
     #site-header .nav-link:hover { color: var(--accent); }
     #site-header .nav-link.active { color: var(--accent); font-weight: 600; }
     #site-header .more-btn {
       padding: 8px 14px;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: var(--text-primary);
+      color: #1a1a1a;
       background: none;
       border: none;
       cursor: pointer;
@@ -158,6 +159,7 @@ export function injectHeader() {
       font-family: 'DM Sans', sans-serif;
       white-space: nowrap;
     }
+    [data-theme="dark"] #site-header .more-btn { color: var(--text-primary); }
     #site-header .more-btn:hover { color: var(--accent); }
     #site-header .more-btn .arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
     #site-header .more-btn.open .arrow { transform: rotate(180deg); }
