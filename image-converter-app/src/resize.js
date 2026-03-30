@@ -377,6 +377,23 @@ const customPct = document.getElementById('customPct')
 
 let selectedFiles = [], currentDownloadUrl = null, activeTab = 'pixels', selectedPct = null, resizedBlobs = []
 
+// Auto-load image from ?url= parameter (e.g. from WordPress plugin)
+;(async function loadFromUrlParam() {
+  const params = new URLSearchParams(window.location.search)
+  const imgUrl = params.get('url')
+  if (!imgUrl) return
+  try {
+    const res = await fetch(imgUrl)
+    if (!res.ok) return
+    const blob = await res.blob()
+    const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+    const file = new File([blob], name, { type: blob.type })
+    selectedFiles = [file]
+    renderPreviews()
+    setIdle()
+  } catch (e) {}
+})()
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)

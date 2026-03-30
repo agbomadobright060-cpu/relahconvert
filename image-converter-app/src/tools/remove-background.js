@@ -479,6 +479,21 @@ fileInput.addEventListener('change', () => { if (fileInput.files.length) addFile
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
+// Auto-load image from ?url= parameter (e.g. from WordPress plugin)
+;(async function loadFromUrlParam() {
+  const params = new URLSearchParams(window.location.search)
+  const imgUrl = params.get('url')
+  if (!imgUrl) return
+  try {
+    const res = await fetch(imgUrl)
+    if (!res.ok) return
+    const blob = await res.blob()
+    const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+    const file = new File([blob], name, { type: blob.type })
+    addFiles([file])
+  } catch (e) {}
+})()
+
 dlBtnEl.addEventListener('click', () => {
   const entry = entries[currentIdx]
   if (!entry?.origData || !entry?.maskData) return

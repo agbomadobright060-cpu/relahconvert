@@ -184,6 +184,23 @@ let selectedFiles = []
 let currentDownloadUrl = null
 let convertedBlobs = []
 
+// Auto-load image from ?url= parameter (e.g. from WordPress plugin)
+;(async function loadFromUrlParam() {
+  const params = new URLSearchParams(window.location.search)
+  const imgUrl = params.get('url')
+  if (!imgUrl) return
+  try {
+    const res = await fetch(imgUrl)
+    if (!res.ok) return
+    const blob = await res.blob()
+    const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+    const file = new File([blob], name, { type: blob.type })
+    selectedFiles = [file]
+    renderPreviews()
+    setIdleEnabled()
+  } catch (e) {}
+})()
+
 function setIdleEnabled() {
   convertBtn.disabled = false; convertBtn.textContent = t.convert_btn
   convertBtn.style.background = 'var(--accent)'; convertBtn.style.cursor = 'pointer'; convertBtn.style.opacity = '1'
