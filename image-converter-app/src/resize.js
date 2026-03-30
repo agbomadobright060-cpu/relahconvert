@@ -378,20 +378,29 @@ const customPct = document.getElementById('customPct')
 let selectedFiles = [], currentDownloadUrl = null, activeTab = 'pixels', selectedPct = null, resizedBlobs = []
 
 // Auto-load image from ?url= parameter (e.g. from WordPress plugin)
-;(async function loadFromUrlParam() {
+;(function loadFromUrlParam() {
   const params = new URLSearchParams(window.location.search)
   const imgUrl = params.get('url')
   if (!imgUrl) return
-  try {
-    const res = await fetch(imgUrl)
-    if (!res.ok) return
-    const blob = await res.blob()
+  function loadFile(blob) {
     const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-    const file = new File([blob], name, { type: blob.type })
+    const file = new File([blob], name, { type: blob.type || 'image/jpeg' })
     selectedFiles = [file]
     renderPreviews()
     setIdle()
-  } catch (e) {}
+  }
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas')
+      c.width = img.naturalWidth; c.height = img.naturalHeight
+      c.getContext('2d').drawImage(img, 0, 0)
+      c.toBlob(blob => { if (blob) loadFile(blob) }, 'image/jpeg', 0.95)
+    } catch (e) { fetch(imgUrl).then(r => r.blob()).then(loadFile).catch(() => {}) }
+  }
+  img.onerror = () => { fetch(imgUrl).then(r => r.blob()).then(loadFile).catch(() => {}) }
+  img.src = imgUrl
 })()
 
 function openDB() {

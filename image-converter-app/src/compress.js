@@ -339,20 +339,47 @@ const nextStepsButtons = document.getElementById('nextStepsButtons')
 let selectedFiles = [], currentDownloadUrl = null, compressedBlobs = []
 
 // Auto-load image from ?url= parameter (e.g. from WordPress plugin)
-;(async function loadFromUrlParam() {
+;(function loadFromUrlParam() {
   const params = new URLSearchParams(window.location.search)
   const imgUrl = params.get('url')
   if (!imgUrl) return
-  try {
-    const res = await fetch(imgUrl)
-    if (!res.ok) return
-    const blob = await res.blob()
-    const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-    const file = new File([blob], name, { type: blob.type })
-    selectedFiles = [file]
-    renderPreviews()
-    setIdle()
-  } catch (e) {}
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas')
+      c.width = img.naturalWidth; c.height = img.naturalHeight
+      c.getContext('2d').drawImage(img, 0, 0)
+      c.toBlob(blob => {
+        if (!blob) return
+        const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+        const file = new File([blob], name, { type: blob.type || 'image/jpeg' })
+        selectedFiles = [file]
+        renderPreviews()
+        setIdle()
+      }, 'image/jpeg', 0.95)
+    } catch (e) {
+      // CORS blocked canvas — fall back to direct fetch
+      fetch(imgUrl).then(r => r.blob()).then(blob => {
+        const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+        const file = new File([blob], name, { type: blob.type })
+        selectedFiles = [file]
+        renderPreviews()
+        setIdle()
+      }).catch(() => {})
+    }
+  }
+  img.onerror = () => {
+    // img tag failed — try direct fetch
+    fetch(imgUrl).then(r => r.blob()).then(blob => {
+      const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+      const file = new File([blob], name, { type: blob.type })
+      selectedFiles = [file]
+      renderPreviews()
+      setIdle()
+    }).catch(() => {})
+  }
+  img.src = imgUrl
 })()
 
 function openDB() {
