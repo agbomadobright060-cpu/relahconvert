@@ -23,6 +23,40 @@ define( 'RELAHCONVERT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RELAHCONVERT_BASE_URL', 'https://relahconvert.com' );
 
 /**
+ * On activation, add CORS headers for uploads so RelahConvert can fetch images.
+ */
+function relahconvert_activate() {
+    $uploads_dir = wp_upload_dir();
+    $htaccess = $uploads_dir['basedir'] . '/.htaccess';
+    $marker = '# BEGIN RelahConvert CORS';
+    $rule = $marker . "\n<IfModule mod_headers.c>\nHeader set Access-Control-Allow-Origin \"https://relahconvert.com\"\n</IfModule>\n# END RelahConvert CORS\n";
+
+    if ( file_exists( $htaccess ) ) {
+        $content = file_get_contents( $htaccess );
+        if ( strpos( $content, $marker ) === false ) {
+            file_put_contents( $htaccess, $rule . $content );
+        }
+    } else {
+        file_put_contents( $htaccess, $rule );
+    }
+}
+register_activation_hook( __FILE__, 'relahconvert_activate' );
+
+/**
+ * On deactivation, remove CORS headers.
+ */
+function relahconvert_deactivate() {
+    $uploads_dir = wp_upload_dir();
+    $htaccess = $uploads_dir['basedir'] . '/.htaccess';
+    if ( file_exists( $htaccess ) ) {
+        $content = file_get_contents( $htaccess );
+        $content = preg_replace( '/# BEGIN RelahConvert CORS.*?# END RelahConvert CORS\n?/s', '', $content );
+        file_put_contents( $htaccess, $content );
+    }
+}
+register_deactivation_hook( __FILE__, 'relahconvert_deactivate' );
+
+/**
  * Enqueue admin assets.
  */
 function relahconvert_enqueue_admin_assets( $hook ) {
