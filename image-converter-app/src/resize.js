@@ -2,6 +2,7 @@ import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
 import { injectHeader } from './core/header.js'
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { createWpUploadButton } from './core/wp-upload.js'
 injectHreflang('resize')
 
 const bg = '#F2F2F2'
@@ -350,6 +351,7 @@ document.querySelector('#app').innerHTML = `
     </div>
     <button id="resizeBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:var(--btn-disabled); color:var(--text-on-dark-btn); font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.resize_btn}</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:var(--btn-dark); text-decoration:none; color:var(--text-on-dark-btn); font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
+    <div id="wpUploadContainer"></div>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -589,6 +591,13 @@ resizeBtn.addEventListener('click', async () => {
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
     }
     buildNextSteps(); setIdle(); fileInput.value = ''
+    const wpContainer = document.getElementById('wpUploadContainer')
+    wpContainer.innerHTML = ''
+    const wpBtn = createWpUploadButton(
+      () => resizedBlobs.length === 1 ? resizedBlobs[0].blob : null,
+      () => resizedBlobs.length === 1 ? resizedBlobs[0].name : 'resized-image.jpg'
+    )
+    if (wpBtn) wpContainer.appendChild(wpBtn)
   } catch (err) {
     alert(err?.message || 'Resize error')
     if (selectedFiles.length) setIdle(); else setDisabled()

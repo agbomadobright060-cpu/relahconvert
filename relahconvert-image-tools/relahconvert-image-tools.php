@@ -83,6 +83,8 @@ function relahconvert_enqueue_admin_assets( $hook ) {
     wp_localize_script( 'relahconvert-admin', 'relahconvert', array(
         'baseUrl' => RELAHCONVERT_BASE_URL,
         'nonce'   => wp_create_nonce( 'relahconvert_nonce' ),
+        'wpsite'  => rest_url( 'relahconvert/v1/upload' ),
+        'token'   => relahconvert_generate_token(),
     ) );
 }
 add_action( 'admin_enqueue_scripts', 'relahconvert_enqueue_admin_assets' );
@@ -101,7 +103,7 @@ function relahconvert_media_row_actions( $actions, $post ) {
     $image_url = wp_get_attachment_url( $post->ID );
     $actions['relahconvert_compress'] = sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/compress?url=' . rawurlencode( $image_url ) ),
+        esc_url( relahconvert_tool_url( 'compress', $image_url ) ),
         esc_attr__( 'Compress with RelahConvert', 'relahconvert-image-tools' ),
         esc_html__( 'Compress', 'relahconvert-image-tools' )
     );
@@ -109,7 +111,7 @@ function relahconvert_media_row_actions( $actions, $post ) {
     if ( $convert_tool ) {
         $actions['relahconvert_convert'] = sprintf(
             '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
-            esc_url( RELAHCONVERT_BASE_URL . '/' . $convert_tool . '?url=' . rawurlencode( $image_url ) ),
+            esc_url( relahconvert_tool_url( $convert_tool, $image_url ) ),
             esc_attr__( 'Convert with RelahConvert', 'relahconvert-image-tools' ),
             esc_html__( 'Convert', 'relahconvert-image-tools' )
         );
@@ -117,14 +119,14 @@ function relahconvert_media_row_actions( $actions, $post ) {
 
     $actions['relahconvert_resize'] = sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/resize?url=' . rawurlencode( $image_url ) ),
+        esc_url( relahconvert_tool_url( 'resize', $image_url ) ),
         esc_attr__( 'Resize with RelahConvert', 'relahconvert-image-tools' ),
         esc_html__( 'Resize', 'relahconvert-image-tools' )
     );
 
     $actions['relahconvert_remove_bg'] = sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/remove-background?url=' . rawurlencode( $image_url ) ),
+        esc_url( relahconvert_tool_url( 'remove-background', $image_url ) ),
         esc_attr__( 'Remove Background', 'relahconvert-image-tools' ),
         esc_html__( 'Remove BG', 'relahconvert-image-tools' )
     );
@@ -144,32 +146,31 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
     $mime = get_post_mime_type( $post->ID );
     $image_url = wp_get_attachment_url( $post->ID );
     $convert_tool = relahconvert_get_convert_tool( $mime );
-    $convert_url = $convert_tool ? RELAHCONVERT_BASE_URL . '/' . $convert_tool . '?url=' . rawurlencode( $image_url ) : '';
 
     $buttons = '<div class="relahconvert-buttons">';
     $buttons .= sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-compress">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/compress?url=' . rawurlencode( $image_url ) ),
+        esc_url( relahconvert_tool_url( 'compress', $image_url ) ),
         esc_html__( 'Compress', 'relahconvert-image-tools' )
     );
 
-    if ( $convert_url ) {
+    if ( $convert_tool ) {
         $buttons .= sprintf(
             '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-convert">%s</a>',
-            esc_url( $convert_url ),
+            esc_url( relahconvert_tool_url( $convert_tool, $image_url ) ),
             esc_html__( 'Convert', 'relahconvert-image-tools' )
         );
     }
 
     $buttons .= sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-resize">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/resize?url=' . rawurlencode( $image_url ) ),
+        esc_url( relahconvert_tool_url( 'resize', $image_url ) ),
         esc_html__( 'Resize', 'relahconvert-image-tools' )
     );
 
     $buttons .= sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-remove-bg">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/remove-background?url=' . rawurlencode( $image_url ) ),
+        esc_url( relahconvert_tool_url( 'remove-background', $image_url ) ),
         esc_html__( 'Remove BG', 'relahconvert-image-tools' )
     );
     $buttons .= '</div>';
@@ -306,3 +307,104 @@ function relahconvert_plugin_action_links( $links ) {
     return $links;
 }
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'relahconvert_plugin_action_links' );
+
+/**
+ * Generate a temporary upload token (valid for 30 minutes).
+ */
+function relahconvert_generate_token() {
+    $token = wp_generate_password( 32, false );
+    set_transient( 'relahconvert_token_' . $token, get_current_user_id(), 30 * MINUTE_IN_SECONDS );
+    return $token;
+}
+
+/**
+ * Build tool URL with auth params for sending images back.
+ */
+function relahconvert_tool_url( $tool, $image_url ) {
+    $token = relahconvert_generate_token();
+    $params = http_build_query( array(
+        'url'    => $image_url,
+        'wpsite' => rest_url( 'relahconvert/v1/upload' ),
+        'token'  => $token,
+    ) );
+    return RELAHCONVERT_BASE_URL . '/' . $tool . '?' . $params;
+}
+
+/**
+ * Register REST API endpoint for receiving processed images.
+ */
+function relahconvert_register_rest_routes() {
+    register_rest_route( 'relahconvert/v1', '/upload', array(
+        'methods'             => 'POST',
+        'callback'            => 'relahconvert_handle_upload',
+        'permission_callback' => '__return_true',
+    ) );
+}
+add_action( 'rest_api_init', 'relahconvert_register_rest_routes' );
+
+/**
+ * Handle image upload from RelahConvert.
+ */
+function relahconvert_handle_upload( $request ) {
+    // Allow CORS from RelahConvert.
+    header( 'Access-Control-Allow-Origin: https://relahconvert.com' );
+    header( 'Access-Control-Allow-Methods: POST, OPTIONS' );
+    header( 'Access-Control-Allow-Headers: Content-Type' );
+
+    $token = $request->get_param( 'token' );
+    if ( ! $token ) {
+        return new WP_Error( 'missing_token', 'Authentication token is required.', array( 'status' => 401 ) );
+    }
+
+    $user_id = get_transient( 'relahconvert_token_' . $token );
+    if ( ! $user_id ) {
+        return new WP_Error( 'invalid_token', 'Token is invalid or expired.', array( 'status' => 401 ) );
+    }
+
+    // Set the current user for upload permissions.
+    wp_set_current_user( $user_id );
+    if ( ! current_user_can( 'upload_files' ) ) {
+        return new WP_Error( 'no_permission', 'User cannot upload files.', array( 'status' => 403 ) );
+    }
+
+    $files = $request->get_file_params();
+    if ( empty( $files['file'] ) ) {
+        return new WP_Error( 'no_file', 'No file was uploaded.', array( 'status' => 400 ) );
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+
+    $attachment_id = media_handle_upload( 'file', 0 );
+    if ( is_wp_error( $attachment_id ) ) {
+        return $attachment_id;
+    }
+
+    // Delete the token after successful use.
+    delete_transient( 'relahconvert_token_' . $token );
+
+    return rest_ensure_response( array(
+        'success'       => true,
+        'attachment_id'  => $attachment_id,
+        'url'           => wp_get_attachment_url( $attachment_id ),
+    ) );
+}
+
+/**
+ * Handle CORS preflight for the upload endpoint.
+ */
+function relahconvert_cors_preflight() {
+    if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS' ) {
+        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+        if ( strpos( $request_uri, 'relahconvert/v1/upload' ) !== false ) {
+            header( 'Access-Control-Allow-Origin: https://relahconvert.com' );
+            header( 'Access-Control-Allow-Methods: POST, OPTIONS' );
+            header( 'Access-Control-Allow-Headers: Content-Type' );
+            header( 'Access-Control-Max-Age: 86400' );
+            status_header( 204 );
+            exit;
+        }
+    }
+}
+add_action( 'init', 'relahconvert_cors_preflight' );

@@ -11,10 +11,18 @@
     }
 
     var baseUrl = relahconvert.baseUrl;
+    var wpsite = relahconvert.wpsite;
+    var token = relahconvert.token;
+
+    function buildToolUrl(tool, imageUrl) {
+        var params = '?url=' + encodeURIComponent(imageUrl);
+        if (wpsite) params += '&wpsite=' + encodeURIComponent(wpsite);
+        if (token) params += '&token=' + encodeURIComponent(token);
+        return baseUrl + '/' + tool + params;
+    }
 
     /**
      * Inject RelahConvert buttons into the media modal attachment details.
-     * Handles the grid-view modal that loads attachment details via Backbone.
      */
     if (typeof wp !== 'undefined' && wp.media) {
         var originalAttachmentDetailsTwoColumn = wp.media.view.Attachment.Details.TwoColumn;
@@ -30,7 +38,6 @@
 
                     var mime = model.get('mime');
                     var imageUrl = model.get('url');
-                    var urlParam = imageUrl ? '?url=' + encodeURIComponent(imageUrl) : '';
                     var convertTool = getConvertTool(mime);
                     var $details = this.$el.find('.attachment-info');
 
@@ -38,12 +45,12 @@
                         var html = '<div class="relahconvert-media-buttons" style="margin-top:12px;padding-top:12px;border-top:1px solid #dcdcde;">';
                         html += '<strong style="display:block;margin-bottom:6px;font-size:12px;color:#787c82;">RelahConvert</strong>';
                         html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-                        html += '<a href="' + baseUrl + '/compress' + urlParam + '" target="_blank" rel="noopener" class="button button-small">Compress</a>';
+                        html += '<a href="' + buildToolUrl('compress', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Compress</a>';
                         if (convertTool) {
-                            html += '<a href="' + baseUrl + '/' + convertTool + urlParam + '" target="_blank" rel="noopener" class="button button-small">Convert</a>';
+                            html += '<a href="' + buildToolUrl(convertTool, imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Convert</a>';
                         }
-                        html += '<a href="' + baseUrl + '/resize' + urlParam + '" target="_blank" rel="noopener" class="button button-small">Resize</a>';
-                        html += '<a href="' + baseUrl + '/remove-background' + urlParam + '" target="_blank" rel="noopener" class="button button-small">Remove BG</a>';
+                        html += '<a href="' + buildToolUrl('resize', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Resize</a>';
+                        html += '<a href="' + buildToolUrl('remove-background', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Remove BG</a>';
                         html += '</div></div>';
 
                         $details.append(html);
@@ -55,9 +62,6 @@
         }
     }
 
-    /**
-     * Map MIME types to convert tools.
-     */
     function getConvertTool(mime) {
         var map = {
             'image/jpeg': 'jpg-to-png',

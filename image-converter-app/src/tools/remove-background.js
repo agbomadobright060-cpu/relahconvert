@@ -1,5 +1,5 @@
 import { injectHeader } from '../core/header.js'
-
+import { createWpUploadButton } from '../core/wp-upload.js'
 import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
 injectHreflang('remove-background')
 
@@ -158,6 +158,7 @@ document.querySelector('#app').innerHTML = `
     <button class="remove-all-btn" id="removeAllBtn" style="display:none;">⚡ Remove All Backgrounds</button>
     <button class="zip-btn" id="zipBtn">${dlZipBtn}</button>
     <button class="new-btn" id="newBtn">+ Add more images</button>
+    <div id="wpUploadContainer"></div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">What's Next?</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -533,6 +534,7 @@ dlBtnEl.addEventListener('click', () => {
     dl.href = off.toDataURL('image/jpeg', 0.95)
     dl.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.jpg'
     dl.click();if(window.showReviewPrompt)window.showReviewPrompt()
+    off.toBlob(blob => { if (blob) showWpUpload(blob, dl.download) }, 'image/jpeg', 0.95)
   } else {
     const out = ctx.createImageData(W, H)
     const d = out.data
@@ -546,8 +548,16 @@ dlBtnEl.addEventListener('click', () => {
     dl.href = off.toDataURL('image/png')
     dl.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
     dl.click();if(window.showReviewPrompt)window.showReviewPrompt()
+    off.toBlob(blob => { if (blob) showWpUpload(blob, dl.download) }, 'image/png')
   }
 })
+
+function showWpUpload(blob, filename) {
+  const wpContainer = document.getElementById('wpUploadContainer')
+  wpContainer.innerHTML = ''
+  const wpBtn = createWpUploadButton(() => blob, () => filename)
+  if (wpBtn) wpContainer.appendChild(wpBtn)
+}
 
 zipBtn.addEventListener('click', async () => {
   const done = entries.filter(e => e.resultBlob)

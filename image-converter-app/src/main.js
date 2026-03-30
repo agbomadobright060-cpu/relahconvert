@@ -3,6 +3,7 @@ import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool, isStandaloneRoute } from './app/router.js'
 import { injectHeader } from './core/header.js'
 import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { createWpUploadButton } from './core/wp-upload.js'
 
 // If a standalone tool was loaded via dynamic import (translated URL), stop here.
 // The dynamically imported module will render its own UI into #app.
@@ -158,6 +159,7 @@ document.querySelector('#app').innerHTML = `
     ${formatSelectorHTML}
     <button id="convertBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:var(--btn-disabled); color:var(--text-on-dark-btn); font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.convert_btn}</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:var(--btn-dark); text-decoration:none; color:var(--text-on-dark-btn); font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
+    <div id="wpUploadContainer"></div>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsLinks"></div>
@@ -366,6 +368,13 @@ convertBtn.addEventListener('click', async () => {
       sizes.textContent = ''
     }
     showNextSteps(mime); setIdleEnabled()
+    const wpContainer = document.getElementById('wpUploadContainer')
+    wpContainer.innerHTML = ''
+    const wpBtn = createWpUploadButton(
+      () => convertedBlobs.length === 1 ? convertedBlobs[0].blob : null,
+      () => convertedBlobs.length === 1 ? convertedBlobs[0].name : 'converted-image.jpg'
+    )
+    if (wpBtn) wpContainer.appendChild(wpBtn)
   } catch (err) {
     alert(err?.message || 'Conversion error')
     sizes.textContent = ''
