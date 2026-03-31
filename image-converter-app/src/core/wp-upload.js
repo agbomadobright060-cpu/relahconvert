@@ -83,6 +83,61 @@ async function uploadToWp(wp, blob, filename, btn, status) {
   }
 }
 
+// ── Global auto-load image from ?url= into any tool ─────────────────────
+;(function autoLoadFromUrl() {
+  const params = new URLSearchParams(window.location.search)
+  const imgUrl = params.get('url')
+  if (!imgUrl) return
+
+  // Wait for DOM to settle, then find the file input and inject the image
+  setTimeout(() => {
+    const fileInput = document.querySelector('input[type="file"][accept*="image"]') || document.querySelector('input[type="file"]')
+    if (!fileInput) return
+
+    // Load the image via img tag (avoids CORS for images)
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas')
+        c.width = img.naturalWidth; c.height = img.naturalHeight
+        c.getContext('2d').drawImage(img, 0, 0)
+        const mime = imgUrl.match(/\.png$/i) ? 'image/png' : 'image/jpeg'
+        c.toBlob(blob => {
+          if (!blob) return
+          const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+          const file = new File([blob], name, { type: blob.type || mime })
+          const dt = new DataTransfer()
+          dt.items.add(file)
+          fileInput.files = dt.files
+          fileInput.dispatchEvent(new Event('change', { bubbles: true }))
+        }, mime, 0.95)
+      } catch (e) {
+        // CORS blocked canvas — try fetch
+        fetch(imgUrl).then(r => r.blob()).then(blob => {
+          const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+          const file = new File([blob], name, { type: blob.type })
+          const dt = new DataTransfer()
+          dt.items.add(file)
+          fileInput.files = dt.files
+          fileInput.dispatchEvent(new Event('change', { bubbles: true }))
+        }).catch(() => {})
+      }
+    }
+    img.onerror = () => {
+      fetch(imgUrl).then(r => r.blob()).then(blob => {
+        const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
+        const file = new File([blob], name, { type: blob.type })
+        const dt = new DataTransfer()
+        dt.items.add(file)
+        fileInput.files = dt.files
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }))
+      }).catch(() => {})
+    }
+    img.src = imgUrl
+  }, 500)
+})()
+
 // ── Global auto-intercept ──────────────────────────────────────────────
 // Intercepts any image download and shows "Send to WordPress" floating button
 ;(function initGlobalWpUpload() {

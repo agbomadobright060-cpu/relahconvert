@@ -134,10 +134,16 @@ function relahconvert_media_row_actions( $actions, $post ) {
 add_filter( 'media_row_actions', 'relahconvert_media_row_actions', 10, 2 );
 
 /**
- * Add buttons to attachment details modal (grid view).
+ * Add buttons to attachment details (list view / edit more details page).
+ * Grid view modal is handled by admin.js Backbone override.
  */
 function relahconvert_attachment_fields( $form_fields, $post ) {
     if ( ! wp_attachment_is_image( $post->ID ) ) {
+        return $form_fields;
+    }
+
+    // Skip in grid view modal — admin.js handles that
+    if ( wp_doing_ajax() ) {
         return $form_fields;
     }
 
