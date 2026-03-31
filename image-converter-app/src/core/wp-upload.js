@@ -1,7 +1,8 @@
 /**
  * WordPress upload integration.
- * Auto-initializes on every page. When ?wpsite and ?token are present,
- * intercepts image downloads and shows a "Send to WordPress" button.
+ * Auto-initializes on every page. When ?wpsite and ?token are present:
+ * 1. Auto-loads image from ?url= into the tool's file input
+ * 2. Shows "Send to WordPress" floating button after any image download
  */
 
 function getWpParams() {
@@ -12,7 +13,6 @@ function getWpParams() {
   return { wpsite, token }
 }
 
-// Also export for tools that manually create the button
 export { getWpParams, createWpUploadButton }
 
 function createWpUploadButton(getBlob, getFilename) {
@@ -25,8 +25,6 @@ function createWpUploadButton(getBlob, getFilename) {
   const btn = document.createElement('button')
   btn.textContent = 'Send to WordPress'
   btn.style.cssText = 'width:100%;padding:13px;border:none;border-radius:10px;background:#0073aa;color:#fff;font-family:"Fraunces",serif;font-weight:700;font-size:15px;cursor:pointer;transition:all 0.18s;'
-  btn.addEventListener('mouseenter', () => { if (!btn.disabled) btn.style.background = '#005a87' })
-  btn.addEventListener('mouseleave', () => { if (!btn.disabled) btn.style.background = '#0073aa' })
 
   const status = document.createElement('div')
   status.style.cssText = 'font-family:"DM Sans",sans-serif;font-size:13px;margin-top:8px;text-align:center;display:none;'
@@ -89,12 +87,10 @@ async function uploadToWp(wp, blob, filename, btn, status) {
   const imgUrl = params.get('url')
   if (!imgUrl) return
 
-  // Wait for DOM to settle, then find the file input and inject the image
   setTimeout(() => {
     const fileInput = document.querySelector('input[type="file"][accept*="image"]') || document.querySelector('input[type="file"]')
     if (!fileInput) return
 
-    // Load the image via img tag (avoids CORS for images)
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
@@ -113,109 +109,84 @@ async function uploadToWp(wp, blob, filename, btn, status) {
           fileInput.dispatchEvent(new Event('change', { bubbles: true }))
         }, mime, 0.95)
       } catch (e) {
-        // CORS blocked canvas — try fetch
-        fetch(imgUrl).then(r => r.blob()).then(blob => {
-          const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-          const file = new File([blob], name, { type: blob.type })
-          const dt = new DataTransfer()
-          dt.items.add(file)
-          fileInput.files = dt.files
-          fileInput.dispatchEvent(new Event('change', { bubbles: true }))
-        }).catch(() => {})
+        fetchAndInject(imgUrl, fileInput)
       }
     }
-    img.onerror = () => {
-      fetch(imgUrl).then(r => r.blob()).then(blob => {
-        const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-        const file = new File([blob], name, { type: blob.type })
-        const dt = new DataTransfer()
-        dt.items.add(file)
-        fileInput.files = dt.files
-        fileInput.dispatchEvent(new Event('change', { bubbles: true }))
-      }).catch(() => {})
-    }
+    img.onerror = () => fetchAndInject(imgUrl, fileInput)
     img.src = imgUrl
   }, 500)
+
+  function fetchAndInject(url, input) {
+    fetch(url).then(r => r.blob()).then(blob => {
+      const name = url.split('/').pop().split('?')[0] || 'image.jpg'
+      const file = new File([blob], name, { type: blob.type })
+      const dt = new DataTransfer()
+      dt.items.add(file)
+      input.files = dt.files
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+    }).catch(() => {})
+  }
 })()
 
-// ── Global auto-intercept ──────────────────────────────────────────────
-// Intercepts any image download and shows "Send to WordPress" floating button
+// ── Global download intercept — show "Send to WordPress" ────────────────
 ;(function initGlobalWpUpload() {
   const wp = getWpParams()
   if (!wp) return
 
-  let lastBlob = null
-  let lastFilename = 'image.jpg'
   let floatingBtn = null
 
-  // Track blobs created via URL.createObjectURL
-  const originalCreateObjectURL = URL.createObjectURL.bind(URL)
-  URL.createObjectURL = function (obj) {
-    if (obj instanceof Blob && obj.type && obj.type.startsWith('image/')) {
-      lastBlob = obj
+  // Helper: convert href to blob
+  function hrefToBlob(href) {
+    if (href.startsWith('blob:')) {
+      return fetch(href).then(r => r.blob()).catch(() => null)
     }
-    return originalCreateObjectURL(obj)
+    if (href.startsWith('data:')) {
+      return fetch(href).then(r => r.blob()).catch(() => null)
+    }
+    return Promise.resolve(null)
   }
 
-  // Intercept anchor clicks with download attribute
-  document.addEventListener('click', (e) => {
-    const anchor = e.target.closest('a[download]')
-    if (!anchor) return
-    const href = anchor.href || ''
-    if (href.startsWith('blob:') || href.startsWith('data:')) {
-      lastFilename = anchor.download || 'image.jpg'
-      // For data URLs, convert to blob
-      if (href.startsWith('data:') && !lastBlob) {
-        fetch(href).then(r => r.blob()).then(b => {
-          lastBlob = b
-          showFloatingWpButton()
-        })
-        return
-      }
-      setTimeout(() => showFloatingWpButton(), 300)
-    }
-  }, true)
-
-  // Also intercept programmatic a.click() calls
+  // Intercept programmatic a.click() — this catches most tools
   const origClick = HTMLAnchorElement.prototype.click
   HTMLAnchorElement.prototype.click = function () {
-    if (this.hasAttribute('download')) {
-      const href = this.href || ''
+    if (this.hasAttribute('download') || this.download) {
+      const href = this.href || this.getAttribute('href') || ''
       if (href.startsWith('blob:') || href.startsWith('data:')) {
-        lastFilename = this.download || 'image.jpg'
-        if (href.startsWith('data:') && !lastBlob) {
-          fetch(href).then(r => r.blob()).then(b => {
-            lastBlob = b
-            showFloatingWpButton()
-          })
-        } else {
-          setTimeout(() => showFloatingWpButton(), 300)
-        }
+        const filename = this.download || 'image.jpg'
+        hrefToBlob(href).then(blob => {
+          if (blob) showFloatingWpButton(blob, filename)
+        })
       }
     }
     return origClick.call(this)
   }
 
-  function showFloatingWpButton() {
-    if (!lastBlob) return
-    const blob = lastBlob
-    const filename = lastFilename
+  // Also catch user clicks on download links in the DOM
+  document.addEventListener('click', (e) => {
+    const anchor = e.target.closest ? e.target.closest('a[download]') : null
+    if (!anchor) return
+    const href = anchor.href || ''
+    if (href.startsWith('blob:') || href.startsWith('data:')) {
+      const filename = anchor.download || 'image.jpg'
+      hrefToBlob(href).then(blob => {
+        if (blob) showFloatingWpButton(blob, filename)
+      })
+    }
+  }, true)
 
-    // Remove old floating button if exists
+  function showFloatingWpButton(blob, filename) {
     if (floatingBtn) floatingBtn.remove()
 
     floatingBtn = document.createElement('div')
-    floatingBtn.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10000;background:#fff;border-radius:14px;padding:16px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.2);border:2px solid #0073aa;font-family:"DM Sans",sans-serif;text-align:center;animation:fadeUp 0.3s ease both;max-width:320px;width:90%;'
+    floatingBtn.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10000;background:#fff;border-radius:14px;padding:16px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.2);border:2px solid #0073aa;font-family:"DM Sans",sans-serif;text-align:center;max-width:320px;width:90%;'
 
     const title = document.createElement('div')
-    title.textContent = 'Send processed image to WordPress?'
+    title.textContent = 'Send to WordPress?'
     title.style.cssText = 'font-size:14px;font-weight:600;color:#1d2327;margin-bottom:10px;'
 
     const btn = document.createElement('button')
     btn.textContent = 'Send to WordPress'
     btn.style.cssText = 'width:100%;padding:11px;border:none;border-radius:8px;background:#0073aa;color:#fff;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.15s;'
-    btn.addEventListener('mouseenter', () => { if (!btn.disabled) btn.style.background = '#005a87' })
-    btn.addEventListener('mouseleave', () => { if (!btn.disabled) btn.style.background = '#0073aa' })
 
     const status = document.createElement('div')
     status.style.cssText = 'font-size:12px;margin-top:6px;display:none;'
@@ -233,7 +204,6 @@ async function uploadToWp(wp, blob, filename, btn, status) {
     floatingBtn.appendChild(dismiss)
     document.body.appendChild(floatingBtn)
 
-    // Auto-dismiss after 30 seconds
-    setTimeout(() => { if (floatingBtn) floatingBtn.remove() }, 30000)
+    setTimeout(() => { if (floatingBtn && floatingBtn.parentNode) floatingBtn.remove() }, 60000)
   }
 })()
