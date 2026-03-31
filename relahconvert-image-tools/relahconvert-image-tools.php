@@ -248,12 +248,12 @@ function relahconvert_settings_page() {
                     </tr>
                     <tr>
                         <td><strong><?php esc_html_e( 'Remove Background', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Remove image backgrounds with AI — free, no upload required.', 'relahconvert-image-tools' ); ?></td>
+                        <td><?php esc_html_e( 'Remove image backgrounds with AI.', 'relahconvert-image-tools' ); ?></td>
                         <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/remove-background' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
                     </tr>
                     <tr>
                         <td><strong><?php esc_html_e( 'Convert Formats', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Convert between JPG, PNG, WebP, GIF, BMP, TIFF, and more.', 'relahconvert-image-tools' ); ?></td>
+                        <td><?php esc_html_e( 'Convert between JPG, PNG, WebP, GIF, BMP, TIFF, SVG, and more.', 'relahconvert-image-tools' ); ?></td>
                         <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/jpg-to-png' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
                     </tr>
                     <tr>
@@ -262,9 +262,49 @@ function relahconvert_settings_page() {
                         <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/crop' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
                     </tr>
                     <tr>
+                        <td><strong><?php esc_html_e( 'Rotate Image', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Rotate images by any angle.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/rotate' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Flip Image', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Flip images horizontally or vertically.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/flip' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
                         <td><strong><?php esc_html_e( 'Watermark Image', 'relahconvert-image-tools' ); ?></strong></td>
                         <td><?php esc_html_e( 'Add text or image watermarks to your photos.', 'relahconvert-image-tools' ); ?></td>
                         <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/watermark' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Grayscale', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Convert images to black and white.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/grayscale' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Round Corners', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Add rounded corners to images.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/round-corners' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Image to PDF', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Convert JPG or PNG images to PDF documents.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/jpg-to-pdf' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Meme Generator', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Create memes with custom text on images.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/meme-generator' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Merge Images', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Combine multiple images into one.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/merge-images' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'Passport Photo', 'relahconvert-image-tools' ); ?></strong></td>
+                        <td><?php esc_html_e( 'Create passport-sized photos for any country.', 'relahconvert-image-tools' ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/passport-photo' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
                     </tr>
                 </tbody>
             </table>
@@ -275,10 +315,10 @@ function relahconvert_settings_page() {
             <ol>
                 <li><?php esc_html_e( 'Go to your Media Library.', 'relahconvert-image-tools' ); ?></li>
                 <li><?php esc_html_e( 'Click any RelahConvert action button (Compress, Convert, Resize, Remove BG) on an image.', 'relahconvert-image-tools' ); ?></li>
-                <li><?php esc_html_e( 'The tool opens in a new tab on RelahConvert.com — drop your image and process it.', 'relahconvert-image-tools' ); ?></li>
-                <li><?php esc_html_e( 'Download the result and re-upload to WordPress.', 'relahconvert-image-tools' ); ?></li>
+                <li><?php esc_html_e( 'The tool opens with your image auto-loaded — process it with one click.', 'relahconvert-image-tools' ); ?></li>
+                <li><?php esc_html_e( 'Click "Send to WordPress" to add the processed image directly to your Media Library.', 'relahconvert-image-tools' ); ?></li>
             </ol>
-            <p><em><?php esc_html_e( 'All processing happens in your browser. Your files are never uploaded to any server.', 'relahconvert-image-tools' ); ?></em></p>
+            <p><em><?php esc_html_e( 'Most processing happens in your browser. Your files stay private and secure.', 'relahconvert-image-tools' ); ?></em></p>
         </div>
 
         <p class="relahconvert-footer">
