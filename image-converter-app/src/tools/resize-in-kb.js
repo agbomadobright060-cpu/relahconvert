@@ -53,7 +53,7 @@ if (document.head) {
     .preview-card .remove-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .preview-card .remove-btn:hover { background:var(--accent); }
     .preview-card .fname { font-size:11px; color:#555; padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .preview-card .kb-input { width:70px; padding:4px 6px; border:1.5px solid var(--border-light); border-radius:6px; font-size:12px; font-family:'DM Sans',sans-serif; color:var(--text-primary); outline:none; margin:0 4px 6px 8px; }
+    .preview-card .kb-input { width:70px; padding:4px 6px; border:1.5px solid var(--border-light); border-radius:6px; font-size:12px; font-family:'DM Sans',sans-serif; color:var(--text-primary); background:var(--bg-surface); outline:none; margin:0 4px 6px 8px; }
     #addMoreBtn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:1.5px dashed var(--border-light); border-radius:8px; background:transparent; color:var(--text-tertiary); font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; margin-top:8px; }
     #addMoreBtn:hover { border-color:var(--accent); color:var(--accent); }
     .seo-section { max-width:700px; margin:0 auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif; }
@@ -550,7 +550,7 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
       <div id="globalTarget" style="display:flex; gap:10px; align-items:center;">
-        <input type="number" id="targetKB" min="1" max="99999" value="200" style="width:120px; padding:10px 14px; border:1.5px solid var(--border-light); border-radius:8px; font-size:15px; font-family:'DM Sans',sans-serif; color:var(--text-primary); outline:none;" />
+        <input type="number" id="targetKB" min="1" max="99999" value="200" style="width:120px; padding:10px 14px; border:1.5px solid var(--border-light); border-radius:8px; font-size:15px; font-family:'DM Sans',sans-serif; color:var(--text-primary); background:var(--bg-surface); outline:none;" />
         <span style="font-size:13px; color:var(--text-tertiary);">KB</span>
       </div>
     </div>

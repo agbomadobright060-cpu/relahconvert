@@ -29,7 +29,7 @@ style.textContent = `
   .sp-preset:hover{border-color:var(--accent);color:var(--accent);}
   .sp-preset.active{background:var(--accent);color:var(--text-on-accent);border-color:var(--accent);}
   .sp-custom-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-  .sp-custom-input{width:56px;padding:7px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);text-align:center;outline:none;}
+  .sp-custom-input{width:56px;padding:7px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-surface);text-align:center;outline:none;}
   .sp-custom-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,75,49,0.12);}
   .sp-info{font-size:12px;color:var(--text-tertiary);margin-bottom:12px;}
   .download-btn{display:none;text-align:center;padding:12px 24px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;border:none;border-radius:10px;cursor:pointer;transition:background 0.15s;width:100%;text-decoration:none;margin-top:10px;}

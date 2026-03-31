@@ -43,7 +43,7 @@ if (document.head) {
     .crop-inputs-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .crop-input-group { display:flex; flex-direction:column; gap:4px; }
     .crop-input-label { font-size:11px; font-weight:600; color:var(--text-secondary); font-family:'DM Sans',sans-serif; }
-    .crop-input { padding:8px 10px; border:1.5px solid var(--border-light); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:var(--text-primary); outline:none; width:100%; box-sizing:border-box; }
+    .crop-input { padding:8px 10px; border:1.5px solid var(--border-light); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; color:var(--text-primary); background:var(--bg-surface); outline:none; width:100%; box-sizing:border-box; }
     .crop-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,75,49,0.1); }
     .next-steps { margin-top:20px; }
     .next-steps-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; }
