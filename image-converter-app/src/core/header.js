@@ -1,6 +1,7 @@
 import { tools } from '../tools/configs.js'
 import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug, englishKeyFromSlug } from './i18n.js'
 import { initTheme, toggleTheme, getCurrentTheme, sunIcon, moonIcon } from './theme.js'
+import './wp-upload.js' // Auto-init WordPress upload integration
 
 // Review prompt — shown once per session after a download
 function showReviewPrompt() {
