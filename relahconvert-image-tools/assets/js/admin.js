@@ -46,14 +46,13 @@
                         html += '<strong style="display:block;margin-bottom:6px;font-size:12px;color:#787c82;">RelahConvert</strong>';
                         html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
                         html += '<a href="' + buildToolUrl('compress', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Compress</a>';
-                        if (convertTool) {
-                            html += '<a href="' + buildToolUrl(convertTool, imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Convert</a>';
-                        }
+                        html += '<a href="' + baseUrl + '/watermark" target="_blank" rel="noopener" class="button button-small">Watermark</a>';
                         html += '<a href="' + buildToolUrl('resize', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Resize</a>';
                         html += '<a href="' + buildToolUrl('remove-background', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Remove BG</a>';
 
                         // More Tools dropdown
                         var moreTools = [
+                            { tool: convertTool || 'jpg-to-png', label: 'Convert' },
                             { tool: 'crop', label: 'Crop' },
                             { tool: 'rotate', label: 'Rotate' },
                             { tool: 'flip', label: 'Flip' },

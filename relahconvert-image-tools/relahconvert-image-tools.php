@@ -108,14 +108,12 @@ function relahconvert_media_row_actions( $actions, $post ) {
         esc_html__( 'Compress', 'relahconvert-image-tools' )
     );
 
-    if ( $convert_tool ) {
-        $actions['relahconvert_convert'] = sprintf(
-            '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
-            esc_url( relahconvert_tool_url( $convert_tool, $image_url ) ),
-            esc_attr__( 'Convert with RelahConvert', 'relahconvert-image-tools' ),
-            esc_html__( 'Convert', 'relahconvert-image-tools' )
-        );
-    }
+    $actions['relahconvert_watermark'] = sprintf(
+        '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
+        esc_url( RELAHCONVERT_BASE_URL . '/watermark' ),
+        esc_attr__( 'Watermark with RelahConvert', 'relahconvert-image-tools' ),
+        esc_html__( 'Watermark', 'relahconvert-image-tools' )
+    );
 
     $actions['relahconvert_resize'] = sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
@@ -145,7 +143,6 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
 
     $mime = get_post_mime_type( $post->ID );
     $image_url = wp_get_attachment_url( $post->ID );
-    $convert_tool = relahconvert_get_convert_tool( $mime );
 
     $buttons = '<div class="relahconvert-buttons">';
     $buttons .= sprintf(
@@ -154,13 +151,11 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
         esc_html__( 'Compress', 'relahconvert-image-tools' )
     );
 
-    if ( $convert_tool ) {
-        $buttons .= sprintf(
-            '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-convert">%s</a>',
-            esc_url( relahconvert_tool_url( $convert_tool, $image_url ) ),
-            esc_html__( 'Convert', 'relahconvert-image-tools' )
-        );
-    }
+    $buttons .= sprintf(
+        '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-watermark">%s</a>',
+        esc_url( RELAHCONVERT_BASE_URL . '/watermark' ),
+        esc_html__( 'Watermark', 'relahconvert-image-tools' )
+    );
 
     $buttons .= sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-resize">%s</a>',
@@ -175,11 +170,12 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
     );
 
     // More Tools dropdown
+    $convert_tool = relahconvert_get_convert_tool( $mime );
     $more_tools = array(
+        array( 'tool' => $convert_tool ? $convert_tool : 'jpg-to-png', 'label' => __( 'Convert', 'relahconvert-image-tools' ) ),
         array( 'tool' => 'crop',           'label' => __( 'Crop', 'relahconvert-image-tools' ) ),
         array( 'tool' => 'rotate',         'label' => __( 'Rotate', 'relahconvert-image-tools' ) ),
         array( 'tool' => 'flip',           'label' => __( 'Flip', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'watermark',      'label' => __( 'Watermark', 'relahconvert-image-tools' ) ),
         array( 'tool' => 'grayscale',      'label' => __( 'Grayscale', 'relahconvert-image-tools' ) ),
         array( 'tool' => 'round-corners',  'label' => __( 'Round Corners', 'relahconvert-image-tools' ) ),
         array( 'tool' => 'jpg-to-pdf',     'label' => __( 'Image to PDF', 'relahconvert-image-tools' ) ),
