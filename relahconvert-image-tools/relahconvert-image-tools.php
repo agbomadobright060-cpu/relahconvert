@@ -248,7 +248,7 @@ function relahconvert_settings_page() {
 
         <div class="relahconvert-settings-card">
             <h2><?php esc_html_e( 'Available Tools', 'relahconvert-image-tools' ); ?></h2>
-            <p><?php esc_html_e( 'RelahConvert provides free browser-based image tools. No files are uploaded to any server — all processing happens in your browser.', 'relahconvert-image-tools' ); ?></p>
+            <p><?php esc_html_e( 'RelahConvert provides free image tools. Most tools process images directly in your browser — your files stay on your device. Some tools like Remove Background use AI processing on a server.', 'relahconvert-image-tools' ); ?></p>
 
             <table class="widefat relahconvert-tools-table">
                 <thead>
