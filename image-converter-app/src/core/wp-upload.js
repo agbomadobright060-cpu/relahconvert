@@ -57,7 +57,10 @@ export function createWpUploadButton(getBlob, getFilename) {
         btn.textContent = 'Sent to WordPress!'
         btn.style.background = '#46b450'
         status.style.color = '#46b450'
-        status.textContent = 'Image added to your Media Library.'
+        status.textContent = 'Image added to your Media Library. Opening...'
+        // Open the Media Library so the user sees the new image
+        const siteUrl = new URL(wp.wpsite).origin
+        window.open(siteUrl + '/wp-admin/upload.php', '_blank')
       } else {
         throw new Error(data.message || 'Upload failed')
       }
