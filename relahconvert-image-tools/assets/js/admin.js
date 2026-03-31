@@ -66,7 +66,7 @@
                         ];
                         html += '<div style="position:relative;display:inline-block;">';
                         html += '<button type="button" class="button button-small relahconvert-more-toggle" style="cursor:pointer;">More &#9660;</button>';
-                        html += '<div class="relahconvert-more-menu" style="display:none;position:absolute;bottom:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:150px;margin-bottom:4px;">';
+                        html += '<div class="relahconvert-more-menu" style="display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:150px;margin-top:4px;max-height:300px;overflow-y:auto;">';
                         for (var i = 0; i < moreTools.length; i++) {
                             html += '<a href="' + baseUrl + '/' + moreTools[i].tool + '" target="_blank" rel="noopener" style="display:block;padding:7px 12px;color:#1d2327;text-decoration:none;font-size:12px;border-bottom:1px solid #f0f0f1;" onmouseover="this.style.background=\'#f0f6fc\'" onmouseout="this.style.background=\'#fff\'">' + moreTools[i].label + '</a>';
                         }

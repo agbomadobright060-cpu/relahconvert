@@ -186,7 +186,7 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
 
     $buttons .= '<div class="relahconvert-more-wrap" style="position:relative;display:inline-block;">';
     $buttons .= '<button type="button" class="button relahconvert-btn relahconvert-btn-more" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'block\'?\'none\':\'block\'" style="margin-top:4px;">' . esc_html__( 'More Tools', 'relahconvert-image-tools' ) . ' &#9660;</button>';
-    $buttons .= '<div class="relahconvert-more-dropdown" style="display:none;position:absolute;bottom:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:160px;margin-bottom:4px;">';
+    $buttons .= '<div class="relahconvert-more-dropdown" style="display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:160px;margin-top:4px;max-height:300px;overflow-y:auto;">';
     foreach ( $more_tools as $tool ) {
         $buttons .= sprintf(
             '<a href="%s" target="_blank" rel="noopener" style="display:block;padding:8px 14px;color:#1d2327;text-decoration:none;font-size:13px;border-bottom:1px solid #f0f0f1;white-space:nowrap;" onmouseover="this.style.background=\'#f0f6fc\'" onmouseout="this.style.background=\'#fff\'">%s</a>',
