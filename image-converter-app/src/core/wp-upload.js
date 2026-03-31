@@ -231,4 +231,90 @@ function buildWpButton(wp, getBlob, getFilename) {
   // Also use MutationObserver for faster detection
   const observer = new MutationObserver(() => findAndAttach())
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'display', 'href'] })
+
+  // ── Intercept programmatic a.click() for tools that don't use persistent links ──
+  let lastDownloadBlob = null
+  let lastDownloadFilename = 'image.jpg'
+  let floatingWpBtn = null
+
+  const origClick = HTMLAnchorElement.prototype.click
+  HTMLAnchorElement.prototype.click = function () {
+    if (this.download || this.hasAttribute('download')) {
+      const href = this.href || this.getAttribute('href') || ''
+      if (href.startsWith('blob:') || href.startsWith('data:')) {
+        lastDownloadFilename = this.download || 'image.jpg'
+        // Fetch the blob before it gets revoked
+        fetch(href).then(r => r.blob()).then(blob => {
+          lastDownloadBlob = blob
+          showFloatingWpBtn()
+        }).catch(() => {})
+      }
+    }
+    return origClick.call(this)
+  }
+
+  function showFloatingWpBtn() {
+    if (!lastDownloadBlob) return
+    if (floatingWpBtn) floatingWpBtn.remove()
+
+    const blob = lastDownloadBlob
+    const filename = lastDownloadFilename
+
+    floatingWpBtn = document.createElement('div')
+    floatingWpBtn.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10000;background:#fff;border-radius:14px;padding:16px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.2);border:2px solid #0073aa;font-family:"DM Sans",sans-serif;text-align:center;max-width:320px;width:90%;'
+
+    const title = document.createElement('div')
+    title.textContent = 'Send to WordPress?'
+    title.style.cssText = 'font-size:14px;font-weight:600;color:#1d2327;margin-bottom:10px;'
+
+    const btn = document.createElement('button')
+    btn.textContent = 'Send to WordPress'
+    btn.style.cssText = 'width:100%;padding:11px;border:none;border-radius:8px;background:#0073aa;color:#fff;font-weight:700;font-size:14px;cursor:pointer;'
+
+    const status = document.createElement('div')
+    status.style.cssText = 'font-size:12px;margin-top:6px;display:none;'
+
+    const dismiss = document.createElement('button')
+    dismiss.textContent = 'Dismiss'
+    dismiss.style.cssText = 'background:none;border:none;color:#999;font-size:12px;cursor:pointer;margin-top:8px;'
+    dismiss.addEventListener('click', () => floatingWpBtn.remove())
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true
+      btn.textContent = 'Uploading...'
+      btn.style.background = '#999'
+      status.style.display = 'block'
+      status.textContent = 'Sending...'
+
+      try {
+        const formData = new FormData()
+        formData.append('file', blob, filename)
+        formData.append('token', wp.token)
+        const res = await fetch(wp.wpsite + '?token=' + encodeURIComponent(wp.token), { method: 'POST', body: formData })
+        const data = await res.json()
+        if (data.success) {
+          btn.textContent = 'Sent!'
+          btn.style.background = '#46b450'
+          status.style.color = '#46b450'
+          status.textContent = 'Image added to Media Library.'
+          const siteUrl = new URL(wp.wpsite).origin
+          window.open(siteUrl + '/wp-admin/upload.php', '_blank')
+        } else { throw new Error(data.message || 'Failed') }
+      } catch (err) {
+        btn.textContent = 'Send to WordPress'
+        btn.style.background = '#0073aa'
+        btn.disabled = false
+        status.style.color = '#dc3232'
+        status.textContent = 'Failed: ' + err.message
+      }
+    })
+
+    floatingWpBtn.appendChild(title)
+    floatingWpBtn.appendChild(btn)
+    floatingWpBtn.appendChild(status)
+    floatingWpBtn.appendChild(dismiss)
+    document.body.appendChild(floatingWpBtn)
+
+    setTimeout(() => { if (floatingWpBtn && floatingWpBtn.parentNode) floatingWpBtn.remove() }, 60000)
+  }
 })()
