@@ -51,9 +51,44 @@
                         }
                         html += '<a href="' + buildToolUrl('resize', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Resize</a>';
                         html += '<a href="' + buildToolUrl('remove-background', imageUrl) + '" target="_blank" rel="noopener" class="button button-small">Remove BG</a>';
+
+                        // More Tools dropdown
+                        var moreTools = [
+                            { tool: 'crop', label: 'Crop' },
+                            { tool: 'rotate', label: 'Rotate' },
+                            { tool: 'flip', label: 'Flip' },
+                            { tool: 'watermark', label: 'Watermark' },
+                            { tool: 'grayscale', label: 'Grayscale' },
+                            { tool: 'round-corners', label: 'Round Corners' },
+                            { tool: 'jpg-to-pdf', label: 'Image to PDF' },
+                            { tool: 'meme-generator', label: 'Meme Generator' },
+                            { tool: 'merge-images', label: 'Merge Images' },
+                            { tool: 'passport-photo', label: 'Passport Photo' }
+                        ];
+                        html += '<div style="position:relative;display:inline-block;">';
+                        html += '<button type="button" class="button button-small relahconvert-more-toggle" style="cursor:pointer;">More &#9660;</button>';
+                        html += '<div class="relahconvert-more-menu" style="display:none;position:absolute;bottom:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:150px;margin-bottom:4px;">';
+                        for (var i = 0; i < moreTools.length; i++) {
+                            html += '<a href="' + baseUrl + '/' + moreTools[i].tool + '" target="_blank" rel="noopener" style="display:block;padding:7px 12px;color:#1d2327;text-decoration:none;font-size:12px;border-bottom:1px solid #f0f0f1;" onmouseover="this.style.background=\'#f0f6fc\'" onmouseout="this.style.background=\'#fff\'">' + moreTools[i].label + '</a>';
+                        }
+                        html += '</div></div>';
+
                         html += '</div></div>';
 
                         $details.append(html);
+
+                        // Toggle dropdown on click
+                        $details.find('.relahconvert-more-toggle').on('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var menu = $(this).next('.relahconvert-more-menu');
+                            menu.toggle();
+                        });
+
+                        // Close dropdown when clicking outside
+                        $(document).on('click.relahconvertMore', function () {
+                            $details.find('.relahconvert-more-menu').hide();
+                        });
                     }
 
                     return this;

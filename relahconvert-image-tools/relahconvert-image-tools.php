@@ -173,6 +173,33 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
         esc_url( relahconvert_tool_url( 'remove-background', $image_url ) ),
         esc_html__( 'Remove BG', 'relahconvert-image-tools' )
     );
+
+    // More Tools dropdown
+    $more_tools = array(
+        array( 'tool' => 'crop',           'label' => __( 'Crop', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'rotate',         'label' => __( 'Rotate', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'flip',           'label' => __( 'Flip', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'watermark',      'label' => __( 'Watermark', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'grayscale',      'label' => __( 'Grayscale', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'round-corners',  'label' => __( 'Round Corners', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'jpg-to-pdf',     'label' => __( 'Image to PDF', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'meme-generator', 'label' => __( 'Meme Generator', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'merge-images',   'label' => __( 'Merge Images', 'relahconvert-image-tools' ) ),
+        array( 'tool' => 'passport-photo', 'label' => __( 'Passport Photo', 'relahconvert-image-tools' ) ),
+    );
+
+    $buttons .= '<div class="relahconvert-more-wrap" style="position:relative;display:inline-block;">';
+    $buttons .= '<button type="button" class="button relahconvert-btn relahconvert-btn-more" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'block\'?\'none\':\'block\'" style="margin-top:4px;">' . esc_html__( 'More Tools', 'relahconvert-image-tools' ) . ' &#9660;</button>';
+    $buttons .= '<div class="relahconvert-more-dropdown" style="display:none;position:absolute;bottom:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:160px;margin-bottom:4px;">';
+    foreach ( $more_tools as $tool ) {
+        $buttons .= sprintf(
+            '<a href="%s" target="_blank" rel="noopener" style="display:block;padding:8px 14px;color:#1d2327;text-decoration:none;font-size:13px;border-bottom:1px solid #f0f0f1;white-space:nowrap;" onmouseover="this.style.background=\'#f0f6fc\'" onmouseout="this.style.background=\'#fff\'">%s</a>',
+            esc_url( RELAHCONVERT_BASE_URL . '/' . $tool['tool'] ),
+            esc_html( $tool['label'] )
+        );
+    }
+    $buttons .= '</div></div>';
+
     $buttons .= '</div>';
 
     $form_fields['relahconvert'] = array(
