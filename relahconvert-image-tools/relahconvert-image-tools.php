@@ -2,7 +2,7 @@
 /**
  * Plugin Name: RelahConvert Image Tools
  * Plugin URI: https://relahconvert.com
- * Description: Free image tools powered by RelahConvert — compress, convert, resize, and remove backgrounds directly from your WordPress media library.
+ * Description: Free image tools powered by RelahConvert — compress, convert, resize, watermark, and remove backgrounds directly from your WordPress media library.
  * Version: 1.0.0
  * Requires at least: 5.0
  * Requires PHP: 7.2
@@ -23,21 +23,44 @@ define( 'RELAHCONVERT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RELAHCONVERT_BASE_URL', 'https://relahconvert.com' );
 
 /**
+ * Allowed tool slugs for URL building.
+ */
+function relahconvert_allowed_tools() {
+    return array(
+        'compress', 'watermark', 'resize', 'remove-background',
+        'crop', 'rotate', 'flip', 'grayscale', 'round-corners',
+        'jpg-to-pdf', 'meme-generator', 'merge-images', 'passport-photo',
+        'jpg-to-png', 'png-to-jpg', 'webp-to-jpg', 'gif-to-jpg',
+        'bmp-to-jpg', 'tiff-to-jpg', 'jpg-to-webp', 'png-to-webp',
+        'webp-to-png', 'bmp-to-png', 'gif-to-png', 'svg-to-png',
+        'svg-to-jpg', 'png-to-gif', 'jpg-to-gif', 'jpg-to-svg',
+        'heic-to-jpg', 'image-to-ico', 'png-to-pdf',
+        'image-splitter', 'resize-in-kb', 'pixelate-image',
+        'blur-face', 'html-to-image',
+    );
+}
+
+/**
  * On activation, add CORS headers for uploads so RelahConvert can fetch images.
  */
 function relahconvert_activate() {
     $uploads_dir = wp_upload_dir();
-    $htaccess = $uploads_dir['basedir'] . '/.htaccess';
+    $basedir = $uploads_dir['basedir'];
+    $htaccess = $basedir . '/.htaccess';
     $marker = '# BEGIN RelahConvert CORS';
     $rule = $marker . "\n<IfModule mod_headers.c>\nHeader set Access-Control-Allow-Origin \"https://relahconvert.com\"\n</IfModule>\n# END RelahConvert CORS\n";
 
+    if ( ! wp_is_writable( $basedir ) ) {
+        return;
+    }
+
     if ( file_exists( $htaccess ) ) {
-        $content = file_get_contents( $htaccess );
+        $content = file_get_contents( $htaccess ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
         if ( strpos( $content, $marker ) === false ) {
-            file_put_contents( $htaccess, $rule . $content );
+            file_put_contents( $htaccess, $rule . $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
         }
     } else {
-        file_put_contents( $htaccess, $rule );
+        file_put_contents( $htaccess, $rule ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
     }
 }
 register_activation_hook( __FILE__, 'relahconvert_activate' );
@@ -48,10 +71,11 @@ register_activation_hook( __FILE__, 'relahconvert_activate' );
 function relahconvert_deactivate() {
     $uploads_dir = wp_upload_dir();
     $htaccess = $uploads_dir['basedir'] . '/.htaccess';
-    if ( file_exists( $htaccess ) ) {
-        $content = file_get_contents( $htaccess );
+
+    if ( file_exists( $htaccess ) && wp_is_writable( $uploads_dir['basedir'] ) ) {
+        $content = file_get_contents( $htaccess ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
         $content = preg_replace( '/# BEGIN RelahConvert CORS.*?# END RelahConvert CORS\n?/s', '', $content );
-        file_put_contents( $htaccess, $content );
+        file_put_contents( $htaccess, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
     }
 }
 register_deactivation_hook( __FILE__, 'relahconvert_deactivate' );
@@ -97,9 +121,6 @@ function relahconvert_media_row_actions( $actions, $post ) {
         return $actions;
     }
 
-    $mime = get_post_mime_type( $post->ID );
-    $convert_tool = relahconvert_get_convert_tool( $mime );
-
     $image_url = wp_get_attachment_url( $post->ID );
     $actions['relahconvert_compress'] = sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
@@ -134,81 +155,13 @@ function relahconvert_media_row_actions( $actions, $post ) {
 add_filter( 'media_row_actions', 'relahconvert_media_row_actions', 10, 2 );
 
 /**
- * Add buttons to attachment details (list view / edit more details page).
- * Grid view modal is handled by admin.js Backbone override.
+ * Grid view modal buttons are handled entirely by admin.js.
+ * We skip the PHP attachment_fields filter for AJAX requests to avoid duplicates.
  */
 function relahconvert_attachment_fields( $form_fields, $post ) {
-    if ( ! wp_attachment_is_image( $post->ID ) ) {
+    if ( wp_doing_ajax() || ! wp_attachment_is_image( $post->ID ) ) {
         return $form_fields;
     }
-
-    // Skip in grid view modal — admin.js handles that
-    if ( wp_doing_ajax() ) {
-        return $form_fields;
-    }
-
-    $mime = get_post_mime_type( $post->ID );
-    $image_url = wp_get_attachment_url( $post->ID );
-
-    $buttons = '<div class="relahconvert-buttons">';
-    $buttons .= sprintf(
-        '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-compress">%s</a>',
-        esc_url( relahconvert_tool_url( 'compress', $image_url ) ),
-        esc_html__( 'Compress', 'relahconvert-image-tools' )
-    );
-
-    $buttons .= sprintf(
-        '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-watermark">%s</a>',
-        esc_url( relahconvert_tool_url( 'watermark', $image_url ) ),
-        esc_html__( 'Watermark', 'relahconvert-image-tools' )
-    );
-
-    $buttons .= sprintf(
-        '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-resize">%s</a>',
-        esc_url( relahconvert_tool_url( 'resize', $image_url ) ),
-        esc_html__( 'Resize', 'relahconvert-image-tools' )
-    );
-
-    $buttons .= sprintf(
-        '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-remove-bg">%s</a>',
-        esc_url( relahconvert_tool_url( 'remove-background', $image_url ) ),
-        esc_html__( 'Remove BG', 'relahconvert-image-tools' )
-    );
-
-    // More Tools dropdown
-    $convert_tool = relahconvert_get_convert_tool( $mime );
-    $more_tools = array(
-        array( 'tool' => $convert_tool ? $convert_tool : 'jpg-to-png', 'label' => __( 'Convert', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'crop',           'label' => __( 'Crop', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'rotate',         'label' => __( 'Rotate', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'flip',           'label' => __( 'Flip', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'grayscale',      'label' => __( 'Grayscale', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'round-corners',  'label' => __( 'Round Corners', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'jpg-to-pdf',     'label' => __( 'Image to PDF', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'meme-generator', 'label' => __( 'Meme Generator', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'merge-images',   'label' => __( 'Merge Images', 'relahconvert-image-tools' ) ),
-        array( 'tool' => 'passport-photo', 'label' => __( 'Passport Photo', 'relahconvert-image-tools' ) ),
-    );
-
-    $buttons .= '<div class="relahconvert-more-wrap" style="position:relative;display:inline-block;">';
-    $buttons .= '<button type="button" class="button relahconvert-btn relahconvert-btn-more" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'block\'?\'none\':\'block\'" style="margin-top:4px;">' . esc_html__( 'More Tools', 'relahconvert-image-tools' ) . ' &#9660;</button>';
-    $buttons .= '<div class="relahconvert-more-dropdown" style="display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #dcdcde;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;min-width:160px;margin-top:4px;max-height:300px;overflow-y:auto;">';
-    foreach ( $more_tools as $tool ) {
-        $buttons .= sprintf(
-            '<a href="%s" target="_blank" rel="noopener" style="display:block;padding:8px 14px;color:#1d2327;text-decoration:none;font-size:13px;border-bottom:1px solid #f0f0f1;white-space:nowrap;" onmouseover="this.style.background=\'#f0f6fc\'" onmouseout="this.style.background=\'#fff\'">%s</a>',
-            esc_url( relahconvert_tool_url( $tool['tool'], $image_url ) ),
-            esc_html( $tool['label'] )
-        );
-    }
-    $buttons .= '</div></div>';
-
-    $buttons .= '</div>';
-
-    $form_fields['relahconvert'] = array(
-        'label' => __( 'RelahConvert', 'relahconvert-image-tools' ),
-        'input' => 'html',
-        'html'  => $buttons,
-    );
 
     return $form_fields;
 }
@@ -254,7 +207,7 @@ function relahconvert_settings_page() {
 
         <div class="relahconvert-settings-card">
             <h2><?php esc_html_e( 'Available Tools', 'relahconvert-image-tools' ); ?></h2>
-            <p><?php esc_html_e( 'RelahConvert provides free image tools. Most tools process images directly in your browser — your files stay on your device. Some tools like Remove Background use AI processing on a server.', 'relahconvert-image-tools' ); ?></p>
+            <p><?php esc_html_e( 'RelahConvert provides free image tools. Most tools process images directly in your browser. Some tools like Remove Background use server-side AI processing.', 'relahconvert-image-tools' ); ?></p>
 
             <table class="widefat relahconvert-tools-table">
                 <thead>
@@ -265,76 +218,31 @@ function relahconvert_settings_page() {
                     </tr>
                 </thead>
                 <tbody>
+                    <?php
+                    $tools = array(
+                        array( 'compress',          __( 'Compress Image', 'relahconvert-image-tools' ),    __( 'Reduce file size of JPG, PNG, and WebP images while maintaining quality.', 'relahconvert-image-tools' ) ),
+                        array( 'resize',            __( 'Resize Image', 'relahconvert-image-tools' ),      __( 'Resize images by pixels or percentage.', 'relahconvert-image-tools' ) ),
+                        array( 'remove-background', __( 'Remove Background', 'relahconvert-image-tools' ), __( 'Remove image backgrounds with AI.', 'relahconvert-image-tools' ) ),
+                        array( 'jpg-to-png',        __( 'Convert Formats', 'relahconvert-image-tools' ),   __( 'Convert between JPG, PNG, WebP, GIF, BMP, TIFF, SVG, and more.', 'relahconvert-image-tools' ) ),
+                        array( 'crop',              __( 'Crop Image', 'relahconvert-image-tools' ),        __( 'Crop images with exact pixel dimensions.', 'relahconvert-image-tools' ) ),
+                        array( 'rotate',            __( 'Rotate Image', 'relahconvert-image-tools' ),      __( 'Rotate images by any angle.', 'relahconvert-image-tools' ) ),
+                        array( 'flip',              __( 'Flip Image', 'relahconvert-image-tools' ),        __( 'Flip images horizontally or vertically.', 'relahconvert-image-tools' ) ),
+                        array( 'watermark',         __( 'Watermark Image', 'relahconvert-image-tools' ),   __( 'Add text or image watermarks to your photos.', 'relahconvert-image-tools' ) ),
+                        array( 'grayscale',         __( 'Grayscale', 'relahconvert-image-tools' ),         __( 'Convert images to black and white.', 'relahconvert-image-tools' ) ),
+                        array( 'round-corners',     __( 'Round Corners', 'relahconvert-image-tools' ),     __( 'Add rounded corners to images.', 'relahconvert-image-tools' ) ),
+                        array( 'jpg-to-pdf',        __( 'Image to PDF', 'relahconvert-image-tools' ),      __( 'Convert JPG or PNG images to PDF documents.', 'relahconvert-image-tools' ) ),
+                        array( 'meme-generator',    __( 'Meme Generator', 'relahconvert-image-tools' ),    __( 'Create memes with custom text on images.', 'relahconvert-image-tools' ) ),
+                        array( 'merge-images',      __( 'Merge Images', 'relahconvert-image-tools' ),      __( 'Combine multiple images into one.', 'relahconvert-image-tools' ) ),
+                        array( 'passport-photo',    __( 'Passport Photo', 'relahconvert-image-tools' ),    __( 'Create passport-sized photos for any country.', 'relahconvert-image-tools' ) ),
+                    );
+                    foreach ( $tools as $tool ) :
+                    ?>
                     <tr>
-                        <td><strong><?php esc_html_e( 'Compress Image', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Reduce file size of JPG, PNG, and WebP images while maintaining quality.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/compress' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
+                        <td><strong><?php echo esc_html( $tool[1] ); ?></strong></td>
+                        <td><?php echo esc_html( $tool[2] ); ?></td>
+                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/' . $tool[0] ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
                     </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Resize Image', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Resize images by pixels or percentage.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/resize' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Remove Background', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Remove image backgrounds with AI.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/remove-background' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Convert Formats', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Convert between JPG, PNG, WebP, GIF, BMP, TIFF, SVG, and more.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/jpg-to-png' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Crop Image', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Crop images with exact pixel dimensions.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/crop' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Rotate Image', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Rotate images by any angle.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/rotate' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Flip Image', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Flip images horizontally or vertically.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/flip' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Watermark Image', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Add text or image watermarks to your photos.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/watermark' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Grayscale', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Convert images to black and white.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/grayscale' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Round Corners', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Add rounded corners to images.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/round-corners' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Image to PDF', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Convert JPG or PNG images to PDF documents.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/jpg-to-pdf' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Meme Generator', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Create memes with custom text on images.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/meme-generator' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Merge Images', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Combine multiple images into one.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/merge-images' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
-                    <tr>
-                        <td><strong><?php esc_html_e( 'Passport Photo', 'relahconvert-image-tools' ); ?></strong></td>
-                        <td><?php esc_html_e( 'Create passport-sized photos for any country.', 'relahconvert-image-tools' ); ?></td>
-                        <td><a href="<?php echo esc_url( RELAHCONVERT_BASE_URL . '/passport-photo' ); ?>" target="_blank" rel="noopener" class="button"><?php esc_html_e( 'Open', 'relahconvert-image-tools' ); ?></a></td>
-                    </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
@@ -343,11 +251,11 @@ function relahconvert_settings_page() {
             <h2><?php esc_html_e( 'How It Works', 'relahconvert-image-tools' ); ?></h2>
             <ol>
                 <li><?php esc_html_e( 'Go to your Media Library.', 'relahconvert-image-tools' ); ?></li>
-                <li><?php esc_html_e( 'Click any RelahConvert action button (Compress, Convert, Resize, Remove BG) on an image.', 'relahconvert-image-tools' ); ?></li>
+                <li><?php esc_html_e( 'Click any RelahConvert action button (Compress, Watermark, Resize, Remove BG, or More Tools) on an image.', 'relahconvert-image-tools' ); ?></li>
                 <li><?php esc_html_e( 'The tool opens with your image auto-loaded — process it with one click.', 'relahconvert-image-tools' ); ?></li>
                 <li><?php esc_html_e( 'Click "Send to WordPress" to add the processed image directly to your Media Library.', 'relahconvert-image-tools' ); ?></li>
             </ol>
-            <p><em><?php esc_html_e( 'Most processing happens in your browser. Your files stay private and secure.', 'relahconvert-image-tools' ); ?></em></p>
+            <p><em><?php esc_html_e( 'Most processing happens in your browser via RelahConvert.com. Your files stay private and secure.', 'relahconvert-image-tools' ); ?></em></p>
         </div>
 
         <p class="relahconvert-footer">
@@ -378,11 +286,11 @@ function relahconvert_plugin_action_links( $links ) {
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'relahconvert_plugin_action_links' );
 
 /**
- * Generate a temporary upload token (valid for 30 minutes).
+ * Generate a temporary upload token (valid for 30 minutes, multi-use).
  */
 function relahconvert_generate_token() {
     $token = wp_generate_password( 32, false );
-    set_transient( 'relahconvert_token_' . $token, get_current_user_id(), 30 * MINUTE_IN_SECONDS );
+    set_transient( 'relahconvert_token_' . sanitize_key( $token ), get_current_user_id(), 30 * MINUTE_IN_SECONDS );
     return $token;
 }
 
@@ -390,6 +298,11 @@ function relahconvert_generate_token() {
  * Build tool URL with auth params for sending images back.
  */
 function relahconvert_tool_url( $tool, $image_url ) {
+    $allowed = relahconvert_allowed_tools();
+    if ( ! in_array( $tool, $allowed, true ) ) {
+        return '';
+    }
+
     $token = relahconvert_generate_token();
     $params = http_build_query( array(
         'url'    => $image_url,
@@ -406,35 +319,38 @@ function relahconvert_register_rest_routes() {
     register_rest_route( 'relahconvert/v1', '/upload', array(
         'methods'             => 'POST',
         'callback'            => 'relahconvert_handle_upload',
-        'permission_callback' => '__return_true',
+        'permission_callback' => 'relahconvert_upload_permission_check',
     ) );
 }
 add_action( 'rest_api_init', 'relahconvert_register_rest_routes' );
 
 /**
- * Handle image upload from RelahConvert.
+ * Permission callback for the upload endpoint.
+ * Validates the token and sets the current user.
  */
-function relahconvert_handle_upload( $request ) {
-    // Allow CORS from RelahConvert.
-    header( 'Access-Control-Allow-Origin: https://relahconvert.com' );
-    header( 'Access-Control-Allow-Methods: POST, OPTIONS' );
-    header( 'Access-Control-Allow-Headers: Content-Type' );
-
-    $token = $request->get_param( 'token' );
+function relahconvert_upload_permission_check( $request ) {
+    $token = sanitize_text_field( $request->get_param( 'token' ) );
     if ( ! $token ) {
         return new WP_Error( 'missing_token', 'Authentication token is required.', array( 'status' => 401 ) );
     }
 
-    $user_id = get_transient( 'relahconvert_token_' . $token );
+    $user_id = get_transient( 'relahconvert_token_' . sanitize_key( $token ) );
     if ( ! $user_id ) {
         return new WP_Error( 'invalid_token', 'Token is invalid or expired.', array( 'status' => 401 ) );
     }
 
-    // Set the current user for upload permissions.
     wp_set_current_user( $user_id );
-    if ( ! current_user_can( 'upload_files' ) ) {
-        return new WP_Error( 'no_permission', 'User cannot upload files.', array( 'status' => 403 ) );
-    }
+    return current_user_can( 'upload_files' );
+}
+
+/**
+ * Handle image upload from RelahConvert.
+ */
+function relahconvert_handle_upload( $request ) {
+    // CORS headers for cross-origin upload from RelahConvert.
+    header( 'Access-Control-Allow-Origin: https://relahconvert.com' );
+    header( 'Access-Control-Allow-Methods: POST, OPTIONS' );
+    header( 'Access-Control-Allow-Headers: Content-Type' );
 
     $files = $request->get_file_params();
     if ( empty( $files['file'] ) ) {
@@ -450,12 +366,10 @@ function relahconvert_handle_upload( $request ) {
         return $attachment_id;
     }
 
-    // Token is kept alive for multiple uses until it expires (30 min).
-
     return rest_ensure_response( array(
-        'success'       => true,
+        'success'        => true,
         'attachment_id'  => $attachment_id,
-        'url'           => wp_get_attachment_url( $attachment_id ),
+        'url'            => wp_get_attachment_url( $attachment_id ),
     ) );
 }
 
@@ -463,16 +377,18 @@ function relahconvert_handle_upload( $request ) {
  * Handle CORS preflight for the upload endpoint.
  */
 function relahconvert_cors_preflight() {
-    if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS' ) {
-        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
-        if ( strpos( $request_uri, 'relahconvert/v1/upload' ) !== false ) {
-            header( 'Access-Control-Allow-Origin: https://relahconvert.com' );
-            header( 'Access-Control-Allow-Methods: POST, OPTIONS' );
-            header( 'Access-Control-Allow-Headers: Content-Type' );
-            header( 'Access-Control-Max-Age: 86400' );
-            status_header( 204 );
-            exit;
-        }
+    if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'OPTIONS' !== $_SERVER['REQUEST_METHOD'] ) {
+        return;
+    }
+
+    $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+    if ( strpos( $request_uri, 'relahconvert/v1/upload' ) !== false ) {
+        header( 'Access-Control-Allow-Origin: https://relahconvert.com' );
+        header( 'Access-Control-Allow-Methods: POST, OPTIONS' );
+        header( 'Access-Control-Allow-Headers: Content-Type' );
+        header( 'Access-Control-Max-Age: 86400' );
+        status_header( 204 );
+        exit;
     }
 }
 add_action( 'init', 'relahconvert_cors_preflight' );
