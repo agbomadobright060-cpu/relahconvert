@@ -450,8 +450,7 @@ function relahconvert_handle_upload( $request ) {
         return $attachment_id;
     }
 
-    // Delete the token after successful use.
-    delete_transient( 'relahconvert_token_' . $token );
+    // Token is kept alive for multiple uses until it expires (30 min).
 
     return rest_ensure_response( array(
         'success'       => true,
