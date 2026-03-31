@@ -2,7 +2,6 @@ import { injectHeader } from './core/header.js'
 import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
-import { createWpUploadButton } from './core/wp-upload.js'
 injectHreflang('compress')
 
 const bg = '#F2F2F2'
@@ -320,7 +319,6 @@ document.querySelector('#app').innerHTML = `
     <button id="compressBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:var(--btn-disabled); color:var(--text-on-dark-btn); font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.compress_btn}</button>
     <div id="resultBar" style="display:none; margin-bottom:12px;"></div>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:var(--btn-dark); text-decoration:none; color:var(--text-on-dark-btn); font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
-    <div id="wpUploadContainer"></div>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -340,49 +338,7 @@ const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 let selectedFiles = [], currentDownloadUrl = null, compressedBlobs = []
 
-// Auto-load image from ?url= parameter (e.g. from WordPress plugin)
-;(function loadFromUrlParam() {
-  const params = new URLSearchParams(window.location.search)
-  const imgUrl = params.get('url')
-  if (!imgUrl) return
-  const img = new Image()
-  img.crossOrigin = 'anonymous'
-  img.onload = () => {
-    try {
-      const c = document.createElement('canvas')
-      c.width = img.naturalWidth; c.height = img.naturalHeight
-      c.getContext('2d').drawImage(img, 0, 0)
-      c.toBlob(blob => {
-        if (!blob) return
-        const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-        const file = new File([blob], name, { type: blob.type || 'image/jpeg' })
-        selectedFiles = [file]
-        renderPreviews()
-        setIdle()
-      }, 'image/jpeg', 0.95)
-    } catch (e) {
-      // CORS blocked canvas — fall back to direct fetch
-      fetch(imgUrl).then(r => r.blob()).then(blob => {
-        const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-        const file = new File([blob], name, { type: blob.type })
-        selectedFiles = [file]
-        renderPreviews()
-        setIdle()
-      }).catch(() => {})
-    }
-  }
-  img.onerror = () => {
-    // img tag failed — try direct fetch
-    fetch(imgUrl).then(r => r.blob()).then(blob => {
-      const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-      const file = new File([blob], name, { type: blob.type })
-      selectedFiles = [file]
-      renderPreviews()
-      setIdle()
-    }).catch(() => {})
-  }
-  img.src = imgUrl
-})()
+// Auto-load from ?url= is handled globally by wp-upload.js via header.js
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -600,14 +556,6 @@ compressBtn.addEventListener('click', async () => {
       showResultBar(totalOriginal, totalOutput)
     }
     setIdle(); fileInput.value = ''
-    // Show "Send to WordPress" button if opened from WP plugin
-    const wpContainer = document.getElementById('wpUploadContainer')
-    wpContainer.innerHTML = ''
-    const wpBtn = createWpUploadButton(
-      () => compressedBlobs.length === 1 ? compressedBlobs[0].blob : null,
-      () => compressedBlobs.length === 1 ? compressedBlobs[0].name : 'compressed-image.jpg'
-    )
-    if (wpBtn) wpContainer.appendChild(wpBtn)
   } catch (err) {
     alert(err?.message || 'Compression error')
     if (selectedFiles.length) setIdle(); else setDisabled()

@@ -2,7 +2,6 @@ import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
 import { injectHeader } from './core/header.js'
 import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
-import { createWpUploadButton } from './core/wp-upload.js'
 injectHreflang('resize')
 
 const bg = '#F2F2F2'
@@ -351,7 +350,6 @@ document.querySelector('#app').innerHTML = `
     </div>
     <button id="resizeBtn" disabled style="width:100%; padding:13px; border:none; border-radius:10px; background:var(--btn-disabled); color:var(--text-on-dark-btn); font-size:15px; font-family:'Fraunces',serif; font-weight:700; cursor:not-allowed; opacity:0.7; margin-bottom:10px;">${t.resize_btn}</button>
     <a id="downloadLink" style="display:none; width:100%; box-sizing:border-box; text-align:center; padding:13px; border-radius:10px; background:var(--btn-dark); text-decoration:none; color:var(--text-on-dark-btn); font-family:'Fraunces',serif; font-weight:700; font-size:15px;"></a>
-    <div id="wpUploadContainer"></div>
     <div id="nextSteps" style="display:none; margin-top:20px;">
       <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">${t.whats_next}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -379,31 +377,7 @@ const customPct = document.getElementById('customPct')
 
 let selectedFiles = [], currentDownloadUrl = null, activeTab = 'pixels', selectedPct = null, resizedBlobs = []
 
-// Auto-load image from ?url= parameter (e.g. from WordPress plugin)
-;(function loadFromUrlParam() {
-  const params = new URLSearchParams(window.location.search)
-  const imgUrl = params.get('url')
-  if (!imgUrl) return
-  function loadFile(blob) {
-    const name = imgUrl.split('/').pop().split('?')[0] || 'image.jpg'
-    const file = new File([blob], name, { type: blob.type || 'image/jpeg' })
-    selectedFiles = [file]
-    renderPreviews()
-    setIdle()
-  }
-  const img = new Image()
-  img.crossOrigin = 'anonymous'
-  img.onload = () => {
-    try {
-      const c = document.createElement('canvas')
-      c.width = img.naturalWidth; c.height = img.naturalHeight
-      c.getContext('2d').drawImage(img, 0, 0)
-      c.toBlob(blob => { if (blob) loadFile(blob) }, 'image/jpeg', 0.95)
-    } catch (e) { fetch(imgUrl).then(r => r.blob()).then(loadFile).catch(() => {}) }
-  }
-  img.onerror = () => { fetch(imgUrl).then(r => r.blob()).then(loadFile).catch(() => {}) }
-  img.src = imgUrl
-})()
+// Auto-load from ?url= is handled globally by wp-upload.js via header.js
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -591,13 +565,6 @@ resizeBtn.addEventListener('click', async () => {
       downloadLink.textContent = `${t.download_zip} (${formatSize(zipBlob.size)})`
     }
     buildNextSteps(); setIdle(); fileInput.value = ''
-    const wpContainer = document.getElementById('wpUploadContainer')
-    wpContainer.innerHTML = ''
-    const wpBtn = createWpUploadButton(
-      () => resizedBlobs.length === 1 ? resizedBlobs[0].blob : null,
-      () => resizedBlobs.length === 1 ? resizedBlobs[0].name : 'resized-image.jpg'
-    )
-    if (wpBtn) wpContainer.appendChild(wpBtn)
   } catch (err) {
     alert(err?.message || 'Resize error')
     if (selectedFiles.length) setIdle(); else setDisabled()
