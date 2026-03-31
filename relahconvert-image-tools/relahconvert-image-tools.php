@@ -110,7 +110,7 @@ function relahconvert_media_row_actions( $actions, $post ) {
 
     $actions['relahconvert_watermark'] = sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="relahconvert-action" title="%s">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/watermark' ),
+        esc_url( relahconvert_tool_url( 'watermark', $image_url ) ),
         esc_attr__( 'Watermark with RelahConvert', 'relahconvert-image-tools' ),
         esc_html__( 'Watermark', 'relahconvert-image-tools' )
     );
@@ -153,7 +153,7 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
 
     $buttons .= sprintf(
         '<a href="%s" target="_blank" rel="noopener" class="button relahconvert-btn relahconvert-btn-watermark">%s</a>',
-        esc_url( RELAHCONVERT_BASE_URL . '/watermark' ),
+        esc_url( relahconvert_tool_url( 'watermark', $image_url ) ),
         esc_html__( 'Watermark', 'relahconvert-image-tools' )
     );
 
@@ -190,7 +190,7 @@ function relahconvert_attachment_fields( $form_fields, $post ) {
     foreach ( $more_tools as $tool ) {
         $buttons .= sprintf(
             '<a href="%s" target="_blank" rel="noopener" style="display:block;padding:8px 14px;color:#1d2327;text-decoration:none;font-size:13px;border-bottom:1px solid #f0f0f1;white-space:nowrap;" onmouseover="this.style.background=\'#f0f6fc\'" onmouseout="this.style.background=\'#fff\'">%s</a>',
-            esc_url( RELAHCONVERT_BASE_URL . '/' . $tool['tool'] ),
+            esc_url( relahconvert_tool_url( $tool['tool'], $image_url ) ),
             esc_html( $tool['label'] )
         );
     }
