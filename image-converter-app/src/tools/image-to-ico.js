@@ -58,7 +58,7 @@ if (document.head) {
 document.title = `${toolName} Converter Free | No Upload — RelahConvert`
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 const SIZES = [16, 32, 48, 64, 128, 256]
-let selectedSize = 32
+let selectedW = 32, selectedH = 32
 let files = []
 let activeFileIndex = 0
 
@@ -77,11 +77,14 @@ document.querySelector('#app').innerHTML = `
     <div id="sizeArea" style="display:none;margin-bottom:16px;">
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">ICO SIZE</div>
       <div class="size-grid" id="sizeGrid">
-        ${SIZES.map(s => `<button class="size-btn${s===selectedSize?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
-        <div style="display:flex;align-items:center;gap:6px;">
-          <input type="number" class="custom-size-input" id="customSize" min="1" max="512" placeholder="Custom" />
-          <span style="font-size:12px;color:var(--text-tertiary);">px</span>
-        </div>
+        ${SIZES.map(s => `<button class="size-btn${s===selectedW && s===selectedH?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;">
+        <span style="font-size:12px;color:var(--text-secondary);font-weight:600;">Custom:</span>
+        <input type="number" class="custom-size-input" id="customW" min="1" max="512" placeholder="W" />
+        <span style="font-size:12px;color:var(--text-tertiary);">×</span>
+        <input type="number" class="custom-size-input" id="customH" min="1" max="512" placeholder="H" />
+        <span style="font-size:12px;color:var(--text-tertiary);">px</span>
       </div>
       <div id="icoPreview" style="margin-top:10px;"></div>
     </div>
@@ -98,37 +101,46 @@ const sizeArea     = document.getElementById('sizeArea')
 const convertBtn   = document.getElementById('convertBtn')
 const downloadLink = document.getElementById('downloadLink')
 const icoPreview   = document.getElementById('icoPreview')
-const customSize   = document.getElementById('customSize')
+const customW      = document.getElementById('customW')
+const customH      = document.getElementById('customH')
 
-// Size selection — single select
+// Size selection — single select (square presets)
 document.getElementById('sizeGrid').addEventListener('click', e => {
   const btn = e.target.closest('.size-btn')
   if (!btn) return
-  selectedSize = parseInt(btn.dataset.size)
-  customSize.value = ''
-  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.size) === selectedSize))
+  const s = parseInt(btn.dataset.size)
+  selectedW = s; selectedH = s
+  customW.value = ''; customH.value = ''
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.size) === s))
   renderIcoPreview()
 })
 
-customSize.addEventListener('input', () => {
-  const v = parseInt(customSize.value)
-  if (v >= 1 && v <= 512) {
-    selectedSize = v
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'))
-    renderIcoPreview()
-  }
-})
+// Custom W×H inputs
+function onCustomInput() {
+  const w = parseInt(customW.value)
+  const h = parseInt(customH.value)
+  if (w >= 1 && w <= 512) selectedW = w
+  if (h >= 1 && h <= 512) selectedH = h
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'))
+  renderIcoPreview()
+}
+customW.addEventListener('input', onCustomInput)
+customH.addEventListener('input', onCustomInput)
 
 function renderIcoPreview() {
   if (!files.length || !files[activeFileIndex]) { icoPreview.innerHTML = ''; return }
   const entry = files[activeFileIndex]
   if (!entry.img) { icoPreview.innerHTML = ''; return }
-  const s = selectedSize
+  const w = selectedW, h = selectedH
   const c = document.createElement('canvas')
-  c.width = s; c.height = s
-  c.getContext('2d').drawImage(entry.img, 0, 0, s, s)
-  const displaySize = Math.min(s, 128)
-  icoPreview.innerHTML = `<div class="ico-preview"><img src="${c.toDataURL()}" width="${displaySize}" height="${displaySize}" style="display:block;image-rendering:${s <= 64 ? 'pixelated' : 'auto'};" /></div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${entry.file.name} — ${s}×${s}px</div>`
+  c.width = w; c.height = h
+  c.getContext('2d').drawImage(entry.img, 0, 0, w, h)
+  // Display at actual size, scale up small ones for visibility (min 48px)
+  const scale = Math.max(1, Math.min(3, 48 / Math.min(w, h)))
+  const displayW = Math.min(Math.round(w * scale), 256)
+  const displayH = Math.min(Math.round(h * scale), 256)
+  const pixelated = Math.max(w, h) <= 64
+  icoPreview.innerHTML = `<div class="ico-preview"><img src="${c.toDataURL()}" width="${displayW}" height="${displayH}" style="display:block;image-rendering:${pixelated ? 'pixelated' : 'auto'};" /></div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${entry.file.name} — ${w}×${h}px</div>`
 }
 
 function addFiles(newFiles) {
@@ -224,19 +236,18 @@ convertBtn.addEventListener('click', async () => {
   convertBtn.disabled = true
   convertBtn.textContent = 'Converting...'
 
-  const s = selectedSize
+  const w = selectedW, h = selectedH
   const results = []
 
   for (const entry of files) {
-    // Wait for image to load if not ready
     if (!entry.img) {
       await new Promise(resolve => {
         const check = setInterval(() => { if (entry.img) { clearInterval(check); resolve() } }, 100)
       })
     }
     const c = document.createElement('canvas')
-    c.width = s; c.height = s
-    c.getContext('2d').drawImage(entry.img, 0, 0, s, s)
+    c.width = w; c.height = h
+    c.getContext('2d').drawImage(entry.img, 0, 0, w, h)
     const blob = buildIco([c])
     const name = entry.file.name.replace(/\.[^.]+$/, '') + '.ico'
     results.push({ blob, name })
@@ -246,7 +257,7 @@ convertBtn.addEventListener('click', async () => {
     const url = URL.createObjectURL(results[0].blob)
     downloadLink.href = url
     downloadLink.download = results[0].name
-    downloadLink.textContent = `${dlBtn} ${results[0].name} (${s}×${s}px)`
+    downloadLink.textContent = `${dlBtn} ${results[0].name} (${w}×${h}px)`
     downloadLink.style.display = 'block'
     if (window.showReviewPrompt) window.showReviewPrompt()
     downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
@@ -258,7 +269,7 @@ convertBtn.addEventListener('click', async () => {
     const url = URL.createObjectURL(zipBlob)
     downloadLink.href = url
     downloadLink.download = 'ico-files.zip'
-    downloadLink.textContent = `${dlZipBtn} (${results.length} files, ${s}×${s}px)`
+    downloadLink.textContent = `${dlZipBtn} (${results.length} files, ${w}×${h}px)`
     downloadLink.style.display = 'block'
     if (window.showReviewPrompt) window.showReviewPrompt()
     downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
