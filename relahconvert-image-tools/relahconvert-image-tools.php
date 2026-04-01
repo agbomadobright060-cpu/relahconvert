@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: RelahConvert Image Tools
- * Plugin URI: https://relahconvert.com
+ * Plugin URI: https://relahconvert.com/wordpress
  * Description: Free image tools powered by RelahConvert — compress, convert, resize, watermark, and remove backgrounds directly from your WordPress media library.
  * Version: 1.0.0
  * Requires at least: 5.0
