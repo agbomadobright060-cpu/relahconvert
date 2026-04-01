@@ -8,10 +8,11 @@ const t = getT()
 const bg = 'var(--bg-page)'
 const toolName  = (t.nav_short && t.nav_short['image-to-ico']) || 'Image to ICO'
 const seoData   = t.seo && t.seo['image-to-ico']
-const descText  = seoData ? seoData.h2a : 'Convert any image to ICO favicon free. No upload. Files never leave your device.'
-const selectLbl = t.select_images || 'Select Image'
-const dropHint  = t.drop_hint || 'or drop image anywhere'
+const descText  = seoData ? seoData.h2a : 'Convert any image to ICO favicon free. Batch process multiple images. No upload.'
+const selectLbl = t.select_images || 'Select Images'
+const dropHint  = t.drop_hint || 'or drop images anywhere'
 const dlBtn     = t.download || 'Download'
+const dlZipBtn  = t.download_zip || 'Download All as ZIP'
 
 if (document.head) {
   document.body.style.cssText = `margin:0;padding:0;min-height:100vh;background:${bg};`
@@ -25,27 +26,30 @@ if (document.head) {
     .download-btn{display:none;width:100%;box-sizing:border-box;text-align:center;padding:13px;border-radius:10px;background:var(--btn-dark);text-decoration:none;color:var(--text-on-dark-btn);font-family:'Fraunces',serif;font-weight:700;font-size:15px;margin-bottom:10px;}
     .download-btn:hover{background:var(--btn-dark-hover);}
     .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;}
-    .size-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:16px;}
-    .size-btn{padding:10px 0;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all 0.15s;}
+    .size-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+    .size-btn{padding:8px 14px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all 0.15s;}
     .size-btn.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
-    .preview-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+    .custom-size-input{width:60px;padding:8px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-surface);text-align:center;outline:none;}
+    .custom-size-input:focus{border-color:var(--accent);}
     .ico-preview{background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%);background-size:12px 12px;border-radius:8px;display:inline-block;padding:8px;}
+    .preview-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+    .preview-card{background:var(--bg-card);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);position:relative;width:100px;}
+    .preview-card img{width:100%;height:80px;object-fit:cover;display:block;}
+    .preview-card .fname{font-size:10px;color:var(--text-tertiary);padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .preview-card .remove-btn{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .preview-card .remove-btn:hover{background:var(--accent);}
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
     .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
     .seo-section ol{padding-left:20px;margin:0 0 12px;}
     .seo-section ol li{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
     .seo-section p{font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;}
-    
-    
-    
-    
     .seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
     .seo-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
     .seo-link:hover{border-color:var(--accent);color:var(--accent);}
-    .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
-    .seo-section .faq-item p { margin:0; }
+    .seo-section .faq-item{background:var(--bg-card);border-radius:12px;padding:18px 20px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+    .seo-section .faq-item h4{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 6px;}
+    .seo-section .faq-item p{margin:0;}
   `
   document.head.appendChild(style)
 }
@@ -54,6 +58,7 @@ document.title = `${toolName} Converter Free | No Upload — RelahConvert`
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 const SIZES = [16, 32, 48, 64, 128, 256]
 let selectedSize = 32
+let files = []
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
@@ -65,18 +70,18 @@ document.querySelector('#app').innerHTML = `
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);margin-left:12px;">${dropHint}</span>
     </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none;" />
-    <div id="previewArea" style="display:none;margin-bottom:16px;">
-      <div class="preview-row">
-        <div><img id="previewImg" src="" alt="preview" style="max-width:120px;max-height:120px;border-radius:8px;display:block;" /></div>
-        <div id="icoPreviews" class="ico-preview"></div>
-      </div>
-      <div style="margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.ico_sizes_label || 'ICO Size'}</div>
-        <div class="size-grid" id="sizeGrid">
-          ${SIZES.map(s => `<button class="size-btn${s===selectedSize?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
+    <div id="previewGrid" class="preview-grid" style="display:none;"></div>
+    <div id="sizeArea" style="display:none;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">ICO SIZE</div>
+      <div class="size-grid" id="sizeGrid">
+        ${SIZES.map(s => `<button class="size-btn${s===selectedSize?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" class="custom-size-input" id="customSize" min="1" max="512" placeholder="Custom" />
+          <span style="font-size:12px;color:var(--text-tertiary);">px</span>
         </div>
       </div>
+      <div id="icoPreview" style="margin-top:10px;"></div>
     </div>
     <button class="opt-btn" id="convertBtn" disabled>${t.convert_to_ico || 'Convert to ICO'}</button>
     <a class="download-btn" id="downloadLink">${dlBtn}</a>
@@ -86,47 +91,89 @@ document.querySelector('#app').innerHTML = `
 injectHeader()
 
 const fileInput    = document.getElementById('fileInput')
-const previewArea  = document.getElementById('previewArea')
-const previewImg   = document.getElementById('previewImg')
+const previewGrid  = document.getElementById('previewGrid')
+const sizeArea     = document.getElementById('sizeArea')
 const convertBtn   = document.getElementById('convertBtn')
 const downloadLink = document.getElementById('downloadLink')
-const icoPreviews  = document.getElementById('icoPreviews')
-let loadedImg = null
-let currentPreviewUrl = null
+const icoPreview   = document.getElementById('icoPreview')
+const customSize   = document.getElementById('customSize')
 
+// Size selection — single select
 document.getElementById('sizeGrid').addEventListener('click', e => {
   const btn = e.target.closest('.size-btn')
   if (!btn) return
   selectedSize = parseInt(btn.dataset.size)
+  customSize.value = ''
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.size) === selectedSize))
-  if (loadedImg) renderPreviews()
+  renderIcoPreview()
 })
 
-function renderPreviews() {
+customSize.addEventListener('input', () => {
+  const v = parseInt(customSize.value)
+  if (v >= 1 && v <= 512) {
+    selectedSize = v
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'))
+    renderIcoPreview()
+  }
+})
+
+function renderIcoPreview() {
+  if (!files.length) return
+  const img = files[0].img
+  if (!img) return
   const s = selectedSize
   const c = document.createElement('canvas')
   c.width = s; c.height = s
-  c.getContext('2d').drawImage(loadedImg, 0, 0, s, s)
-  icoPreviews.innerHTML = `<img src="${c.toDataURL()}" width="${Math.min(s,64)}" height="${Math.min(s,64)}" style="display:inline-block;image-rendering:pixelated;" title="${s}×${s}" />`
+  c.getContext('2d').drawImage(img, 0, 0, s, s)
+  // Show preview at actual size (capped at 128px for display)
+  const displaySize = Math.min(s, 128)
+  icoPreview.innerHTML = `<div class="ico-preview"><img src="${c.toDataURL()}" width="${displaySize}" height="${displaySize}" style="display:block;image-rendering:${s <= 64 ? 'pixelated' : 'auto'};" /></div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${s}×${s}px preview</div>`
 }
 
-function loadFile(file) {
-  if (!file || !file.type.startsWith('image/')) return
-  if (currentPreviewUrl) URL.revokeObjectURL(currentPreviewUrl)
-  const url = URL.createObjectURL(file)
-  currentPreviewUrl = url
-  const img = new Image()
-  img.onload = () => {
-    loadedImg = img; previewImg.src = url
-    previewArea.style.display = 'block'; convertBtn.disabled = false
-    downloadLink.style.display = 'none'; renderPreviews()
-  }
-  img.src = url
+function addFiles(newFiles) {
+  const arr = Array.from(newFiles).filter(f => f.type.startsWith('image/'))
+  arr.forEach(f => {
+    const url = URL.createObjectURL(f)
+    const entry = { file: f, url, img: null }
+    const img = new Image()
+    img.onload = () => {
+      entry.img = img
+      if (files.length === 1) renderIcoPreview()
+    }
+    img.src = url
+    files.push(entry)
+  })
+  renderPreviews()
+  sizeArea.style.display = 'block'
+  convertBtn.disabled = false
+  downloadLink.style.display = 'none'
 }
 
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); fileInput.value = '' })
+function renderPreviews() {
+  if (!files.length) { previewGrid.style.display = 'none'; return }
+  previewGrid.style.display = 'flex'
+  previewGrid.innerHTML = files.map((f, i) => `
+    <div class="preview-card">
+      <img src="${f.url}" alt="" />
+      <button class="remove-btn" data-index="${i}">×</button>
+      <div class="fname">${f.file.name}</div>
+    </div>
+  `).join('') + `<label for="fileInput" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100px;height:110px;border:2px dashed #CCC;border-radius:10px;cursor:pointer;color:#999;font-size:13px;gap:4px;"><span style="font-size:24px;">+</span><span>Add more</span></label>`
+
+  previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index)
+      URL.revokeObjectURL(files[idx].url)
+      files.splice(idx, 1)
+      renderPreviews()
+      if (!files.length) { sizeArea.style.display = 'none'; convertBtn.disabled = true; downloadLink.style.display = 'none' }
+    })
+  })
+}
+
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = '' })
 document.addEventListener('dragover', e => e.preventDefault())
-document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]) })
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files) })
 
 function buildIco(canvases) {
   const NUM = canvases.length
@@ -159,20 +206,53 @@ function buildIco(canvases) {
   return new Blob([buf], { type: 'image/x-icon' })
 }
 
-convertBtn.addEventListener('click', () => {
-  if (!loadedImg) return
+convertBtn.addEventListener('click', async () => {
+  if (!files.length) return
+  convertBtn.disabled = true
+  convertBtn.textContent = 'Converting...'
+
   const s = selectedSize
-  const c = document.createElement('canvas')
-  c.width = s; c.height = s
-  c.getContext('2d').drawImage(loadedImg, 0, 0, s, s)
-  const blob = buildIco([c])
-  if (downloadLink.href && downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href)
-  const url = URL.createObjectURL(blob)
-  downloadLink.href = url
-  downloadLink.download = 'favicon.ico'
-  downloadLink.textContent = `${dlBtn} favicon.ico (${s}×${s}px)`
-  downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
-  downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
+  const results = []
+
+  for (const entry of files) {
+    // Wait for image to load if not ready
+    if (!entry.img) {
+      await new Promise(resolve => {
+        const check = setInterval(() => { if (entry.img) { clearInterval(check); resolve() } }, 100)
+      })
+    }
+    const c = document.createElement('canvas')
+    c.width = s; c.height = s
+    c.getContext('2d').drawImage(entry.img, 0, 0, s, s)
+    const blob = buildIco([c])
+    const name = entry.file.name.replace(/\.[^.]+$/, '') + '.ico'
+    results.push({ blob, name })
+  }
+
+  if (results.length === 1) {
+    const url = URL.createObjectURL(results[0].blob)
+    downloadLink.href = url
+    downloadLink.download = results[0].name
+    downloadLink.textContent = `${dlBtn} ${results[0].name} (${s}×${s}px)`
+    downloadLink.style.display = 'block'
+    if (window.showReviewPrompt) window.showReviewPrompt()
+    downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
+  } else {
+    const JSZip = (await import('jszip')).default
+    const zip = new JSZip()
+    results.forEach(r => zip.file(r.name, r.blob))
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+    const url = URL.createObjectURL(zipBlob)
+    downloadLink.href = url
+    downloadLink.download = 'ico-files.zip'
+    downloadLink.textContent = `${dlZipBtn} (${results.length} files, ${s}×${s}px)`
+    downloadLink.style.display = 'block'
+    if (window.showReviewPrompt) window.showReviewPrompt()
+    downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
+  }
+
+  convertBtn.disabled = false
+  convertBtn.textContent = t.convert_to_ico || 'Convert to ICO'
 })
 
 ;(function injectSEO() {
