@@ -109,6 +109,12 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
       <div class="controls-col">
+        <div id="modeToggle" style="display:none;margin-bottom:12px;">
+          <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+            <button class="mode-btn active" data-mode="all" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+            <button class="mode-btn" data-mode="individual" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+          </div>
+        </div>
         <h3>Watermark Layers</h3>
         <div class="add-row">
           <button class="add-btn" id="addTextBtn">
@@ -142,6 +148,25 @@ injectHeader()
 let baseFiles = [], activeFileIdx = 0, watermarks = [], selectedWmId = null
 let isDragging = false, dragOffsetX = 0, dragOffsetY = 0, wmIdCounter = 0
 let lastResults = []
+let wmMode = 'all' // 'all' or 'individual'
+
+// Save current watermarks to the active file's state
+function saveWMState() {
+  if (wmMode === 'individual' && baseFiles[activeFileIdx]) {
+    baseFiles[activeFileIdx].watermarks = watermarks
+  }
+}
+// Load watermarks for a given file index
+function loadWMState(idx) {
+  if (wmMode === 'individual' && baseFiles[idx]) {
+    watermarks = baseFiles[idx].watermarks || []
+  }
+}
+// Get watermarks for a specific entry (used during export)
+function getWMFor(entry) {
+  if (wmMode === 'individual') return entry.watermarks || []
+  return watermarks
+}
 
 const fileInput     = document.getElementById('fileInput')
 const toolLayout    = document.getElementById('toolLayout')
@@ -506,6 +531,42 @@ previewCanvas.addEventListener('touchmove', e => {
 
 previewCanvas.addEventListener('touchend', () => { isDragging = false })
 
+// Mode toggle handler
+const modeToggle = document.getElementById('modeToggle')
+modeToggle.addEventListener('click', e => {
+  const btn = e.target.closest('.mode-btn')
+  if (!btn) return
+  const newMode = btn.dataset.mode
+  if (newMode === wmMode) return
+
+  if (wmMode === 'all' && newMode === 'individual') {
+    // Copy global watermarks to each file that doesn't have its own yet
+    baseFiles.forEach(entry => {
+      if (!entry.watermarks || !entry.watermarks.length) {
+        entry.watermarks = JSON.parse(JSON.stringify(watermarks))
+        // Re-link image elements (can't be JSON-cloned)
+        entry.watermarks.forEach((wm, i) => {
+          if (wm.type === 'image' && watermarks[i] && watermarks[i].imgEl) wm.imgEl = watermarks[i].imgEl
+        })
+      }
+    })
+    loadWMState(activeFileIdx)
+  } else {
+    // Switch to global — use current watermarks as global
+    watermarks = getWMFor(baseFiles[activeFileIdx])
+  }
+
+  wmMode = newMode
+  modeToggle.querySelectorAll('.mode-btn').forEach(b => {
+    const isActive = b.dataset.mode === wmMode
+    b.style.background = isActive ? 'var(--accent)' : 'var(--bg-card)'
+    b.style.color = isActive ? 'var(--text-on-accent)' : 'var(--text-secondary)'
+    b.classList.toggle('active', isActive)
+  })
+  selectedWmId = null
+  renderWmList(); renderPreview(); renderFileChips()
+})
+
 function renderFileChips() {
   fileChips.innerHTML = ''
   if (baseFiles.length <= 1) return
@@ -513,13 +574,23 @@ function renderFileChips() {
     const chip = document.createElement('div')
     chip.className = 'file-chip'
     chip.style.border = idx === activeFileIdx ? '1.5px solid var(--accent)' : '1.5px solid transparent'
-    chip.innerHTML = `<span style="cursor:pointer;">${entry.file.name.replace(/\.[^.]+$/, '').slice(0, 12)}</span><button data-idx="${idx}">✕</button>`
-    chip.querySelector('span').addEventListener('click', () => { activeFileIdx = idx; renderFileChips(); renderPreview() })
+    const wmCount = wmMode === 'individual' ? (entry.watermarks || []).length : ''
+    const badge = wmMode === 'individual' && wmCount ? ` (${wmCount})` : ''
+    chip.innerHTML = `<span style="cursor:pointer;">${entry.file.name.replace(/\.[^.]+$/, '').slice(0, 12)}${badge}</span><button data-idx="${idx}">✕</button>`
+    chip.querySelector('span').addEventListener('click', () => {
+      saveWMState()
+      activeFileIdx = idx
+      loadWMState(idx)
+      selectedWmId = null
+      renderFileChips(); renderWmList(); renderPreview()
+    })
     chip.querySelector('button').addEventListener('click', () => {
       baseFiles.splice(idx, 1)
       if (activeFileIdx >= baseFiles.length) activeFileIdx = baseFiles.length - 1
-      renderFileChips(); renderPreview()
+      if (wmMode === 'individual') loadWMState(activeFileIdx)
+      renderFileChips(); renderWmList(); renderPreview()
       if (baseFiles.length === 0) toolLayout.style.display = 'none'
+      if (baseFiles.length <= 1) modeToggle.style.display = 'none'
     })
     fileChips.appendChild(chip)
   })
@@ -533,10 +604,11 @@ function loadFiles(newFiles) {
     const _lurl = URL.createObjectURL(file)
     img.onload = () => {
       URL.revokeObjectURL(_lurl)
-      baseFiles.push({ file, img }); loaded++
+      baseFiles.push({ file, img, watermarks: [] }); loaded++
       if (loaded === toAdd.length) {
         toolLayout.style.display = 'grid'
         applyBtn.disabled = false
+        if (baseFiles.length > 1) modeToggle.style.display = 'block'
         renderFileChips(); renderPreview()
       }
     }
@@ -549,7 +621,11 @@ document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) loadFiles(e.dataTransfer.files) })
 
 applyBtn.addEventListener('click', async () => {
-  if (baseFiles.length === 0 || watermarks.length === 0) return
+  saveWMState()
+  if (baseFiles.length === 0) return
+  // Check at least one file has watermarks
+  const hasAny = wmMode === 'all' ? watermarks.length > 0 : baseFiles.some(e => (e.watermarks || []).length > 0)
+  if (!hasAny) return
   applyBtn.disabled = true
   applyBtn.textContent = 'Processing...'
   document.getElementById('zipWrap').style.display = 'none'
@@ -558,11 +634,12 @@ applyBtn.addEventListener('click', async () => {
 
   if (baseFiles.length === 1) {
     const entry = baseFiles[0]
+    const wms = getWMFor(entry)
     const canvas = document.createElement('canvas')
     canvas.width = entry.img.naturalWidth; canvas.height = entry.img.naturalHeight
     const ctx = canvas.getContext('2d')
     ctx.drawImage(entry.img, 0, 0)
-    watermarks.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
+    wms.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
     const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
     const ext = mime === 'image/png' ? 'png' : 'jpg'
     const blob = await canvasToBlob(canvas, mime, 0.92)
@@ -581,11 +658,13 @@ applyBtn.addEventListener('click', async () => {
   const usedNames = new Set()
 
   for (const entry of baseFiles) {
+    const wms = getWMFor(entry)
+    if (!wms.length) continue
     const canvas = document.createElement('canvas')
     canvas.width = entry.img.naturalWidth; canvas.height = entry.img.naturalHeight
     const ctx = canvas.getContext('2d')
     ctx.drawImage(entry.img, 0, 0)
-    watermarks.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
+    wms.forEach(wm => drawWatermarkFull(ctx, canvas.width, canvas.height, wm))
     const mime = entry.file.type === 'image/png' ? 'image/png' : 'image/jpeg'
     const ext = mime === 'image/png' ? 'png' : 'jpg'
     const base = entry.file.name.replace(/\.[^.]+$/, '')
