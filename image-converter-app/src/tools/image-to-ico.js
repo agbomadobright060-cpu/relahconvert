@@ -53,7 +53,7 @@ if (document.head) {
 document.title = `${toolName} Converter Free | No Upload — RelahConvert`
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 const SIZES = [16, 32, 48, 64, 128, 256]
-let selectedSizes = [16, 32, 48]
+let selectedSize = 32
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
@@ -72,9 +72,9 @@ document.querySelector('#app').innerHTML = `
         <div id="icoPreviews" class="ico-preview"></div>
       </div>
       <div style="margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.ico_sizes_label || 'ICO Sizes (select all you need)'}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.ico_sizes_label || 'ICO Size'}</div>
         <div class="size-grid" id="sizeGrid">
-          ${SIZES.map(s => `<button class="size-btn${selectedSizes.includes(s)?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
+          ${SIZES.map(s => `<button class="size-btn${s===selectedSize?' active':''}" data-size="${s}">${s}×${s}</button>`).join('')}
         </div>
       </div>
     </div>
@@ -97,20 +97,17 @@ let currentPreviewUrl = null
 document.getElementById('sizeGrid').addEventListener('click', e => {
   const btn = e.target.closest('.size-btn')
   if (!btn) return
-  const s = parseInt(btn.dataset.size)
-  if (selectedSizes.includes(s)) { if (selectedSizes.length > 1) selectedSizes = selectedSizes.filter(x => x !== s) }
-  else selectedSizes.push(s)
-  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', selectedSizes.includes(parseInt(b.dataset.size))))
+  selectedSize = parseInt(btn.dataset.size)
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.size) === selectedSize))
   if (loadedImg) renderPreviews()
 })
 
 function renderPreviews() {
-  icoPreviews.innerHTML = selectedSizes.sort((a,b)=>a-b).map(s => {
-    const c = document.createElement('canvas')
-    c.width = s; c.height = s
-    c.getContext('2d').drawImage(loadedImg, 0, 0, s, s)
-    return `<img src="${c.toDataURL()}" width="${Math.min(s,48)}" height="${Math.min(s,48)}" style="display:inline-block;margin:4px;image-rendering:pixelated;" title="${s}×${s}" />`
-  }).join('')
+  const s = selectedSize
+  const c = document.createElement('canvas')
+  c.width = s; c.height = s
+  c.getContext('2d').drawImage(loadedImg, 0, 0, s, s)
+  icoPreviews.innerHTML = `<img src="${c.toDataURL()}" width="${Math.min(s,64)}" height="${Math.min(s,64)}" style="display:inline-block;image-rendering:pixelated;" title="${s}×${s}" />`
 }
 
 function loadFile(file) {
@@ -164,20 +161,16 @@ function buildIco(canvases) {
 
 convertBtn.addEventListener('click', () => {
   if (!loadedImg) return
-  const sorted = [...selectedSizes].sort((a,b)=>a-b)
-  const canvases = sorted.map(s => {
-    const c = document.createElement('canvas')
-    c.width = s; c.height = s
-    c.getContext('2d').drawImage(loadedImg, 0, 0, s, s)
-    return c
-  })
-  const blob = buildIco(canvases)
-  // Revoke previous download URL
+  const s = selectedSize
+  const c = document.createElement('canvas')
+  c.width = s; c.height = s
+  c.getContext('2d').drawImage(loadedImg, 0, 0, s, s)
+  const blob = buildIco([c])
   if (downloadLink.href && downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href)
   const url = URL.createObjectURL(blob)
   downloadLink.href = url
   downloadLink.download = 'favicon.ico'
-  downloadLink.textContent = `${dlBtn} favicon.ico (${sorted.join(', ')}px)`
+  downloadLink.textContent = `${dlBtn} favicon.ico (${s}×${s}px)`
   downloadLink.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
   downloadLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
 })
