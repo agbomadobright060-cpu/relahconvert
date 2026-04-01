@@ -450,6 +450,27 @@ mergeBtn.addEventListener('click', function () {
   })
 })
 
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+
+async function saveFilesToIDB(files) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    files.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+
 function buildNextSteps() {
   var ns = t.nav_short || {}
   var buttons = []
@@ -463,7 +484,20 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', () => { window.location.href = b.href })
+    btn.addEventListener('click', async () => {
+      // Save the merged image to IDB so the next tool can load it
+      const href = dlLink.href || ''
+      if (href) {
+        try {
+          const res = await fetch(href)
+          const blob = await res.blob()
+          const name = dlLink.download || 'merged-image.jpg'
+          await saveFilesToIDB([{ blob, name, type: blob.type }])
+          sessionStorage.setItem('pendingFromIDB', '1')
+        } catch (e) {}
+      }
+      window.location.href = b.href
+    })
     nextStepsButtons.appendChild(btn)
   })
   nextSteps.style.display = 'block'
