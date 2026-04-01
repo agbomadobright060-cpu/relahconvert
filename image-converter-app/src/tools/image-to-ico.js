@@ -33,7 +33,8 @@ if (document.head) {
     .custom-size-input:focus{border-color:var(--accent);}
     .ico-preview{background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%);background-size:12px 12px;border-radius:8px;display:inline-block;padding:8px;}
     .preview-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
-    .preview-card{background:var(--bg-card);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);position:relative;width:100px;}
+    .preview-card{background:var(--bg-card);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);position:relative;width:100px;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s;}
+    .preview-card.active{border-color:var(--accent);}
     .preview-card img{width:100%;height:80px;object-fit:cover;display:block;}
     .preview-card .fname{font-size:10px;color:var(--text-tertiary);padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .preview-card .remove-btn{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
@@ -59,6 +60,7 @@ const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _
 const SIZES = [16, 32, 48, 64, 128, 256]
 let selectedSize = 32
 let files = []
+let activeFileIndex = 0
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
@@ -118,16 +120,15 @@ customSize.addEventListener('input', () => {
 })
 
 function renderIcoPreview() {
-  if (!files.length) return
-  const img = files[0].img
-  if (!img) return
+  if (!files.length || !files[activeFileIndex]) { icoPreview.innerHTML = ''; return }
+  const entry = files[activeFileIndex]
+  if (!entry.img) { icoPreview.innerHTML = ''; return }
   const s = selectedSize
   const c = document.createElement('canvas')
   c.width = s; c.height = s
-  c.getContext('2d').drawImage(img, 0, 0, s, s)
-  // Show preview at actual size (capped at 128px for display)
+  c.getContext('2d').drawImage(entry.img, 0, 0, s, s)
   const displaySize = Math.min(s, 128)
-  icoPreview.innerHTML = `<div class="ico-preview"><img src="${c.toDataURL()}" width="${displaySize}" height="${displaySize}" style="display:block;image-rendering:${s <= 64 ? 'pixelated' : 'auto'};" /></div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${s}×${s}px preview</div>`
+  icoPreview.innerHTML = `<div class="ico-preview"><img src="${c.toDataURL()}" width="${displaySize}" height="${displaySize}" style="display:block;image-rendering:${s <= 64 ? 'pixelated' : 'auto'};" /></div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${entry.file.name} — ${s}×${s}px</div>`
 }
 
 function addFiles(newFiles) {
@@ -153,19 +154,31 @@ function renderPreviews() {
   if (!files.length) { previewGrid.style.display = 'none'; return }
   previewGrid.style.display = 'flex'
   previewGrid.innerHTML = files.map((f, i) => `
-    <div class="preview-card">
+    <div class="preview-card${i === activeFileIndex ? ' active' : ''}" data-file-index="${i}">
       <img src="${f.url}" alt="" />
       <button class="remove-btn" data-index="${i}">×</button>
       <div class="fname">${f.file.name}</div>
     </div>
   `).join('') + `<label for="fileInput" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100px;height:110px;border:2px dashed #CCC;border-radius:10px;cursor:pointer;color:#999;font-size:13px;gap:4px;"><span style="font-size:24px;">+</span><span>Add more</span></label>`
 
+  // Click to select image for preview
+  previewGrid.querySelectorAll('.preview-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.remove-btn')) return
+      activeFileIndex = parseInt(card.dataset.fileIndex)
+      previewGrid.querySelectorAll('.preview-card').forEach(c => c.classList.toggle('active', parseInt(c.dataset.fileIndex) === activeFileIndex))
+      renderIcoPreview()
+    })
+  })
+
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.index)
       URL.revokeObjectURL(files[idx].url)
       files.splice(idx, 1)
+      if (activeFileIndex >= files.length) activeFileIndex = Math.max(0, files.length - 1)
       renderPreviews()
+      renderIcoPreview()
       if (!files.length) { sizeArea.style.display = 'none'; convertBtn.disabled = true; downloadLink.style.display = 'none' }
     })
   })
