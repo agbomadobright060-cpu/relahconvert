@@ -33,8 +33,7 @@ style.textContent = `
   .file-card .dl-link{display:none;font-size:11px;font-weight:700;color:var(--accent);font-family:'DM Sans',sans-serif;padding:0 8px 7px;text-decoration:none;}
   .file-card .dl-link:hover{text-decoration:underline;}
   .file-card .rm-btn{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-  #actionRow.on{display:flex;}
+  #actionRow{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;}
   .action-btn:hover{background:var(--accent-hover);}
   .action-btn.dark{background:var(--btn-dark);}
@@ -133,13 +132,13 @@ function addFiles(newFiles) {
       const idx = files.findIndex(f => f.card === card)
       if (idx !== -1) files.splice(idx, 1)
       card.remove()
-      if (files.length === 0) { widthRow.classList.remove('on'); actionRow.classList.remove('on'); statusText.textContent = ''; convertBtn.disabled = true; convertBtn.style.opacity = '0.7'; convertBtn.style.cursor = 'not-allowed' }
+      if (files.length === 0) { widthRow.classList.remove('on'); statusText.textContent = ''; convertBtn.disabled = true; convertBtn.style.opacity = '0.7'; convertBtn.style.cursor = 'not-allowed' }
     })
     card.append(img, fname, dlLink, rmBtn)
     fileGrid.appendChild(card)
     files.push({ file, card, dlLink })
   })
-  widthRow.classList.add('on'); actionRow.classList.add('on')
+  widthRow.classList.add('on')
   convertBtn.disabled = false; convertBtn.style.opacity = '1'; convertBtn.style.cursor = 'pointer'
   zipBtn.style.display = 'none'; statusText.textContent = ''
 }
