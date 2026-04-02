@@ -512,7 +512,7 @@ const addMoreLbl = t.add_more || 'Add More'
 const downloadZipLbl = t.download_zip || 'Download ZIP'
 
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:1100px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
+  <div style="max-width:900px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:var(--text-primary); margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">
         ${h1Main} <em style="font-style:italic; color:var(--accent);">${h1Em}</em>
