@@ -194,7 +194,7 @@ function langCopyPlugin() {
           ? `    <meta name="description" content="${homeDescByLang[lang]}" />\n`
           : ''
         // Inject canonical, hreflang tags and meta description into <head>
-        const homeCanonical = `    <link rel="canonical" href="${base}/${lang}/" />\n`
+        const homeCanonical = `    <link rel="canonical" href="${base}/${lang}" />\n`
         homeHtml = homeHtml.replace('</head>', homeCanonical + descTag + hreflangTags(null) + '  </head>')
 
         // Create {lang}/index.html for homepage
@@ -205,7 +205,7 @@ function langCopyPlugin() {
         // Create {lang}/{slug}/index.html for each tool page
         const slugMap = slugMapByLang[lang] || {}
         for (const [enKey, localSlug] of Object.entries(slugMap)) {
-          const toolCanonical = `    <link rel="canonical" href="${base}/${lang}/${localSlug}/" />\n`
+          const toolCanonical = `    <link rel="canonical" href="${base}/${lang}/${localSlug}" />\n`
           const toolHtml = langHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
           const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
@@ -222,7 +222,7 @@ function langCopyPlugin() {
           staticHtml = staticHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
           staticHtml = staticHtml.replace(/<link rel="alternate" hreflang="[^"]*"[^>]*\/>\n?/g, '')
           const translatedSlug = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
-          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlug}/" />\n`
+          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlug}" />\n`
           staticHtml = staticHtml.replace('</head>', staticCanonical + staticHreflangTags(page) + '  </head>')
           const staticDir = resolve(distDir, lang, translatedSlug)
           mkdirSync(staticDir, { recursive: true })
