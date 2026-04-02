@@ -34,8 +34,7 @@ style.textContent = `
   .card-dl{display:none;font-size:11px;font-weight:700;color:var(--text-primary);font-family:'DM Sans',sans-serif;padding:2px 8px 0;text-align:center;text-decoration:none;}
   .card-dl:hover{text-decoration:underline;color:var(--accent);}
   .card-rm{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.4);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;}
-  #actionRow{display:none;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-  #actionRow.on{display:flex;}
+  #actionRow{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;min-width:160px;}
   .action-btn:hover{background:var(--accent-hover);}
   .action-btn.dark{background:var(--btn-dark);}
@@ -78,7 +77,7 @@ document.querySelector('#app').innerHTML = `
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
     <div id="actionRow">
-      <button class="action-btn" id="applyBtn">⬇ Download All</button>
+      <button class="action-btn" id="applyBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">⬇ Download All</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
     <div id="nextSteps" style="display:none;" class="next-steps">
@@ -229,14 +228,14 @@ function addFiles(newFiles) {
     rmBtn.addEventListener('click', () => {
       files = files.filter(f => f !== entry)
       card.remove()
-      if (files.length === 0) { actionRow.classList.remove('on'); statusText.textContent = ''; nextSteps.style.display = 'none' }
+      if (files.length === 0) { statusText.textContent = ''; nextSteps.style.display = 'none'; applyBtn.disabled = true; applyBtn.style.background = 'var(--btn-disabled)'; applyBtn.style.opacity = '0.7'; applyBtn.style.cursor = 'not-allowed' }
     })
     card.append(imgWrap, fname, angleLabel, dlLink, rmBtn)
     fileGrid.appendChild(card)
     files.push(entry)
   })
   if (files.length > 0) {
-    actionRow.classList.add('on')
+    applyBtn.disabled = false; applyBtn.style.background = 'var(--accent)'; applyBtn.style.opacity = '1'; applyBtn.style.cursor = 'pointer'
     zipBtn.style.display = 'none'
     statusText.textContent = 'Tap ↻ on each image to rotate individually, then download all.'
   }
