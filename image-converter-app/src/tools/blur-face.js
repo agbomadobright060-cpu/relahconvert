@@ -92,8 +92,8 @@ if (document.head) {
     .seo-section h3{font-family:'Fraunces',serif;font-size:16px;font-weight:800;color:var(--text-primary);margin:22px 0 8px}
     .seo-section ol{padding-left:20px;color:var(--text-secondary);font-size:14px;line-height:1.8}
     .seo-section p{color:var(--text-secondary);font-size:14px;line-height:1.7;margin:10px 0}
-    .faq-item{margin-bottom:14px}
-    .faq-q{font-weight:700;color:var(--text-primary);font-size:14px;margin:0 0 4px}
+    .faq-item{background:var(--bg-card);border-radius:12px;padding:18px 20px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+    .faq-q{font-family:'Fraunces',serif;font-weight:700;color:var(--text-primary);font-size:15px;margin:0 0 6px}
     .faq-a{color:var(--text-secondary);font-size:13px;line-height:1.6;margin:0}
     .also-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
     .also-link{padding:7px 14px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:8px;font-size:12px;font-weight:600;color:var(--text-primary);text-decoration:none;transition:all 0.15s}
