@@ -83,7 +83,7 @@ document.querySelector('#app').innerHTML = `
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
     <div id="actionRow">
-      <button class="action-btn" id="convertBtn">Convert to PNG</button>
+      <button class="action-btn" id="convertBtn" disabled style="opacity:0.7;cursor:not-allowed;">Convert to PNG</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
   </div>
@@ -133,13 +133,14 @@ function addFiles(newFiles) {
       const idx = files.findIndex(f => f.card === card)
       if (idx !== -1) files.splice(idx, 1)
       card.remove()
-      if (files.length === 0) { widthRow.classList.remove('on'); actionRow.classList.remove('on'); statusText.textContent = '' }
+      if (files.length === 0) { widthRow.classList.remove('on'); actionRow.classList.remove('on'); statusText.textContent = ''; convertBtn.disabled = true; convertBtn.style.opacity = '0.7'; convertBtn.style.cursor = 'not-allowed' }
     })
     card.append(img, fname, dlLink, rmBtn)
     fileGrid.appendChild(card)
     files.push({ file, card, dlLink })
   })
   widthRow.classList.add('on'); actionRow.classList.add('on')
+  convertBtn.disabled = false; convertBtn.style.opacity = '1'; convertBtn.style.cursor = 'pointer'
   zipBtn.style.display = 'none'; statusText.textContent = ''
 }
 
