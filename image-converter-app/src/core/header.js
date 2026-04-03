@@ -1,6 +1,9 @@
 import { tools } from '../tools/configs.js'
 import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug, englishKeyFromSlug } from './i18n.js'
 import { initTheme, toggleTheme, getCurrentTheme, sunIcon, moonIcon } from './theme.js'
+import { getUser, onAuthStateChange, signOut as supabaseSignOut } from './supabase.js'
+import { createSignInButton, createUserDropdown, showSignInModal } from './auth-ui.js'
+import { initPreferencesSync, syncPreference, clearPreferencesSync } from './preferences-sync.js'
 import './wp-upload.js' // Auto-init WordPress upload integration
 
 // Review prompt — shown once per session after a download
@@ -425,7 +428,9 @@ export function injectHeader() {
       ${mainLinks.map(slug => `<a href="${localHref(slug)}" class="nav-link ${activeToolKey === slug ? 'active' : ''}">${t.nav_short[slug]}</a>`).join('')}
       <button class="more-btn" id="moreBtn">${t.nav_more_tools} <span class="arrow">▼</span></button>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+      <div id="authSlot" style="display:inline-flex;margin-inline-start:4px;"></div>
     </nav>
+    <div id="authSlotMobile" style="display:inline-flex;"></div>
     <button class="theme-toggle mobile-theme" id="themeToggleMobile" aria-label="Toggle dark mode"></button>
     <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -509,9 +514,55 @@ export function injectHeader() {
     if (themeToggleMobile) themeToggleMobile.innerHTML = icon
   }
   updateToggleIcons()
-  function handleToggle() { toggleTheme(); updateToggleIcons() }
+  function handleToggle() {
+    toggleTheme(); updateToggleIcons()
+    syncPreference('theme', getCurrentTheme())
+  }
   if (themeToggle) themeToggle.addEventListener('click', handleToggle)
   if (themeToggleMobile) themeToggleMobile.addEventListener('click', handleToggle)
+
+  // ── Auth integration ──
+  const authSlot = document.getElementById('authSlot')
+  const authSlotMobile = document.getElementById('authSlotMobile')
+
+  function renderAuthUI(user) {
+    if (!authSlot) return
+    authSlot.innerHTML = ''
+    if (authSlotMobile) authSlotMobile.innerHTML = ''
+    if (user) {
+      authSlot.appendChild(createUserDropdown(user, async () => {
+        clearPreferencesSync()
+        await supabaseSignOut()
+      }))
+    } else {
+      authSlot.appendChild(createSignInButton(() => showSignInModal()))
+      if (authSlotMobile) {
+        authSlotMobile.appendChild(createSignInButton(() => showSignInModal()))
+      }
+    }
+  }
+
+  // Initialize auth state
+  getUser().then(user => {
+    renderAuthUI(user)
+    if (user) initPreferencesSync(user)
+  })
+
+  // Listen for auth changes (sign in, sign out, token refresh)
+  onAuthStateChange((event, session) => {
+    const user = session?.user || null
+    renderAuthUI(user)
+    if (event === 'SIGNED_IN' && user) initPreferencesSync(user)
+    if (event === 'SIGNED_OUT') clearPreferencesSync()
+  })
+
+  // Listen for theme apply from preferences sync
+  window.addEventListener('rc:apply-theme', (e) => {
+    const theme = e.detail
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('relahconvert-theme', theme)
+    updateToggleIcons()
+  })
 
   const langToggle = document.getElementById('langToggle')
   const langGridWrap = document.getElementById('langGridWrap')
