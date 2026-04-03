@@ -100,7 +100,7 @@ document.querySelector('#app').innerHTML = `
         <rect x="14" y="16" width="28" height="22" rx="3" stroke="currentColor" stroke-width="2" fill="#fff" opacity="0.85"/>
         <path d="M28 30v-8m0 0l-3.5 3.5M28 22l3.5 3.5" stroke="#C84B31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <p>${t.drop_images_here || 'Drop images here'}</p>
+      <p>${t.drop_images || 'Drop images'}</p>
     </div>
     <div id="fileGrid"></div>
     <div class="options-row" id="optionsRow" style="display:none;">
