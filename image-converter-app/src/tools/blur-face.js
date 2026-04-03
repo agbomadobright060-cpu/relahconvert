@@ -40,7 +40,7 @@ if (document.head) {
   const style = document.createElement('style')
   style.textContent = `
     *{box-sizing:border-box}
-    .tool-wrap{max-width:1060px;margin:0 auto;padding:24px 16px 60px;font-family:'DM Sans',sans-serif}
+    .tool-wrap{max-width:700px;margin:0 auto;padding:24px 16px 60px;font-family:'DM Sans',sans-serif;transition:max-width 0.3s}
     .tool-hero{margin-bottom:20px}
     .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--text-primary);margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
     .brand-em{font-style:italic;color:var(--accent)}
@@ -248,6 +248,7 @@ function activateImage(idx) {
   activeIdx = idx
   selectedRegion = null
   $('uploadArea').style.display = 'none'
+  document.querySelector('.tool-wrap').style.maxWidth = '1060px'
   $('bfLayout').classList.add('visible')
   renderQueue()
   initCanvas()

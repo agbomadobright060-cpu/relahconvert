@@ -32,7 +32,7 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .drop-zone{border:2px dashed var(--border-light);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:18px;background:var(--bg-surface);}
+  .drop-zone{border:2px dashed var(--border-light);border-radius:14px;padding:48px 24px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:18px;background:var(--bg-card);}
   .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-bg);}
   .drop-zone svg{margin-bottom:6px;color:var(--btn-disabled);transition:color 0.2s;}
   .drop-zone:hover svg,.drop-zone.drag-over svg{color:var(--accent);}
