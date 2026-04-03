@@ -206,7 +206,30 @@
         </a>
         <nav class="desktop-nav" id="desktopNav"></nav>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
-        <a href="/compress" id="homeSignIn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.15s;white-space:nowrap;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Sign in</span></a>
+        <div id="homeAuthSlot" style="display:inline-flex;"></div>
+        <script type="module">
+          import { getUser, onAuthStateChange } from '/src/core/supabase.js'
+          import { createSignInButton, createUserDropdown, showSignInModal } from '/src/core/auth-ui.js'
+          import { signOut } from '/src/core/supabase.js'
+          import { initPreferencesSync, clearPreferencesSync } from '/src/core/preferences-sync.js'
+
+          const slot = document.getElementById('homeAuthSlot')
+          function render(user) {
+            if (!slot) return
+            slot.innerHTML = ''
+            if (user) {
+              slot.appendChild(createUserDropdown(user, async () => { clearPreferencesSync(); await signOut() }))
+            } else {
+              slot.appendChild(createSignInButton(() => showSignInModal()))
+            }
+          }
+          getUser().then(user => { render(user); if (user) initPreferencesSync(user) })
+          onAuthStateChange((ev, session) => {
+            render(session?.user || null)
+            if (ev === 'SIGNED_IN' && session?.user) initPreferencesSync(session.user)
+            if (ev === 'SIGNED_OUT') clearPreferencesSync()
+          })
+        </script>
         <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
