@@ -320,6 +320,7 @@ export default defineConfig({
         'pixelate-image':    resolve(__dirname, 'pixelate-image.html'),
         'svg-to-png':        resolve(__dirname, 'svg-to-png.html'),
         'svg-to-jpg':        resolve(__dirname, 'svg-to-jpg.html'),
+        'account':           resolve(__dirname, 'account.html'),
       }
     }
   }

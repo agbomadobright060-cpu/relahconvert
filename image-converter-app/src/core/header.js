@@ -5,6 +5,7 @@ import { getUser, onAuthStateChange, signOut as supabaseSignOut } from './supaba
 import { createSignInButton, createUserDropdown, showSignInModal } from './auth-ui.js'
 import { initPreferencesSync, syncPreference, clearPreferencesSync } from './preferences-sync.js'
 import './wp-upload.js' // Auto-init WordPress upload integration
+import { maybeShowSaveButton } from './cloud-save.js'
 
 // Review prompt — shown once per session after a download
 function showReviewPrompt() {
@@ -557,6 +558,24 @@ export function injectHeader() {
     localStorage.setItem('relahconvert-theme', theme)
     updateToggleIcons()
   })
+
+  // ── Auto-inject "Save to Account" next to download links ──
+  const processedDLs = new WeakSet()
+  function checkForDownloadLinks() {
+    const links = document.querySelectorAll('a[download], a[id*="download"], a[class*="download"]')
+    links.forEach(a => {
+      if (processedDLs.has(a)) return
+      if (a.style.display === 'none' || !a.offsetParent) return
+      const href = a.href || ''
+      if (!href.startsWith('blob:') && !href.startsWith('data:')) return
+      processedDLs.add(a)
+      const toolSlug = window.location.pathname.split('/').filter(Boolean).pop() || 'unknown'
+      maybeShowSaveButton(a.parentElement, () => fetch(href).then(r => r.blob()), () => a.download || 'image.jpg', toolSlug)
+    })
+  }
+  const dlObserver = new MutationObserver(checkForDownloadLinks)
+  dlObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'display', 'href'] })
+  setInterval(checkForDownloadLinks, 2000)
 
   const langToggle = document.getElementById('langToggle')
   const langGridWrap = document.getElementById('langGridWrap')
