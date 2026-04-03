@@ -45,7 +45,7 @@ if (document.head) {
     .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--text-primary);margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
     .brand-em{font-style:italic;color:var(--accent)}
     .tool-sub{font-size:13px;color:var(--text-tertiary);margin:0}
-    .bf-upload-area{border:2px dashed var(--border-light);border-radius:14px;padding:48px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:transparent}
+    .bf-upload-area{display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border-light);border-radius:14px;padding:48px 24px;cursor:pointer;transition:all 0.2s;background:var(--bg-card);margin-bottom:16px}
     .bf-upload-area:hover,.bf-upload-area.drag{border-color:var(--accent);background:#FDF5F3}
     .bf-upload-icon{font-size:36px;margin-bottom:10px}
     .bf-upload-text{font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
