@@ -526,8 +526,7 @@ document.querySelector('#app').innerHTML = `
       <span style="font-size:12px; color:var(--text-muted); margin-left:12px;">${dropHint}</span>
       <label for="fileInput" id="dropZone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:48px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.background='transparent'">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-        <span style="font-size:14px;color:var(--text-secondary);margin-top:10px;font-family:'DM Sans',sans-serif;font-weight:600;">Drop images here</span>
-        <span style="font-size:12px;color:var(--text-muted);margin-top:4px;font-family:'DM Sans',sans-serif;">JPG, PNG, WebP — up to 25 files</span>
+        <span style="font-size:14px;color:var(--text-secondary);margin-top:10px;font-family:'DM Sans',sans-serif;font-weight:600;">Drop images</span>
       </label>
     </div>
     <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none;" />
