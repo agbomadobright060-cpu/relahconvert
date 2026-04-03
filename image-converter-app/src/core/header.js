@@ -430,7 +430,6 @@ export function injectHeader() {
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
       <div id="authSlot" style="display:inline-flex;margin-inline-start:4px;"></div>
     </nav>
-    <div id="authSlotMobile" style="display:inline-flex;"></div>
     <button class="theme-toggle mobile-theme" id="themeToggleMobile" aria-label="Toggle dark mode"></button>
     <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -523,12 +522,10 @@ export function injectHeader() {
 
   // ── Auth integration ──
   const authSlot = document.getElementById('authSlot')
-  const authSlotMobile = document.getElementById('authSlotMobile')
 
   function renderAuthUI(user) {
     if (!authSlot) return
     authSlot.innerHTML = ''
-    if (authSlotMobile) authSlotMobile.innerHTML = ''
     if (user) {
       authSlot.appendChild(createUserDropdown(user, async () => {
         clearPreferencesSync()
@@ -536,9 +533,6 @@ export function injectHeader() {
       }))
     } else {
       authSlot.appendChild(createSignInButton(() => showSignInModal()))
-      if (authSlotMobile) {
-        authSlotMobile.appendChild(createSignInButton(() => showSignInModal()))
-      }
     }
   }
 
