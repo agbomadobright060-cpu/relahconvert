@@ -1,9 +1,9 @@
 /**
  * Preferences sync — bidirectional sync between localStorage and Supabase.
  * Theme and language are saved to Supabase when user is signed in.
- * On sign-in, Supabase preferences override local ones.
+ * On sign-in, Supabase preferences override local ones (theme only — language doesn't reload).
  */
-import { supabase, getUser } from './supabase.js'
+import { supabase } from './supabase.js'
 
 let currentUserId = null
 
@@ -20,15 +20,14 @@ export async function initPreferencesSync(user) {
     .single()
 
   if (data) {
-    // Apply Supabase preferences locally
+    // Apply theme from Supabase if different
     if (data.theme && data.theme !== localStorage.getItem('relahconvert-theme')) {
       localStorage.setItem('relahconvert-theme', data.theme)
       window.dispatchEvent(new CustomEvent('rc:apply-theme', { detail: data.theme }))
     }
-    if (data.language && data.language !== localStorage.getItem('rc_lang')) {
+    // Sync language to localStorage but don't reload — user navigates manually
+    if (data.language) {
       localStorage.setItem('rc_lang', data.language)
-      // Language change requires reload
-      window.location.reload()
     }
   } else {
     // First sign-in — upload current local preferences to Supabase

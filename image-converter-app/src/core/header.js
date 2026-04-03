@@ -607,6 +607,7 @@ export function injectHeader() {
         e.preventDefault()
         const newLang = link.dataset.lang
         setLang(newLang)
+        syncPreference('language', newLang)
         if (activeToolKey && tools[activeToolKey]) {
           if (newLang === 'en') {
             window.location.href = '/' + activeToolKey
