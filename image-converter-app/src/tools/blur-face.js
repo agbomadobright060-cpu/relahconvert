@@ -177,7 +177,7 @@ let selectedRegion = null
 
 const $ = id => document.getElementById(id)
 
-$('uploadBtn').onclick = () => { $('fileInput').value = ''; $('fileInput').click() }
+// Upload button is now a <label for="fileInput"> so no onclick needed
 $('fileInput').onchange = e => { addFiles(Array.from(e.target.files||[])); $('fileInput').value='' }
 
 const uploadArea = $('uploadArea')
