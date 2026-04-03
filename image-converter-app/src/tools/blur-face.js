@@ -45,7 +45,7 @@ if (document.head) {
     .tool-title{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--text-primary);margin:0 0 4px;line-height:1;letter-spacing:-0.02em}
     .brand-em{font-style:italic;color:var(--accent)}
     .tool-sub{font-size:13px;color:var(--text-tertiary);margin:0}
-    .bf-upload-area{border:2px dashed var(--border-light);border-radius:14px;padding:40px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg-card)}
+    .bf-upload-area{border:2px dashed var(--border-light);border-radius:14px;padding:48px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:transparent}
     .bf-upload-area:hover,.bf-upload-area.drag{border-color:var(--accent);background:#FDF5F3}
     .bf-upload-icon{font-size:36px;margin-bottom:10px}
     .bf-upload-text{font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
@@ -120,23 +120,17 @@ document.querySelector('#app').innerHTML = `
     <h1 class="tool-title">${ui.title} <em class="brand-em">${ui.titleEm}</em></h1>
     <p class="tool-sub">${ui.sub}</p>
   </div>
-  <div class="bf-upload-area" id="uploadArea">
-    <div class="bf-upload-icon">
-      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="4" width="40" height="40" rx="8" fill="#F5EDE8" stroke="#DDD5C8" stroke-width="2"/>
-        <circle cx="24" cy="18" r="7" fill="#C84B31" opacity="0.25" stroke="#C84B31" stroke-width="1.5"/>
-        <path d="M10 38c0-7.732 6.268-14 14-14s14 6.268 14 14" fill="#C84B31" opacity="0.15" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round"/>
-        <rect x="16" y="14" width="16" height="8" rx="3" fill="#C84B31" opacity="0.3"/>
-        <line x1="15" y1="16" x2="33" y2="16" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-        <line x1="15" y1="19" x2="33" y2="19" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-        <line x1="15" y1="22" x2="33" y2="22" stroke="#C84B31" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-      </svg>
-    </div>
-    <p class="bf-upload-text">${ui.drop}</p>
-    <p class="bf-upload-sub">${ui.dropSub}</p>
-    <button class="bf-upload-btn" id="uploadBtn">${ui.uploadBtn}</button>
-    <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+  <div style="margin-bottom:16px;">
+    <label class="bf-upload-btn" for="fileInput" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;border:none;">
+      <span style="font-size:18px;">+</span> ${ui.uploadBtn}
+    </label>
+    <span style="font-size:12px;color:var(--text-muted);margin-left:12px;">${t.drop_hint || 'or drop images anywhere'}</span>
   </div>
+  <label for="fileInput" class="bf-upload-area" id="uploadArea">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    <p class="bf-upload-text" style="margin-top:10px;">${t.drop_images || 'Drop images'}</p>
+  </label>
+  <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
   <div class="bf-queue" id="bfQueue">
     <p class="bf-queue-title">Images (<span id="queueCount">0</span>)</p>
     <div class="bf-queue-grid" id="queueGrid"></div>
