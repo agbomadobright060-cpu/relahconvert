@@ -135,9 +135,11 @@
       .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
       @media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
       .home-mobile-user { display:none; background:none; border:1px solid var(--border-light); border-radius:8px; padding:6px; color:var(--text-secondary); cursor:pointer; }
-      [dir="rtl"] .header-inner { gap: 10px; padding: 0 16px; }
-      [dir="rtl"] .nav-link { padding: 6px 8px; font-size: 11px; }
-      [dir="rtl"] .desktop-nav { gap: 8px; }
+      [dir="rtl"] .header-inner { gap: 8px; padding: 0 12px; }
+      [dir="rtl"] .nav-link { padding: 4px 6px; font-size: 10px; letter-spacing: 0; }
+      [dir="rtl"] .desktop-nav { gap: 4px; }
+      [dir="rtl"] .nav-link:nth-child(3),
+      [dir="rtl"] .nav-link:nth-child(4) { display: none; }
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
