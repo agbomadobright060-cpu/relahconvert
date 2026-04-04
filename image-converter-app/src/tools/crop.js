@@ -69,7 +69,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | Free & Private — RelahConvert`
+document.title = `${toolName} Free | Private — RelahConvert`
 const parts = toolName.split(' ')
 const h1Main = parts[0]
 const h1Em   = parts.slice(1).join(' ')
@@ -81,8 +81,8 @@ document.querySelector('#app').innerHTML = `
       <p style="font-size:13px; color:var(--text-tertiary); margin:0;">${descText}</p>
     </div>
     <div style="margin-bottom:16px;">
-      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px; color:var(--text-muted); margin-left:12px;">${dropHint}</span>
+      <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${t.select_image || 'Select Image'}</label>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:12px;">${t.drop_hint_single || 'or drop image anywhere'}</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
     <div id="previewArea" style="display:none; margin-bottom:16px;">
