@@ -1,8 +1,24 @@
 import { injectHeader } from './core/header.js'
 import { supabase, getUser, signOut } from './core/supabase.js'
 import { signInWithGoogle, showSignInModal } from './core/auth-ui.js'
+import { getT } from './core/i18n.js'
 
+const t = getT()
 const app = document.querySelector('#app')
+
+const L = {
+  my_account: t.auth_my_account || 'My Account',
+  my_files: t.auth_my_files || 'My Files',
+  sign_in: t.auth_sign_in || 'Sign in',
+  sign_out: t.auth_sign_out || 'Sign out',
+  saved_files: t.account_saved_files || 'Saved Files',
+  no_files: t.account_no_files || 'No saved files yet. Use any tool and click "Save to Account" after processing.',
+  storage: t.account_storage || 'Storage',
+  sign_in_prompt_title: t.account_sign_in_title || 'Sign in to view your account',
+  sign_in_prompt_desc: t.account_sign_in_desc || 'Sign in to save processed images and sync preferences across devices.',
+  download: t.download || 'Download',
+  delete_btn: t.account_delete || 'Delete',
+}
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 const style = document.createElement('style')
@@ -49,9 +65,9 @@ async function renderAccount() {
     app.innerHTML = `
       <div class="account-wrap">
         <div class="sign-in-prompt">
-          <h2>Sign in to view your account</h2>
-          <p>Sign in to save processed images and sync preferences across devices.</p>
-          <button id="promptSignIn">Sign in</button>
+          <h2>${L.sign_in_prompt_title}</h2>
+          <p>${L.sign_in_prompt_desc}</p>
+          <button id="promptSignIn">${L.sign_in}</button>
         </div>
       </div>
     `
@@ -84,7 +100,7 @@ async function renderAccount() {
 
   app.innerHTML = `
     <div class="account-wrap">
-      <h1 class="account-title">My <em style="font-style:italic;color:var(--accent);">Account</em></h1>
+      <h1 class="account-title">${L.my_account}</h1>
 
       <div class="account-card">
         <div class="user-info">
@@ -97,14 +113,14 @@ async function renderAccount() {
             <div class="user-email">${user.email || ''}</div>
           </div>
         </div>
-        <div class="storage-text">Storage: ${usedMB} MB / ${MAX_STORAGE_MB} MB</div>
+        <div class="storage-text">${L.storage}: ${usedMB} MB / ${MAX_STORAGE_MB} MB</div>
         <div class="storage-bar"><div class="storage-fill" style="width:${pct}%;"></div></div>
       </div>
 
       <div class="account-card">
-        <h2>Saved Files</h2>
+        <h2>${L.saved_files}</h2>
         ${files.length === 0
-          ? '<div class="empty-state">No saved files yet. Use any tool and click "Save to Account" after processing.</div>'
+          ? '<div class="empty-state">' + L.no_files + '</div>'
           : `<div class="files-grid">${files.map(f => `
               <div class="file-card" data-id="${f.id}" data-path="${f.storage_path}">
                 <img src="" alt="${f.file_name}" data-path="${f.storage_path}" class="file-thumb" />
@@ -112,8 +128,8 @@ async function renderAccount() {
                   <div class="file-name" title="${f.file_name}">${f.file_name}</div>
                   <div class="file-meta">${(f.file_size / 1024).toFixed(0)} KB${f.tool_used ? ' · ' + f.tool_used : ''}</div>
                   <div class="file-actions">
-                    <button class="file-btn dl" data-path="${f.storage_path}" data-name="${f.file_name}">Download</button>
-                    <button class="file-btn del" data-id="${f.id}" data-path="${f.storage_path}">Delete</button>
+                    <button class="file-btn dl" data-path="${f.storage_path}" data-name="${f.file_name}">${L.download}</button>
+                    <button class="file-btn del" data-id="${f.id}" data-path="${f.storage_path}">${L.delete_btn}</button>
                   </div>
                 </div>
               </div>
