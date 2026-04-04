@@ -348,8 +348,13 @@ export function injectHeader() {
     }
     .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
     .mobile-theme { display: none; }
+    .mobile-user-btn { display:none; background:none; border:1px solid var(--border-light); border-radius:8px; padding:6px; color:var(--text-secondary); cursor:pointer; transition:all 0.15s; }
+    .mobile-user-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .mobile-user-btn.signed-in { color:var(--accent); border-color:var(--accent); }
+    #mobileUserPanel { display:none; position:fixed; top:64px; right:0; width:280px; background:var(--bg-card); border-bottom-left-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,0.15); z-index:99; padding:16px; border:1px solid var(--border-light); }
+    #mobileUserPanel.open { display:block; }
     @media (max-width: 768px) {
-      .mobile-theme { display: flex; }
+      .mobile-user-btn { display:flex; align-items:center; justify-content:center; }
       #themeToggle { display: none; }
     }
 
@@ -431,7 +436,9 @@ export function injectHeader() {
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
       <div id="authSlot" style="display:inline-flex;margin-inline-start:4px;"></div>
     </nav>
-    <button class="theme-toggle mobile-theme" id="themeToggleMobile" aria-label="Toggle dark mode"></button>
+    <button class="mobile-user-btn" id="mobileUserBtn" aria-label="Account">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
     <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>`
@@ -474,8 +481,16 @@ export function injectHeader() {
       <div class="dropdown-col">${leftCats.map(renderCat).join('')}</div>
       <div class="dropdown-col">${rightCats.map(renderCat).join('')}</div>
     </div>
-    <div id="mobileAuthSlot" style="padding:12px 20px;border-top:1px solid var(--border-light);display:none;"></div>
   `
+
+  // Mobile user panel (separate from tools dropdown)
+  const mobileUserPanel = document.createElement('div')
+  mobileUserPanel.id = 'mobileUserPanel'
+  mobileUserPanel.innerHTML = `<div id="mobileAuthContent"></div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:12px;font-weight:600;color:var(--text-muted);font-family:'DM Sans',sans-serif;">Dark mode</span>
+      <button id="mobileThemeBtn" style="background:none;border:1px solid var(--border-light);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;gap:6px;font-size:12px;font-family:'DM Sans',sans-serif;"></button>
+    </div>`
 
   const footer = document.createElement('footer')
   footer.id = 'site-footer'
@@ -504,15 +519,35 @@ export function injectHeader() {
 
   document.body.insertBefore(header, document.body.firstChild)
   document.body.insertBefore(dropdown, header.nextSibling)
+  document.body.insertBefore(mobileUserPanel, dropdown.nextSibling)
   document.body.appendChild(footer)
 
   // Theme toggle
   const themeToggle = document.getElementById('themeToggle')
-  const themeToggleMobile = document.getElementById('themeToggleMobile')
+  const mobileThemeBtn = document.getElementById('mobileThemeBtn')
+
+  // Mobile user button
+  const mobileUserBtn = document.getElementById('mobileUserBtn')
+  if (mobileUserBtn) {
+    mobileUserBtn.addEventListener('click', () => {
+      const panel = document.getElementById('mobileUserPanel')
+      panel.classList.toggle('open')
+      // Close tools dropdown if open
+      dropdown.classList.remove('open')
+    })
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('mobileUserPanel')
+      if (!panel.contains(e.target) && e.target !== mobileUserBtn && !mobileUserBtn.contains(e.target)) {
+        panel.classList.remove('open')
+      }
+    })
+  }
   function updateToggleIcons() {
     const icon = getCurrentTheme() === 'dark' ? sunIcon : moonIcon
+    const label = getCurrentTheme() === 'dark' ? 'Light' : 'Dark'
     if (themeToggle) themeToggle.innerHTML = icon
-    if (themeToggleMobile) themeToggleMobile.innerHTML = icon
+    if (mobileThemeBtn) mobileThemeBtn.innerHTML = icon + ' ' + label
   }
   updateToggleIcons()
   function handleToggle() {
@@ -520,50 +555,49 @@ export function injectHeader() {
     syncPreference('theme', getCurrentTheme())
   }
   if (themeToggle) themeToggle.addEventListener('click', handleToggle)
-  if (themeToggleMobile) themeToggleMobile.addEventListener('click', handleToggle)
+  if (mobileThemeBtn) mobileThemeBtn.addEventListener('click', handleToggle)
 
   // ── Auth integration ──
   const authSlot = document.getElementById('authSlot')
-  const mobileAuthSlot = document.getElementById('mobileAuthSlot')
+  const mobileAuthContent = document.getElementById('mobileAuthContent')
 
   function renderAuthUI(user) {
+    // Desktop auth
     if (authSlot) {
       authSlot.innerHTML = ''
       if (user) {
-        authSlot.appendChild(createUserDropdown(user, async () => {
-          clearPreferencesSync()
-          await supabaseSignOut()
-        }))
+        authSlot.appendChild(createUserDropdown(user, async () => { clearPreferencesSync(); await supabaseSignOut() }))
       } else {
         authSlot.appendChild(createSignInButton(() => showSignInModal()))
       }
     }
-    // Mobile auth in hamburger menu
-    if (mobileAuthSlot) {
-      mobileAuthSlot.style.display = 'block'
-      mobileAuthSlot.innerHTML = ''
+    // Mobile auth panel
+    if (mobileAuthContent) {
+      mobileAuthContent.innerHTML = ''
       if (user) {
         const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
-        mobileAuthSlot.innerHTML = `
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;">${name.charAt(0).toUpperCase()}</div>
+        const avatar = user.user_metadata?.avatar_url
+        mobileAuthContent.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            ${avatar ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" referrerpolicy="no-referrer" />` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;font-family:'DM Sans',sans-serif;">${name.charAt(0).toUpperCase()}</div>`}
             <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text-primary);font-family:'DM Sans',sans-serif;">${name}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);font-family:'DM Sans',sans-serif;">${name}</div>
               <div style="font-size:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">${user.email || ''}</div>
             </div>
           </div>
           <div style="display:flex;gap:8px;">
-            <a href="/account" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-primary);text-decoration:none;text-align:center;font-family:'DM Sans',sans-serif;">My Files</a>
-            <button id="mobileSignOut" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;">Sign out</button>
+            <a href="/account" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-primary);text-decoration:none;text-align:center;font-family:'DM Sans',sans-serif;">My Files</a>
+            <button id="mobileSignOutBtn" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;">Sign out</button>
           </div>`
-        const signOutBtn = mobileAuthSlot.querySelector('#mobileSignOut')
-        if (signOutBtn) signOutBtn.addEventListener('click', async () => { clearPreferencesSync(); await supabaseSignOut() })
+        mobileAuthContent.querySelector('#mobileSignOutBtn')?.addEventListener('click', async () => { clearPreferencesSync(); await supabaseSignOut(); document.getElementById('mobileUserPanel').classList.remove('open') })
+        if (mobileUserBtn) mobileUserBtn.classList.add('signed-in')
       } else {
         const btn = document.createElement('button')
-        btn.style.cssText = 'width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent);color:var(--text-on-accent);font-size:13px;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;'
+        btn.style.cssText = 'width:100%;padding:11px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;'
         btn.textContent = 'Sign in'
-        btn.addEventListener('click', () => { showSignInModal() })
-        mobileAuthSlot.appendChild(btn)
+        btn.addEventListener('click', () => { showSignInModal(); document.getElementById('mobileUserPanel').classList.remove('open') })
+        mobileAuthContent.appendChild(btn)
+        if (mobileUserBtn) mobileUserBtn.classList.remove('signed-in')
       }
     }
   }
