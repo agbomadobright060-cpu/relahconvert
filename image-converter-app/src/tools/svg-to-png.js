@@ -59,7 +59,7 @@ style.textContent = `
   .next-link:hover{border-color:var(--accent);color:var(--accent);}
 `
 document.head.appendChild(style)
-document.title = t.svgpng_page_title || (seoData ? seoData.page_title : 'SVG to PNG Converter Free | No Upload \u2014 RelahConvert')
+document.title = t.svgpng_page_title || (seoData ? seoData.page_title : 'SVG to PNG Converter Free | Bulk & Private \u2014 RelahConvert')
 const _metaDesc = document.createElement('meta'); _metaDesc.name = 'description'
 _metaDesc.content = t.svgpng_meta_desc || 'Convert SVG to PNG free. Set custom width, batch convert up to 25 files. Browser-only, no upload required.'
 document.head.appendChild(_metaDesc)

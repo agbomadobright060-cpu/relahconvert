@@ -52,7 +52,7 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = toolName + ' Free | No Upload — RelahConvert'
+document.title = toolName + ' Free | Bulk & Private — RelahConvert'
 
 const PRESETS = [
   { label: '2×2', rows: 2, cols: 2 },

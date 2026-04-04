@@ -166,7 +166,7 @@ document.querySelector('#app').innerHTML = `
   ${buildSeoSection()}
 `
 
-if (currentTool) document.title = (t.tool_title && t.tool_title[slug] ? t.tool_title[slug] : currentTool.title) + ' | Free & Private — No Upload'
+if (currentTool) document.title = (t.tool_title && t.tool_title[slug] ? t.tool_title[slug] : currentTool.title) + ' | Free, Bulk & Private'
 injectHeader()
 
 const fileInput = document.getElementById('fileInput')

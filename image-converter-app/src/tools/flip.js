@@ -66,7 +66,7 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = `${toolName} Free | No Upload — RelahConvert`
+document.title = `${toolName} Free | Bulk & Private — RelahConvert`
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">

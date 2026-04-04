@@ -59,7 +59,7 @@ style.textContent = `
   .next-link:hover{border-color:var(--accent);color:var(--accent);}
 `
 document.head.appendChild(style)
-document.title = t.svgjpg_page_title || (seoData ? seoData.page_title : 'SVG to JPG Converter Free | No Upload \u2014 RelahConvert')
+document.title = t.svgjpg_page_title || (seoData ? seoData.page_title : 'SVG to JPG Converter Free | Bulk & Private \u2014 RelahConvert')
 const _metaDesc = document.createElement('meta'); _metaDesc.name = 'description'
 _metaDesc.content = t.svgjpg_meta_desc || 'Convert SVG to JPG free with white background. Set custom width, batch convert. Browser-only, no upload required.'
 document.head.appendChild(_metaDesc)

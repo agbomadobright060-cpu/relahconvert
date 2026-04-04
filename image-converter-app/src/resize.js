@@ -53,7 +53,7 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = 'Image Resizer — Resize JPG and PNG Free | No Upload'
+  document.title = 'Image Resizer — Resize JPG and PNG Free | Bulk & Private'
   const metaDesc = document.createElement('meta')
   metaDesc.name = 'description'
   metaDesc.content = 'Resize images by pixels or percentage free without uploading to a server. Browser-based image resizer — your files never leave your device. Instant, private, no account needed.'

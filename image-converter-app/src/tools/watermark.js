@@ -89,7 +89,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | No Upload — RelahConvert`
+document.title = `${toolName} Free | Bulk & Private — RelahConvert`
 document.querySelector('#app').innerHTML = `
   <div id="mainContainer" style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">

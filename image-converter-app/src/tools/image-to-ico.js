@@ -59,7 +59,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Converter Free | No Upload — RelahConvert`
+document.title = `${toolName} Converter Free | Bulk & Private — RelahConvert`
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 const SIZES = [16, 32, 48, 64, 128, 256]
 let mode = 'all' // 'all' or 'individual'
