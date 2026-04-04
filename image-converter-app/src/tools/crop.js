@@ -69,7 +69,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | Bulk & Private — RelahConvert`
+document.title = `${toolName} Free | Free & Private — RelahConvert`
 const parts = toolName.split(' ')
 const h1Main = parts[0]
 const h1Em   = parts.slice(1).join(' ')
