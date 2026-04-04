@@ -53,7 +53,8 @@ export function createUserDropdown(user, onSignOut) {
   btn.innerHTML += `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>`
 
   const menu = document.createElement('div')
-  menu.style.cssText = 'display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:1000;min-width:220px;overflow:hidden;'
+  const isRTL = document.documentElement.dir === 'rtl'
+  menu.style.cssText = 'display:none;position:absolute;top:100%;margin-top:6px;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:1000;min-width:220px;overflow:hidden;' + (isRTL ? 'left:0;' : 'right:0;')
 
   // User info header
   const header = document.createElement('div')
