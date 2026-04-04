@@ -135,10 +135,13 @@
       .theme-toggle { background: none; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; padding: 4px 6px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-left: auto; }
       .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
       @media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
+      .home-mobile-user { display:none; background:none; border:1px solid var(--border-light); border-radius:8px; padding:6px; color:var(--text-secondary); cursor:pointer; }
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
         #homeAuthSlot { display: none !important; }
+        #themeToggle { display: none; }
+        .home-mobile-user { display:flex; align-items:center; justify-content:center; }
         .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .tool-card { padding: 14px; }
         .tool-card .icon { width: 36px; height: 36px; margin-bottom: 8px; }
@@ -208,32 +211,64 @@
         <nav class="desktop-nav" id="desktopNav"></nav>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
         <div id="homeAuthSlot" style="display:inline-flex;"></div>
-        <script type="module">
-          import { getUser, onAuthStateChange } from '/src/core/supabase.js'
-          import { createSignInButton, createUserDropdown, showSignInModal } from '/src/core/auth-ui.js'
-          import { signOut } from '/src/core/supabase.js'
-          import { initPreferencesSync, clearPreferencesSync } from '/src/core/preferences-sync.js'
-
-          const slot = document.getElementById('homeAuthSlot')
-          function render(user) {
-            if (!slot) return
-            slot.innerHTML = ''
-            if (user) {
-              slot.appendChild(createUserDropdown(user, async () => { clearPreferencesSync(); await signOut() }))
-            } else {
-              slot.appendChild(createSignInButton(() => showSignInModal()))
-            }
-          }
-          getUser().then(user => { render(user); if (user) initPreferencesSync(user) })
-          onAuthStateChange((ev, session) => {
-            render(session?.user || null)
-            if (ev === 'SIGNED_IN' && session?.user) initPreferencesSync(session.user)
-            if (ev === 'SIGNED_OUT') clearPreferencesSync()
-          })
-        </script>
+        <button class="home-mobile-user" id="homeMobileUserBtn" aria-label="Account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
         <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
+      </div>
+    </header>
+    <div id="homeMobilePanel" style="display:none;position:fixed;top:64px;right:0;width:280px;background:var(--bg-card);border-bottom-left-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:99;padding:16px;border:1px solid var(--border-light);">
+      <div id="homeMobileAuth"></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted);font-family:'DM Sans',sans-serif;">Dark mode</span>
+        <button id="homeMobileTheme" style="background:none;border:1px solid var(--border-light);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;gap:6px;font-size:12px;font-family:'DM Sans',sans-serif;"></button>
+      </div>
+    </div>
+    <script type="module">
+      import { getUser, onAuthStateChange, signOut } from '/src/core/supabase.js'
+      import { createSignInButton, createUserDropdown, showSignInModal } from '/src/core/auth-ui.js'
+      import { initPreferencesSync, clearPreferencesSync } from '/src/core/preferences-sync.js'
+      import { getCurrentTheme, toggleTheme, sunIcon, moonIcon } from '/src/core/theme.js'
+
+      // Desktop auth
+      const slot = document.getElementById('homeAuthSlot')
+      const mobileAuth = document.getElementById('homeMobileAuth')
+      const mobileBtn = document.getElementById('homeMobileUserBtn')
+      const panel = document.getElementById('homeMobilePanel')
+
+      function render(user) {
+        if (slot) { slot.innerHTML = ''; if (user) { slot.appendChild(createUserDropdown(user, async () => { clearPreferencesSync(); await signOut() })) } else { slot.appendChild(createSignInButton(() => showSignInModal())) } }
+        if (mobileAuth) {
+          mobileAuth.innerHTML = ''
+          if (user) {
+            const n = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+            const av = user.user_metadata?.avatar_url
+            mobileAuth.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">' + (av ? '<img src="'+av+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" referrerpolicy="no-referrer" />' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;">'+n.charAt(0).toUpperCase()+'</div>') + '<div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">'+n+'</div><div style="font-size:11px;color:var(--text-muted);">'+(user.email||'')+'</div></div></div><div style="display:flex;gap:8px;"><a href="/account" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-primary);text-decoration:none;text-align:center;">My Files</a><button id="hmSignOut" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-card);cursor:pointer;">Sign out</button></div>'
+            mobileAuth.querySelector('#hmSignOut')?.addEventListener('click', async () => { clearPreferencesSync(); await signOut(); panel.style.display='none' })
+          } else {
+            const b = document.createElement('button')
+            b.style.cssText = 'width:100%;padding:11px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-weight:700;cursor:pointer;'
+            b.textContent = 'Sign in'
+            b.addEventListener('click', () => { showSignInModal(); panel.style.display='none' })
+            mobileAuth.appendChild(b)
+          }
+        }
+      }
+      getUser().then(user => { render(user); if (user) initPreferencesSync(user) })
+      onAuthStateChange((ev, s) => { render(s?.user||null); if(ev==='SIGNED_IN'&&s?.user) initPreferencesSync(s.user); if(ev==='SIGNED_OUT') clearPreferencesSync() })
+
+      // Mobile panel toggle
+      if (mobileBtn) mobileBtn.addEventListener('click', () => { panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; document.getElementById('dropdown-menu')?.classList.remove('open') })
+      document.addEventListener('click', e => { if (panel && !panel.contains(e.target) && e.target !== mobileBtn && !mobileBtn?.contains(e.target)) panel.style.display = 'none' })
+
+      // Mobile theme toggle
+      const mtb = document.getElementById('homeMobileTheme')
+      function updateMT() { if(mtb) mtb.innerHTML = (getCurrentTheme()==='dark'?sunIcon:moonIcon) + ' ' + (getCurrentTheme()==='dark'?'Light':'Dark') }
+      updateMT()
+      if(mtb) mtb.addEventListener('click', () => { toggleTheme(); updateMT() })
+    </script>
       </div>
     </header>
     <div id="dropdown-menu">
