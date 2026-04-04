@@ -135,11 +135,16 @@
       .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
       @media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
       .home-mobile-user { display:none; background:none; border:1px solid var(--border-light); border-radius:8px; padding:6px; color:var(--text-secondary); cursor:pointer; }
-      [dir="rtl"] .header-inner { gap: 8px; padding: 0 12px; }
-      [dir="rtl"] .nav-link { padding: 4px 6px; font-size: 10px; letter-spacing: 0; }
-      [dir="rtl"] .desktop-nav { gap: 4px; }
-      [dir="rtl"] .nav-link:nth-child(3),
-      [dir="rtl"] .nav-link:nth-child(4) { display: none; }
+      [dir="rtl"] .header-inner { gap: 6px; padding: 0 10px; }
+      [dir="rtl"] .nav-link { padding: 4px 5px; font-size: 10px; letter-spacing: 0; gap: 2px; }
+      [dir="rtl"] .desktop-nav { gap: 3px; }
+      [dir="rtl"] .more-btn { font-size: 10px; padding: 6px 8px; }
+      [dir="rtl"] .logo { font-size: 20px; gap: 4px; }
+      [dir="rtl"] .logo svg { width: 18px; height: 14px; }
+      [dir="rtl"] .theme-toggle { padding: 3px 4px; }
+      [dir="rtl"] .rc-auth-btn { padding: 4px 8px; font-size: 11px; }
+      [dir="rtl"] .rc-auth-btn span { display: none; }
+      [dir="rtl"] .rc-user-btn { padding: 2px 6px; }
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
