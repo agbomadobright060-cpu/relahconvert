@@ -91,7 +91,7 @@ const translations = {
       'jpg-to-gif':'Convert JPG images to GIF format free. Files never leave your device.',
       'png-to-gif':'Convert PNG images to GIF format free. Files never leave your device.',
     },
-    auth_sign_in:'Sign in',auth_sign_up:'Sign up',auth_sign_out:'Sign out',auth_sign_in_google:'Sign in with Google',auth_email:'Email',auth_password:'Password',auth_my_account:'My Account',auth_my_files:'My Files',auth_or:'or',auth_no_account:'Don't have an account?',auth_have_account:'Already have an account?',select_images:'Select Images',drop_hint:'or drop images anywhere',drop_images:'Drop images',
+    auth_sign_in:'Sign in',auth_sign_up:'Sign up',auth_sign_out:'Sign out',auth_sign_in_google:'Sign in with Google',auth_email:'Email',auth_password:'Password',auth_my_account:'My Account',auth_my_files:'My Files',auth_or:'or',auth_no_account:'No account yet?',auth_have_account:'Already have an account?',select_images:'Select Images',drop_hint:'or drop images anywhere',drop_images:'Drop images',
     add_more:'Add more',download:'Download',download_zip:'Download ZIP',processing:'Processing...',
     warn_wrong_format:'file(s) were skipped.',warn_unsupported:'Unsupported format.',
     warn_too_large:'file(s) are too large and were skipped.',
