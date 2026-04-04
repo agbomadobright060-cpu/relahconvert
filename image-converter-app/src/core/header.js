@@ -474,6 +474,7 @@ export function injectHeader() {
       <div class="dropdown-col">${leftCats.map(renderCat).join('')}</div>
       <div class="dropdown-col">${rightCats.map(renderCat).join('')}</div>
     </div>
+    <div id="mobileAuthSlot" style="padding:12px 20px;border-top:1px solid var(--border-light);display:none;"></div>
   `
 
   const footer = document.createElement('footer')
@@ -523,17 +524,47 @@ export function injectHeader() {
 
   // ── Auth integration ──
   const authSlot = document.getElementById('authSlot')
+  const mobileAuthSlot = document.getElementById('mobileAuthSlot')
 
   function renderAuthUI(user) {
-    if (!authSlot) return
-    authSlot.innerHTML = ''
-    if (user) {
-      authSlot.appendChild(createUserDropdown(user, async () => {
-        clearPreferencesSync()
-        await supabaseSignOut()
-      }))
-    } else {
-      authSlot.appendChild(createSignInButton(() => showSignInModal()))
+    if (authSlot) {
+      authSlot.innerHTML = ''
+      if (user) {
+        authSlot.appendChild(createUserDropdown(user, async () => {
+          clearPreferencesSync()
+          await supabaseSignOut()
+        }))
+      } else {
+        authSlot.appendChild(createSignInButton(() => showSignInModal()))
+      }
+    }
+    // Mobile auth in hamburger menu
+    if (mobileAuthSlot) {
+      mobileAuthSlot.style.display = 'block'
+      mobileAuthSlot.innerHTML = ''
+      if (user) {
+        const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+        mobileAuthSlot.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;">${name.charAt(0).toUpperCase()}</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);font-family:'DM Sans',sans-serif;">${name}</div>
+              <div style="font-size:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">${user.email || ''}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <a href="/account" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-primary);text-decoration:none;text-align:center;font-family:'DM Sans',sans-serif;">My Files</a>
+            <button id="mobileSignOut" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border-light);font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;">Sign out</button>
+          </div>`
+        const signOutBtn = mobileAuthSlot.querySelector('#mobileSignOut')
+        if (signOutBtn) signOutBtn.addEventListener('click', async () => { clearPreferencesSync(); await supabaseSignOut() })
+      } else {
+        const btn = document.createElement('button')
+        btn.style.cssText = 'width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent);color:var(--text-on-accent);font-size:13px;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;'
+        btn.textContent = 'Sign in'
+        btn.addEventListener('click', () => { showSignInModal() })
+        mobileAuthSlot.appendChild(btn)
+      }
     }
   }
 
