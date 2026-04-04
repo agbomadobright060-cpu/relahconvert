@@ -72,7 +72,7 @@
       .logo { font-family: 'Fraunces', serif; font-size: 24px; color: var(--text-primary); text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; display: flex; flex-direction: row; align-items: center; gap: 7px; line-height: 1; direction: ltr; white-space: nowrap; }
       .logo .relah { font-weight: 400; color: var(--text-primary); }
       .logo .convert { font-weight: 900; font-style: italic; color: var(--accent); }
-      .desktop-nav { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; overflow: hidden; }
+      .desktop-nav { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
       .nav-link { padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #111111; text-decoration: none; transition: color 0.15s; white-space: nowrap; }
       [data-theme="dark"] .nav-link { color: var(--text-primary); }
       .nav-link:hover { color: var(--accent); }
@@ -135,6 +135,9 @@
       .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
       @media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
       .home-mobile-user { display:none; background:none; border:1px solid var(--border-light); border-radius:8px; padding:6px; color:var(--text-secondary); cursor:pointer; }
+      [dir="rtl"] .header-inner { gap: 10px; padding: 0 16px; }
+      [dir="rtl"] .nav-link { padding: 6px 8px; font-size: 11px; }
+      [dir="rtl"] .desktop-nav { gap: 8px; }
       @media (max-width: 768px) {
         .desktop-nav { display: none; }
         .hamburger { display: flex; }
