@@ -55,6 +55,8 @@ style.textContent = `
     .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
     .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
+  .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .next-link:hover{border-color:var(--accent);color:var(--accent);}
 `
 document.head.appendChild(style)
 document.title = t.svgjpg_page_title || (seoData ? seoData.page_title : 'SVG to JPG Converter Free | No Upload \u2014 RelahConvert')
@@ -85,6 +87,10 @@ document.querySelector('#app').innerHTML = `
       <button class="action-btn" id="convertBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">Convert to JPG</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
+    <div id="nextSteps" style="display:none;margin-top:20px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
@@ -100,6 +106,53 @@ const outWidthInp = document.getElementById('outWidth')
 const statusText  = document.getElementById('statusText')
 
 let files = []
+let lastResults = []
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+
+function buildNextSteps() {
+  const ns = t.nav_short || {}
+  const buttons = [
+    { label: ns.compress || 'Compress', href: localHref('compress') },
+    { label: ns.resize || 'Resize', href: localHref('resize') },
+    { label: ns.crop || 'Crop', href: localHref('crop') },
+    { label: ns.watermark || 'Watermark', href: localHref('watermark') },
+    { label: ns['remove-background'] || 'Remove BG', href: localHref('remove-background') },
+  ]
+  const nextStepsButtons = document.getElementById('nextStepsButtons')
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  document.getElementById('nextSteps').style.display = 'block'
+}
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
@@ -188,6 +241,8 @@ convertBtn.addEventListener('click', async () => {
   convertBtn.disabled = false
   statusText.textContent = files.length > 1 ? `${files.length} JPGs ready.` : 'JPG ready.'
   if (files.length > 1) { zipBtn.style.display = 'block'; zipBtn._results = results }
+  lastResults = results.map(r => ({ blob: r.blob, name: r.name, type: 'image/jpeg' }))
+  buildNextSteps()
 })
 
 zipBtn.addEventListener('click', async () => {

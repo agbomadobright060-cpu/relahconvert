@@ -83,6 +83,8 @@ style.textContent = `
     .seo-section .faq-item { background:var(--bg-card); border-radius:12px; padding:18px 20px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
     .seo-section .faq-item h4 { font-family:'Fraunces',serif; font-size:15px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
     .seo-section .faq-item p { margin:0; }
+  .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .next-link:hover{border-color:var(--accent);color:var(--accent);}
 `
 document.head.appendChild(style)
 
@@ -124,10 +126,62 @@ document.querySelector('#app').innerHTML = `
       <img id="previewImg" src="" alt="Screenshot preview" />
     </div>
     <a class="download-btn" id="downloadBtn" href="#" download="screenshot.jpg">⬇ ${t.hti_download || 'Download Screenshot'}</a>
+    <div id="nextSteps" style="display:none;margin-top:20px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
+    </div>
   </div>
 `
 
 injectHeader()
+
+let lastResults = []
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+
+function buildNextSteps() {
+  const ns = t.nav_short || {}
+  const buttons = [
+    { label: ns.compress || 'Compress', href: localHref('compress') },
+    { label: ns.resize || 'Resize', href: localHref('resize') },
+    { label: ns.crop || 'Crop', href: localHref('crop') },
+    { label: ns.watermark || 'Watermark', href: localHref('watermark') },
+    { label: ns['remove-background'] || 'Remove BG', href: localHref('remove-background') },
+  ]
+  const nextStepsButtons = document.getElementById('nextStepsButtons')
+  nextStepsButtons.innerHTML = ''
+  buttons.forEach(b => {
+    const btn = document.createElement('button')
+    btn.className = 'next-link'
+    btn.textContent = b.label
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {}
+      }
+      window.location.href = b.href
+    })
+    nextStepsButtons.appendChild(btn)
+  })
+  document.getElementById('nextSteps').style.display = 'block'
+}
 
 const urlInput    = document.getElementById('urlInput')
 const screenSize  = document.getElementById('screenSize')
@@ -174,6 +228,8 @@ captureBtn.addEventListener('click', async () => {
     downloadBtn.href     = objUrl
     downloadBtn.download = `screenshot.${ext}`
     downloadBtn.style.display = 'block';if(window.showReviewPrompt)window.showReviewPrompt()
+    lastResults = [{ blob, name: `screenshot.${ext}`, type: blob.type }]
+    buildNextSteps()
   } catch {
     showError(t.hti_error || 'Could not capture screenshot. Please check the URL and try again.')
   } finally {
