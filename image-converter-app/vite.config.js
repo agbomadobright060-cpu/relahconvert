@@ -182,7 +182,7 @@ function langCopyPlugin() {
 
       for (const lang of supportedLangs) {
         // Replace lang="en" with the correct language and strip English canonical
-        let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"`)
+        let langHtml = baseHtml.replace('lang="en"', `lang="${lang}"${lang === 'ar' ? ' dir="rtl"' : ''}`)
         langHtml = langHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
 
         // Inject translated title and meta description into homepage
@@ -218,7 +218,7 @@ function langCopyPlugin() {
           const staticSrc = resolve(distDir, page + '.html')
           if (!existsSync(staticSrc)) continue
           let staticHtml = readFileSync(staticSrc, 'utf-8')
-          staticHtml = staticHtml.replace('lang="en"', `lang="${lang}"`)
+          staticHtml = staticHtml.replace('lang="en"', `lang="${lang}"${lang === 'ar' ? ' dir="rtl"' : ''}`)
           staticHtml = staticHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
           staticHtml = staticHtml.replace(/<link rel="alternate" hreflang="[^"]*"[^>]*\/>\n?/g, '')
           const translatedSlug = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
