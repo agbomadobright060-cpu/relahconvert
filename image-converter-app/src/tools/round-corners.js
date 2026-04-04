@@ -84,8 +84,14 @@ document.querySelector('#app').innerHTML = `
       <span class="count-badge" id="countBadge" style="display:none;">0 images</span>
     </div>
     <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
+    <div id="modeToggle" style="display:none;margin-bottom:14px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button class="mode-btn active" data-mode="all" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button class="mode-btn" data-mode="individual" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="radiusPanel" class="radius-panel" style="display:none;">
-      <div class="radius-panel-title">${t.round_corners_panel}</div>
+      <div class="radius-panel-title" id="radiusPanelTitle">${t.round_corners_panel}</div>
       <div class="slider-row">
         <input type="range" class="radius-slider" id="radiusSlider" min="0" max="50" value="20" />
         <span class="radius-value" id="radiusValue">20%</span>
@@ -125,6 +131,12 @@ const nextStepsButtons = document.getElementById('nextStepsButtons')
 
 let files = []
 let lastResults = []
+let rcMode = 'all'
+let activeIdx = 0
+
+function getRadius(item) {
+  return rcMode === 'individual' && item.radius !== undefined ? item.radius : parseInt(radiusSlider.value)
+}
 
 // ── IndexedDB helpers ──────────────────────────────────────────────────────
 function openDB() {
@@ -217,10 +229,12 @@ function updateCountBadge() {
   if (files.length === 0) {
     countBadge.style.display = 'none'
     radiusPanel.style.display = 'none'
+    document.getElementById('modeToggle').style.display = 'none'
   } else {
     countBadge.style.display = 'inline-block'
     countBadge.textContent = `${files.length} image${files.length > 1 ? 's' : ''}`
     radiusPanel.style.display = 'block'
+    if (files.length > 1) document.getElementById('modeToggle').style.display = 'block'
   }
   applyBtn.disabled = files.length === 0
   applyBtn.textContent = files.length > 1 ? `${t.round_corners_btn} (${files.length})` : t.round_corners_btn
@@ -252,37 +266,54 @@ function drawRounded(img, canvas, radiusPct) {
 
 // ── Update all previews when slider changes ────────────────────────────────
 function refreshPreviews() {
-  const radiusPct = parseInt(radiusSlider.value)
   files.forEach(item => {
     if (item.imgEl && item.previewCanvas) {
-      drawRounded(item.imgEl, item.previewCanvas, radiusPct)
+      drawRounded(item.imgEl, item.previewCanvas, getRadius(item))
     }
+  })
+  // Update radius badges
+  document.querySelectorAll('.radius-badge').forEach((badge, i) => {
+    if (files[i]) badge.textContent = getRadius(files[i]) + '%'
   })
 }
 
 // ── Render grid ────────────────────────────────────────────────────────────
 function renderGrid() {
   fileGrid.innerHTML = ''
-  const radiusPct = parseInt(radiusSlider.value)
   files.forEach((item, idx) => {
     const card = document.createElement('div')
     card.className = 'file-card'
+    card.style.cursor = 'pointer'
+    card.style.border = idx === activeIdx && rcMode === 'individual' ? '2px solid var(--accent)' : '1.5px solid var(--border)'
     const imgWrap = document.createElement('div')
     imgWrap.className = 'card-img-wrap'
     const canvas = document.createElement('canvas')
     canvas.style.cssText = 'max-width:100%; max-height:130px; object-fit:contain; display:block;'
     item.previewCanvas = canvas
-    if (item.imgEl) drawRounded(item.imgEl, canvas, radiusPct)
+    if (item.imgEl) drawRounded(item.imgEl, canvas, getRadius(item))
     imgWrap.appendChild(canvas)
     const footer = document.createElement('div')
     footer.className = 'card-footer'
-    footer.innerHTML = `<span class="card-name">${item.file.name}</span><button class="remove-btn" data-idx="${idx}">✕</button>`
-    footer.querySelector('.remove-btn').addEventListener('click', () => {
+    footer.innerHTML = `<span class="card-name">${item.file.name}</span><span class="radius-badge" style="font-size:10px;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif;">${getRadius(item)}%</span><button class="remove-btn" data-idx="${idx}">✕</button>`
+    footer.querySelector('.remove-btn').addEventListener('click', (e) => {
+      e.stopPropagation()
       files.splice(idx, 1)
+      if (activeIdx >= files.length) activeIdx = Math.max(0, files.length - 1)
       renderGrid()
       updateCountBadge()
       zipWrap.style.display = 'none'
       nextSteps.style.display = 'none'
+      if (files.length <= 1) document.getElementById('modeToggle').style.display = 'none'
+    })
+    card.addEventListener('click', () => {
+      if (rcMode !== 'individual') return
+      activeIdx = idx
+      // Load this file's radius into the slider
+      radiusSlider.value = getRadius(item)
+      radiusValue.textContent = getRadius(item) + '%'
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === getRadius(item)))
+      document.getElementById('radiusPanelTitle').textContent = item.file.name
+      renderGrid()
     })
     card.append(imgWrap, footer)
     fileGrid.appendChild(card)
@@ -319,19 +350,48 @@ document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.
 
 // ── Slider & presets ───────────────────────────────────────────────────────
 radiusSlider.addEventListener('input', () => {
-  const val = radiusSlider.value
+  const val = parseInt(radiusSlider.value)
   radiusValue.textContent = val + '%'
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.val === val))
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === val))
+  if (rcMode === 'individual' && files[activeIdx]) {
+    files[activeIdx].radius = val
+  }
   refreshPreviews()
 })
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    radiusSlider.value = btn.dataset.val
-    radiusValue.textContent = btn.dataset.val + '%'
+    const val = parseInt(btn.dataset.val)
+    radiusSlider.value = val
+    radiusValue.textContent = val + '%'
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'))
     btn.classList.add('active')
+    if (rcMode === 'individual' && files[activeIdx]) {
+      files[activeIdx].radius = val
+    }
     refreshPreviews()
   })
+})
+
+// Mode toggle
+document.getElementById('modeToggle').addEventListener('click', e => {
+  const btn = e.target.closest('.mode-btn')
+  if (!btn) return
+  rcMode = btn.dataset.mode
+  document.querySelectorAll('#modeToggle .mode-btn').forEach(b => {
+    const isActive = b.dataset.mode === rcMode
+    b.style.background = isActive ? 'var(--accent)' : 'var(--bg-card)'
+    b.style.color = isActive ? 'var(--text-on-accent)' : 'var(--text-secondary)'
+  })
+  if (rcMode === 'individual') {
+    // Initialize per-file radius from current slider
+    const globalVal = parseInt(radiusSlider.value)
+    files.forEach(f => { if (f.radius === undefined) f.radius = globalVal })
+    document.getElementById('radiusPanelTitle').textContent = files[activeIdx]?.file.name || 'CORNER RADIUS'
+  } else {
+    document.getElementById('radiusPanelTitle').textContent = t.round_corners_panel || 'CORNER RADIUS'
+  }
+  renderGrid()
+  refreshPreviews()
 })
 
 // ── Canvas to blob ─────────────────────────────────────────────────────────
@@ -347,11 +407,11 @@ applyBtn.addEventListener('click', async () => {
   zipWrap.style.display = 'none'
   nextSteps.style.display = 'none'
   lastResults = []
-  const radiusPct = parseInt(radiusSlider.value)
   const usedNames = new Set()
 
   if (files.length === 1) {
     const item = files[0]
+    const radiusPct = getRadius(item)
     const canvas = document.createElement('canvas')
     drawRounded(item.imgEl, canvas, radiusPct)
     const blob = await canvasToBlob(canvas)
@@ -380,7 +440,7 @@ applyBtn.addEventListener('click', async () => {
   const zip = new window.JSZip()
   for (const item of files) {
     const canvas = document.createElement('canvas')
-    drawRounded(item.imgEl, canvas, radiusPct)
+    drawRounded(item.imgEl, canvas, getRadius(item))
     const blob = await canvasToBlob(canvas)
     const baseName = item.file.name.replace(/\.[^.]+$/, '')
     const fname = makeUnique(usedNames, `${baseName}-rounded.png`)
