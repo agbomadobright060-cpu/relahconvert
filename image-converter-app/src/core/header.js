@@ -448,12 +448,12 @@ export function injectHeader() {
   header.innerHTML = `<div class="header-inner">${logoHTML + navHTML}</div>`
 
   const toolCategories = [
-    { name: 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
-    { name: 'Optimize', slugs: ['compress','resize','resize-in-kb'] },
-    { name: 'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
-    { name: 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
-    { name: 'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
-    { name: 'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
+    { name: t.cat_convert || 'Convert', slugs: ['jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png','gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg','heic-to-jpg'] },
+    { name: t.cat_optimize || 'Optimize', slugs: ['compress','resize','resize-in-kb'] },
+    { name: t.cat_modify || 'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
+    { name: t.cat_create || 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
+    { name: t.cat_export || 'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
+    { name: t.cat_photo || 'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
   ]
 
   function toolLink(slug) {
