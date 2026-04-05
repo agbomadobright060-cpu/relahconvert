@@ -96,8 +96,12 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif; font-size:clamp(24px,4vw,36px); font-weight:400; color:var(--text-primary); margin:0 0 6px; line-height:1; letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic; color:var(--accent);">${h1Em}</em></h1>
       <p style="font-size:13px; color:var(--text-tertiary); margin:0 0 14px;">${descText}</p>
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-      <span style="font-size:12px; color:var(--text-muted); margin-left:10px;">up to 25 images</span>
+      <span style="font-size:12px; color:var(--text-muted); margin-left:10px;">${t.drop_hint || 'or drop images anywhere'}</span>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
+      <label for="fileInput" id="wmDropZone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:48px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.background='var(--bg-card)'">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span style="font-size:14px;color:var(--text-secondary);margin-top:10px;font-family:'DM Sans',sans-serif;font-weight:600;">${t.drop_images || 'Drop images'}</span>
+      </label>
     </div>
     <div class="tool-layout" id="toolLayout" style="display:none;">
       <div class="image-col">
@@ -608,6 +612,8 @@ function loadFiles(newFiles) {
       if (loaded === toAdd.length) {
         toolLayout.style.display = 'grid'
         document.getElementById('mainContainer').style.maxWidth = '1000px'
+        const dz = document.getElementById('wmDropZone')
+        if (dz) dz.style.display = 'none'
         applyBtn.disabled = false
         if (baseFiles.length > 1) modeToggle.style.display = 'block'
         renderFileChips(); renderPreview()
