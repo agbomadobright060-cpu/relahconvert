@@ -114,6 +114,10 @@ document.querySelector('#app').innerHTML = `
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);margin-left:12px;">${dropHint}</span>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
+      <label for="fileInput" id="rbDropZone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:48px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.background='var(--bg-card)'">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span style="font-size:14px;color:var(--text-secondary);margin-top:10px;font-family:'DM Sans',sans-serif;font-weight:600;">${t.drop_images || 'Drop images'}</span>
+      </label>
     </div>
     <div id="thumbStrip"></div>
     <div id="navRow">
@@ -470,6 +474,8 @@ function addFiles(newFiles) {
     entries.push(entry)
   }
   thumbStrip.classList.add('on'); navRow.classList.add('on')
+  const rbDZ = document.getElementById('rbDropZone')
+  if (rbDZ) rbDZ.style.display = 'none'
   if (entries.length > 1) removeAllBtn.style.display = 'block'
   currentIdx = startIdx; renderCurrent()
 }
