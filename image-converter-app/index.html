@@ -595,7 +595,7 @@
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
         const ic = svgIcons[c.slug] || { bg: '#F5F5F5', svg: '' }
-        const newBadge = c.isNew ? '<span class="new-badge">New!</span>' : ''
+        const newBadge = c.isNew ? `<span class="new-badge">${t.new_badge || 'New!'}</span>` : ''
         return `<a href="${localHref(c.slug)}" class="tool-card" data-category="${c.cat}">
           ${newBadge}
           <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
