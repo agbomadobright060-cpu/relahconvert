@@ -1039,6 +1039,7 @@ downloadBtn.addEventListener('click', async () => {
       a.href = currentDownloadUrl
       a.download = resultBlobs[0].name
       a.click();if(window.showReviewPrompt)window.showReviewPrompt()
+      window.rcShowSaveButton?.(downloadBtn.parentElement, resultBlobs[0].blob, resultBlobs[0].name, 'pixelate-image')
     } else {
       const zip = new JSZip()
       resultBlobs.forEach((r, i) => zip.file((i + 1) + '_' + r.name, r.blob))
@@ -1049,6 +1050,7 @@ downloadBtn.addEventListener('click', async () => {
       a.href = currentDownloadUrl
       a.download = 'pixelated-images.zip'
       a.click();if(window.showReviewPrompt)window.showReviewPrompt()
+      window.rcShowSaveButton?.(downloadBtn.parentElement, zipBlob, 'pixelated-images.zip', 'pixelate-image')
     }
     buildNextSteps()
   } catch (e) {

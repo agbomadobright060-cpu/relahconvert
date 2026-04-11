@@ -284,13 +284,15 @@ applyBtn.addEventListener('click', async () => {
       const ext  = mime === 'image/png' ? 'png' : 'jpg'
       const baseName = item.file.name.replace(/\.[^.]+$/, '')
       canvas.toBlob(blob => {
-        lastResults = [{ blob, name: `grayscale-${baseName}.${ext}`, type: mime }]
+        const fname = `grayscale-${baseName}.${ext}`
+        lastResults = [{ blob, name: fname, type: mime }]
         const a = document.createElement('a')
         const url = URL.createObjectURL(blob)
         a.href = url
-        a.download = `grayscale-${baseName}.${ext}`
+        a.download = fname
         a.click();if(window.showReviewPrompt)window.showReviewPrompt()
         setTimeout(() => URL.revokeObjectURL(url), 10000)
+        window.rcShowSaveButton?.(applyBtn.parentElement, blob, fname, 'grayscale')
         applyBtn.disabled = false
         applyBtn.textContent = dlBtn
         buildNextSteps()

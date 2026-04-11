@@ -257,6 +257,7 @@ zipBtn.addEventListener('click', async () => {
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob); a.download = 'png-files.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'png-files.zip', 'svg-to-png')
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })

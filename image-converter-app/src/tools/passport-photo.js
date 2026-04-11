@@ -965,11 +965,13 @@ dlPhoto.addEventListener('click', () => {
   photoCanvas.toBlob(blob => {
     if (!blob) return
     const url = URL.createObjectURL(blob)
+    const filename = 'passport-photo-' + selectedCountry.country.toLowerCase().replace(/\s+/g, '-') + '.jpg'
     const a = document.createElement('a')
     a.href = url
-    a.download = 'passport-photo-' + selectedCountry.country.toLowerCase().replace(/\s+/g, '-') + '.jpg'
+    a.download = filename
     a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
+    window.rcShowSaveButton?.(dlPhoto.parentElement, blob, filename, 'passport-photo')
   }, 'image/jpeg', 0.95)
 })
 
@@ -997,11 +999,13 @@ dlSheet.addEventListener('click', () => {
   sheetCanvas.toBlob(blob => {
     if (!blob) return
     const url = URL.createObjectURL(blob)
+    const filename = 'passport-photo-sheet-4x6.jpg'
     const a = document.createElement('a')
     a.href = url
-    a.download = 'passport-photo-sheet-4x6.jpg'
+    a.download = filename
     a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
+    window.rcShowSaveButton?.(dlSheet.parentElement, blob, filename, 'passport-photo')
   }, 'image/jpeg', 0.95)
 })
 

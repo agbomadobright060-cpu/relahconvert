@@ -384,6 +384,7 @@ convertBtn.addEventListener('click', async () => {
           const a = document.createElement('a')
           a.href = zipBtn._url; a.download = 'converted-gif.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
           setTimeout(() => URL.revokeObjectURL(zipBtn._url), 10000)
+          window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'converted-gif.zip', 'jpg-to-gif')
         }, { once: true })
       }
       statusNote.textContent = statusNote.textContent || 'Done!'

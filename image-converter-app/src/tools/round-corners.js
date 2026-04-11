@@ -422,6 +422,7 @@ applyBtn.addEventListener('click', async () => {
     const url = URL.createObjectURL(blob)
     a.href = url; a.download = fname; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
+    window.rcShowSaveButton?.(applyBtn.parentElement, blob, fname, 'round-corners')
     applyBtn.disabled = false
     applyBtn.textContent = t.round_corners_btn
     buildNextSteps()

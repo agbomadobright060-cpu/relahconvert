@@ -334,6 +334,7 @@ zipBtn.addEventListener('click', async () => {
     a.download = 'flipped-images.zip'
     a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'flipped-images.zip', 'flip')
   } catch(e) { alert('ZIP failed: ' + e.message) }
   zipBtn.textContent = dlZipBtn
   zipBtn.disabled = false

@@ -556,6 +556,7 @@ $('downloadBtn').onclick=async()=>{
   const url=URL.createObjectURL(blob)
   const a=document.createElement('a');a.href=url;a.download='blurred-face.jpg';a.click();if(window.showReviewPrompt)window.showReviewPrompt()
   setTimeout(()=>URL.revokeObjectURL(url),10000)
+  window.rcShowSaveButton?.($('downloadBtn').parentElement, blob, 'blurred-face.jpg', 'blur-face')
   buildNextSteps(blob)
 }
 
@@ -579,6 +580,7 @@ $('batchDownloadBtn').onclick=async()=>{
     const url=URL.createObjectURL(zipBlob)
     const a=document.createElement('a');a.href=url;a.download='blurred-faces.zip';a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(()=>URL.revokeObjectURL(url),10000)
+    window.rcShowSaveButton?.(btn.parentElement, zipBlob, 'blurred-faces.zip', 'blur-face')
   }catch(e){alert(ui.batchFailed+': '+e.message)}
   btn.disabled=false;btn.textContent='⬇ ${ui.downloadZip}'
 }

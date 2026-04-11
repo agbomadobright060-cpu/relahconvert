@@ -1023,8 +1023,10 @@ $('downloadBtn').onclick = () => {
   render()
   canvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = `meme.${S.fmt}`; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
+    const filename = `meme.${S.fmt}`
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
+    window.rcShowSaveButton?.($('downloadBtn').parentElement, blob, filename, 'meme-generator')
     buildNextSteps(blob, mime)
     // restore selection
     selectedLayer = prevSelected

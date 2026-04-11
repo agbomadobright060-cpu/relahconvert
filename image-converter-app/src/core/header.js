@@ -7,6 +7,9 @@ import { initPreferencesSync, syncPreference, clearPreferencesSync } from './pre
 import './wp-upload.js' // Auto-init WordPress upload integration
 import { maybeShowSaveButton } from './cloud-save.js'
 
+// Expose globally so tools using ephemeral <a> downloads can trigger it manually
+if (typeof window !== 'undefined') window.rcShowSaveButton = maybeShowSaveButton
+
 // Review prompt — shown once per session after a download
 function showReviewPrompt() {
   if (sessionStorage.getItem('reviewShown')) return

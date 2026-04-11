@@ -512,10 +512,12 @@ dlBtnEl.addEventListener('click', () => {
       d[p+3] = 255
     }
     ctx.putImageData(out, 0, 0)
+    const filename = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.jpg'
     const dl = document.createElement('a')
     dl.href = off.toDataURL('image/jpeg', 0.95)
-    dl.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.jpg'
+    dl.download = filename
     dl.click();if(window.showReviewPrompt)window.showReviewPrompt()
+    off.toBlob(b => { if (b) window.rcShowSaveButton?.(dlBtnEl.parentElement, b, filename, 'remove-background') }, 'image/jpeg', 0.95)
   } else {
     const out = ctx.createImageData(W, H)
     const d = out.data
@@ -525,10 +527,12 @@ dlBtnEl.addEventListener('click', () => {
       d[p+3] = Math.round(255 * (1 - intensity) + entry.maskData[i] * intensity)
     }
     ctx.putImageData(out, 0, 0)
+    const filename = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
     const dl = document.createElement('a')
     dl.href = off.toDataURL('image/png')
-    dl.download = entry.file.name.replace(/\.[^.]+$/, '') + '-no-bg.png'
+    dl.download = filename
     dl.click();if(window.showReviewPrompt)window.showReviewPrompt()
+    off.toBlob(b => { if (b) window.rcShowSaveButton?.(dlBtnEl.parentElement, b, filename, 'remove-background') }, 'image/png')
   }
 })
 
@@ -549,6 +553,7 @@ zipBtn.addEventListener('click', async () => {
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob); a.download = 'removed-backgrounds.zip'; a.click();if(window.showReviewPrompt)window.showReviewPrompt(); setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'removed-backgrounds.zip', 'remove-background')
   } catch(err) { alert('ZIP failed: ' + err.message) }
   zipBtn.textContent = dlZipBtn; zipBtn.disabled = false
 })

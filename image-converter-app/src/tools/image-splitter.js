@@ -309,6 +309,7 @@ downloadBtn.addEventListener('click', async () => {
     a.download = 'split-images.zip'
     a.click();if(window.showReviewPrompt)window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    window.rcShowSaveButton?.(downloadBtn.parentElement, zipBlob, 'split-images.zip', 'image-splitter')
 
     buildNextSteps()
   } catch (e) {
