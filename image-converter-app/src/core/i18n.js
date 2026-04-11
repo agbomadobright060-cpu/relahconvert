@@ -7562,7 +7562,22 @@ export function localHref(englishSlug) {
   return '/' + lang + '/' + translatedSlug(lang, englishSlug)
 }
 
-// Inject hreflang link tags into <head> for multilingual SEO
+// Set or replace the page's <link rel="canonical"> to a specific URL.
+// Always overwrites any existing canonical so SPA-loaded tool pages don't
+// inherit the wrong homepage canonical from index.html.
+export function setCanonical(url) {
+  if (typeof document === 'undefined') return
+  let link = document.querySelector('link[rel="canonical"]')
+  if (!link) {
+    link = document.createElement('link')
+    link.rel = 'canonical'
+    document.head.appendChild(link)
+  }
+  link.href = url
+}
+
+// Inject hreflang link tags into <head> for multilingual SEO,
+// and update the canonical to point at the proper localized URL for this tool.
 export function injectHreflang(toolKey) {
   const base = 'https://relahconvert.com'
   const isHome = !toolKey || toolKey === 'home'
@@ -7584,6 +7599,19 @@ export function injectHreflang(toolKey) {
   xdef.hreflang = 'x-default'
   xdef.href = isHome ? base + '/' : base + '/' + toolKey
   document.head.appendChild(xdef)
+
+  // Also fix the canonical: every tool page should point at its own
+  // localized URL, not at whatever the static HTML happened to ship with.
+  const currentLang = getLang()
+  let canonicalHref
+  if (isHome) {
+    canonicalHref = currentLang === 'en' ? base + '/' : base + '/' + currentLang + '/'
+  } else if (currentLang === 'en') {
+    canonicalHref = base + '/' + toolKey
+  } else {
+    canonicalHref = base + '/' + currentLang + '/' + translatedSlug(currentLang, toolKey) + '/'
+  }
+  setCanonical(canonicalHref)
 }
 
 // Inject FAQPage JSON-LD structured data for rich results

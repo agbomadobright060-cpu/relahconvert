@@ -313,8 +313,16 @@
     </footer>
     <script type="module">
       import { getLang, setLang, getT, supportedLangs, langLabels, translatedSlug as getTranslatedSlug, englishKeyFromSlug } from '/src/core/i18n.js'
-      import { injectHreflang } from '/src/core/i18n.js'
+      import { injectHreflang, setCanonical } from '/src/core/i18n.js'
       injectHreflang('home')
+
+      // Always set a self-canonical based on the actual URL the visitor hit.
+      // This protects against the SPA-fallback case where unknown URLs (e.g.
+      // /fr/jpg-to-png — English slug under a language prefix) get served the
+      // homepage HTML and would otherwise inherit the homepage canonical.
+      // Tool routes that load successfully will overwrite this again from
+      // injectHreflang() with the proper localized canonical.
+      setCanonical(window.location.origin + window.location.pathname)
 
       // Handle translated URLs served via catch-all
       let __isToolRoute = false
