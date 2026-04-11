@@ -103,8 +103,10 @@
       .filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--text-on-accent); }
       .tool-card[style*="display:none"] { display: none !important; }
       .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-      .tool-card { background: var(--bg-card); border-radius: 14px; padding: 20px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; display: block; }
+      .tool-card { position: relative; background: var(--bg-card); border-radius: 14px; padding: 20px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; display: block; }
       .tool-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(200,75,49,0.12); transform: translateY(-2px); }
+      .tool-card .new-badge { position: absolute; top: 12px; right: 12px; background: #E0EAFB; color: #1E3A8A; font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.02em; line-height: 1.4; }
+      [dir="rtl"] .tool-card .new-badge { right: auto; left: 12px; }
       .tool-card .icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; overflow: hidden; flex-shrink: 0; }
       .tool-card .icon svg { width: 36px; height: 36px; }
       .tool-card h2 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; letter-spacing: -0.01em; }
@@ -570,7 +572,7 @@
         { slug: 'webp-to-png',       title: t.nav_short['webp-to-png'],                               desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.'),                 cat: 'convert' },
         { slug: 'jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                                desc: cardDesc('jpg_to_pdf',        'Turn photos and camera images into PDF documents.'), cat: 'convert' },
         { slug: 'png-to-pdf',        title: t.nav_short['png-to-pdf'],                                desc: cardDesc('png_to_pdf',        'Convert screenshots, logos, and graphics to PDF.'), cat: 'convert' },
-        { slug: 'pdf-to-png',        title: t.nav_short['pdf-to-png'] || 'PDF to PNG',                desc: cardDesc('pdf_to_png',        'Convert PDF pages to high-quality PNG images.'), cat: 'convert' },
+        { slug: 'pdf-to-png',        title: t.nav_short['pdf-to-png'] || 'PDF to PNG',                desc: cardDesc('pdf_to_png',        'Convert PDF pages to high-quality PNG images.'), cat: 'convert', isNew: true },
         { slug: 'gif-to-jpg',        title: t.nav_short['gif-to-jpg']   || 'GIF to JPG',             desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.'),                  cat: 'convert' },
         { slug: 'gif-to-png',        title: t.nav_short['gif-to-png']   || 'GIF to PNG',             desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.'),                  cat: 'convert' },
         { slug: 'bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']   || 'BMP to JPG',             desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.'),                  cat: 'convert' },
@@ -593,7 +595,9 @@
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
         const ic = svgIcons[c.slug] || { bg: '#F5F5F5', svg: '' }
+        const newBadge = c.isNew ? '<span class="new-badge">New!</span>' : ''
         return `<a href="${localHref(c.slug)}" class="tool-card" data-category="${c.cat}">
+          ${newBadge}
           <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
           <h2>${c.title}</h2>
           <p>${c.desc}</p>
