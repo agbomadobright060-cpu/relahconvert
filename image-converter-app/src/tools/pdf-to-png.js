@@ -127,12 +127,13 @@ let pages = []   // [{ pageNum, card, dlLink, blob? }]
 let lastResults = []
 
 // ── Lazy-load pdf.js ────────────────────────────────────────────────────────
+// NOTE: must be plain string literals (not template literals) so Vite leaves
+// the full URL alone instead of rewriting it as a relative path.
 let pdfjsLib = null
 async function loadPdfJs() {
   if (pdfjsLib) return pdfjsLib
-  const PDFJS_VER = '4.0.379'
-  const mod = await import(`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VER}/build/pdf.min.mjs`)
-  mod.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VER}/build/pdf.worker.min.mjs`
+  const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs')
+  mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs'
   pdfjsLib = mod
   return mod
 }
@@ -251,8 +252,8 @@ async function loadPdfFile(file) {
     convertBtn.style.background = 'var(--accent)'
     statusText.textContent = ''
   } catch (err) {
+    console.error('[pdf-to-png] load failed:', err)
     statusText.textContent = (t.pdfpng_load_error || 'Could not load PDF: ') + (err?.message || err)
-    resetState()
   }
 }
 
