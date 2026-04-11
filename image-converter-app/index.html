@@ -338,6 +338,7 @@
               'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'merge-images':()=>import('/src/tools/merge-images.js'),'passport-photo':()=>import('/src/tools/passport-photo.js'),'image-splitter':()=>import('/src/tools/image-splitter.js'),
               'jpg-to-pdf':()=>import('/src/jpg-to-pdf.js'),
               'png-to-pdf':()=>import('/src/png-to-pdf.js'),
+              'pdf-to-png':()=>import('/src/tools/pdf-to-png.js'),
             }
             // Clear the homepage HTML and set up a clean page for the tool
             document.body.innerHTML = '<div id="app"></div>'
@@ -362,6 +363,7 @@
           'png-to-gif':()=>import('/src/tools/png-to-gif.js'),'merge-images':()=>import('/src/tools/merge-images.js'),
           'passport-photo':()=>import('/src/tools/passport-photo.js'),
           'image-splitter':()=>import('/src/tools/image-splitter.js'),
+          'pdf-to-png':()=>import('/src/tools/pdf-to-png.js'),
         }
         if (__modules2[__segs[0]]) {
           __isToolRoute = true
@@ -411,7 +413,7 @@
       const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
       const allSlugs = [
         'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
-        'compress','resize','jpg-to-pdf','png-to-pdf',
+        'compress','resize','jpg-to-pdf','png-to-pdf','pdf-to-png',
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif',
         'crop','rotate','flip','grayscale','watermark','round-corners','meme-generator','blur-face',
@@ -439,6 +441,7 @@
         'webp-to-png':       'convert',
         'jpg-to-pdf':        'convert',
         'png-to-pdf':        'convert',
+        'pdf-to-png':        'convert',
         'gif-to-jpg':        'convert',
         'gif-to-png':        'convert',
         'bmp-to-jpg':        'convert',
@@ -477,6 +480,7 @@
         'webp-to-png':       { bg: '#EFF6FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#3B82F6" opacity="0.3"/><text x="5" y="21" font-family="Arial" font-size="5.8" font-weight="800" fill="#2563EB">WebP</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#2563EB"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'jpg-to-pdf':        { bg: '#FEF2F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#EF4444" opacity="0.2" stroke="#EF4444" stroke-width="2"/><path d="M24 6v7h7" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/><text x="12" y="28" font-family="Arial" font-size="7.5" font-weight="800" fill="#EF4444">PDF</text></svg>` },
         'png-to-pdf':        { bg: '#FFF1F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="2"/><path d="M24 6v7h7" stroke="#F43F5E" stroke-width="2" stroke-linecap="round"/><text x="12" y="28" font-family="Arial" font-size="7.5" font-weight="800" fill="#F43F5E">PDF</text></svg>` },
+        'pdf-to-png':        { bg: '#FFE4E6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="9" width="14" height="20" rx="2" fill="#E11D48" opacity="0.25" stroke="#E11D48" stroke-width="1.5"/><text x="5.5" y="22" font-family="Arial" font-size="6" font-weight="800" fill="#E11D48">PDF</text><rect x="22" y="13" width="14" height="18" rx="3" fill="#E11D48"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#E11D48" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#E11D48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'gif-to-jpg':        { bg: '#FFFBEB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#F59E0B" opacity="0.3"/><text x="6.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#D97706">GIF</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#D97706"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#D97706" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'gif-to-png':        { bg: '#F0FDF4', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#22C55E" opacity="0.3"/><text x="6.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#16A34A">GIF</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#16A34A"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">PNG</text><path d="M18 20h4" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
         'bmp-to-jpg':        { bg: '#EFF6FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#3B82F6" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#2563EB">BMP</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#2563EB"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">JPG</text><path d="M18 20h4" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
@@ -511,7 +515,7 @@
         { name: t.cat_optimize||'Optimize', slugs: ['compress','resize','resize-in-kb'] },
         { name: t.cat_modify||'Modify', slugs: ['crop','rotate','flip','grayscale','round-corners','pixelate-image'] },
         { name: t.cat_create||'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
-        { name: t.cat_export||'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
+        { name: t.cat_export||'Export', slugs: ['jpg-to-pdf','png-to-pdf','pdf-to-png','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
         { name: t.cat_photo||'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
       ]
       function toolLink(slug) {
@@ -558,6 +562,7 @@
         { slug: 'webp-to-png',       title: t.nav_short['webp-to-png'],                               desc: cardDesc('webp_to_png',       'Convert WebP to PNG free.'),                 cat: 'convert' },
         { slug: 'jpg-to-pdf',        title: t.nav_short['jpg-to-pdf'],                                desc: cardDesc('jpg_to_pdf',        'Turn photos and camera images into PDF documents.'), cat: 'convert' },
         { slug: 'png-to-pdf',        title: t.nav_short['png-to-pdf'],                                desc: cardDesc('png_to_pdf',        'Convert screenshots, logos, and graphics to PDF.'), cat: 'convert' },
+        { slug: 'pdf-to-png',        title: t.nav_short['pdf-to-png'] || 'PDF to PNG',                desc: cardDesc('pdf_to_png',        'Convert PDF pages to high-quality PNG images.'), cat: 'convert' },
         { slug: 'gif-to-jpg',        title: t.nav_short['gif-to-jpg']   || 'GIF to JPG',             desc: cardDesc('gif-to-jpg',        'Convert GIF to JPG free.'),                  cat: 'convert' },
         { slug: 'gif-to-png',        title: t.nav_short['gif-to-png']   || 'GIF to PNG',             desc: cardDesc('gif-to-png',        'Convert GIF to PNG free.'),                  cat: 'convert' },
         { slug: 'bmp-to-jpg',        title: t.nav_short['bmp-to-jpg']   || 'BMP to JPG',             desc: cardDesc('bmp-to-jpg',        'Convert BMP to JPG free.'),                  cat: 'convert' },

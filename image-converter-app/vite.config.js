@@ -154,7 +154,7 @@ function langCopyPlugin() {
       // Inject hreflang into English tool HTML files (e.g. dist/jpg-to-pdf.html)
       const enToolSlugs = [
         'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
-        'compress','resize','jpg-to-pdf','png-to-pdf',
+        'compress','resize','jpg-to-pdf','png-to-pdf','pdf-to-png',
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
         'round-corners','meme-generator','blur-face','remove-background',
@@ -293,6 +293,7 @@ export default defineConfig({
         resize:              resolve(__dirname, 'resize.html'),
         'jpg-to-pdf':        resolve(__dirname, 'jpg-to-pdf.html'),
         'png-to-pdf':        resolve(__dirname, 'png-to-pdf.html'),
+        'pdf-to-png':        resolve(__dirname, 'pdf-to-png.html'),
         'gif-to-jpg':        resolve(__dirname, 'gif-to-jpg.html'),
         'gif-to-png':        resolve(__dirname, 'gif-to-png.html'),
         'bmp-to-jpg':        resolve(__dirname, 'bmp-to-jpg.html'),

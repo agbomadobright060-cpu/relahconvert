@@ -15,6 +15,7 @@ const icons = {
   'svg-to-jpg': '🖼️',
   'jpg-to-pdf': '📄',
   'png-to-pdf': '📄',
+  'pdf-to-png': '🖼️',
 }
 
 export function renderToolsNav(currentSlug) {

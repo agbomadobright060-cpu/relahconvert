@@ -69,6 +69,13 @@ export const tools = {
     outputFormat: 'application/pdf',
     slug: 'png-to-pdf'
   },
+  'pdf-to-png': {
+    title: 'PDF to PNG Converter',
+    description: 'Convert PDF pages to PNG images free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'image/png',
+    slug: 'pdf-to-png'
+  },
   'gif-to-jpg': {
     title: 'GIF to JPG Converter',
     description: 'Convert GIF images to JPG format free. No upload required.',

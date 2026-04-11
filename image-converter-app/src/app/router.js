@@ -28,6 +28,7 @@ const standaloneModules = {
   'svg-to-jpg':        () => import('../tools/svg-to-jpg.js'),
   'jpg-to-pdf':        () => import('../jpg-to-pdf.js'),
   'png-to-pdf':        () => import('../png-to-pdf.js'),
+  'pdf-to-png':        () => import('../tools/pdf-to-png.js'),
 }
 
 // Parse URL
