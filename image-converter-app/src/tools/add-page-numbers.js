@@ -150,7 +150,7 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
     </div>
-    <div id="actionRow" style="display:none;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;">
+    <div id="actionRow" style="display:none;margin-bottom:14px;gap:10px;flex-wrap:wrap;">
       <button class="action-btn" id="applyBtn">${applyLbl}</button>
       <button class="action-btn dark" id="applyAllBtn" style="display:none;">${applyAllLbl}</button>
     </div>
