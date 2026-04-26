@@ -15,6 +15,8 @@
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
     "@mediapipe/tasks-vision": "^0.10.33",
+    "@pdfsmaller/pdf-decrypt-lite": "^1.0.0",
+    "@pdfsmaller/pdf-encrypt-lite": "^1.0.2",
     "@supabase/supabase-js": "^2.101.1",
     "exifr": "^7.1.3",
     "face-api.js": "^0.22.2",

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 320px; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #F8F6F3; }
+    .header { padding: 16px; background: #fff; border-bottom: 1px solid #E8E0D5; display: flex; align-items: center; gap: 10px; }
+    .header h1 { font-size: 16px; font-weight: 700; color: #2C1810; }
+    .header h1 span { font-style: italic; color: #C84B31; }
+    .tools-grid { padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tool-btn { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #fff; border: 1px solid #E8E0D5; border-radius: 10px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+    .tool-btn:hover { border-color: #C84B31; background: #FDE8E3; }
+    .tool-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tool-icon svg { width: 16px; height: 16px; }
+    .tool-name { font-size: 12px; font-weight: 600; color: #2C1810; }
+    .section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #9A8A7A; padding: 12px 12px 6px; }
+    .footer { padding: 12px; border-top: 1px solid #E8E0D5; text-align: center; }
+    .footer a { font-size: 11px; color: #C84B31; text-decoration: none; font-weight: 600; }
+    .footer a:hover { text-decoration: underline; }
+    .tip { padding: 8px 12px; background: #FDE8E3; font-size: 11px; color: #C84B31; text-align: center; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg width="20" height="16" viewBox="0 0 26 20">
+      <polygon points="9,1 17,10 9,19 1,10" fill="#C84B31" opacity="0.5"/>
+      <polygon points="17,1 25,10 17,19 9,10" fill="#C84B31"/>
+    </svg>
+    <h1>Relah<span>convert</span></h1>
+  </div>
+
+  <div class="tip">💡 Right-click any image → RelahConvert → choose tool</div>
+
+  <div class="section-label">Optimize</div>
+  <div class="tools-grid">
+    <a class="tool-btn" href="https://relahconvert.com/compress" target="_blank">
+      <div class="tool-icon" style="background:#E8F4FB;"><svg viewBox="0 0 24 24" fill="none" stroke="#3B9ECC" stroke-width="2.5" stroke-linecap="round"><path d="M12 6v6M12 12l-3 3M12 12l3 3M7 18h10"/></svg></div>
+      <span class="tool-name">Compress</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/resize" target="_blank">
+      <div class="tool-icon" style="background:#FEF3E6;"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h4M19 12h-4M7 10l-2 2 2 2M17 10l2 2-2 2"/></svg></div>
+      <span class="tool-name">Resize</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/remove-background" target="_blank">
+      <div class="tool-icon" style="background:#F0F9FF;"><svg viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="3 2"/><circle cx="12" cy="10" r="3"/><path d="M6 18c0-3 2.7-5 6-5s6 2 6 5"/></svg></div>
+      <span class="tool-name">Remove BG</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/crop" target="_blank">
+      <div class="tool-icon" style="background:#FFF7ED;"><svg viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.5" stroke-linecap="round"><path d="M6 2v16h16M2 6h16v16"/></svg></div>
+      <span class="tool-name">Crop</span>
+    </a>
+  </div>
+
+  <div class="section-label">Edit</div>
+  <div class="tools-grid">
+    <a class="tool-btn" href="https://relahconvert.com/rotate" target="_blank">
+      <div class="tool-icon" style="background:#EFF6FF;"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"><path d="M17 5a9 9 0 11-12 0M17 2v5h-5"/></svg></div>
+      <span class="tool-name">Rotate</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/flip" target="_blank">
+      <div class="tool-icon" style="background:#F5F3FF;"><svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M5 7h5v10H5zM14 7h5v10h-5z"/></svg></div>
+      <span class="tool-name">Flip</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/watermark" target="_blank">
+      <div class="tool-icon" style="background:#ECFDF5;"><svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 13h10M7 16h6" opacity="0.5"/></svg></div>
+      <span class="tool-name">Watermark</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/grayscale" target="_blank">
+      <div class="tool-icon" style="background:#F3F4F6;"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" stroke-width="1.5"/></svg></div>
+      <span class="tool-name">Black & White</span>
+    </a>
+  </div>
+
+  <div class="section-label">Convert</div>
+  <div class="tools-grid">
+    <a class="tool-btn" href="https://relahconvert.com/jpg-to-png" target="_blank">
+      <div class="tool-icon" style="background:#F0FDF4;"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><path d="M10 12h4M12 10l2 2-2 2"/></svg></div>
+      <span class="tool-name">JPG → PNG</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/png-to-jpg" target="_blank">
+      <div class="tool-icon" style="background:#FFF7ED;"><svg viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.5" stroke-linecap="round"><path d="M10 12h4M12 10l2 2-2 2"/></svg></div>
+      <span class="tool-name">PNG → JPG</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/jpg-to-webp" target="_blank">
+      <div class="tool-icon" style="background:#F5F3FF;"><svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round"><path d="M10 12h4M12 10l2 2-2 2"/></svg></div>
+      <span class="tool-name">JPG → WebP</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/jpg-to-pdf" target="_blank">
+      <div class="tool-icon" style="background:#FEF2F2;"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v6h6"/></svg></div>
+      <span class="tool-name">JPG → PDF</span>
+    </a>
+  </div>
+
+  <div class="section-label">More</div>
+  <div class="tools-grid">
+    <a class="tool-btn" href="https://relahconvert.com/blur-face" target="_blank">
+      <div class="tool-icon" style="background:#F0F4FF;"><svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="5"/><path d="M8 9h8M8 11h8" opacity="0.5"/></svg></div>
+      <span class="tool-name">Blur Face</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/meme-generator" target="_blank">
+      <div class="tool-icon" style="background:#FFF9E6;"><svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 9h8M8 15h8"/></svg></div>
+      <span class="tool-name">Meme Maker</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/passport-photo" target="_blank">
+      <div class="tool-icon" style="background:#FDF2F8;"><svg viewBox="0 0 24 24" fill="none" stroke="#DB2777" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 18c0-2 2-3 4-3s4 1 4 3"/></svg></div>
+      <span class="tool-name">Passport Photo</span>
+    </a>
+    <a class="tool-btn" href="https://relahconvert.com/merge-images" target="_blank">
+      <div class="tool-icon" style="background:#ECFDF5;"><svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div>
+      <span class="tool-name">Merge Images</span>
+    </a>
+  </div>
+
+  <div class="footer">
+    <a href="https://relahconvert.com" target="_blank">Open RelahConvert.com →</a>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', () => window.close())
+    })
+  </script>
+</body>
+</html>

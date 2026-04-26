@@ -435,6 +435,11 @@ export function injectHeader() {
     'extract-pdf':       { bg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 16v10M17 19l3-3 3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
     'remove-pdf':        { bg: '#E11D48', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M15 19l10 8M25 19l-10 8" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></svg>` },
     'add-page-numbers':  { bg: '#EA580C', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><text x="20" y="25" font-family="Arial" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">1</text></svg>` },
+    'watermark-pdf':     { bg: '#6366F1', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="2" fill="#fff" opacity="0.3"/><text x="20" y="24" font-family="Arial" font-size="7" font-weight="800" fill="#fff" text-anchor="middle" opacity="0.7" transform="rotate(-30 20 20)">DRAFT</text></svg>` },
+    'crop-pdf':          { bg: '#0D9488', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M14 12v16h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M10 16h16v16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>` },
+    'protect-pdf':       { bg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><rect x="15" y="17" width="10" height="9" rx="1.5" fill="#fff"/><path d="M17 17v-3a3 3 0 016 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>` },
+    'unlock-pdf':        { bg: '#DC2626', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><rect x="15" y="17" width="10" height="9" rx="1.5" fill="#fff"/><path d="M17 17v-3a3 3 0 016 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>` },
+    'extract-images-pdf':{ bg: '#8B5CF6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><rect x="14" y="14" width="12" height="10" rx="1.5" fill="#fff" opacity="0.8"/><circle cx="17" cy="17" r="1.5" fill="#8B5CF6"/><path d="M14 22l4-4 3 3 2-2 3 3" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
   }
 
   const mainLinks = ['compress', 'resize', 'pdf-tools']
@@ -474,7 +479,7 @@ export function injectHeader() {
     { name: t.cat_create || 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
     { name: t.cat_export || 'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
     { name: t.cat_photo || 'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
-    { name: t.cat_pdf || 'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers'] },
+    { name: t.cat_pdf || 'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf'] },
   ]
 
   function toolLink(slug) {

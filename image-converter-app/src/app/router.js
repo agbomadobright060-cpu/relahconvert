@@ -38,6 +38,11 @@ const standaloneModules = {
   'extract-pdf':       () => import('../tools/extract-pdf.js'),
   'remove-pdf':        () => import('../tools/remove-pdf.js'),
   'add-page-numbers':  () => import('../tools/add-page-numbers.js'),
+  'watermark-pdf':     () => import('../tools/watermark-pdf.js'),
+  'crop-pdf':          () => import('../tools/crop-pdf.js'),
+  'protect-pdf':       () => import('../tools/protect-pdf.js'),
+  'unlock-pdf':        () => import('../tools/unlock-pdf.js'),
+  'extract-images-pdf':() => import('../tools/extract-images-pdf.js'),
 }
 
 // Parse URL

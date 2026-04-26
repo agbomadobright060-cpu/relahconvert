@@ -25,6 +25,11 @@ const icons = {
   'extract-pdf': '📤',
   'remove-pdf': '🗑️',
   'add-page-numbers': '#️⃣',
+  'watermark-pdf': '💧',
+  'crop-pdf': '✂️',
+  'protect-pdf': '🔒',
+  'unlock-pdf': '🔓',
+  'extract-images-pdf': '🖼️',
 }
 
 export function renderToolsNav(currentSlug) {

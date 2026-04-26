@@ -159,7 +159,8 @@ function langCopyPlugin() {
         'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
         'round-corners','meme-generator','blur-face','remove-background',
         'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image','svg-to-png','svg-to-jpg',
-        'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers'
+        'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers',
+        'watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
@@ -331,6 +332,11 @@ export default defineConfig({
         'extract-pdf':       resolve(__dirname, 'extract-pdf.html'),
         'remove-pdf':        resolve(__dirname, 'remove-pdf.html'),
         'add-page-numbers':  resolve(__dirname, 'add-page-numbers.html'),
+        'watermark-pdf':     resolve(__dirname, 'watermark-pdf.html'),
+        'crop-pdf':          resolve(__dirname, 'crop-pdf.html'),
+        'protect-pdf':       resolve(__dirname, 'protect-pdf.html'),
+        'unlock-pdf':        resolve(__dirname, 'unlock-pdf.html'),
+        'extract-images-pdf':resolve(__dirname, 'extract-images-pdf.html'),
         'account':           resolve(__dirname, 'account.html'),
       }
     }

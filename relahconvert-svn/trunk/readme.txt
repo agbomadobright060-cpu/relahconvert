@@ -132,9 +132,9 @@ Yes. On activation, the plugin adds a CORS header to `wp-content/uploads/.htacce
 
 == Screenshots ==
 
-1. Media Library grid view with RelahConvert buttons and More Tools dropdown.
-2. Image auto-loaded on RelahConvert with Send to WordPress button.
-3. Settings page with all available tools.
+1. RelahConvert tool buttons on a Media Library attachment — Compress, Watermark, Resize, Remove BG, and the "More" dropdown showing all 38 tools.
+2. A tool in action on RelahConvert.com — image processed with one click and ready to "Send to WordPress" back to your Media Library.
+3. Media Library after processing — multiple versions of an image created with different tools, all sent back automatically.
 
 == Changelog ==
 

@@ -1,0 +1,102 @@
+/* RelahConvert Image Tools — Admin Styles */
+
+/* Media library row actions */
+.relahconvert-action {
+    color: #C84B31 !important;
+}
+.relahconvert-action:hover {
+    color: #a33a24 !important;
+}
+
+/* Attachment details modal buttons */
+.relahconvert-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.relahconvert-btn {
+    font-size: 12px !important;
+    padding: 2px 10px !important;
+    height: auto !important;
+    line-height: 24px !important;
+    border-color: #C84B31 !important;
+    color: #C84B31 !important;
+    background: #fff !important;
+    text-decoration: none !important;
+}
+
+.relahconvert-btn:hover,
+.relahconvert-btn:focus {
+    background: #C84B31 !important;
+    color: #fff !important;
+    border-color: #C84B31 !important;
+}
+
+/* Settings page */
+.relahconvert-settings {
+    max-width: 800px;
+}
+
+.relahconvert-settings h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #1d2327;
+}
+
+.relahconvert-settings-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.relahconvert-settings-card h2 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #1d2327;
+}
+
+.relahconvert-settings-card p {
+    color: #50575e;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.relahconvert-settings-card ol {
+    color: #50575e;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.relahconvert-tools-table {
+    margin-top: 16px;
+}
+
+.relahconvert-tools-table td,
+.relahconvert-tools-table th {
+    vertical-align: middle;
+}
+
+.relahconvert-tools-table td:last-child {
+    text-align: right;
+    width: 80px;
+}
+
+.relahconvert-footer {
+    margin-top: 24px;
+    font-size: 13px;
+    color: #787c82;
+}
+
+.relahconvert-footer a {
+    color: #C84B31;
+    text-decoration: none;
+}
+
+.relahconvert-footer a:hover {
+    text-decoration: underline;
+}

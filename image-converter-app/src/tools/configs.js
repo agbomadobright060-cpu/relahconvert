@@ -328,4 +328,39 @@ export const tools = {
     outputFormat: 'application/pdf',
     slug: 'add-page-numbers'
   },
+  'watermark-pdf': {
+    title: 'Watermark PDF',
+    description: 'Add text watermark to PDF documents free. Customize opacity, position, and size.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'watermark-pdf'
+  },
+  'crop-pdf': {
+    title: 'Crop PDF',
+    description: 'Crop PDF pages free. Adjust margins to trim whitespace or resize pages.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'crop-pdf'
+  },
+  'protect-pdf': {
+    title: 'Protect PDF',
+    description: 'Add password protection to PDF documents free. AES-256 encryption.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'protect-pdf'
+  },
+  'unlock-pdf': {
+    title: 'Unlock PDF',
+    description: 'Remove password protection from PDF documents free.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'unlock-pdf'
+  },
+  'extract-images-pdf': {
+    title: 'Extract Images',
+    description: 'Extract all images from PDF documents free. Download as PNG or JPG.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'image/png',
+    slug: 'extract-images-pdf'
+  },
 }
