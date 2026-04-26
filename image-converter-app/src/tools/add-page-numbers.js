@@ -9,14 +9,17 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['add-page-numbers']) || 'Add Page Numbers'
 const seoData   = t.seo && t.seo['add-page-numbers']
 const descText  = t.addpgnum_desc || (seoData ? seoData.h2a : 'Add page numbers to any PDF. Choose position, font size, format, and starting number.')
-const selectLbl = t.addpgnum_select || t.select_image || 'Select PDF'
-const dropHint  = t.addpgnum_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
+const selectLbl = t.addpgnum_select || t.select_image || 'Select PDFs'
+const dropHint  = t.addpgnum_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'
-const applyLbl  = t.addpgnum_apply || 'Add Page Numbers'
+const dlAllLbl  = t.addpgnum_download_all || 'Download All as ZIP'
+const applyLbl  = t.addpgnum_apply || 'Add Numbers & Download'
 const applyingLbl = t.addpgnum_applying || 'Adding numbers\u2026'
-const loadingLbl  = t.addpgnum_loading || 'Loading PDF\u2026'
+const loadingLbl  = t.addpgnum_loading || 'Loading PDFs\u2026'
 const pagesLabel  = t.addpgnum_pages || t.pdfpng_pages || 'pages'
 const removeLbl   = t.remove || 'Remove'
+const removeAllLbl = t.addpgnum_remove_all || 'Remove All'
+const numbersAddedLbl = t.addpgnum_numbers_added || 'Numbers added'
 
 /* position labels */
 const posLabels = {
@@ -57,12 +60,22 @@ style.textContent = `
   .action-btn.dark{background:var(--btn-dark);}
   .action-btn.dark:hover{background:var(--btn-dark-hover);}
   .status-text{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
-  #fileMeta{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:14px;display:none;}
-  #fileMeta.on{display:block;}
-  #removeBtn{background:transparent;color:var(--accent);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;text-decoration:underline;}
   .drop-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:48px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);}
   .drop-zone:hover{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
   .drop-zone.over{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
+  .file-list{list-style:none;margin:0 0 16px;padding:0;}
+  .file-list li{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-primary);gap:10px;}
+  .file-list li .fl-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+  .file-list li .fl-meta{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+  .file-list li .fl-remove{background:transparent;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;white-space:nowrap;}
+  .file-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .file-list-header span{font-size:13px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-weight:600;}
+  .file-list-header button{background:transparent;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;}
+  .result-list{list-style:none;margin:0 0 16px;padding:0;}
+  .result-list li{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-primary);gap:10px;}
+  .result-list li .rl-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+  .result-list li .rl-status{font-size:11px;color:var(--text-success,#2e7d32);white-space:nowrap;}
+  .result-list li a.rl-dl{font-size:12px;font-weight:600;color:var(--accent);text-decoration:underline;white-space:nowrap;font-family:'DM Sans',sans-serif;}
   .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
   .next-link:hover{border-color:var(--accent);color:var(--accent);}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
@@ -83,7 +96,7 @@ document.head.appendChild(style)
 document.title = t.addpgnum_page_title || 'Add Page Numbers to PDF Free \u2014 Number PDF Pages Online | RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
-_metaDesc.content = t.addpgnum_meta_desc || 'Add page numbers to PDF documents free. Choose position, font size, format, and starting number. Browser-only, no upload required.'
+_metaDesc.content = t.addpgnum_meta_desc || 'Add page numbers to PDF documents free. Choose position, font size, format, and starting number.'
 document.head.appendChild(_metaDesc)
 
 const _tp = toolName.split(' ')
@@ -101,10 +114,16 @@ document.querySelector('#app').innerHTML = `
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
       </div>
-      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop a PDF here</span></label>
+      <label for="fileInput" class="drop-zone" id="dropZone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
     </div>
-    <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none;" />
-    <div id="fileMeta"><span id="fileMetaText"></span><button id="removeBtn">${removeLbl}</button></div>
+    <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
+    <div id="fileListWrap" style="display:none;">
+      <div class="file-list-header">
+        <span id="fileCountText"></span>
+        <button id="removeAllBtn">${removeAllLbl}</button>
+      </div>
+      <ul class="file-list" id="fileList"></ul>
+    </div>
     <div id="optionsPanel" style="display:none;">
       <div class="opt-card">
         <h3>${t.addpgnum_options_title || 'Page Number Options'}</h3>
@@ -134,7 +153,10 @@ document.querySelector('#app').innerHTML = `
     <div class="status-text" id="statusText"></div>
     <div id="actionRow" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
       <button class="action-btn" id="applyBtn" disabled>${applyLbl}</button>
-      <a class="action-btn dark" id="downloadBtn" style="display:none;text-align:center;text-decoration:none;">\u2B07 ${dlBtn}</a>
+    </div>
+    <ul class="result-list" id="resultList" style="display:none;"></ul>
+    <div id="zipRow" style="display:none;margin-bottom:14px;">
+      <a class="action-btn dark" id="zipBtn" style="display:block;text-align:center;text-decoration:none;">\u2B07 ${dlAllLbl}</a>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.whats_next || "What's Next?"}</div>
@@ -145,91 +167,146 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-/* ── DOM refs ─────────────────────────────────────────────────────────────── */
+/* -- DOM refs ---------------------------------------------------------------- */
 const fileInput      = document.getElementById('fileInput')
 const dropZone       = document.getElementById('dropZone')
-const fileMeta       = document.getElementById('fileMeta')
-const fileMetaText   = document.getElementById('fileMetaText')
-const removeBtn      = document.getElementById('removeBtn')
+const fileListWrap   = document.getElementById('fileListWrap')
+const fileList       = document.getElementById('fileList')
+const fileCountText  = document.getElementById('fileCountText')
+const removeAllBtn   = document.getElementById('removeAllBtn')
 const optionsPanel   = document.getElementById('optionsPanel')
 const positionSelect = document.getElementById('positionSelect')
 const fontSizeInput  = document.getElementById('fontSizeInput')
 const startNumInput  = document.getElementById('startNumInput')
 const formatSelect   = document.getElementById('formatSelect')
 const applyBtn       = document.getElementById('applyBtn')
-const downloadBtn    = document.getElementById('downloadBtn')
 const statusText     = document.getElementById('statusText')
+const resultList     = document.getElementById('resultList')
+const zipRow         = document.getElementById('zipRow')
+const zipBtn         = document.getElementById('zipBtn')
 
-/* ── State ────────────────────────────────────────────────────────────────── */
-let pdfBytes = null
-let pdfFileName = ''
-let pdfPageCount = 0
+/* -- State ------------------------------------------------------------------- */
+let pdfFiles = []   // { id, name, size, bytes (Uint8Array), pageCount }
+let fileIdCounter = 0
 
-/* ── Reset ────────────────────────────────────────────────────────────────── */
-function resetState() {
-  pdfBytes = null
-  pdfFileName = ''
-  pdfPageCount = 0
-  fileMeta.classList.remove('on')
-  optionsPanel.style.display = 'none'
-  dropZone.style.display = 'flex'
-  downloadBtn.style.display = 'none'
-  statusText.textContent = ''
-  applyBtn.disabled = true
-  document.getElementById('nextSteps').style.display = 'none'
-}
+/* -- Helpers ----------------------------------------------------------------- */
+function fileKey(f) { return `${f.name}__${f.size}__${f.lastModified}` }
 
-removeBtn.addEventListener('click', resetState)
-
-/* ── Load PDF ─────────────────────────────────────────────────────────────── */
-async function loadPdfFile(file) {
-  if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
-    statusText.textContent = t.warn_wrong_fmt_short || 'Please select a PDF file.'
-    return
-  }
-  if (file.size > 50 * 1024 * 1024) {
-    statusText.textContent = 'File too large. Maximum size is 50 MB.'
-    return
-  }
-  resetState()
-  statusText.textContent = loadingLbl
-
-  try {
-    const { PDFDocument } = await import('pdf-lib')
-    const buf = await file.arrayBuffer()
-    const doc = await PDFDocument.load(buf)
-    pdfBytes = new Uint8Array(buf.slice(0))
-    pdfPageCount = doc.getPageCount()
-    pdfFileName = file.name.replace(/\.[^.]+$/, '')
-
-    fileMetaText.textContent = `${file.name} \u2014 ${pdfPageCount} ${pagesLabel}`
-    fileMeta.classList.add('on')
-    optionsPanel.style.display = 'block'
-    dropZone.style.display = 'none'
-    downloadBtn.style.display = 'none'
-
-    applyBtn.disabled = false
+function updateUI() {
+  const count = pdfFiles.length
+  if (count === 0) {
+    fileListWrap.style.display = 'none'
+    optionsPanel.style.display = 'none'
+    dropZone.style.display = 'flex'
+    applyBtn.disabled = true
+    resultList.style.display = 'none'
+    zipRow.style.display = 'none'
+    document.getElementById('nextSteps').style.display = 'none'
     statusText.textContent = ''
-  } catch (err) {
-    console.error('[add-page-numbers] load failed:', err)
-    statusText.textContent = (t.addpgnum_load_error || 'Could not load PDF: ') + (err?.message || err)
+    return
   }
+  fileListWrap.style.display = 'block'
+  optionsPanel.style.display = 'block'
+  dropZone.style.display = count >= LIMITS.MAX_FILES ? 'none' : 'flex'
+  applyBtn.disabled = false
+  fileCountText.textContent = `${count} ${count === 1 ? 'file' : 'files'}`
+  renderFileList()
 }
 
-/* ── File input & drag-drop ───────────────────────────────────────────────── */
+function renderFileList() {
+  fileList.innerHTML = ''
+  pdfFiles.forEach(f => {
+    const li = document.createElement('li')
+    li.innerHTML = `<span class="fl-name" title="${f.name}">${f.name}</span><span class="fl-meta">${f.pageCount} ${pagesLabel} \u2014 ${formatSize(f.size)}</span><button class="fl-remove" data-id="${f.id}">${removeLbl}</button>`
+    fileList.appendChild(li)
+  })
+  fileList.querySelectorAll('.fl-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      pdfFiles = pdfFiles.filter(f => f.id !== Number(btn.dataset.id))
+      updateUI()
+    })
+  })
+}
+
+/* -- Reset ------------------------------------------------------------------- */
+function resetState() {
+  pdfFiles = []
+  fileIdCounter = 0
+  resultList.style.display = 'none'
+  resultList.innerHTML = ''
+  zipRow.style.display = 'none'
+  updateUI()
+}
+
+removeAllBtn.addEventListener('click', resetState)
+
+/* -- Load PDF files ---------------------------------------------------------- */
+async function loadPdfFiles(files) {
+  const toLoad = Array.from(files).filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))
+  if (!toLoad.length) {
+    statusText.textContent = t.warn_wrong_fmt_short || 'Please select PDF files.'
+    return
+  }
+
+  /* clear previous results */
+  resultList.style.display = 'none'
+  resultList.innerHTML = ''
+  zipRow.style.display = 'none'
+  document.getElementById('nextSteps').style.display = 'none'
+
+  const remaining = LIMITS.MAX_FILES - pdfFiles.length
+  if (remaining <= 0) {
+    statusText.textContent = (t.addpgnum_max_files || 'Maximum') + ` ${LIMITS.MAX_FILES} files.`
+    return
+  }
+  const batch = toLoad.slice(0, remaining)
+  if (batch.length < toLoad.length) {
+    statusText.textContent = (t.addpgnum_max_files || 'Maximum') + ` ${LIMITS.MAX_FILES} files. ${toLoad.length - batch.length} skipped.`
+  } else {
+    statusText.textContent = loadingLbl
+  }
+
+  const { PDFDocument } = await import('pdf-lib')
+
+  for (const file of batch) {
+    if (file.size > 50 * 1024 * 1024) {
+      statusText.textContent = `${file.name}: ` + (t.addpgnum_too_large || 'File too large. Maximum size is 50 MB.')
+      continue
+    }
+    try {
+      const buf = await file.arrayBuffer()
+      const doc = await PDFDocument.load(buf)
+      pdfFiles.push({
+        id: ++fileIdCounter,
+        name: file.name,
+        size: file.size,
+        bytes: new Uint8Array(buf.slice(0)),
+        pageCount: doc.getPageCount(),
+      })
+    } catch (err) {
+      console.error('[add-page-numbers] load failed:', file.name, err)
+      statusText.textContent = `${file.name}: ` + (t.addpgnum_load_error || 'Could not load PDF: ') + (err?.message || err)
+    }
+  }
+
+  updateUI()
+  if (pdfFiles.length) statusText.textContent = ''
+}
+
+/* -- File input & drag-drop -------------------------------------------------- */
 fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) loadPdfFile(fileInput.files[0])
+  if (fileInput.files.length) loadPdfFiles(fileInput.files)
   fileInput.value = ''
 })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => {
   e.preventDefault()
-  if (e.dataTransfer.files.length) loadPdfFile(e.dataTransfer.files[0])
+  if (e.dataTransfer.files.length) loadPdfFiles(e.dataTransfer.files)
 })
 dropZone.addEventListener('dragenter', () => dropZone.classList.add('over'))
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'))
 
-/* ── Format number text ───────────────────────────────────────────────────── */
+/* -- Format number text ------------------------------------------------------ */
 function formatPageNumber(pageNum, totalPages, fmt) {
   const pageLbl = t.addpgnum_page_word || 'Page'
   const ofLbl   = t.addpgnum_of_word || 'of'
@@ -241,7 +318,7 @@ function formatPageNumber(pageNum, totalPages, fmt) {
   }
 }
 
-/* ── Calculate position ───────────────────────────────────────────────────── */
+/* -- Calculate position ------------------------------------------------------ */
 function calcPosition(pos, pageWidth, pageHeight, textWidth, fontSize) {
   const margin = 40
   let x, y
@@ -278,63 +355,124 @@ function calcPosition(pos, pageWidth, pageHeight, textWidth, fontSize) {
   return { x, y }
 }
 
-/* ── Apply page numbers ───────────────────────────────────────────────────── */
+/* -- Process a single PDF and return { name, blob, filename } ---------------- */
+async function processOnePdf(entry, opts, PDFDocument, rgb, StandardFonts) {
+  const doc = await PDFDocument.load(entry.bytes)
+  const font = await doc.embedFont(StandardFonts.Helvetica)
+  const totalPages = doc.getPageCount()
+
+  for (let i = 0; i < totalPages; i++) {
+    const page = doc.getPage(i)
+    const { width, height } = page.getSize()
+    const pageNum = opts.startNum + i
+    const text = formatPageNumber(pageNum, opts.startNum + totalPages - 1, opts.fmt)
+    const textWidth = font.widthOfTextAtSize(text, opts.fontSize)
+    const { x, y } = calcPosition(opts.pos, width, height, textWidth, opts.fontSize)
+
+    page.drawText(text, {
+      x, y,
+      size: opts.fontSize,
+      font,
+      color: rgb(0, 0, 0),
+    })
+  }
+
+  const numberedBytes = await doc.save()
+  const blob = new Blob([numberedBytes], { type: 'application/pdf' })
+  const baseName = entry.name.replace(/\.[^.]+$/, '')
+  const filename = `${baseName}-numbered.pdf`
+  return { name: entry.name, blob, filename, totalPages }
+}
+
+/* -- Apply page numbers to all files ----------------------------------------- */
 applyBtn.addEventListener('click', async () => {
-  if (!pdfBytes) return
+  if (!pdfFiles.length) return
   applyBtn.disabled = true
   applyBtn.textContent = applyingLbl
-  downloadBtn.style.display = 'none'
+  resultList.style.display = 'none'
+  resultList.innerHTML = ''
+  zipRow.style.display = 'none'
   statusText.textContent = ''
   document.getElementById('nextSteps').style.display = 'none'
+
+  const opts = {
+    pos: positionSelect.value,
+    fontSize: Math.max(8, Math.min(36, parseInt(fontSizeInput.value) || 12)),
+    startNum: parseInt(startNumInput.value) || 1,
+    fmt: formatSelect.value,
+  }
 
   try {
     const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib')
 
-    const doc = await PDFDocument.load(pdfBytes)
-    const font = await doc.embedFont(StandardFonts.Helvetica)
-    const totalPages = doc.getPageCount()
+    const results = []
 
-    const pos      = positionSelect.value
-    const fontSize = Math.max(8, Math.min(36, parseInt(fontSizeInput.value) || 12))
-    const startNum = parseInt(startNumInput.value) || 1
-    const fmt      = formatSelect.value
-
-    for (let i = 0; i < totalPages; i++) {
-      const page   = doc.getPage(i)
-      const { width, height } = page.getSize()
-      const pageNum = startNum + i
-      const text    = formatPageNumber(pageNum, startNum + totalPages - 1, fmt)
-      const textWidth = font.widthOfTextAtSize(text, fontSize)
-
-      const { x, y } = calcPosition(pos, width, height, textWidth, fontSize)
-
-      page.drawText(text, {
-        x,
-        y,
-        size: fontSize,
-        font,
-        color: rgb(0, 0, 0),
-      })
-
-      statusText.textContent = `${applyingLbl} (${i + 1}/${totalPages})`
+    for (let idx = 0; idx < pdfFiles.length; idx++) {
+      statusText.textContent = `${applyingLbl} (${idx + 1}/${pdfFiles.length})`
+      const result = await processOnePdf(pdfFiles[idx], opts, PDFDocument, rgb, StandardFonts)
+      results.push(result)
     }
 
-    const numberedBytes = await doc.save()
-    const blob = new Blob([numberedBytes], { type: 'application/pdf' })
-    const url  = URL.createObjectURL(blob)
-    const filename = `${pdfFileName || 'document'}-numbered.pdf`
+    /* Render per-file results */
+    resultList.innerHTML = ''
+    const urls = []
+    results.forEach(r => {
+      const url = URL.createObjectURL(r.blob)
+      urls.push(url)
+      const li = document.createElement('li')
+      li.innerHTML = `<span class="rl-name" title="${r.name}">${r.name}</span><span class="rl-status">${numbersAddedLbl}</span><a class="rl-dl" href="${url}" download="${r.filename}">\u2B07 ${dlBtn}</a>`
+      resultList.appendChild(li)
+    })
+    resultList.style.display = 'block'
 
-    downloadBtn.href     = url
-    downloadBtn.download = filename
-    downloadBtn.style.display = 'block'
-    downloadBtn.onclick = () => {
+    /* Single file: trigger download directly, show rcShowSaveButton */
+    if (results.length === 1) {
+      const r = results[0]
+      const url = urls[0]
+      const a = document.createElement('a')
+      a.href = url
+      a.download = r.filename
+      a.click()
       if (window.showReviewPrompt) window.showReviewPrompt()
+      window.rcShowSaveButton?.(applyBtn.parentElement, r.blob, r.filename, 'add-page-numbers')
       setTimeout(() => URL.revokeObjectURL(url), 10000)
     }
 
-    window.rcShowSaveButton?.(applyBtn.parentElement, blob, filename, 'add-page-numbers')
+    /* Multiple files: show Download All as ZIP */
+    if (results.length > 1) {
+      zipRow.style.display = 'block'
+      zipBtn.onclick = async (e) => {
+        e.preventDefault()
+        zipBtn.textContent = (t.addpgnum_zipping || 'Creating ZIP\u2026')
+        zipBtn.style.pointerEvents = 'none'
+        try {
+          const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+          const zip = new JSZip()
+          for (const r of results) {
+            zip.file(r.filename, r.blob)
+          }
+          const zipBlob = await zip.generateAsync({ type: 'blob' })
+          const zipUrl = URL.createObjectURL(zipBlob)
+          const a = document.createElement('a')
+          a.href = zipUrl
+          a.download = 'numbered-pdfs.zip'
+          a.click()
+          setTimeout(() => URL.revokeObjectURL(zipUrl), 10000)
+          if (window.showReviewPrompt) window.showReviewPrompt()
+        } catch (err) {
+          console.error('[add-page-numbers] zip failed:', err)
+          statusText.textContent = (t.addpgnum_error || 'Error: ') + (err?.message || err)
+        }
+        zipBtn.innerHTML = `\u2B07 ${dlAllLbl}`
+        zipBtn.style.pointerEvents = ''
+      }
+    }
 
-    statusText.textContent = t.addpgnum_done || `Done! ${totalPages} ${totalPages === 1 ? 'page' : 'pages'} numbered.`
+    /* Revoke individual URLs after 60s */
+    setTimeout(() => urls.forEach(u => URL.revokeObjectURL(u)), 60000)
+
+    const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
+    statusText.textContent = t.addpgnum_done || `Done! ${totalPgs} ${totalPgs === 1 ? 'page' : 'pages'} numbered across ${results.length} ${results.length === 1 ? 'file' : 'files'}.`
     buildNextSteps()
   } catch (err) {
     console.error('[add-page-numbers] failed:', err)
@@ -345,7 +483,7 @@ applyBtn.addEventListener('click', async () => {
   applyBtn.textContent = applyLbl
 })
 
-/* ── Next steps ───────────────────────────────────────────────────────────── */
+/* -- Next steps -------------------------------------------------------------- */
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -366,7 +504,7 @@ function buildNextSteps() {
   document.getElementById('nextSteps').style.display = 'block'
 }
 
-/* ── SEO section ──────────────────────────────────────────────────────────── */
+/* -- SEO section ------------------------------------------------------------- */
 ;(function injectSEO() {
   const seo = t.seo && t.seo['add-page-numbers']
   if (!seo) return

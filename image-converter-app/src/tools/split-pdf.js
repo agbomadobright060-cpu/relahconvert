@@ -10,20 +10,21 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['split-pdf']) || 'Split PDF'
 const seoData   = t.seo && t.seo['split-pdf']
 const descText  = (t.splitpdf_desc) || (seoData ? seoData.h2a : 'Split PDF into individual pages or custom ranges.')
-const selectLbl = t.splitpdf_select || t.select_image || 'Select PDF'
-const dropHint  = t.splitpdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
+const selectLbl = t.splitpdf_select || t.select_image || 'Select PDFs'
+const dropHint  = t.splitpdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'
 const dlZipBtn  = t.download_zip || 'Download All as ZIP'
 const splitAllLbl   = t.splitpdf_split_all || 'Split All Pages'
-const customLbl     = t.splitpdf_custom || 'Custom Ranges'
-const splitBtnLbl   = t.splitpdf_split_btn || 'Split PDF'
-const splittingLbl  = t.splitpdf_splitting || 'Splitting...'
+const splitBtnLbl   = t.splitpdf_split_btn || 'Split All'
+const splittingLbl  = t.splitpdf_splitting || 'Splitting'
 const pageLabel     = t.splitpdf_page || t.pdfpng_page || 'Page'
 const pagesLabel    = t.splitpdf_pages || t.pdfpng_pages || 'pages'
-const loadingLbl    = t.splitpdf_loading || 'Loading PDF...'
-const rangeHint     = t.splitpdf_range_hint || 'e.g. 1-3, 5, 7-10'
-const modeLblAll    = t.splitpdf_mode_all || 'Each page as a separate PDF'
-const modeLblCustom = t.splitpdf_mode_custom || 'Split by custom page ranges'
+const loadingLbl    = t.splitpdf_loading || 'Loading PDFs...'
+const filesLabel    = t.splitpdf_files || 'files'
+const modeLblAll    = t.splitpdf_mode_all || 'Each page of every PDF as a separate file'
+
+const MAX_FILES = LIMITS.MAX_FILES || 25
+const MAX_FILE_SIZE = 50 * 1024 * 1024
 
 document.body.style.cssText = `margin:0;padding:0;min-height:100vh;background:var(--bg-page);`
 
@@ -35,15 +36,13 @@ style.textContent = `
   .upload-label:hover{background:var(--accent-hover);}
   .drop-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:40px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);}
   .drop-zone:hover{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
-  #modeRow{display:none;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-  #modeRow.on{display:flex;}
-  .mode-btn{padding:8px 16px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);color:var(--text-secondary);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
-  .mode-btn.active{border-color:var(--accent);color:var(--accent);background:var(--bg-surface);}
-  .mode-btn:hover{border-color:var(--accent);color:var(--accent);}
-  #rangeRow{display:none;align-items:center;gap:12px;margin-bottom:14px;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);padding:12px 16px;flex-wrap:wrap;}
-  #rangeRow.on{display:flex;}
-  #rangeRow label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;white-space:nowrap;}
-  #rangeInput{flex:1;min-width:160px;padding:6px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-primary);outline:none;background:var(--bg-card);}
+  #fileList{display:none;margin-bottom:14px;}
+  #fileList.on{display:block;}
+  .file-entry{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;margin-bottom:6px;font-family:'DM Sans',sans-serif;}
+  .file-entry .fe-name{flex:1;font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .file-entry .fe-meta{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+  .file-entry .fe-remove{background:none;border:none;color:var(--accent);font-size:16px;cursor:pointer;padding:0 4px;font-weight:700;line-height:1;}
+  .file-entry .fe-remove:hover{opacity:0.7;}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
   .pdf-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;position:relative;}
   .pdf-card canvas{width:100%;height:130px;object-fit:contain;display:block;background:var(--bg-surface);}
@@ -53,7 +52,7 @@ style.textContent = `
   .pdf-card .dl-link:hover{text-decoration:underline;}
   #fileMeta{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;display:none;}
   #fileMeta.on{display:block;}
-  #removeBtn{background:transparent;color:var(--accent);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;text-decoration:underline;}
+  #removeAllBtn{background:transparent;color:var(--accent);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;text-decoration:underline;}
   #actionRow{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;}
   .action-btn:hover{background:var(--accent-hover);}
@@ -77,10 +76,10 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.splitpdf_page_title || (seoData ? seoData.page_title : 'Split PDF Online Free | Extract Pages — RelahConvert')
+document.title = t.splitpdf_page_title || (seoData ? seoData.page_title : 'Split PDF Online Free | Extract Pages \u2014 RelahConvert')
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
-_metaDesc.content = t.splitpdf_meta_desc || 'Split PDF into separate pages or custom ranges free. Browser-only, no upload needed. Download individual PDFs or ZIP all.'
+_metaDesc.content = t.splitpdf_meta_desc || 'Split PDF into separate pages or custom ranges free. Download individual PDFs or ZIP all.'
 document.head.appendChild(_metaDesc)
 
 const _tp = toolName.split(' ')
@@ -98,20 +97,11 @@ document.querySelector('#app').innerHTML = `
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
       </div>
-      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop a PDF here</span></label>
+      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
     </div>
-    <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none;" />
-    <div id="modeRow">
-      <button class="mode-btn active" data-mode="all">${splitAllLbl}</button>
-      <button class="mode-btn" data-mode="custom">${customLbl}</button>
-      <span style="font-size:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;" id="modeDesc">${modeLblAll}</span>
-    </div>
-    <div id="rangeRow">
-      <label>${customLbl}:</label>
-      <input type="text" id="rangeInput" placeholder="${rangeHint}" />
-      <span style="font-size:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">${rangeHint}</span>
-    </div>
-    <div id="fileMeta"><span id="fileMetaText"></span><button id="removeBtn">${t.remove || 'Remove'}</button></div>
+    <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
+    <div id="fileList"></div>
+    <div id="fileMeta"><span id="fileMetaText"></span><button id="removeAllBtn">${t.splitpdf_remove_all || 'Remove All'}</button></div>
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
     <div id="actionRow">
@@ -128,22 +118,17 @@ document.querySelector('#app').innerHTML = `
 injectHeader()
 
 const fileInput    = document.getElementById('fileInput')
-const modeRow      = document.getElementById('modeRow')
-const modeDesc     = document.getElementById('modeDesc')
-const rangeRow     = document.getElementById('rangeRow')
-const rangeInput   = document.getElementById('rangeInput')
+const fileList     = document.getElementById('fileList')
 const fileGrid     = document.getElementById('fileGrid')
 const fileMeta     = document.getElementById('fileMeta')
 const fileMetaText = document.getElementById('fileMetaText')
-const removeBtn    = document.getElementById('removeBtn')
+const removeAllBtn = document.getElementById('removeAllBtn')
 const splitBtn     = document.getElementById('splitBtn')
 const zipBtn       = document.getElementById('zipBtn')
 const statusText   = document.getElementById('statusText')
 
-let pdfJsDoc = null
-let pdfBytes = null
-let pdfFileName = ''
-let splitMode = 'all'
+// Each entry: { file, name, size, bytes (Uint8Array), pdfJsDoc, pageCount }
+let pdfFiles = []
 let resultBlobs = []
 
 // -- Lazy-load pdf.js for thumbnails --
@@ -155,22 +140,6 @@ async function loadPdfJs() {
   pdfjsLib = mod
   return mod
 }
-
-// -- Mode selector --
-modeRow.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    modeRow.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'))
-    btn.classList.add('active')
-    splitMode = btn.dataset.mode
-    if (splitMode === 'custom') {
-      rangeRow.classList.add('on')
-      modeDesc.textContent = modeLblCustom
-    } else {
-      rangeRow.classList.remove('on')
-      modeDesc.textContent = modeLblAll
-    }
-  })
-})
 
 // -- Next steps --
 function buildNextSteps() {
@@ -193,114 +162,145 @@ function buildNextSteps() {
   document.getElementById('nextSteps').style.display = 'block'
 }
 
-function resetState() {
-  pdfJsDoc = null
-  pdfBytes = null
-  pdfFileName = ''
-  resultBlobs = []
-  fileGrid.innerHTML = ''
-  fileMeta.classList.remove('on')
-  modeRow.classList.remove('on')
-  rangeRow.classList.remove('on')
-  zipBtn.style.display = 'none'
-  statusText.textContent = ''
+function updateFileMeta() {
+  if (pdfFiles.length === 0) {
+    fileMeta.classList.remove('on')
+    fileList.classList.remove('on')
+    disableSplitBtn()
+    return
+  }
+  const totalPages = pdfFiles.reduce((sum, f) => sum + f.pageCount, 0)
+  fileMetaText.textContent = `${pdfFiles.length} ${filesLabel} \u2014 ${totalPages} ${pagesLabel}`
+  fileMeta.classList.add('on')
+  fileList.classList.add('on')
+  enableSplitBtn()
+}
+
+function renderFileList() {
+  fileList.innerHTML = ''
+  pdfFiles.forEach((entry, idx) => {
+    const row = document.createElement('div')
+    row.className = 'file-entry'
+    row.innerHTML = `
+      <span class="fe-name" title="${entry.name}">${entry.name}</span>
+      <span class="fe-meta">${formatSize(entry.size)} \u2014 ${entry.pageCount} ${pagesLabel}</span>
+    `
+    const removeBtn = document.createElement('button')
+    removeBtn.className = 'fe-remove'
+    removeBtn.textContent = '\u00D7'
+    removeBtn.title = t.remove || 'Remove'
+    removeBtn.addEventListener('click', () => {
+      pdfFiles.splice(idx, 1)
+      renderFileList()
+      updateFileMeta()
+      clearResults()
+    })
+    row.appendChild(removeBtn)
+    fileList.appendChild(row)
+  })
+  fileList.classList.toggle('on', pdfFiles.length > 0)
+}
+
+function enableSplitBtn() {
+  splitBtn.disabled = false
+  splitBtn.style.opacity = '1'
+  splitBtn.style.cursor = 'pointer'
+  splitBtn.style.background = 'var(--accent)'
+}
+
+function disableSplitBtn() {
   splitBtn.disabled = true
   splitBtn.style.opacity = '0.7'
   splitBtn.style.cursor = 'not-allowed'
   splitBtn.style.background = 'var(--btn-disabled)'
+}
+
+function clearResults() {
+  resultBlobs = []
+  fileGrid.innerHTML = ''
+  zipBtn.style.display = 'none'
+  statusText.textContent = ''
   document.getElementById('nextSteps').style.display = 'none'
 }
 
-removeBtn.addEventListener('click', resetState)
+function resetState() {
+  pdfFiles = []
+  resultBlobs = []
+  fileGrid.innerHTML = ''
+  fileList.innerHTML = ''
+  fileList.classList.remove('on')
+  fileMeta.classList.remove('on')
+  zipBtn.style.display = 'none'
+  statusText.textContent = ''
+  disableSplitBtn()
+  document.getElementById('nextSteps').style.display = 'none'
+}
 
-async function loadPdfFile(file) {
-  if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
-    statusText.textContent = t.warn_wrong_fmt_short || 'Wrong format.'
-    return
-  }
-  if (file.size > 50 * 1024 * 1024) {
-    statusText.textContent = 'File too large. Maximum size is 50 MB.'
-    return
-  }
-  resetState()
-  statusText.textContent = loadingLbl
-  try {
-    const pdfjs = await loadPdfJs()
-    const buf = await file.arrayBuffer()
-    pdfBytes = new Uint8Array(buf.slice(0))
-    pdfJsDoc = await pdfjs.getDocument({ data: buf }).promise
-    pdfFileName = file.name.replace(/\.[^.]+$/, '')
-    fileMetaText.textContent = `${file.name} \u2014 ${pdfJsDoc.numPages} ${pagesLabel}`
-    fileMeta.classList.add('on')
-    modeRow.classList.add('on')
+removeAllBtn.addEventListener('click', resetState)
 
-    // Render preview thumbnails
-    for (let i = 1; i <= pdfJsDoc.numPages; i++) {
-      const page = await pdfJsDoc.getPage(i)
-      const viewport = page.getViewport({ scale: 0.4 })
-      const card = document.createElement('div')
-      card.className = 'pdf-card'
-      const canvas = document.createElement('canvas')
-      canvas.width = viewport.width
-      canvas.height = viewport.height
-      const ctx = canvas.getContext('2d')
-      await page.render({ canvasContext: ctx, viewport, intent: 'display' }).promise
-      const pname = document.createElement('div')
-      pname.className = 'pname'
-      pname.textContent = `${pageLabel} ${i}`
-      const pmeta = document.createElement('div')
-      pmeta.className = 'pmeta'
-      const fullViewport = page.getViewport({ scale: 1 })
-      pmeta.textContent = `${Math.round(fullViewport.width)} \u00D7 ${Math.round(fullViewport.height)} pt`
-      card.append(canvas, pname, pmeta)
-      fileGrid.appendChild(card)
+async function addPdfFiles(files) {
+  const incoming = Array.from(files)
+  const pdfjs = await loadPdfJs()
+  let skipped = 0
+
+  for (const file of incoming) {
+    // Validate type
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      skipped++
+      continue
+    }
+    // Validate size
+    if (file.size > MAX_FILE_SIZE) {
+      statusText.textContent = `${file.name}: ${t.splitpdf_too_large || 'File too large. Maximum 50 MB per file.'}`
+      skipped++
+      continue
+    }
+    // Validate max count
+    if (pdfFiles.length >= MAX_FILES) {
+      statusText.textContent = t.splitpdf_max_files || `Maximum ${MAX_FILES} files.`
+      break
     }
 
-    splitBtn.disabled = false
-    splitBtn.style.opacity = '1'
-    splitBtn.style.cursor = 'pointer'
-    splitBtn.style.background = 'var(--accent)'
-    statusText.textContent = ''
-  } catch (err) {
-    console.error('[split-pdf] load failed:', err)
-    statusText.textContent = (t.splitpdf_load_error || 'Could not load PDF: ') + (err?.message || err)
+    statusText.textContent = loadingLbl
+    try {
+      const buf = await file.arrayBuffer()
+      const bytes = new Uint8Array(buf.slice(0))
+      const pdfJsDoc = await pdfjs.getDocument({ data: buf }).promise
+      pdfFiles.push({
+        file,
+        name: file.name,
+        size: file.size,
+        bytes,
+        pdfJsDoc,
+        pageCount: pdfJsDoc.numPages
+      })
+    } catch (err) {
+      console.error('[split-pdf] load failed:', file.name, err)
+      statusText.textContent = (t.splitpdf_load_error || 'Could not load PDF: ') + file.name
+      skipped++
+    }
   }
+
+  renderFileList()
+  updateFileMeta()
+  if (pdfFiles.length > 0 && skipped === 0) statusText.textContent = ''
 }
 
 fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) loadPdfFile(fileInput.files[0])
+  if (fileInput.files.length) {
+    clearResults()
+    addPdfFiles(fileInput.files)
+  }
   fileInput.value = ''
 })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => {
   e.preventDefault()
-  if (e.dataTransfer.files.length) loadPdfFile(e.dataTransfer.files[0])
-})
-
-// -- Parse custom ranges like "1-3, 5, 7-10" --
-function parseRanges(input, totalPages) {
-  const ranges = []
-  const parts = input.split(',').map(s => s.trim()).filter(Boolean)
-  for (const part of parts) {
-    const match = part.match(/^(\d+)\s*-\s*(\d+)$/)
-    if (match) {
-      const start = parseInt(match[1], 10)
-      const end = parseInt(match[2], 10)
-      if (start < 1 || end < start || end > totalPages) {
-        throw new Error(`Invalid range: ${part} (PDF has ${totalPages} pages)`)
-      }
-      ranges.push({ start, end, label: `${start}-${end}` })
-    } else {
-      const num = parseInt(part, 10)
-      if (isNaN(num) || num < 1 || num > totalPages) {
-        throw new Error(`Invalid page: ${part} (PDF has ${totalPages} pages)`)
-      }
-      ranges.push({ start: num, end: num, label: `${num}` })
-    }
+  if (e.dataTransfer.files.length) {
+    clearResults()
+    addPdfFiles(e.dataTransfer.files)
   }
-  if (ranges.length === 0) throw new Error('No valid ranges entered.')
-  return ranges
-}
+})
 
 // -- Create a PDF with specific pages --
 async function extractPages(srcBytes, pageIndices) {
@@ -322,76 +322,91 @@ function triggerDownload(blob, filename) {
 
 // -- Split action --
 splitBtn.addEventListener('click', async () => {
-  if (!pdfBytes || !pdfJsDoc) return
-  splitBtn.disabled = true
-  splitBtn.style.opacity = '0.7'
-  splitBtn.style.cursor = 'not-allowed'
+  if (!pdfFiles.length) return
+  disableSplitBtn()
   resultBlobs = []
+  fileGrid.innerHTML = ''
   zipBtn.style.display = 'none'
 
   try {
-    const totalPages = pdfJsDoc.numPages
-    let tasks = [] // { pageIndices: number[], label: string }
-
-    if (splitMode === 'custom') {
-      const raw = rangeInput.value.trim()
-      if (!raw) {
-        statusText.textContent = t.splitpdf_enter_ranges || 'Please enter page ranges.'
-        splitBtn.disabled = false
-        splitBtn.style.opacity = '1'
-        splitBtn.style.cursor = 'pointer'
-        return
-      }
-      const ranges = parseRanges(raw, totalPages)
-      for (const r of ranges) {
-        const indices = []
-        for (let p = r.start; p <= r.end; p++) indices.push(p - 1) // 0-indexed for pdf-lib
-        tasks.push({ pageIndices: indices, label: r.label })
-      }
-    } else {
-      // Split all: each page separately
-      for (let i = 0; i < totalPages; i++) {
-        tasks.push({ pageIndices: [i], label: `${i + 1}` })
+    // Build task list: split every page of every file
+    const tasks = [] // { bytes, pageIndex, fileName, pageNum }
+    for (const entry of pdfFiles) {
+      for (let i = 0; i < entry.pageCount; i++) {
+        tasks.push({
+          bytes: entry.bytes,
+          pageIndex: i,
+          fileName: entry.name.replace(/\.[^.]+$/, ''),
+          pageNum: i + 1,
+          pdfJsDoc: entry.pdfJsDoc
+        })
       }
     }
 
     // Process each task
-    for (let i = 0; i < tasks.length; i++) {
-      statusText.textContent = `${splittingLbl} (${i + 1}/${tasks.length})`
-      const task = tasks[i]
-      const newPdfBytes = await extractPages(pdfBytes, task.pageIndices)
-      const blob = new Blob([newPdfBytes], { type: 'application/pdf' })
-      const filename = tasks.length === 1
-        ? `${pdfFileName || 'split'}-pages-${task.label}.pdf`
-        : `${pdfFileName || 'split'}-page-${task.label}.pdf`
-      resultBlobs.push({ blob, name: filename })
+    let currentFileIdx = 0
+    let taskIdx = 0
+    for (const entry of pdfFiles) {
+      for (let i = 0; i < entry.pageCount; i++) {
+        const task = tasks[taskIdx]
+        statusText.textContent = `${splittingLbl} (${taskIdx + 1}/${tasks.length}) \u2014 ${entry.name}`
+        const newPdfBytes = await extractPages(task.bytes, [task.pageIndex])
+        const blob = new Blob([newPdfBytes], { type: 'application/pdf' })
+        const filename = `${task.fileName}-page-${task.pageNum}.pdf`
+        resultBlobs.push({ blob, name: filename })
+        taskIdx++
+      }
+      currentFileIdx++
     }
 
-    // If only one result, download immediately
+    statusText.textContent = `${resultBlobs.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
+
+    // Render result cards with thumbnails
+    for (let r = 0; r < resultBlobs.length; r++) {
+      const task = tasks[r]
+      const card = document.createElement('div')
+      card.className = 'pdf-card'
+
+      // Render thumbnail from source pdf.js doc
+      try {
+        const page = await task.pdfJsDoc.getPage(task.pageIndex + 1)
+        const viewport = page.getViewport({ scale: 0.4 })
+        const canvas = document.createElement('canvas')
+        canvas.width = viewport.width
+        canvas.height = viewport.height
+        const ctx = canvas.getContext('2d')
+        await page.render({ canvasContext: ctx, viewport, intent: 'display' }).promise
+        card.appendChild(canvas)
+      } catch (_) {
+        // Skip thumbnail on error
+      }
+
+      const pname = document.createElement('div')
+      pname.className = 'pname'
+      pname.textContent = resultBlobs[r].name
+      const pmeta = document.createElement('div')
+      pmeta.className = 'pmeta'
+      pmeta.textContent = `${pageLabel} ${task.pageNum} \u2014 ${task.fileName}`
+
+      const dlLink = document.createElement('a')
+      dlLink.className = 'dl-link'
+      const url = URL.createObjectURL(resultBlobs[r].blob)
+      dlLink.textContent = `\u2B07 ${dlBtn} PDF`
+      dlLink.href = url
+      dlLink.download = resultBlobs[r].name
+      dlLink.style.display = 'block'
+      dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
+
+      card.append(pname, pmeta, dlLink)
+      fileGrid.appendChild(card)
+    }
+
+    // If only one result, auto-download
     if (resultBlobs.length === 1) {
       triggerDownload(resultBlobs[0].blob, resultBlobs[0].name)
       statusText.textContent = t.splitpdf_done || 'Done! PDF downloaded.'
       if (window.showReviewPrompt) window.showReviewPrompt()
     } else {
-      statusText.textContent = `${resultBlobs.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
-      // Show individual download links on cards
-      resultBlobs.forEach((r, idx) => {
-        const card = fileGrid.children[idx]
-        if (card) {
-          let dlLink = card.querySelector('.dl-link')
-          if (!dlLink) {
-            dlLink = document.createElement('a')
-            dlLink.className = 'dl-link'
-            card.appendChild(dlLink)
-          }
-          const url = URL.createObjectURL(r.blob)
-          dlLink.textContent = `\u2B07 ${dlBtn} PDF`
-          dlLink.href = url
-          dlLink.download = r.name
-          dlLink.style.display = 'block'
-          dlLink.onclick = () => setTimeout(() => URL.revokeObjectURL(url), 10000)
-        }
-      })
       zipBtn.style.display = 'block'
     }
 
@@ -401,9 +416,7 @@ splitBtn.addEventListener('click', async () => {
     statusText.textContent = (t.splitpdf_error || 'Split failed: ') + (err?.message || err)
   }
 
-  splitBtn.disabled = false
-  splitBtn.style.opacity = '1'
-  splitBtn.style.cursor = 'pointer'
+  enableSplitBtn()
 })
 
 // -- ZIP download --
@@ -419,11 +432,11 @@ zipBtn.addEventListener('click', async () => {
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob)
-    a.download = `${pdfFileName || 'split-pdf'}.zip`
+    a.download = 'split-pdfs.zip'
     a.click()
     if (window.showReviewPrompt) window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, `${pdfFileName || 'split-pdf'}.zip`, 'split-pdf')
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'split-pdfs.zip', 'split-pdf')
   } catch (e) {
     alert('ZIP failed: ' + e.message)
   }

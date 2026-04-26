@@ -83,7 +83,7 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div style="margin-bottom:16px;">
+    <div id="uploadArea" style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
@@ -201,6 +201,7 @@ function resetState() {
   pages = []
   fileGrid.innerHTML = ''
   fileMeta.classList.remove('on')
+  if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
   selectionRow.classList.remove('on')
   statusText.textContent = ''
   extractBtn.disabled = true
@@ -231,6 +232,7 @@ async function loadPdfFile(file) {
     pdfDoc = await pdfjs.getDocument({ data: buf }).promise
     pdfFileName = file.name.replace(/\.[^.]+$/, '')
     fileMetaText.textContent = `${file.name} \u2014 ${pdfDoc.numPages} ${pagesLabel}`
+    document.getElementById('uploadArea').style.display = 'none'
     fileMeta.classList.add('on')
     selectionRow.classList.add('on')
 

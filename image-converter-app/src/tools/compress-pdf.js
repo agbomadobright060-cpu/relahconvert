@@ -254,6 +254,7 @@ function updateUI() {
     uploadArea.style.display = ''
     return
   }
+  uploadArea.style.display = 'none'
   const totalSize = pdfEntries.reduce((s, e) => s + e.originalSize, 0)
   fileMetaText.textContent = `${pdfEntries.length} file${pdfEntries.length > 1 ? 's' : ''} \u2014 ${formatSize(totalSize)}`
   fileMeta.classList.add('on')
