@@ -20,28 +20,41 @@ const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
-  .pdf-hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:24px;}
-  .pdf-hub-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:24px 20px;text-decoration:none;transition:all 0.18s;display:flex;align-items:flex-start;gap:16px;}
-  .pdf-hub-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(200,75,49,0.10);transform:translateY(-2px);}
-  .pdf-hub-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;}
-  .pdf-hub-info{flex:1;min-width:0;}
-  .pdf-hub-info h3{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 4px;line-height:1.3;}
-  .pdf-hub-info p{font-size:13px;color:var(--text-tertiary);margin:0;line-height:1.5;font-family:'DM Sans',sans-serif;}
-  .pdf-hub-arrow{color:var(--text-muted);font-size:18px;margin-top:4px;flex-shrink:0;transition:color 0.15s;}
-  .pdf-hub-card:hover .pdf-hub-arrow{color:var(--accent);}
+  .pdf-hero{text-align:center;padding:56px 16px 40px;max-width:700px;margin:0 auto;}
+  .pdf-hero h1{font-family:'Fraunces',serif;font-size:clamp(32px,6vw,52px);font-weight:400;color:var(--text-primary);line-height:1.1;letter-spacing:-0.02em;margin-bottom:14px;}
+  .pdf-hero h1 em{font-style:italic;color:var(--accent);}
+  .pdf-hero p{font-size:15px;color:var(--text-tertiary);line-height:1.6;}
+  .pdf-tools-section{max-width:1180px;margin:0 auto;padding:0 24px 60px;width:100%;}
+  .pdf-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:16px;padding:28px 26px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.2s;display:block;}
+  .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(200,75,49,0.12);transform:translateY(-2px);}
+  .pdf-tool-card .icon{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+  .pdf-tool-card .icon svg{width:34px;height:34px;display:block;}
+  .pdf-tool-card h2{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;letter-spacing:-0.01em;}
+  .pdf-tool-card p{font-size:13px;color:var(--text-tertiary);line-height:1.55;}
+  @media(max-width:900px){.pdf-tools-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:768px){
+    .pdf-tools-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+    .pdf-tool-card{padding:18px 16px;border-radius:14px;}
+    .pdf-tool-card .icon{width:44px;height:44px;border-radius:10px;margin-bottom:10px;}
+    .pdf-tool-card .icon svg{width:34px;height:34px;}
+    .pdf-tool-card h2{font-size:14px;}
+    .pdf-tool-card p{display:none;}
+    .pdf-hero{padding:36px 16px 28px;}
+  }
 `
 document.head.appendChild(style)
 
-const pdfTools = [
-  { slug: 'merge-pdf',       icon: '📑', bg: '#EFF6FF', color: '#2563EB' },
-  { slug: 'split-pdf',       icon: '✂️', bg: '#FEF3C7', color: '#D97706' },
-  { slug: 'rotate-pdf',      icon: '🔄', bg: '#F0FDF4', color: '#16A34A' },
-  { slug: 'compress-pdf',    icon: '📦', bg: '#FEF2F2', color: '#DC2626' },
-  { slug: 'reorder-pdf',     icon: '↕️', bg: '#F5F3FF', color: '#7C3AED' },
-  { slug: 'extract-pdf',     icon: '📤', bg: '#ECFDF5', color: '#059669' },
-  { slug: 'remove-pdf',      icon: '🗑️', bg: '#FFF1F2', color: '#E11D48' },
-  { slug: 'add-page-numbers',icon: '#️⃣', bg: '#FFF7ED', color: '#EA580C' },
-]
+const svgIcons = {
+  'merge-pdf':        { bg: '#2563EB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="8" width="12" height="16" rx="2" fill="#fff" opacity="0.6"/><rect x="22" y="16" width="12" height="16" rx="2" fill="#fff" opacity="0.9"/><path d="M16 20l6-4v8z" fill="#fff"/></svg>` },
+  'split-pdf':        { bg: '#D97706', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 8v24" stroke="#fff" stroke-width="2.5" stroke-dasharray="3 2"/><path d="M16 20l-4 3v-6z" fill="#fff"/><path d="M24 20l4 3v-6z" fill="#fff"/></svg>` },
+  'rotate-pdf':       { bg: '#16A34A', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="24" rx="2" fill="#fff" opacity="0.3"/><path d="M26 16a8 8 0 11-12 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M26 12v5h-5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'compress-pdf':     { bg: '#DC2626', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 14v8M20 22l-3 3M20 22l3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 28h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>` },
+  'reorder-pdf':      { bg: '#7C3AED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="6" rx="1.5" fill="#fff" opacity="0.5"/><rect x="10" y="17" width="20" height="6" rx="1.5" fill="#fff"/><rect x="10" y="26" width="20" height="6" rx="1.5" fill="#fff" opacity="0.5"/></svg>` },
+  'extract-pdf':      { bg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 16v10M17 19l3-3 3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'remove-pdf':       { bg: '#E11D48', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M15 19l10 8M25 19l-10 8" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></svg>` },
+  'add-page-numbers': { bg: '#EA580C', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><text x="20" y="25" font-family="Arial" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">1</text></svg>` },
+}
 
 const ns = t.nav_short || {}
 const cardDescs = {
@@ -55,30 +68,30 @@ const cardDescs = {
   'add-page-numbers': t.card_add_page_numbers_desc || 'Add page numbers to your PDF. Choose position, font size, and starting number.',
 }
 
+const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers']
+
 const _tp = hubTitle.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')
 
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
-    <div style="margin-bottom:8px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
-      <p style="font-size:14px;color:var(--text-tertiary);margin:0;max-width:600px;line-height:1.5;">${hubDesc}</p>
-    </div>
-    <div class="pdf-hub-grid">
-      ${pdfTools.map(tool => `
-        <a href="${localHref(tool.slug)}" class="pdf-hub-card">
-          <div class="pdf-hub-icon" style="background:${tool.bg};">
-            <span>${tool.icon}</span>
-          </div>
-          <div class="pdf-hub-info">
-            <h3>${ns[tool.slug] || tool.slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</h3>
-            <p>${cardDescs[tool.slug]}</p>
-          </div>
-          <span class="pdf-hub-arrow">\u203A</span>
-        </a>
-      `).join('')}
-    </div>
+  <div>
+    <section class="pdf-hero">
+      <h1>${titlePart1} <em>${titlePart2}</em></h1>
+      <p>${hubDesc}</p>
+    </section>
+    <section class="pdf-tools-section">
+      <div class="pdf-tools-grid">
+        ${pdfToolSlugs.map(slug => {
+          const ic = svgIcons[slug]
+          return `<a href="${localHref(slug)}" class="pdf-tool-card">
+            <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
+            <h2>${ns[slug] || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</h2>
+            <p>${cardDescs[slug]}</p>
+          </a>`
+        }).join('')}
+      </div>
+    </section>
   </div>
 `
 
