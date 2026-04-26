@@ -184,8 +184,32 @@ const applyAllBtn    = document.getElementById('applyAllBtn')
 const statusText     = document.getElementById('statusText')
 
 /* -- State ------------------------------------------------------------------- */
-let files = []          // { name, bytes, pageCount }
+let files = []          // { name, bytes, pageCount, opts: {position, fontSize, startNum, format} }
 let activeFileIndex = 0
+
+/* Save current form values into the active file's opts */
+function saveActiveOpts() {
+  if (!files.length) return
+  const f = files[activeFileIndex]
+  if (!f) return
+  f.opts = {
+    position: positionSelect.value,
+    fontSize: parseInt(fontSizeInput.value) || 12,
+    startNum: parseInt(startNumInput.value) || 1,
+    format: formatSelect.value,
+  }
+}
+
+/* Load the active file's opts into the form */
+function loadActiveOpts() {
+  if (!files.length) return
+  const f = files[activeFileIndex]
+  if (!f || !f.opts) return
+  positionSelect.value = f.opts.position
+  fontSizeInput.value = f.opts.fontSize
+  startNumInput.value = f.opts.startNum
+  formatSelect.value = f.opts.format
+}
 
 /* -- UI update --------------------------------------------------------------- */
 function updateUI() {
@@ -238,8 +262,10 @@ function renderTabs() {
     btn.textContent = f.name.length > 22 ? f.name.slice(0, 20) + '\u2026' : f.name
     btn.title = f.name
     btn.addEventListener('click', () => {
+      saveActiveOpts()
       activeFileIndex = i
       updateUI()
+      loadActiveOpts()
     })
     fileTabs.appendChild(btn)
   })
@@ -298,6 +324,7 @@ async function loadPdfFiles(rawFiles) {
         name: file.name,
         bytes: new Uint8Array(buf.slice(0)),
         pageCount: doc.getPageCount(),
+        opts: { position: 'bc', fontSize: 12, startNum: 1, format: 'num' },
       })
     } catch (err) {
       console.error('[add-page-numbers] load failed:', file.name, err)
@@ -412,6 +439,14 @@ function getOpts() {
     fmt: formatSelect.value,
   }
 }
+function getOptsForFile(f) {
+  return {
+    pos: f.opts.position,
+    fontSize: Math.max(8, Math.min(36, f.opts.fontSize)),
+    startNum: f.opts.startNum,
+    fmt: f.opts.format,
+  }
+}
 
 /* -- Trigger download -------------------------------------------------------- */
 function triggerDownload(blob, filename) {
@@ -431,7 +466,8 @@ applyBtn.addEventListener('click', async () => {
   statusText.textContent = applyingLbl
   document.getElementById('nextSteps').style.display = 'none'
 
-  const opts = getOpts()
+  saveActiveOpts()
+  const opts = getOptsForFile(files[activeFileIndex])
 
   try {
     const result = await processOnePdf(files[activeFileIndex], opts)
@@ -458,12 +494,13 @@ applyAllBtn.addEventListener('click', async () => {
   statusText.textContent = ''
   document.getElementById('nextSteps').style.display = 'none'
 
-  const opts = getOpts()
+  saveActiveOpts()
 
   try {
     const results = []
     for (let i = 0; i < files.length; i++) {
       statusText.textContent = `${applyingLbl} (${i + 1}/${files.length})`
+      const opts = getOptsForFile(files[i])
       const result = await processOnePdf(files[i], opts)
       results.push(result)
     }
