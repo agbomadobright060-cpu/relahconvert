@@ -27,6 +27,8 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
+  .drop-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:40px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);}
+  .drop-zone:hover{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
   #pageGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
   .page-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;position:relative;cursor:grab;user-select:none;transition:transform 0.15s,box-shadow 0.15s,opacity 0.15s,border-color 0.15s;}
   .page-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);}
@@ -77,7 +79,7 @@ const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')
 
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
+  <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
@@ -85,6 +87,7 @@ document.querySelector('#app').innerHTML = `
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
+      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop a PDF here</span></label>
     </div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none;" />
     <div id="fileMeta"><span id="fileMetaText"></span><button id="removeBtn">${t.remove || 'Remove'}</button></div>
