@@ -8,14 +8,13 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['compress-pdf']) || 'Compress PDF'
 const seoData   = t.seo && t.seo['compress-pdf']
-const descText  = t.compresspdf_desc || (seoData ? seoData.h2a : 'Compress PDF files free. Reduce file size in your browser — no upload required.')
+const descText  = t.compresspdf_desc || (seoData ? seoData.h2a : 'Reduce PDF file size by optimizing images.')
 const selectLbl = t.compresspdf_select || t.select_image || 'Select PDF'
 const dropHint  = t.compresspdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const dlBtn     = t.download || 'Download'
 const compressLbl   = t.compresspdf_compress_btn || 'Compress PDF'
 const compressingLbl = t.compresspdf_compressing || 'Compressing\u2026'
 const qualityLabel  = t.compresspdf_quality_label || 'Compression level'
-const noticeMsg = t.compresspdf_notice || 'Upload a PDF and compress it by re-rendering pages as optimized JPEG images. Higher compression means smaller files but lower image quality.'
 const pagesLabel = t.compresspdf_pages || 'pages'
 const loadingLbl = t.compresspdf_loading || 'Loading PDF\u2026'
 const lowLbl     = t.compresspdf_low || 'Low'
@@ -33,7 +32,6 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
   #qualityRow{display:none;align-items:center;gap:12px;margin-bottom:14px;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);padding:12px 16px;flex-wrap:wrap;}
   #qualityRow.on{display:flex;}
   #qualityRow label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;white-space:nowrap;}
@@ -92,7 +90,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">\u2139\uFE0F ${noticeMsg}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>

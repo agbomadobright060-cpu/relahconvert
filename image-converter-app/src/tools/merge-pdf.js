@@ -8,12 +8,11 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['merge-pdf']) || 'Merge PDF'
 const seoData   = t.seo && t.seo['merge-pdf']
-const descText  = (t.mergepdf_desc) || (seoData ? seoData.h2a : 'Combine multiple PDF files into one. Free, browser-only, no upload required.')
+const descText  = (t.mergepdf_desc) || (seoData ? seoData.h2a : 'Combine multiple PDF files into one document.')
 const selectLbl = t.mergepdf_select || 'Select PDFs'
 const dropHint  = t.mergepdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const mergeLbl  = t.mergepdf_merge_btn || 'Merge PDFs'
 const mergingLbl = t.mergepdf_merging || 'Merging…'
-const noticeMsg = t.mergepdf_notice || 'Add two or more PDF files, reorder them by dragging, and merge into a single PDF. Everything happens in your browser — nothing is uploaded.'
 const pagesLabel = t.mergepdf_pages || t.pdfpng_pages || 'pages'
 const loadingLbl = t.mergepdf_loading || 'Loading PDFs…'
 const dlBtn     = t.download || 'Download'
@@ -26,7 +25,6 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
   #fileGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
   .pdf-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;position:relative;cursor:grab;user-select:none;transition:box-shadow 0.15s,border-color 0.15s;}
   .pdf-card.dragging{opacity:0.5;border-color:var(--accent);}
@@ -78,7 +76,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">\u2139\uFE0F ${noticeMsg}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>

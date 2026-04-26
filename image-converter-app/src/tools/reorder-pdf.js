@@ -8,12 +8,11 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['reorder-pdf']) || 'Reorder PDF'
 const seoData   = t.seo && t.seo['reorder-pdf']
-const descText  = t.reorderpdf_desc || (seoData ? seoData.h2a : 'Drag and drop to rearrange PDF pages in any order. Free, browser-only, no upload required.')
+const descText  = t.reorderpdf_desc || (seoData ? seoData.h2a : 'Drag and drop to rearrange PDF pages in any order.')
 const selectLbl = t.reorderpdf_select || t.select_image || 'Select PDF'
 const dropHint  = t.reorderpdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const applyBtn  = t.reorderpdf_apply || 'Apply & Download'
 const applyingLbl = t.reorderpdf_applying || 'Reordering pages\u2026'
-const noticeMsg = t.reorderpdf_notice || 'Upload a PDF, then drag and drop the page thumbnails to rearrange them. Click "Apply & Download" to save the reordered PDF.'
 const pageLabel = t.reorderpdf_page || t.pdfpng_page || 'Page'
 const pagesLabel = t.reorderpdf_pages || t.pdfpng_pages || 'pages'
 const loadingLbl = t.reorderpdf_loading || 'Loading PDF\u2026'
@@ -28,7 +27,6 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
   #pageGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
   .page-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;position:relative;cursor:grab;user-select:none;transition:transform 0.15s,box-shadow 0.15s,opacity 0.15s,border-color 0.15s;}
   .page-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);}
@@ -84,7 +82,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">\u2139\uFE0F ${noticeMsg}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>

@@ -8,7 +8,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['split-pdf']) || 'Split PDF'
 const seoData   = t.seo && t.seo['split-pdf']
-const descText  = (t.splitpdf_desc) || (seoData ? seoData.h2a : 'Split PDF into individual pages or custom ranges. Free, browser-only.')
+const descText  = (t.splitpdf_desc) || (seoData ? seoData.h2a : 'Split PDF into individual pages or custom ranges.')
 const selectLbl = t.splitpdf_select || t.select_image || 'Select PDF'
 const dropHint  = t.splitpdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const dlBtn     = t.download || 'Download'
@@ -21,7 +21,6 @@ const pageLabel     = t.splitpdf_page || t.pdfpng_page || 'Page'
 const pagesLabel    = t.splitpdf_pages || t.pdfpng_pages || 'pages'
 const loadingLbl    = t.splitpdf_loading || 'Loading PDF...'
 const rangeHint     = t.splitpdf_range_hint || 'e.g. 1-3, 5, 7-10'
-const noticeMsg     = t.splitpdf_notice || 'Upload a PDF and split it into separate pages or custom page ranges. Everything runs in your browser — no upload needed.'
 const modeLblAll    = t.splitpdf_mode_all || 'Each page as a separate PDF'
 const modeLblCustom = t.splitpdf_mode_custom || 'Split by custom page ranges'
 
@@ -33,7 +32,6 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
   #modeRow{display:none;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   #modeRow.on{display:flex;}
   .mode-btn{padding:8px 16px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);color:var(--text-secondary);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
@@ -92,7 +90,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">\u2139\uFE0F ${noticeMsg}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>

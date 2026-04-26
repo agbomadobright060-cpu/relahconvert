@@ -7,13 +7,12 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['rotate-pdf']) || 'Rotate PDF'
 const seoData   = t.seo && t.seo['rotate-pdf']
-const descText  = t.rotatepdf_desc || (seoData ? seoData.h2a : 'Rotate PDF pages by 90, 180, or 270 degrees. Free, browser-only, no upload.')
+const descText  = t.rotatepdf_desc || (seoData ? seoData.h2a : 'Rotate PDF pages by 90, 180, or 270 degrees.')
 const selectLbl = t.rotatepdf_select || t.select_image || 'Select PDF'
 const dropHint  = t.rotatepdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const dlBtn     = t.download || 'Download'
 const rotateLbl = t.rotatepdf_apply_btn || 'Apply & Download'
 const applyingLbl = t.rotatepdf_applying || 'Applying rotations\u2026'
-const noticeMsg = t.rotatepdf_notice || 'Upload a PDF, rotate individual pages or all pages at once, then download the rotated PDF.'
 const pageLabel = t.rotatepdf_page || t.pdfpng_page || 'Page'
 const pagesLabel = t.rotatepdf_pages || t.pdfpng_pages || 'pages'
 const loadingLbl = t.rotatepdf_loading || 'Loading PDF\u2026'
@@ -31,7 +30,6 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
   #pageGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:16px;}
   .page-card{background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);overflow:hidden;position:relative;transition:border-color 0.15s;}
   .page-card:hover{border-color:var(--accent);}
@@ -89,7 +87,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">\u2139\uFE0F ${noticeMsg}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>

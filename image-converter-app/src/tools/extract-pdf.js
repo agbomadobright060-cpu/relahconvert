@@ -7,12 +7,11 @@ const t = getT()
 
 const toolName    = (t.nav_short && t.nav_short['extract-pdf']) || 'Extract PDF Pages'
 const seoData     = t.seo && t.seo['extract-pdf']
-const descText    = t.extractpdf_desc || (seoData ? seoData.h2a : 'Extract specific pages from a PDF and save them as a new document. Free, browser-only.')
+const descText    = t.extractpdf_desc || (seoData ? seoData.h2a : 'Extract specific pages from a PDF and save them as a new document.')
 const selectLbl   = t.extractpdf_select || t.select_image || 'Select PDF'
 const dropHint    = t.extractpdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const extractLbl  = t.extractpdf_extract_btn || 'Extract Selected Pages'
 const extractingLbl = t.extractpdf_extracting || 'Extracting\u2026'
-const noticeMsg   = t.extractpdf_notice || 'Upload a PDF, select the pages you want, and download a new PDF with only those pages.'
 const pageLabel   = t.extractpdf_page || t.pdfpng_page || 'Page'
 const pagesLabel  = t.extractpdf_pages || t.pdfpng_pages || 'pages'
 const loadingLbl  = t.extractpdf_loading || 'Loading PDF\u2026'
@@ -29,7 +28,6 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .notice{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:10px;background:var(--bg-card);border-radius:8px;border:1.5px solid var(--border);}
   #fileMeta{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;display:none;}
   #fileMeta.on{display:block;}
   #removeBtn{background:transparent;color:var(--accent);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;text-decoration:underline;}
@@ -82,7 +80,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div class="notice">\u2139\uFE0F ${noticeMsg}</div>
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
       <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
