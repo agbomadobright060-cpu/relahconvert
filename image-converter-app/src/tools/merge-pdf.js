@@ -79,7 +79,7 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
     </div>
-    <div style="margin-bottom:16px;">
+    <div id="uploadArea" style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
@@ -126,24 +126,28 @@ async function loadPdfJs() {
 
 function updateMergeButton() {
   const actionRow = document.getElementById('actionRow')
+  const uploadArea = document.getElementById('uploadArea')
   if (pdfFiles.length >= 2) {
     mergeBtn.disabled = false
     mergeBtn.style.opacity = '1'
     mergeBtn.style.cursor = 'pointer'
     mergeBtn.style.background = 'var(--accent)'
     actionRow.style.display = 'flex'
+    if (uploadArea) uploadArea.style.display = 'none'
   } else if (pdfFiles.length >= 1) {
     mergeBtn.disabled = true
     mergeBtn.style.opacity = '0.7'
     mergeBtn.style.cursor = 'not-allowed'
     mergeBtn.style.background = 'var(--btn-disabled)'
     actionRow.style.display = 'flex'
+    if (uploadArea) uploadArea.style.display = 'none'
   } else {
     mergeBtn.disabled = true
     mergeBtn.style.opacity = '0.7'
     mergeBtn.style.cursor = 'not-allowed'
     mergeBtn.style.background = 'var(--btn-disabled)'
     actionRow.style.display = 'none'
+    if (uploadArea) uploadArea.style.display = ''
   }
 }
 
