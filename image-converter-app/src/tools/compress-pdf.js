@@ -388,7 +388,7 @@ function renderPageToJpeg(page, scale, jpegQuality) {
 }
 
 // ── Compress single PDF ───────────────────────────────────────────────────
-async function compressSinglePdf(file, preset) {
+async function compressSinglePdf(file, preset, onPageProgress) {
   const pdfjs = await loadPdfJs()
   const srcBuf = await file.arrayBuffer()
   const srcDoc = await pdfjs.getDocument({ data: new Uint8Array(srcBuf) }).promise
@@ -396,6 +396,7 @@ async function compressSinglePdf(file, preset) {
   const newPdf = await PDFDocument.create()
 
   for (let i = 1; i <= srcDoc.numPages; i++) {
+    if (onPageProgress) onPageProgress(i, srcDoc.numPages)
     const page = await srcDoc.getPage(i)
     const jpegBlob = await renderPageToJpeg(page, preset.scale, preset.jpeg)
     const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer())
@@ -411,7 +412,12 @@ async function compressSinglePdf(file, preset) {
 
   const compressedBytes = await newPdf.save()
   srcDoc.destroy()
-  return new Blob([compressedBytes], { type: 'application/pdf' })
+  const compressedBlob = new Blob([compressedBytes], { type: 'application/pdf' })
+  // If "compressed" is larger than original, return original instead
+  if (compressedBlob.size >= file.size) {
+    return new Blob([await file.arrayBuffer()], { type: 'application/pdf' })
+  }
+  return compressedBlob
 }
 
 // ── Compress all ──────────────────────────────────────────────────────────
@@ -428,10 +434,10 @@ compressBtn.addEventListener('click', async () => {
 
   for (let i = 0; i < pdfEntries.length; i++) {
     const entry = pdfEntries[i]
-    statusText.textContent = `${compressingLbl} (${i + 1}/${pdfEntries.length}) — ${entry.name}`
-
     try {
-      const blob = await compressSinglePdf(entry.file, preset)
+      const blob = await compressSinglePdf(entry.file, preset, (page, total) => {
+        statusText.textContent = `${compressingLbl} — ${entry.name} (page ${page}/${total})`
+      })
       entry.compressedBlob = blob
       entry.compressedSize = blob.size
       totalOriginal += entry.originalSize
