@@ -367,6 +367,15 @@
               'jpg-to-pdf':()=>import('/src/jpg-to-pdf.js'),
               'png-to-pdf':()=>import('/src/png-to-pdf.js'),
               'pdf-to-png':()=>import('/src/tools/pdf-to-png.js'),
+              'pdf-tools':()=>import('/src/tools/pdf-tools.js'),
+              'merge-pdf':()=>import('/src/tools/merge-pdf.js'),
+              'split-pdf':()=>import('/src/tools/split-pdf.js'),
+              'rotate-pdf':()=>import('/src/tools/rotate-pdf.js'),
+              'compress-pdf':()=>import('/src/tools/compress-pdf.js'),
+              'reorder-pdf':()=>import('/src/tools/reorder-pdf.js'),
+              'extract-pdf':()=>import('/src/tools/extract-pdf.js'),
+              'remove-pdf':()=>import('/src/tools/remove-pdf.js'),
+              'add-page-numbers':()=>import('/src/tools/add-page-numbers.js'),
             }
             // Clear the homepage HTML and set up a clean page for the tool
             document.body.innerHTML = '<div id="app"></div>'
@@ -392,6 +401,15 @@
           'passport-photo':()=>import('/src/tools/passport-photo.js'),
           'image-splitter':()=>import('/src/tools/image-splitter.js'),
           'pdf-to-png':()=>import('/src/tools/pdf-to-png.js'),
+          'pdf-tools':()=>import('/src/tools/pdf-tools.js'),
+          'merge-pdf':()=>import('/src/tools/merge-pdf.js'),
+          'split-pdf':()=>import('/src/tools/split-pdf.js'),
+          'rotate-pdf':()=>import('/src/tools/rotate-pdf.js'),
+          'compress-pdf':()=>import('/src/tools/compress-pdf.js'),
+          'reorder-pdf':()=>import('/src/tools/reorder-pdf.js'),
+          'extract-pdf':()=>import('/src/tools/extract-pdf.js'),
+          'remove-pdf':()=>import('/src/tools/remove-pdf.js'),
+          'add-page-numbers':()=>import('/src/tools/add-page-numbers.js'),
         }
         if (__modules2[__segs[0]]) {
           __isToolRoute = true
@@ -438,7 +456,7 @@
         `<button class="filter-btn${key === 'all' ? ' active' : ''}" data-filter="${key}">${label}</button>`
       ).join('')
 
-      const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
+      const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf', 'pdf-tools']
       const allSlugs = [
         'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
         'compress','resize','jpg-to-pdf','png-to-pdf','pdf-to-png',
@@ -541,6 +559,15 @@
         'pixelate-image':    { bg: '#6366F1', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="10" width="6" height="6" fill="#fff"/><rect x="18" y="10" width="6" height="6" fill="#fff" fill-opacity="0.7"/><rect x="26" y="10" width="4" height="6" fill="#fff"/><rect x="10" y="18" width="6" height="6" fill="#fff" fill-opacity="0.7"/><rect x="18" y="18" width="6" height="6" fill="#fff"/><rect x="26" y="18" width="4" height="6" fill="#fff" fill-opacity="0.7"/><rect x="10" y="26" width="6" height="4" fill="#fff"/><rect x="18" y="26" width="6" height="4" fill="#fff" fill-opacity="0.7"/><rect x="26" y="26" width="4" height="4" fill="#fff"/></svg>` },
         'svg-to-png':        { bg: '#D97706', svg: _conv('SVG', 'PNG', '#D97706') },
         'svg-to-jpg':        { bg: '#EA580C', svg: _conv('SVG', 'JPG', '#EA580C') },
+        'pdf-tools':         { bg: '#EF4444', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#fff" opacity="0.9"/><text x="12" y="28" font-family="Arial" font-size="7.5" font-weight="800" fill="#EF4444">PDF</text></svg>` },
+        'merge-pdf':         { bg: '#2563EB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="8" width="12" height="16" rx="2" fill="#fff" opacity="0.6"/><rect x="22" y="16" width="12" height="16" rx="2" fill="#fff" opacity="0.9"/><path d="M16 20l6-4v8z" fill="#fff"/></svg>` },
+        'split-pdf':         { bg: '#D97706', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 8v24" stroke="#fff" stroke-width="2.5" stroke-dasharray="3 2"/><path d="M16 20l-4 3v-6z" fill="#fff"/><path d="M24 20l4 3v-6z" fill="#fff"/></svg>` },
+        'rotate-pdf':        { bg: '#16A34A', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="24" rx="2" fill="#fff" opacity="0.3"/><path d="M26 16a8 8 0 11-12 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M26 12v5h-5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'compress-pdf':      { bg: '#DC2626', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 14v8M20 22l-3 3M20 22l3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 28h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>` },
+        'reorder-pdf':       { bg: '#7C3AED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="6" rx="1.5" fill="#fff" opacity="0.5"/><rect x="10" y="17" width="20" height="6" rx="1.5" fill="#fff"/><rect x="10" y="26" width="20" height="6" rx="1.5" fill="#fff" opacity="0.5"/></svg>` },
+        'extract-pdf':       { bg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 16v10M17 19l3-3 3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+        'remove-pdf':        { bg: '#E11D48', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M15 19l10 8M25 19l-10 8" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></svg>` },
+        'add-page-numbers':  { bg: '#EA580C', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><text x="20" y="25" font-family="Arial" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">1</text></svg>` },
       }
 
       const toolCategories = [
@@ -550,6 +577,7 @@
         { name: t.cat_create||'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
         { name: t.cat_export||'Export', slugs: ['jpg-to-pdf','png-to-pdf','pdf-to-png','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
         { name: t.cat_photo||'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
+        { name: t.cat_pdf||'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers'] },
       ]
       function toolLink(slug) {
         const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
