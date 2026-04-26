@@ -238,6 +238,7 @@ async function loadPdfFile(file) {
 
     // Render preview thumbnails
     for (let i = 1; i <= pdfDoc.numPages; i++) {
+      statusText.textContent = `Loading page ${i}/${pdfDoc.numPages}`
       const page = await pdfDoc.getPage(i)
       const viewport = page.getViewport({ scale: 0.4 })
       const card = document.createElement('div')

@@ -417,8 +417,16 @@ async function addFiles(inputFiles) {
       const rotations = new Array(pageCount).fill(0)
       const canvases = []
 
-      // Render thumbnails
+      // Add file entry first (with empty canvases), render thumbnails progressively
+      const entry = { name: file.name, bytes, pageCount, rotations, canvases, pdfDoc }
+      files.push(entry)
+      activeFileIndex = files.length - 1
+      updateLayout()
+      renderFileTabs()
+
+      // Render thumbnails one at a time with progress
       for (let p = 1; p <= pageCount; p++) {
+        statusText.textContent = `Loading ${file.name} \u2014 page ${p}/${pageCount}`
         const page = await pdfDoc.getPage(p)
         const viewport = page.getViewport({ scale: 0.4 })
         const canvas = document.createElement('canvas')
@@ -427,9 +435,8 @@ async function addFiles(inputFiles) {
         const ctx = canvas.getContext('2d')
         await page.render({ canvasContext: ctx, viewport, intent: 'display' }).promise
         canvases.push(canvas)
+        renderActiveFile() // Update grid after each page
       }
-
-      files.push({ name: file.name, bytes, pageCount, rotations, canvases })
     } catch (err) {
       console.error('[rotate-pdf] load failed:', file.name, err)
       statusText.textContent = `Failed to load ${file.name}: ${err?.message || err}`

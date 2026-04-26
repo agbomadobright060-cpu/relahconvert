@@ -202,6 +202,7 @@ async function loadPdfFile(file) {
     fileMeta.classList.add('on')
 
     for (let i = 1; i <= totalPages; i++) {
+      statusText.textContent = `Loading page ${i}/${totalPages}`
       const page = await pdfJsDoc.getPage(i)
       const viewport = page.getViewport({ scale: 0.4 })
       const thumb = document.createElement('div')

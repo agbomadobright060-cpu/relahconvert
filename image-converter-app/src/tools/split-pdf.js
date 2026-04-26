@@ -395,7 +395,8 @@ async function renderPageGrid(f) {
       }
     })
 
-    // Render thumbnail async
+    // Render thumbnail async with progress
+    statusText.textContent = `Loading page ${i + 1}/${f.pageCount}`
     try {
       const canvas = await renderThumb(f.pdfJsDoc, i + 1)
       card.insertBefore(canvas, pnum)
