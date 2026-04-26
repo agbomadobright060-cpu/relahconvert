@@ -352,12 +352,12 @@ mergeBtn.addEventListener('click', async () => {
 
     const mergedBytes = await mergedPdf.save()
     const blob = new Blob([mergedBytes], { type: 'application/pdf' })
-    lastResults = [{ blob, name: `${mergedName}.pdf`, type: 'application/pdf' }]
     const url = URL.createObjectURL(blob)
 
     // Build download filename from first file's name
     const baseName = pdfFiles[0].name.replace(/\.[^.]+$/, '')
     const fileName = `${baseName}-merged.pdf`
+    lastResults = [{ blob, name: fileName, type: 'application/pdf' }]
 
     const a = document.createElement('a')
     a.href = url
