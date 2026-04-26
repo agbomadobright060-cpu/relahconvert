@@ -503,6 +503,7 @@ async function applyAndDownloadSingle(idx) {
     const blob = await buildRotatedPdf(f)
     const baseName = f.name.replace(/\.[^.]+$/, '')
     const outName = `${baseName}-rotated.pdf`
+    lastResults = [{ blob, name: outName, type: 'application/pdf' }]
     downloadBlob(blob, outName)
 
     statusText.textContent = (t.rotatepdf_done || 'Done!') + ` ${f.name} rotated.`
@@ -536,6 +537,7 @@ async function applyAllAndDownloadZip() {
 
     statusText.textContent = t.rotatepdf_zipping || 'Creating ZIP\u2026'
     const zipBlob = await zip.generateAsync({ type: 'blob' })
+    lastResults = [{ blob: zipBlob, name: 'rotated-pdfs.zip', type: 'application/zip' }]
     downloadBlob(zipBlob, 'rotated-pdfs.zip')
 
     statusText.textContent = (t.rotatepdf_done || 'Done!') + ` ${files.length} files rotated.`
