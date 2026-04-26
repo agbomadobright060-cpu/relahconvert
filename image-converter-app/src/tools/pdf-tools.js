@@ -6,7 +6,7 @@ injectHreflang('pdf-tools')
 const t = getT()
 
 const hubTitle = t.pdfhub_title || 'PDF Tools'
-const hubDesc  = t.pdfhub_desc || 'Edit, organize, and optimize your PDF documents instantly. No sign-up required.'
+const hubDesc  = t.pdfhub_desc || 'Edit, organize, and optimize your PDF documents instantly.'
 
 document.title = t.pdfhub_page_title || 'Free Online PDF Tools — Merge, Split, Compress, Rotate PDF | RelahConvert'
 const _metaDesc = document.createElement('meta')
