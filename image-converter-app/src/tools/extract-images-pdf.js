@@ -8,14 +8,13 @@ const t = getT()
 
 const toolName    = (t.nav_short && t.nav_short['extract-images-pdf']) || 'Extract Images from PDF'
 const seoData     = t.seo && t.seo['extract-images-pdf']
-const descText    = t.extimg_desc || (seoData ? seoData.h2a : 'Extract every page of a PDF as a high-quality PNG image.')
+const descText    = t.extimg_desc || (seoData ? seoData.h2a : 'Extract actual embedded images from any PDF — photos, logos, diagrams — at their original resolution.')
 const selectLbl   = t.extimg_select || t.select_image || 'Select PDF'
 const dropHint    = t.extimg_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const extractLbl  = t.extimg_extract_btn || 'Extract Images'
 const extractingLbl = t.extimg_extracting || 'Extracting\u2026'
 const dlBtn       = t.download || 'Download'
 const dlZipBtn    = t.download_zip || 'Download All as ZIP'
-const pageLabel   = t.extimg_page || t.pdfpng_page || 'Page'
 const pagesLabel  = t.extimg_pages || t.pdfpng_pages || 'pages'
 const loadingLbl  = t.extimg_loading || 'Loading PDF\u2026'
 
@@ -34,7 +33,7 @@ style.textContent = `
   #removeBtn{background:transparent;color:var(--accent);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;text-decoration:underline;}
   #imageGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
   .img-card{background:var(--bg-card);border-radius:10px;border:1.5px solid var(--border);overflow:hidden;}
-  .img-card img{width:100%;height:130px;object-fit:contain;display:block;background:var(--bg-surface);}
+  .img-card canvas,.img-card img{width:100%;height:130px;object-fit:contain;display:block;background:var(--bg-surface);}
   .img-card .iname{font-size:11px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;padding:6px 8px 2px;font-weight:600;}
   .img-card .imeta{font-size:10px;color:var(--text-muted);font-family:'DM Sans',sans-serif;padding:0 8px 4px;}
   .img-card .dl-link{display:block;font-size:11px;font-weight:700;color:var(--accent);font-family:'DM Sans',sans-serif;padding:0 8px 8px;text-decoration:none;}
@@ -62,10 +61,10 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.extimg_page_title || (seoData ? seoData.page_title : 'Extract Images from PDF Free Online | No Upload \u2014 RelahConvert')
+document.title = t.extimg_page_title || (seoData ? seoData.page_title : 'Extract Images from PDF Free Online | RelahConvert')
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
-_metaDesc.content = t.extimg_meta_desc || 'Extract images from PDF free. Render every page as a high-quality PNG image. Download individually or as a ZIP. Browser-only, no upload.'
+_metaDesc.content = t.extimg_meta_desc || 'Extract actual embedded images from any PDF at their original resolution. Download photos, logos, and diagrams individually or as a ZIP.'
 document.head.appendChild(_metaDesc)
 
 const _tp = toolName.split(' ')
@@ -171,11 +170,9 @@ async function loadPendingFiles() {
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
-    { label: ns['compress-pdf'] || 'Compress PDF', href: localHref('compress-pdf') },
-    { label: ns['add-page-numbers'] || 'Add Page Numbers', href: localHref('add-page-numbers') },
-    { label: ns['pdf-to-png'] || 'PDF to PNG', href: localHref('pdf-to-png') },
     { label: ns.compress || 'Compress Image', href: localHref('compress') },
     { label: ns.resize || 'Resize Image', href: localHref('resize') },
+    { label: ns['png-to-jpg'] || 'PNG to JPG', href: localHref('png-to-jpg') },
   ]
   const nextStepsButtons = document.getElementById('nextStepsButtons')
   nextStepsButtons.innerHTML = ''
@@ -209,21 +206,6 @@ function resetState() {
 }
 
 removeBtn.addEventListener('click', resetState)
-
-// -- Render a single page to PNG blob at given DPI ---------------------------
-function pageToPngBlob(page, dpi) {
-  const scale = dpi / 72
-  const viewport = page.getViewport({ scale })
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.round(viewport.width)
-  canvas.height = Math.round(viewport.height)
-  const ctx = canvas.getContext('2d')
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  return page.render({ canvasContext: ctx, viewport, intent: 'print' }).promise.then(() => {
-    return new Promise(resolve => canvas.toBlob(b => resolve({ blob: b, w: canvas.width, h: canvas.height }), 'image/png'))
-  })
-}
 
 // -- Load PDF ----------------------------------------------------------------
 async function loadPdfFile(file) {
@@ -264,7 +246,78 @@ document.addEventListener('drop', e => {
   if (e.dataTransfer.files.length) loadPdfFile(e.dataTransfer.files[0])
 })
 
-// -- Extract images (render pages at 150 DPI) --------------------------------
+// -- Convert raw image data to a PNG blob ------------------------------------
+function imageDataToBlob(imgData) {
+  return new Promise((resolve, reject) => {
+    try {
+      const w = imgData.width
+      const h = imgData.height
+      if (!w || !h || w < 1 || h < 1) { resolve(null); return }
+
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+
+      const rawData = imgData.data
+      const kind = imgData.kind
+
+      // kind 1 = GRAYSCALE_1BPP, kind 2 = RGB_24BPP, kind 3 = RGBA_32BPP
+      // If it's already RGBA (Uint8ClampedArray with 4 bytes per pixel), use directly
+      if (rawData instanceof Uint8ClampedArray && rawData.length === w * h * 4) {
+        const id = new ImageData(new Uint8ClampedArray(rawData), w, h)
+        ctx.putImageData(id, 0, 0)
+      } else if (rawData instanceof Uint8Array || rawData instanceof Uint8ClampedArray) {
+        const pixels = rawData.length
+        const expected4 = w * h * 4
+        const expected3 = w * h * 3
+        const expected1 = w * h
+
+        if (pixels === expected4) {
+          // RGBA data
+          const id = new ImageData(new Uint8ClampedArray(rawData), w, h)
+          ctx.putImageData(id, 0, 0)
+        } else if (pixels === expected3) {
+          // RGB data — expand to RGBA
+          const rgba = new Uint8ClampedArray(expected4)
+          for (let i = 0, j = 0; i < pixels; i += 3, j += 4) {
+            rgba[j]     = rawData[i]
+            rgba[j + 1] = rawData[i + 1]
+            rgba[j + 2] = rawData[i + 2]
+            rgba[j + 3] = 255
+          }
+          const id = new ImageData(rgba, w, h)
+          ctx.putImageData(id, 0, 0)
+        } else if (pixels === expected1) {
+          // Grayscale data — expand to RGBA
+          const rgba = new Uint8ClampedArray(expected4)
+          for (let i = 0; i < pixels; i++) {
+            const off = i * 4
+            rgba[off] = rgba[off + 1] = rgba[off + 2] = rawData[i]
+            rgba[off + 3] = 255
+          }
+          const id = new ImageData(rgba, w, h)
+          ctx.putImageData(id, 0, 0)
+        } else {
+          // Unknown format — skip
+          resolve(null)
+          return
+        }
+      } else {
+        // Not a typed array — skip
+        resolve(null)
+        return
+      }
+
+      canvas.toBlob(blob => resolve(blob ? { blob, w, h } : null), 'image/png')
+    } catch (e) {
+      console.warn('[extract-images-pdf] imageDataToBlob error:', e)
+      resolve(null)
+    }
+  })
+}
+
+// -- Extract actual embedded images ------------------------------------------
 extractBtn.addEventListener('click', async () => {
   if (!pdfDoc) return
   extractBtn.disabled = true
@@ -273,52 +326,87 @@ extractBtn.addEventListener('click', async () => {
   lastResults = []
   zipBtn.style.display = 'none'
 
-  const DPI = 150
+  const pdfjs = await loadPdfJs()
   const results = []
+  const seenImages = new Set()
+  let imgCount = 0
 
-  for (let i = 1; i <= pdfDoc.numPages; i++) {
-    statusText.textContent = `Extracting page ${i}/${pdfDoc.numPages}`
-    const page = await pdfDoc.getPage(i)
-    const { blob, w, h } = await pageToPngBlob(page, DPI)
-    const safeName = `${pdfFileName || 'page'}-page-${String(i).padStart(2, '0')}.png`
-    const url = URL.createObjectURL(blob)
+  for (let p = 1; p <= pdfDoc.numPages; p++) {
+    statusText.textContent = `Scanning page ${p}/${pdfDoc.numPages}` + (imgCount > 0 ? ` \u2014 found ${imgCount} image${imgCount !== 1 ? 's' : ''} so far` : '')
 
-    // Build image card
-    const card = document.createElement('div')
-    card.className = 'img-card'
+    let page
+    try { page = await pdfDoc.getPage(p) } catch (e) { continue }
 
-    const img = document.createElement('img')
-    img.src = url
-    img.alt = `${pageLabel} ${i}`
+    let ops
+    try { ops = await page.getOperatorList() } catch (e) { continue }
 
-    const iname = document.createElement('div')
-    iname.className = 'iname'
-    iname.textContent = `${pageLabel} ${i}`
+    for (let i = 0; i < ops.fnArray.length; i++) {
+      const fn = ops.fnArray[i]
+      if (fn !== pdfjs.OPS.paintImageXObject && fn !== pdfjs.OPS.paintJpegXObject) continue
 
-    const imeta = document.createElement('div')
-    imeta.className = 'imeta'
-    imeta.textContent = `${w} \u00D7 ${h} \u2014 ${formatSize(blob.size)}`
+      const imgName = ops.argsArray[i][0]
+      if (!imgName || seenImages.has(imgName)) continue
+      seenImages.add(imgName)
 
-    const dlLink = document.createElement('a')
-    dlLink.className = 'dl-link'
-    dlLink.href = url
-    dlLink.download = safeName
-    dlLink.textContent = `\u2B07 ${dlBtn} PNG`
-    dlLink.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 10000))
+      let imgData
+      try { imgData = await page.objs.get(imgName) } catch (e) { continue }
+      if (!imgData || !imgData.width || !imgData.height) continue
 
-    card.append(img, iname, imeta, dlLink)
-    imageGrid.appendChild(card)
+      // Skip tiny images (likely artifacts, spacing pixels, or decorative dots)
+      if (imgData.width < 8 || imgData.height < 8) continue
 
-    results.push({ name: safeName, blob })
+      let result
+      try { result = await imageDataToBlob(imgData) } catch (e) { continue }
+      if (!result) continue
+
+      imgCount++
+      const safeName = `${pdfFileName || 'image'}-img-${String(imgCount).padStart(3, '0')}.png`
+      const url = URL.createObjectURL(result.blob)
+
+      // Build image card
+      const card = document.createElement('div')
+      card.className = 'img-card'
+
+      const img = document.createElement('img')
+      img.src = url
+      img.alt = `Image ${imgCount}`
+
+      const iname = document.createElement('div')
+      iname.className = 'iname'
+      iname.textContent = `Image ${imgCount}`
+
+      const imeta = document.createElement('div')
+      imeta.className = 'imeta'
+      imeta.textContent = `${result.w} \u00D7 ${result.h} \u2014 ${formatSize(result.blob.size)}`
+
+      const dlLink = document.createElement('a')
+      dlLink.className = 'dl-link'
+      dlLink.href = url
+      dlLink.download = safeName
+      dlLink.textContent = `\u2B07 ${dlBtn} PNG`
+      dlLink.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 10000))
+
+      card.append(img, iname, imeta, dlLink)
+      imageGrid.appendChild(card)
+
+      results.push({ name: safeName, blob: result.blob })
+    }
+  }
+
+  if (results.length === 0) {
+    statusText.textContent = t.extimg_no_images || 'No embedded images found in this PDF.'
+    extractBtn.disabled = false
+    extractBtn.textContent = extractLbl
+    return
   }
 
   lastResults = results.map(r => ({ blob: r.blob, name: r.name, type: 'image/png' }))
 
-  statusText.textContent = pdfDoc.numPages > 1
-    ? `${pdfDoc.numPages} ${t.extimg_images_ready || 'images extracted.'}`
-    : (t.extimg_image_ready || 'Image extracted.')
+  statusText.textContent = results.length === 1
+    ? (t.extimg_image_ready || '1 image extracted.')
+    : `${results.length} ${t.extimg_images_ready || 'images extracted.'}`
 
-  if (pdfDoc.numPages > 1) {
+  if (results.length > 1) {
     zipBtn.style.display = 'block'
     zipBtn._results = results
   }
