@@ -288,9 +288,9 @@ let lastResults = []
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
-    { label: ns['merge-pdf'] || 'Merge PDF', href: localHref('merge-pdf') },
     { label: ns['compress-pdf'] || 'Compress PDF', href: localHref('compress-pdf') },
-    { label: ns['rotate-pdf'] || 'Rotate PDF', href: localHref('rotate-pdf') },
+    { label: ns['add-page-numbers'] || 'Add Page Numbers', href: localHref('add-page-numbers') },
+    { label: ns['pdf-to-png'] || 'PDF to PNG', href: localHref('pdf-to-png') },
   ]
   const nextStepsButtons = document.getElementById('nextStepsButtons')
   nextStepsButtons.innerHTML = ''
@@ -298,7 +298,7 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
+    btn.addEventListener('click', () => { window.location.href = b.href })
     nextStepsButtons.appendChild(btn)
   })
   document.getElementById('nextSteps').style.display = 'block'
