@@ -262,14 +262,35 @@ async function renderThumb(pdfJsDoc, pageNum) {
 }
 
 /* ---- Next steps ---- */
-// ── IndexedDB handoff ────────────────────────────────────────────────────────function openDB() {  return new Promise((resolve, reject) => {    const req = indexedDB.open('relahconvert', 1)    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })    req.onsuccess = e => resolve(e.target.result)    req.onerror = () => reject(new Error('IndexedDB open failed'))  })}async function saveFilesToIDB(items) {  const db = await openDB()  return new Promise((resolve, reject) => {    const tx = db.transaction('pending', 'readwrite')    const store = tx.objectStore('pending')    store.clear()    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))    tx.oncomplete = () => resolve()    tx.onerror = () => reject(new Error('IDB write failed'))  })}let lastResults = []
+
+// ── IndexedDB handoff ────────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('relahconvert', 1)
+    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+    req.onsuccess = e => resolve(e.target.result)
+    req.onerror = () => reject(new Error('IndexedDB open failed'))
+  })
+}
+async function saveFilesToIDB(items) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
+    store.clear()
+    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(new Error('IDB write failed'))
+  })
+}
+let lastResults = []
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
     { label: ns['merge-pdf'] || 'Merge PDF', href: localHref('merge-pdf') },
     { label: ns['compress-pdf'] || 'Compress PDF', href: localHref('compress-pdf') },
     { label: ns['rotate-pdf'] || 'Rotate PDF', href: localHref('rotate-pdf') },
-    { label: ns['pdf-to-png'] || 'PDF to PNG', href: localHref('pdf-to-png') },
   ]
   const nextStepsButtons = document.getElementById('nextStepsButtons')
   nextStepsButtons.innerHTML = ''
