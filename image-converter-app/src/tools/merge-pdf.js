@@ -238,7 +238,9 @@ async function addPdfFiles(files) {
   try {
     const pdfjs = await loadPdfJs()
 
-    for (const file of validFiles) {
+    for (let fi = 0; fi < validFiles.length; fi++) {
+      const file = validFiles[fi]
+      statusText.textContent = `Loading PDF ${fi + 1}/${validFiles.length} — ${file.name}`
       const buf = await file.arrayBuffer()
       let pageCount = 0
       let thumbCanvas = null
