@@ -77,7 +77,7 @@ style.textContent = `
   #actionRow{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;flex:1;}
   .action-btn:hover{background:var(--accent-hover);}
-  .action-btn.dark{background:var(--btn-dark);}
+  .action-btn.dark{background:var(--btn-dark);color:var(--text-on-dark-btn);}
   .action-btn.dark:hover{background:var(--btn-dark-hover);}
   .action-btn.disabled{background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;}
   #resultArea{display:none;margin-bottom:16px;}
