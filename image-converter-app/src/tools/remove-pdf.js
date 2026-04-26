@@ -182,7 +182,7 @@ async function loadPdfFile(file) {
   try {
     const pdfjs = await loadPdfJs()
     const buf = await file.arrayBuffer()
-    pdfRawBytes = new Uint8Array(buf)
+    pdfRawBytes = new Uint8Array(buf.slice(0))
     pdfJsDoc = await pdfjs.getDocument({ data: buf }).promise
     pdfFileName = file.name.replace(/\.[^.]+$/, '')
     totalPages = pdfJsDoc.numPages

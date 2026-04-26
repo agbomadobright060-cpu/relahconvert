@@ -218,7 +218,7 @@ async function loadPdfFile(file) {
   try {
     const pdfjs = await loadPdfJs()
     const buf = await file.arrayBuffer()
-    pdfBytes = new Uint8Array(buf)
+    pdfBytes = new Uint8Array(buf.slice(0))
     pdfFileName = file.name.replace(/\.[^.]+$/, '')
 
     const pdfDoc = await pdfjs.getDocument({ data: buf }).promise

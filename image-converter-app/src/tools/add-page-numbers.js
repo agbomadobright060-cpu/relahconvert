@@ -194,7 +194,7 @@ async function loadPdfFile(file) {
     const { PDFDocument } = await import('pdf-lib')
     const buf = await file.arrayBuffer()
     const doc = await PDFDocument.load(buf)
-    pdfBytes = new Uint8Array(buf)
+    pdfBytes = new Uint8Array(buf.slice(0))
     pdfPageCount = doc.getPageCount()
     pdfFileName = file.name.replace(/\.[^.]+$/, '')
 

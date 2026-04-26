@@ -217,7 +217,7 @@ async function loadPdfFile(file) {
   try {
     const pdfjs = await loadPdfJs()
     const buf = await file.arrayBuffer()
-    pdfBytes = new Uint8Array(buf)
+    pdfBytes = new Uint8Array(buf.slice(0))
     pdfJsDoc = await pdfjs.getDocument({ data: buf }).promise
     pdfFileName = file.name.replace(/\.[^.]+$/, '')
     fileMetaText.textContent = `${file.name} \u2014 ${pdfJsDoc.numPages} ${pagesLabel}`
