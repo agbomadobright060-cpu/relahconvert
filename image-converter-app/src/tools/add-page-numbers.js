@@ -150,8 +150,9 @@ document.querySelector('#app').innerHTML = `
         </div>
       </div>
     </div>
-    <div id="actionRow" style="display:none;margin-bottom:14px;">
+    <div id="actionRow" style="display:none;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;">
       <button class="action-btn" id="applyBtn">${applyLbl}</button>
+      <button class="action-btn dark" id="applyAllBtn" style="display:none;">${applyAllLbl}</button>
     </div>
     <div class="status-text" id="statusText"></div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
@@ -179,6 +180,7 @@ const startNumInput  = document.getElementById('startNumInput')
 const formatSelect   = document.getElementById('formatSelect')
 const actionRow      = document.getElementById('actionRow')
 const applyBtn       = document.getElementById('applyBtn')
+const applyAllBtn    = document.getElementById('applyAllBtn')
 const statusText     = document.getElementById('statusText')
 
 /* -- State ------------------------------------------------------------------- */
@@ -221,10 +223,11 @@ function updateUI() {
 
   /* Options & action */
   optionsPanel.style.display = 'block'
-  actionRow.style.display = 'block'
+  actionRow.style.display = 'flex'
 
-  /* Button label */
-  applyBtn.textContent = count > 1 ? applyAllLbl : applyLbl
+  /* Show/hide buttons based on file count */
+  applyBtn.textContent = applyLbl
+  applyAllBtn.style.display = count > 1 ? '' : 'none'
 }
 
 function renderTabs() {
@@ -420,48 +423,22 @@ function triggerDownload(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
 
-/* -- Apply page numbers ------------------------------------------------------ */
+/* -- Apply to current file --------------------------------------------------- */
 applyBtn.addEventListener('click', async () => {
   if (!files.length) return
   applyBtn.disabled = true
   applyBtn.textContent = applyingLbl
-  statusText.textContent = ''
+  statusText.textContent = applyingLbl
   document.getElementById('nextSteps').style.display = 'none'
 
   const opts = getOpts()
 
   try {
-    if (files.length === 1) {
-      /* Single file: process and download directly */
-      statusText.textContent = applyingLbl
-      const result = await processOnePdf(files[0], opts)
-      triggerDownload(result.blob, result.filename)
-      statusText.textContent = t.addpgnum_done_single || `Done! ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'} numbered.`
-      if (window.showReviewPrompt) window.showReviewPrompt()
-      window.rcShowSaveButton?.(actionRow, result.blob, result.filename, 'add-page-numbers')
-    } else {
-      /* Multiple files: process all and create ZIP */
-      const results = []
-      for (let i = 0; i < files.length; i++) {
-        statusText.textContent = `${applyingLbl} (${i + 1}/${files.length})`
-        const result = await processOnePdf(files[i], opts)
-        results.push(result)
-      }
-
-      statusText.textContent = t.addpgnum_zipping || 'Creating ZIP\u2026'
-      const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
-      const zip = new JSZip()
-      for (const r of results) {
-        zip.file(r.filename, r.blob)
-      }
-      const zipBlob = await zip.generateAsync({ type: 'blob' })
-      triggerDownload(zipBlob, 'numbered-pdfs.zip')
-
-      const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
-      statusText.textContent = t.addpgnum_done || `Done! ${totalPgs} ${totalPgs === 1 ? 'page' : 'pages'} numbered across ${results.length} files.`
-      if (window.showReviewPrompt) window.showReviewPrompt()
-    }
-
+    const result = await processOnePdf(files[activeFileIndex], opts)
+    triggerDownload(result.blob, result.filename)
+    statusText.textContent = t.addpgnum_done_single || `Done! ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'} numbered.`
+    if (window.showReviewPrompt) window.showReviewPrompt()
+    window.rcShowSaveButton?.(actionRow, result.blob, result.filename, 'add-page-numbers')
     buildNextSteps()
   } catch (err) {
     console.error('[add-page-numbers] failed:', err)
@@ -469,7 +446,49 @@ applyBtn.addEventListener('click', async () => {
   }
 
   applyBtn.disabled = false
-  applyBtn.textContent = files.length > 1 ? applyAllLbl : applyLbl
+  applyBtn.textContent = applyLbl
+})
+
+/* -- Apply to all files & ZIP ------------------------------------------------ */
+applyAllBtn.addEventListener('click', async () => {
+  if (files.length < 2) return
+  applyAllBtn.disabled = true
+  applyBtn.disabled = true
+  applyAllBtn.textContent = applyingLbl
+  statusText.textContent = ''
+  document.getElementById('nextSteps').style.display = 'none'
+
+  const opts = getOpts()
+
+  try {
+    const results = []
+    for (let i = 0; i < files.length; i++) {
+      statusText.textContent = `${applyingLbl} (${i + 1}/${files.length})`
+      const result = await processOnePdf(files[i], opts)
+      results.push(result)
+    }
+
+    statusText.textContent = t.addpgnum_zipping || 'Creating ZIP\u2026'
+    const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+    const zip = new JSZip()
+    for (const r of results) {
+      zip.file(r.filename, r.blob)
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    triggerDownload(zipBlob, 'numbered-pdfs.zip')
+
+    const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
+    statusText.textContent = t.addpgnum_done || `Done! ${totalPgs} ${totalPgs === 1 ? 'page' : 'pages'} numbered across ${results.length} files.`
+    if (window.showReviewPrompt) window.showReviewPrompt()
+    buildNextSteps()
+  } catch (err) {
+    console.error('[add-page-numbers] failed:', err)
+    statusText.textContent = (t.addpgnum_error || 'Error: ') + (err?.message || err)
+  }
+
+  applyAllBtn.disabled = false
+  applyBtn.disabled = false
+  applyAllBtn.textContent = applyAllLbl
 })
 
 /* -- Next steps -------------------------------------------------------------- */
