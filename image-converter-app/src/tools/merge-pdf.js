@@ -374,6 +374,7 @@ mergeBtn.addEventListener('click', async () => {
 })
 
 // ── What's Next? ────────────────────────────────────────────────────────────
+// ── IndexedDB handoff ────────────────────────────────────────────────────────function openDB() {  return new Promise((resolve, reject) => {    const req = indexedDB.open('relahconvert', 1)    req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })    req.onsuccess = e => resolve(e.target.result)    req.onerror = () => reject(new Error('IndexedDB open failed'))  })}async function saveFilesToIDB(items) {  const db = await openDB()  return new Promise((resolve, reject) => {    const tx = db.transaction('pending', 'readwrite')    const store = tx.objectStore('pending')    store.clear()    items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))    tx.oncomplete = () => resolve()    tx.onerror = () => reject(new Error('IDB write failed'))  })}let lastResults = []
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -388,7 +389,7 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', () => { window.location.href = b.href })
+    btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
     nextStepsButtons.appendChild(btn)
   })
   document.getElementById('nextSteps').style.display = 'block'
