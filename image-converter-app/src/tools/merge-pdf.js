@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['merge-pdf']) || 'Merge PDF'
 const seoData   = t.seo && t.seo['merge-pdf']
-const descText  = (t.mergepdf_desc) || (seoData ? seoData.h2a : 'Combine multiple PDF files into one document.')
+const descText  = t.mergepdf_desc || t.card_merge_pdf_desc || 'Combine multiple PDF files into one document.'
 const selectLbl = t.mergepdf_select || 'Select PDFs'
 const dropHint  = t.mergepdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const mergeLbl  = t.mergepdf_merge_btn || 'Merge PDFs'

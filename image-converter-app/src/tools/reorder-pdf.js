@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['reorder-pdf']) || 'Reorder PDF'
 const seoData   = t.seo && t.seo['reorder-pdf']
-const descText  = t.reorderpdf_desc || (seoData ? seoData.h2a : 'Drag and drop to rearrange PDF pages in any order.')
+const descText  = t.reorderpdf_desc || t.card_reorder_pdf_desc || 'Drag and drop to rearrange PDF pages in any order.'
 const selectLbl = t.reorderpdf_select || t.select_image || 'Select PDF'
 const dropHint  = t.reorderpdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const applyBtn  = t.reorderpdf_apply || 'Apply & Download'

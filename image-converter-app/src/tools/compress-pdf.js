@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['compress-pdf']) || 'Compress PDF'
 const seoData   = t.seo && t.seo['compress-pdf']
-const descText  = t.compresspdf_desc || (seoData ? seoData.h2a : 'Reduce PDF file size by optimizing images.')
+const descText  = t.compresspdf_desc || t.card_compress_pdf_desc || 'Reduce PDF file size by optimizing images.'
 const selectLbl = t.compresspdf_select || 'Select PDFs'
 const dropHint  = t.compresspdf_drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'

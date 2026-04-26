@@ -8,7 +8,7 @@ const t = getT()
 
 const toolName    = (t.nav_short && t.nav_short['extract-pdf']) || 'Extract PDF Pages'
 const seoData     = t.seo && t.seo['extract-pdf']
-const descText    = t.extractpdf_desc || (seoData ? seoData.h2a : 'Extract specific pages from a PDF and save them as a new document.')
+const descText    = t.extractpdf_desc || t.card_extract_pdf_desc || 'Extract specific pages from a PDF and save them as a new document.'
 const selectLbl   = t.extractpdf_select || t.select_image || 'Select PDF'
 const dropHint    = t.extractpdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const extractLbl  = t.extractpdf_extract_btn || 'Extract Selected Pages'

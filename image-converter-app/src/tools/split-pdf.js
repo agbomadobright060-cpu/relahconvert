@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['split-pdf']) || 'Split PDF'
 const seoData   = t.seo && t.seo['split-pdf']
-const descText  = t.splitpdf_desc || (seoData ? seoData.h2a : 'Split PDF into individual pages or custom ranges.')
+const descText  = t.splitpdf_desc || t.card_split_pdf_desc || 'Split a PDF into separate pages or custom page ranges.'
 const selectLbl = t.splitpdf_select || t.select_image || 'Select PDFs'
 const dropHint  = t.splitpdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'

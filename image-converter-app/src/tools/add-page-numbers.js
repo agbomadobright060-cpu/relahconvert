@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['add-page-numbers']) || 'Add Page Numbers'
 const seoData   = t.seo && t.seo['add-page-numbers']
-const descText  = t.addpgnum_desc || (seoData ? seoData.h2a : 'Add page numbers to any PDF. Choose position, font size, format, and starting number.')
+const descText  = t.addpgnum_desc || t.card_add_page_numbers_desc || 'Add page numbers to your PDF. Choose position, font size, and starting number.'
 const selectLbl = t.addpgnum_select || t.select_image || 'Select PDFs'
 const dropHint  = t.addpgnum_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'

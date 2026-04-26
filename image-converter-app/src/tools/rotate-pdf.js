@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['rotate-pdf']) || 'Rotate PDF'
 const seoData   = t.seo && t.seo['rotate-pdf']
-const descText  = t.rotatepdf_desc || (seoData ? seoData.h2a : 'Rotate PDF pages by 90, 180, or 270 degrees.')
+const descText  = t.rotatepdf_desc || t.card_rotate_pdf_desc || 'Rotate PDF pages by 90, 180, or 270 degrees.'
 const selectLbl = t.rotatepdf_select || t.select_image || 'Select PDFs'
 const dropHint  = t.rotatepdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const applyLbl  = t.rotatepdf_apply_btn || 'Apply & Download'

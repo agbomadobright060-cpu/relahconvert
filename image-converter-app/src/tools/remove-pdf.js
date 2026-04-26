@@ -9,7 +9,7 @@ const t = getT()
 
 const toolName   = (t.nav_short && t.nav_short['remove-pdf']) || 'Remove PDF Pages'
 const seoData    = t.seo && t.seo['remove-pdf']
-const descText   = t.removepdf_desc || (seoData ? seoData.h2a : 'Delete unwanted pages from a PDF. Select pages to remove and download the result.')
+const descText   = t.removepdf_desc || t.card_remove_pdf_desc || 'Delete unwanted pages from a PDF document.'
 const selectLbl  = t.removepdf_select || 'Select PDF'
 const dropHint   = t.removepdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
 const removeLbl  = t.removepdf_remove_btn || 'Remove Selected Pages'
