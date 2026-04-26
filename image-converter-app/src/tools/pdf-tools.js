@@ -98,11 +98,16 @@ const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reord
 // Decorative PDF icon for background blocks
 const bgIcon = `<svg viewBox="0 0 60 40" fill="none"><path d="M15 5h18l8 8v22a2 2 0 01-2 2H15a2 2 0 01-2-2V7a2 2 0 012-2z" fill="rgba(255,255,255,0.7)"/><path d="M33 5v9h9" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><text x="22" y="28" font-family="Arial" font-size="8" font-weight="800" fill="rgba(255,255,255,0.6)">PDF</text></svg>`
 
+// Inject background decoration into body (outside #app, like homepage)
+const bgCanvas = document.createElement('div')
+bgCanvas.className = 'bg-canvas'
+bgCanvas.innerHTML = Array.from({length:10}, () => `<div class="pdf-block"><div class="block-area">${bgIcon}</div><div class="block-bar"></div></div>`).join('')
+document.body.insertBefore(bgCanvas, document.body.firstChild)
+const bgFade = document.createElement('div')
+bgFade.className = 'bg-fade'
+document.body.insertBefore(bgFade, bgCanvas.nextSibling)
+
 document.querySelector('#app').innerHTML = `
-  <div class="bg-canvas">
-    ${Array.from({length:10}, () => `<div class="pdf-block"><div class="block-area">${bgIcon}</div><div class="block-bar"></div></div>`).join('')}
-  </div>
-  <div class="bg-fade"></div>
   <div>
     <section class="pdf-hero">
       <h1>Every PDF tool<br>you need, <em>free</em></h1>
