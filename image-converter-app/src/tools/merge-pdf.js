@@ -90,7 +90,7 @@ document.querySelector('#app').innerHTML = `
     <div id="fileMeta"><span id="fileMetaText"></span></div>
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
-    <div id="actionRow">
+    <div id="actionRow" style="display:none;">
       <button class="action-btn" id="mergeBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${mergeLbl}</button>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
@@ -125,16 +125,25 @@ async function loadPdfJs() {
 }
 
 function updateMergeButton() {
+  const actionRow = document.getElementById('actionRow')
   if (pdfFiles.length >= 2) {
     mergeBtn.disabled = false
     mergeBtn.style.opacity = '1'
     mergeBtn.style.cursor = 'pointer'
     mergeBtn.style.background = 'var(--accent)'
+    actionRow.style.display = 'flex'
+  } else if (pdfFiles.length >= 1) {
+    mergeBtn.disabled = true
+    mergeBtn.style.opacity = '0.7'
+    mergeBtn.style.cursor = 'not-allowed'
+    mergeBtn.style.background = 'var(--btn-disabled)'
+    actionRow.style.display = 'flex'
   } else {
     mergeBtn.disabled = true
     mergeBtn.style.opacity = '0.7'
     mergeBtn.style.cursor = 'not-allowed'
     mergeBtn.style.background = 'var(--btn-disabled)'
+    actionRow.style.display = 'none'
   }
 }
 

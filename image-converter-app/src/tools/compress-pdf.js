@@ -138,7 +138,7 @@ document.querySelector('#app').innerHTML = `
       <div class="size-bar-wrap"><div class="size-bar" id="sizeBar" style="width:100%;"></div></div>
     </div>
     <div class="status-text" id="statusText"></div>
-    <div id="actionRow">
+    <div id="actionRow" style="display:none;">
       <button class="action-btn" id="compressBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${compressLbl}</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
@@ -273,9 +273,11 @@ function updateUI() {
     compressBtn.style.cursor = 'not-allowed'
     compressBtn.style.background = 'var(--btn-disabled)'
     uploadArea.style.display = ''
+    document.getElementById('actionRow').style.display = 'none'
     return
   }
   uploadArea.style.display = 'none'
+  document.getElementById('actionRow').style.display = 'flex'
   const totalSize = pdfEntries.reduce((s, e) => s + e.originalSize, 0)
   fileMetaText.textContent = `${pdfEntries.length} file${pdfEntries.length > 1 ? 's' : ''} \u2014 ${formatSize(totalSize)}`
   fileMeta.classList.add('on')

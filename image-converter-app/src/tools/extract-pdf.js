@@ -99,7 +99,7 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div id="fileGrid"></div>
     <div class="status-text" id="statusText"></div>
-    <div id="actionRow">
+    <div id="actionRow" style="display:none;">
       <button class="action-btn" id="extractBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${extractLbl}</button>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
@@ -225,6 +225,7 @@ function resetState() {
   fileMeta.classList.remove('on')
   if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
   selectionRow.classList.remove('on')
+  document.getElementById('actionRow').style.display = 'none'
   statusText.textContent = ''
   extractBtn.disabled = true
   extractBtn.style.opacity = '0.7'
@@ -257,6 +258,7 @@ async function loadPdfFile(file) {
     document.getElementById('uploadArea').style.display = 'none'
     fileMeta.classList.add('on')
     selectionRow.classList.add('on')
+    document.getElementById('actionRow').style.display = 'flex'
 
     // Render preview thumbnails
     for (let i = 1; i <= pdfDoc.numPages; i++) {

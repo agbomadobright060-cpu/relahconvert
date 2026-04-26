@@ -97,7 +97,7 @@ document.querySelector('#app').innerHTML = `
     <div id="dragHint">\u2195 ${dragHint}</div>
     <div id="pageGrid"></div>
     <div class="status-text" id="statusText"></div>
-    <div id="actionRow">
+    <div id="actionRow" style="display:none;">
       <button class="action-btn" id="applyBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${applyBtn}</button>
       <button class="action-btn dark" id="resetBtn" style="display:none;">${resetLbl}</button>
     </div>
@@ -256,6 +256,7 @@ function resetState() {
   pageGrid.innerHTML = ''
   fileMeta.classList.remove('on')
   if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
+  document.getElementById('actionRow').style.display = 'none'
   dragHintEl.classList.remove('on')
   resetBtnEl.style.display = 'none'
   statusText.textContent = ''
@@ -299,6 +300,7 @@ async function loadPdfFile(file) {
     document.getElementById('uploadArea').style.display = 'none'
     fileMeta.classList.add('on')
     dragHintEl.classList.add('on')
+    document.getElementById('actionRow').style.display = 'flex'
 
     // Render thumbnails with progress
     for (let i = 1; i <= totalPages; i++) {
