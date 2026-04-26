@@ -352,6 +352,7 @@ mergeBtn.addEventListener('click', async () => {
 
     const mergedBytes = await mergedPdf.save()
     const blob = new Blob([mergedBytes], { type: 'application/pdf' })
+    lastResults = [{ blob, name: `${mergedName}.pdf`, type: 'application/pdf' }]
     const url = URL.createObjectURL(blob)
 
     // Build download filename from first file's name
@@ -406,6 +407,28 @@ async function saveFilesToIDB(items) {
 }
 let lastResults = []
 
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
+    addPdfFiles(files)
+  } catch (e) { console.warn('[merge-pdf] IDB autoload failed:', e) }
+}
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -419,13 +442,16 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', () => { window.location.href = b.href })
+    btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
     nextStepsButtons.appendChild(btn)
   })
   document.getElementById('nextSteps').style.display = 'block'
 }
 
 // ── SEO section ─────────────────────────────────────────────────────────────
+
+loadPendingFiles()
+
 ;(function injectSEO() {
   const seo = t.seo && t.seo['merge-pdf']
   if (!seo) return

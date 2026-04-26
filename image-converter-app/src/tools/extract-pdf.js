@@ -196,6 +196,28 @@ async function saveFilesToIDB(items) {
 }
 let lastResults = []
 
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
+    loadPdfFile(files[0])
+  } catch (e) { console.warn('[extract-pdf] IDB autoload failed:', e) }
+}
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -209,7 +231,7 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', () => { window.location.href = b.href })
+    btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
     nextStepsButtons.appendChild(btn)
   })
   document.getElementById('nextSteps').style.display = 'block'
@@ -321,6 +343,7 @@ extractBtn.addEventListener('click', async () => {
 
     const pdfBytes = await newDoc.save()
     const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+    lastResults = [{ blob, name: `${pdfFileName || 'extracted'}-extracted.pdf`, type: 'application/pdf' }]
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -343,6 +366,9 @@ extractBtn.addEventListener('click', async () => {
 })
 
 // ── SEO section ─────────────────────────────────────────────────────────────
+
+loadPendingFiles()
+
 ;(function injectSEO() {
   const seo = t.seo && t.seo['extract-pdf']
   if (!seo) return

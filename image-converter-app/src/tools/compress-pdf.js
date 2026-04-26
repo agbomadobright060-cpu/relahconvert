@@ -227,6 +227,28 @@ async function saveFilesToIDB(items) {
 }
 let lastResults = []
 
+async function loadFilesFromIDB() {
+  const db = await openDB()
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
+  return new Promise((resolve, reject) => {
+    const req = store.getAll()
+    req.onsuccess = () => { store.clear(); resolve(req.result || []) }
+    req.onerror = () => reject(new Error('IDB read failed'))
+  })
+}
+
+async function loadPendingFiles() {
+  if (!sessionStorage.getItem('pendingFromIDB')) return
+  sessionStorage.removeItem('pendingFromIDB')
+  try {
+    const records = await loadFilesFromIDB()
+    if (!records.length) return
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
+    addFiles(files)
+  } catch (e) { console.warn('[compress-pdf] IDB autoload failed:', e) }
+}
+
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -239,7 +261,7 @@ function buildNextSteps() {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', () => { window.location.href = b.href })
+    btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
     nextStepsButtons.appendChild(btn)
   })
   document.getElementById('nextSteps').style.display = 'block'
@@ -506,6 +528,9 @@ zipBtn.addEventListener('click', async () => {
 })
 
 // ── SEO Section ─────────────────────────────────────────────────────────────
+
+loadPendingFiles()
+
 ;(function injectSEO() {
   const seo = t.seo && t.seo['compress-pdf']
   if (!seo) return
