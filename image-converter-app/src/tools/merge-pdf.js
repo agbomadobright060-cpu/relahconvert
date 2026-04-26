@@ -1,4 +1,5 @@
 import { injectHeader } from '../core/header.js'
+import { LIMITS, formatSize } from '../core/utils.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
@@ -216,6 +217,20 @@ async function addPdfFiles(files) {
   if (validFiles.length === 0) {
     statusText.textContent = t.warn_wrong_fmt_short || 'Please select PDF files.'
     return
+  }
+
+  // Check total file count (existing + new)
+  if (pdfFiles.length + validFiles.length > 25) {
+    statusText.textContent = 'Too many files. Maximum is 25 PDFs.'
+    return
+  }
+
+  // Check per-file size limit
+  for (const file of validFiles) {
+    if (file.size > 50 * 1024 * 1024) {
+      statusText.textContent = `"${file.name}" is too large. Maximum size is 50 MB per file.`
+      return
+    }
   }
 
   statusText.textContent = loadingLbl

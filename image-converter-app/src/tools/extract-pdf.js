@@ -1,4 +1,5 @@
 import { injectHeader } from '../core/header.js'
+import { LIMITS, formatSize } from '../core/utils.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 
 injectHreflang('extract-pdf')
@@ -215,6 +216,10 @@ removeBtn.addEventListener('click', resetState)
 async function loadPdfFile(file) {
   if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
     statusText.textContent = t.warn_wrong_fmt_short || 'Wrong format.'
+    return
+  }
+  if (file.size > 50 * 1024 * 1024) {
+    statusText.textContent = 'File too large. Maximum size is 50 MB.'
     return
   }
   resetState()
