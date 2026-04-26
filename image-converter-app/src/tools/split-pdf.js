@@ -605,6 +605,7 @@ function clearResults() {
 
 async function showResults(blobs) {
   resultBlobs = blobs
+  lastResults = blobs.map(b => ({ blob: b.blob, name: b.name, type: 'application/pdf' }))
   resultGrid.innerHTML = ''
   resultArea.classList.add('on')
 

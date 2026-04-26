@@ -472,6 +472,7 @@ applyBtn.addEventListener('click', async () => {
   try {
     const result = await processOnePdf(files[activeFileIndex], opts)
     triggerDownload(result.blob, result.filename)
+    lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
     statusText.textContent = t.addpgnum_done_single || `Done! ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'} numbered.`
     if (window.showReviewPrompt) window.showReviewPrompt()
     window.rcShowSaveButton?.(actionRow, result.blob, result.filename, 'add-page-numbers')

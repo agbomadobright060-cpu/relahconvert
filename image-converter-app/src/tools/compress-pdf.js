@@ -496,6 +496,8 @@ compressBtn.addEventListener('click', async () => {
     zipBtn.style.display = 'block'
   }
 
+  const successResults = pdfEntries.filter(e => e.compressedBlob)
+  lastResults = successResults.map(e => ({ blob: e.compressedBlob, name: e.name.replace(/.pdf$/i, '') + '-compressed.pdf', type: 'application/pdf' }))
   if (window.showReviewPrompt) window.showReviewPrompt()
   buildNextSteps()
 })
