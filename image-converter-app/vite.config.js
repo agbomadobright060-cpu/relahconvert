@@ -158,7 +158,8 @@ function langCopyPlugin() {
         'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
         'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
         'round-corners','meme-generator','blur-face','remove-background',
-        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image','svg-to-png','svg-to-jpg'
+        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image','svg-to-png','svg-to-jpg',
+        'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
@@ -321,6 +322,15 @@ export default defineConfig({
         'pixelate-image':    resolve(__dirname, 'pixelate-image.html'),
         'svg-to-png':        resolve(__dirname, 'svg-to-png.html'),
         'svg-to-jpg':        resolve(__dirname, 'svg-to-jpg.html'),
+        'pdf-tools':         resolve(__dirname, 'pdf-tools.html'),
+        'merge-pdf':         resolve(__dirname, 'merge-pdf.html'),
+        'split-pdf':         resolve(__dirname, 'split-pdf.html'),
+        'rotate-pdf':        resolve(__dirname, 'rotate-pdf.html'),
+        'compress-pdf':      resolve(__dirname, 'compress-pdf.html'),
+        'reorder-pdf':       resolve(__dirname, 'reorder-pdf.html'),
+        'extract-pdf':       resolve(__dirname, 'extract-pdf.html'),
+        'remove-pdf':        resolve(__dirname, 'remove-pdf.html'),
+        'add-page-numbers':  resolve(__dirname, 'add-page-numbers.html'),
         'account':           resolve(__dirname, 'account.html'),
       }
     }

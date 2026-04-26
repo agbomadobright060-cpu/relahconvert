@@ -29,6 +29,15 @@ const standaloneModules = {
   'jpg-to-pdf':        () => import('../jpg-to-pdf.js'),
   'png-to-pdf':        () => import('../png-to-pdf.js'),
   'pdf-to-png':        () => import('../tools/pdf-to-png.js'),
+  'pdf-tools':         () => import('../tools/pdf-tools.js'),
+  'merge-pdf':         () => import('../tools/merge-pdf.js'),
+  'split-pdf':         () => import('../tools/split-pdf.js'),
+  'rotate-pdf':        () => import('../tools/rotate-pdf.js'),
+  'compress-pdf':      () => import('../tools/compress-pdf.js'),
+  'reorder-pdf':       () => import('../tools/reorder-pdf.js'),
+  'extract-pdf':       () => import('../tools/extract-pdf.js'),
+  'remove-pdf':        () => import('../tools/remove-pdf.js'),
+  'add-page-numbers':  () => import('../tools/add-page-numbers.js'),
 }
 
 // Parse URL

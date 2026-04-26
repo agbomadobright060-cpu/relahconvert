@@ -418,6 +418,15 @@ export function injectHeader() {
     'jpg-to-svg':        { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="9" width="14" height="18" rx="3" fill="#10B981" opacity="0.3"/><text x="5.5" y="21" font-family="Arial" font-size="6.5" font-weight="800" fill="#059669">JPG</text><rect x="21" y="13" width="14" height="18" rx="3" fill="#059669"/><text x="22.5" y="25" font-family="Arial" font-size="6.5" font-weight="800" fill="#fff">SVG</text><path d="M18 20h4" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/><path d="M20 18l2 2-2 2" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
     'html-to-image':     { bg: '#E0F2FE', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="3" fill="#0EA5E9" opacity="0.2" stroke="#0EA5E9" stroke-width="1.5"/><rect x="4" y="8" width="32" height="7" rx="3" fill="#0EA5E9" opacity="0.35"/><circle cx="9" cy="11.5" r="1.5" fill="#fff"/><circle cx="14" cy="11.5" r="1.5" fill="#fff"/><circle cx="19" cy="11.5" r="1.5" fill="#fff"/><rect x="8" y="19" width="24" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/><rect x="8" y="24" width="16" height="2" rx="1" fill="#0EA5E9" opacity="0.4"/></svg>` },
     'image-splitter':    { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="5" y="5" width="30" height="30" rx="3" fill="#F97316" opacity="0.15" stroke="#F97316" stroke-width="1.5"/><line x1="20" y1="5" x2="20" y2="35" stroke="#F97316" stroke-width="1.5" stroke-dasharray="3 2"/><line x1="5" y1="20" x2="35" y2="20" stroke="#F97316" stroke-width="1.5" stroke-dasharray="3 2"/><rect x="8" y="8" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/><rect x="23" y="8" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/><rect x="8" y="23" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/><rect x="23" y="23" width="9" height="9" rx="1.5" fill="#F97316" opacity="0.25"/></svg>` },
+    'pdf-tools':         { bg: '#FEF2F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#EF4444" opacity="0.2" stroke="#EF4444" stroke-width="2"/><path d="M24 6v7h7" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/><text x="12" y="28" font-family="Arial" font-size="7.5" font-weight="800" fill="#EF4444">PDF</text></svg>` },
+    'merge-pdf':         { bg: '#EFF6FF', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M8 8h10l4 4v14a2 2 0 01-2 2H8a2 2 0 01-2-2V10a2 2 0 012-2z" fill="#2563EB" opacity="0.25"/><path d="M18 12h10l4 4v14a2 2 0 01-2 2H18a2 2 0 01-2-2V14a2 2 0 012-2z" fill="#2563EB" opacity="0.4"/><path d="M14 22l6-4v8z" fill="#2563EB"/></svg>` },
+    'split-pdf':         { bg: '#FEF3C7', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#D97706" opacity="0.2"/><line x1="20" y1="10" x2="20" y2="34" stroke="#D97706" stroke-width="2" stroke-dasharray="3 2"/><path d="M16 20l-4 3v-6z" fill="#D97706"/><path d="M24 20l4 3v-6z" fill="#D97706"/></svg>` },
+    'rotate-pdf':        { bg: '#F0FDF4', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 8h14l6 6v18a2 2 0 01-2 2H10a2 2 0 01-2-2V10a2 2 0 012-2z" fill="#16A34A" opacity="0.2"/><path d="M24 16a6 6 0 11-8 0" stroke="#16A34A" stroke-width="2" stroke-linecap="round"/><path d="M24 13v4h-4" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+    'compress-pdf':      { bg: '#FEF2F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#DC2626" opacity="0.2"/><path d="M20 14v8M20 22l-3 3M20 22l3 3" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 28h12" stroke="#DC2626" stroke-width="2" stroke-linecap="round"/></svg>` },
+    'reorder-pdf':       { bg: '#F5F3FF', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="6" rx="2" fill="#7C3AED" opacity="0.3"/><rect x="10" y="17" width="20" height="6" rx="2" fill="#7C3AED" opacity="0.5"/><rect x="10" y="26" width="20" height="6" rx="2" fill="#7C3AED" opacity="0.3"/><path d="M8 11l-3 3 3 3" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round"/><path d="M32 23l3-3-3-3" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round"/></svg>` },
+    'extract-pdf':       { bg: '#ECFDF5', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#059669" opacity="0.2"/><path d="M20 16v10M17 19l3-3 3 3" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+    'remove-pdf':        { bg: '#FFF1F2', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#E11D48" opacity="0.2"/><path d="M15 19l10 8M25 19l-10 8" stroke="#E11D48" stroke-width="2.5" stroke-linecap="round"/></svg>` },
+    'add-page-numbers':  { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#EA580C" opacity="0.2"/><text x="14" y="26" font-family="Arial" font-size="9" font-weight="800" fill="#EA580C">1 2</text><text x="18" y="18" font-family="Arial" font-size="6" font-weight="600" fill="#EA580C">#</text></svg>` },
   }
 
   const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
@@ -457,6 +466,7 @@ export function injectHeader() {
     { name: t.cat_create || 'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
     { name: t.cat_export || 'Export', slugs: ['jpg-to-pdf','png-to-pdf','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
     { name: t.cat_photo || 'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
+    { name: t.cat_pdf || 'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers'] },
   ]
 
   function toolLink(slug) {
@@ -471,7 +481,7 @@ export function injectHeader() {
   }
 
   const leftCats = toolCategories.slice(0, 3)  // Convert, Optimize, Modify
-  const rightCats = toolCategories.slice(3)     // Create, Export, Photo
+  const rightCats = toolCategories.slice(3)     // Create, Export, Photo, PDF Tools
 
   function renderCat(cat) {
     return `<div class="dropdown-category"><h3>${cat.name}</h3>${cat.slugs.map(s => toolLink(s)).join('')}</div>`

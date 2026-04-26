@@ -16,6 +16,15 @@ const icons = {
   'jpg-to-pdf': '📄',
   'png-to-pdf': '📄',
   'pdf-to-png': '🖼️',
+  'pdf-tools': '📄',
+  'merge-pdf': '📑',
+  'split-pdf': '✂️',
+  'rotate-pdf': '🔄',
+  'compress-pdf': '📦',
+  'reorder-pdf': '↕️',
+  'extract-pdf': '📤',
+  'remove-pdf': '🗑️',
+  'add-page-numbers': '#️⃣',
 }
 
 export function renderToolsNav(currentSlug) {

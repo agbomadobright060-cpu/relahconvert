@@ -265,4 +265,67 @@ export const tools = {
     outputFormat: 'image/jpeg',
     slug: 'svg-to-jpg'
   },
+  'pdf-tools': {
+    title: 'PDF Tools',
+    description: 'Free online PDF tools. Merge, split, compress, rotate, reorder, extract, remove pages and add page numbers.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'pdf-tools'
+  },
+  'merge-pdf': {
+    title: 'Merge PDF',
+    description: 'Combine multiple PDF files into one document free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'merge-pdf'
+  },
+  'split-pdf': {
+    title: 'Split PDF',
+    description: 'Split a PDF into separate pages or custom ranges free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'split-pdf'
+  },
+  'rotate-pdf': {
+    title: 'Rotate PDF',
+    description: 'Rotate PDF pages by 90, 180, or 270 degrees free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'rotate-pdf'
+  },
+  'compress-pdf': {
+    title: 'Compress PDF',
+    description: 'Reduce PDF file size free. Optimize in your browser. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'compress-pdf'
+  },
+  'reorder-pdf': {
+    title: 'Reorder Pages',
+    description: 'Drag and drop to reorder PDF pages free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'reorder-pdf'
+  },
+  'extract-pdf': {
+    title: 'Extract Pages',
+    description: 'Extract specific pages from a PDF into a new document free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'extract-pdf'
+  },
+  'remove-pdf': {
+    title: 'Remove Pages',
+    description: 'Delete specific pages from a PDF document free. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'remove-pdf'
+  },
+  'add-page-numbers': {
+    title: 'Add Page Numbers',
+    description: 'Add page numbers to PDF documents free. Choose position and format. No upload required.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/pdf',
+    slug: 'add-page-numbers'
+  },
 }
