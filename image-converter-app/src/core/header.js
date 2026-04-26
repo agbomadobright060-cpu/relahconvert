@@ -429,7 +429,7 @@ export function injectHeader() {
     'add-page-numbers':  { bg: '#FFF7ED', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M10 6h14l6 6v22a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#EA580C" opacity="0.2"/><text x="14" y="26" font-family="Arial" font-size="9" font-weight="800" fill="#EA580C">1 2</text><text x="18" y="18" font-family="Arial" font-size="6" font-weight="600" fill="#EA580C">#</text></svg>` },
   }
 
-  const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf']
+  const mainLinks = ['compress', 'resize', 'jpg-to-png', 'jpg-to-pdf', 'pdf-tools']
 
   const logoHTML = `
     <a href="${currentLang === 'en' ? '/' : '/' + currentLang}" class="logo">
