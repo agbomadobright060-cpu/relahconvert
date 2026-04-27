@@ -50,10 +50,10 @@ style.textContent = `
   .options-panel{display:none;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);padding:16px 20px;margin-bottom:16px;}
   .options-panel.on{display:block;}
   .options-title{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
-  .margin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:12px;}
+  .margin-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px 12px;margin-bottom:12px;}
   .margin-field{display:flex;flex-direction:column;gap:4px;}
   .margin-field label{font-size:11px;font-weight:600;color:var(--text-muted);font-family:'DM Sans',sans-serif;}
-  .margin-field input{padding:8px 12px;border:1.5px solid var(--border-light);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);width:100%;box-sizing:border-box;transition:border-color 0.15s;}
+  .margin-field input{padding:8px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text-primary);background:var(--bg-card);width:100%;box-sizing:border-box;transition:border-color 0.15s;}
   .margin-field input:focus{outline:none;border-color:var(--accent);}
   .apply-all-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
   .apply-all-row input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
@@ -65,15 +65,30 @@ style.textContent = `
   .file-header .fmeta{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;}
   .file-header .clear-btn{background:transparent;color:var(--accent);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 
-  /* Preview area */
-  .preview-area{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:var(--bg-surface);border-radius:12px;border:1.5px solid var(--border);overflow:hidden;min-height:300px;}
-  .preview-area canvas{max-width:100%;max-height:500px;display:block;}
-  .crop-overlay{position:absolute;pointer-events:none;}
-  .crop-overlay-top,.crop-overlay-bottom,.crop-overlay-left,.crop-overlay-right{position:absolute;background:rgba(200,75,49,0.18);transition:all 0.2s;}
-  .crop-overlay-top{top:0;left:0;right:0;}
-  .crop-overlay-bottom{bottom:0;left:0;right:0;}
-  .crop-overlay-left{left:0;}
-  .crop-overlay-right{right:0;}
+  /* Preview wrapper — holds canvas + interactive overlay */
+  .preview-wrap{position:relative;display:inline-block;margin-bottom:16px;background:var(--bg-surface);border-radius:12px;border:1.5px solid var(--border);overflow:hidden;line-height:0;}
+  .preview-center{display:flex;align-items:center;justify-content:center;min-height:300px;}
+  .preview-wrap canvas{display:block;max-width:100%;max-height:500px;}
+
+  /* Crop overlay regions (semi-transparent shading) */
+  .crop-shade{position:absolute;background:rgba(200,75,49,0.22);pointer-events:none;transition:none;}
+
+  /* Draggable edge handles */
+  .crop-handle{position:absolute;z-index:10;user-select:none;-webkit-user-select:none;}
+  .crop-handle-top{left:0;right:0;height:8px;cursor:ns-resize;background:transparent;}
+  .crop-handle-top::after{content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:48px;height:4px;border-radius:2px;background:var(--accent);opacity:0.7;}
+  .crop-handle-bottom{left:0;right:0;height:8px;cursor:ns-resize;background:transparent;}
+  .crop-handle-bottom::after{content:'';position:absolute;left:50%;transform:translateX(-50%);top:0;width:48px;height:4px;border-radius:2px;background:var(--accent);opacity:0.7;}
+  .crop-handle-left{top:0;bottom:0;width:8px;cursor:ew-resize;background:transparent;}
+  .crop-handle-left::after{content:'';position:absolute;top:50%;transform:translateY(-50%);right:0;height:48px;width:4px;border-radius:2px;background:var(--accent);opacity:0.7;}
+  .crop-handle-right{top:0;bottom:0;width:8px;cursor:ew-resize;background:transparent;}
+  .crop-handle-right::after{content:'';position:absolute;top:50%;transform:translateY(-50%);left:0;height:48px;width:4px;border-radius:2px;background:var(--accent);opacity:0.7;}
+
+  /* Crop box outline */
+  .crop-box-outline{position:absolute;border:2px dashed var(--accent);pointer-events:none;border-radius:2px;z-index:5;}
+
+  /* Crop dimensions readout */
+  .crop-dims{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;text-align:center;margin-top:8px;margin-bottom:8px;min-height:16px;}
 
   /* Page nav */
   .page-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;font-family:'DM Sans',sans-serif;}
@@ -105,6 +120,10 @@ style.textContent = `
   .seo-section .faq-item p{margin:0;}
   .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
   .next-link:hover{border-color:var(--accent);color:var(--accent);}
+
+  @media(max-width:560px){
+    .margin-grid{grid-template-columns:1fr 1fr;}
+  }
 `
 document.head.appendChild(style)
 
@@ -133,6 +152,29 @@ document.querySelector('#app').innerHTML = `
     </div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none;" />
     <div id="fileHeader" class="file-header" style="display:none;"></div>
+    <div id="pageNav" class="page-nav" style="display:none;">
+      <button id="prevPageBtn">\u2190 Prev</button>
+      <span class="page-info" id="pageInfo"></span>
+      <button id="nextPageBtn">Next \u2192</button>
+    </div>
+    <div id="previewCenter" class="preview-center" style="display:none;">
+      <div id="previewWrap" class="preview-wrap">
+        <canvas id="previewCanvas"></canvas>
+        <!-- Shade overlays -->
+        <div class="crop-shade" id="shadeTop"></div>
+        <div class="crop-shade" id="shadeBottom"></div>
+        <div class="crop-shade" id="shadeLeft"></div>
+        <div class="crop-shade" id="shadeRight"></div>
+        <!-- Crop box outline -->
+        <div class="crop-box-outline" id="cropBoxOutline"></div>
+        <!-- Drag handles -->
+        <div class="crop-handle crop-handle-top" id="handleTop"></div>
+        <div class="crop-handle crop-handle-bottom" id="handleBottom"></div>
+        <div class="crop-handle crop-handle-left" id="handleLeft"></div>
+        <div class="crop-handle crop-handle-right" id="handleRight"></div>
+      </div>
+    </div>
+    <div class="crop-dims" id="cropDims"></div>
     <div id="optionsPanel" class="options-panel">
       <div class="options-title">${marginsLbl}</div>
       <div class="margin-grid">
@@ -145,20 +187,6 @@ document.querySelector('#app').innerHTML = `
         <input type="checkbox" id="applyAllCheck" checked />
         <label for="applyAllCheck">${applyAllPagesLbl}</label>
       </div>
-    </div>
-    <div id="previewArea" class="preview-area" style="display:none;">
-      <canvas id="previewCanvas"></canvas>
-      <div class="crop-overlay" id="cropOverlay">
-        <div class="crop-overlay-top" id="overlayTop"></div>
-        <div class="crop-overlay-bottom" id="overlayBottom"></div>
-        <div class="crop-overlay-left" id="overlayLeft"></div>
-        <div class="crop-overlay-right" id="overlayRight"></div>
-      </div>
-    </div>
-    <div id="pageNav" class="page-nav" style="display:none;">
-      <button id="prevPageBtn">\u2190 Prev</button>
-      <span class="page-info" id="pageInfo"></span>
-      <button id="nextPageBtn">Next \u2192</button>
     </div>
     <div class="status-text" id="statusText"></div>
     <div id="actionRow" style="display:none;">
@@ -174,106 +202,202 @@ document.querySelector('#app').innerHTML = `
 injectHeader()
 
 /* -- DOM refs ---------------------------------------------------------------- */
-const uploadArea    = document.getElementById('uploadArea')
-const fileInput     = document.getElementById('fileInput')
-const fileHeader    = document.getElementById('fileHeader')
-const optionsPanel  = document.getElementById('optionsPanel')
-const previewArea   = document.getElementById('previewArea')
-const previewCanvas = document.getElementById('previewCanvas')
-const cropOverlay   = document.getElementById('cropOverlay')
-const overlayTop    = document.getElementById('overlayTop')
-const overlayBottom = document.getElementById('overlayBottom')
-const overlayLeft   = document.getElementById('overlayLeft')
-const overlayRight  = document.getElementById('overlayRight')
-const pageNav       = document.getElementById('pageNav')
-const prevPageBtn   = document.getElementById('prevPageBtn')
-const nextPageBtn   = document.getElementById('nextPageBtn')
-const pageInfo      = document.getElementById('pageInfo')
-const statusText    = document.getElementById('statusText')
-const actionRow     = document.getElementById('actionRow')
-const applyBtn      = document.getElementById('applyBtn')
-const marginTop     = document.getElementById('marginTop')
-const marginBottom  = document.getElementById('marginBottom')
-const marginLeft    = document.getElementById('marginLeft')
-const marginRight   = document.getElementById('marginRight')
-const applyAllCheck = document.getElementById('applyAllCheck')
+const uploadArea     = document.getElementById('uploadArea')
+const fileInput      = document.getElementById('fileInput')
+const fileHeader     = document.getElementById('fileHeader')
+const optionsPanel   = document.getElementById('optionsPanel')
+const previewCenter  = document.getElementById('previewCenter')
+const previewWrap    = document.getElementById('previewWrap')
+const previewCanvas  = document.getElementById('previewCanvas')
+const shadeTop       = document.getElementById('shadeTop')
+const shadeBottom    = document.getElementById('shadeBottom')
+const shadeLeft      = document.getElementById('shadeLeft')
+const shadeRight     = document.getElementById('shadeRight')
+const cropBoxOutline = document.getElementById('cropBoxOutline')
+const handleTop      = document.getElementById('handleTop')
+const handleBottom   = document.getElementById('handleBottom')
+const handleLeft     = document.getElementById('handleLeft')
+const handleRight    = document.getElementById('handleRight')
+const cropDims       = document.getElementById('cropDims')
+const pageNav        = document.getElementById('pageNav')
+const prevPageBtn    = document.getElementById('prevPageBtn')
+const nextPageBtn    = document.getElementById('nextPageBtn')
+const pageInfo       = document.getElementById('pageInfo')
+const statusText     = document.getElementById('statusText')
+const actionRow      = document.getElementById('actionRow')
+const applyBtn       = document.getElementById('applyBtn')
+const marginTopEl    = document.getElementById('marginTop')
+const marginBottomEl = document.getElementById('marginBottom')
+const marginLeftEl   = document.getElementById('marginLeft')
+const marginRightEl  = document.getElementById('marginRight')
+const applyAllCheck  = document.getElementById('applyAllCheck')
 
 /* -- State ------------------------------------------------------------------- */
-let fileBytes    = null  // Uint8Array
-let fileName     = ''
-let pdfDocProxy  = null  // PDF.js document
-let pageCount    = 0
-let currentPage  = 0     // 0-indexed
-let pageViewport = null  // viewport of current rendered page
-let renderScale  = 1
-let lastResults  = []
+let fileBytes     = null  // Uint8Array
+let fileName      = ''
+let pdfDocProxy   = null  // PDF.js document
+let pageCount     = 0
+let currentPage   = 0     // 0-indexed
+let pageViewport  = null  // viewport of current rendered page
+let renderScale   = 1
+let lastResults   = []
+let pagePtWidth   = 0     // current page width in PDF points
+let pagePtHeight  = 0     // current page height in PDF points
+let dragging      = null  // which edge is being dragged: 'top'|'bottom'|'left'|'right'|null
 
-/* -- Margin inputs ----------------------------------------------------------- */
+/* -- Margin helpers ---------------------------------------------------------- */
 function getMargins() {
   return {
-    top:    Math.max(0, parseFloat(marginTop.value) || 0),
-    bottom: Math.max(0, parseFloat(marginBottom.value) || 0),
-    left:   Math.max(0, parseFloat(marginLeft.value) || 0),
-    right:  Math.max(0, parseFloat(marginRight.value) || 0),
+    top:    Math.max(0, parseFloat(marginTopEl.value) || 0),
+    bottom: Math.max(0, parseFloat(marginBottomEl.value) || 0),
+    left:   Math.max(0, parseFloat(marginLeftEl.value) || 0),
+    right:  Math.max(0, parseFloat(marginRightEl.value) || 0),
   }
 }
 
-;[marginTop, marginBottom, marginLeft, marginRight].forEach(inp => {
-  inp.addEventListener('input', updateCropOverlay)
+function setMargins(m) {
+  marginTopEl.value    = Math.round(m.top)
+  marginBottomEl.value = Math.round(m.bottom)
+  marginLeftEl.value   = Math.round(m.left)
+  marginRightEl.value  = Math.round(m.right)
+}
+
+;[marginTopEl, marginBottomEl, marginLeftEl, marginRightEl].forEach(inp => {
+  inp.addEventListener('input', () => { clampMargins(); updateCropOverlay() })
 })
 
-/* -- Update crop overlay ----------------------------------------------------- */
+function clampMargins() {
+  if (!pagePtWidth || !pagePtHeight) return
+  const m = getMargins()
+  const minDim = 10 // minimum remaining area in points
+  if (m.left + m.right > pagePtWidth - minDim) {
+    const excess = m.left + m.right - (pagePtWidth - minDim)
+    m.right = Math.max(0, m.right - excess)
+  }
+  if (m.top + m.bottom > pagePtHeight - minDim) {
+    const excess = m.top + m.bottom - (pagePtHeight - minDim)
+    m.bottom = Math.max(0, m.bottom - excess)
+  }
+  setMargins(m)
+}
+
+/* -- Get display dimensions of canvas (CSS pixels) --------------------------- */
+function getCanvasDisplay() {
+  const rect = previewCanvas.getBoundingClientRect()
+  return { w: rect.width, h: rect.height }
+}
+
+/* -- Update crop overlay + handles + dimensions ------------------------------ */
 function updateCropOverlay() {
   if (!pageViewport || !pdfDocProxy) return
   const m = getMargins()
+  const disp = getCanvasDisplay()
+  const dw = disp.w
+  const dh = disp.h
 
-  // Convert point margins to pixel positions on canvas
-  const scaleX = renderScale
-  const scaleY = renderScale
-  const canvasW = previewCanvas.width
-  const canvasH = previewCanvas.height
+  if (dw === 0 || dh === 0) return
 
-  // PDF points to canvas pixels
-  const topPx    = m.top * scaleY
-  const bottomPx = m.bottom * scaleY
-  const leftPx   = m.left * scaleX
-  const rightPx  = m.right * scaleX
+  // PDF points to display pixels
+  const ptToPxX = dw / pagePtWidth
+  const ptToPxY = dh / pagePtHeight
 
-  // Get displayed size of canvas (CSS pixels)
-  const rect = previewCanvas.getBoundingClientRect()
-  const dispW = rect.width
-  const dispH = rect.height
+  const tPx = Math.min(m.top * ptToPxY, dh)
+  const bPx = Math.min(m.bottom * ptToPxY, dh)
+  const lPx = Math.min(m.left * ptToPxX, dw)
+  const rPx = Math.min(m.right * ptToPxX, dw)
 
-  // Scale from canvas pixels to display pixels
-  const sx = dispW / canvasW
-  const sy = dispH / canvasH
+  // Shade regions
+  // Top shade: full width, from top to tPx
+  shadeTop.style.cssText    = `top:0;left:0;width:${dw}px;height:${tPx}px;`
+  // Bottom shade: full width, from bottom up bPx
+  shadeBottom.style.cssText = `bottom:0;left:0;width:${dw}px;height:${bPx}px;`
+  // Left shade: between top and bottom shades
+  const midH = Math.max(0, dh - tPx - bPx)
+  shadeLeft.style.cssText   = `top:${tPx}px;left:0;width:${lPx}px;height:${midH}px;`
+  // Right shade: between top and bottom shades
+  shadeRight.style.cssText  = `top:${tPx}px;right:0;width:${rPx}px;height:${midH}px;`
 
-  const tPx = topPx * sy
-  const bPx = bottomPx * sy
-  const lPx = leftPx * sx
-  const rPx = rightPx * sx
+  // Crop box outline
+  const boxX = lPx
+  const boxY = tPx
+  const boxW = Math.max(0, dw - lPx - rPx)
+  const boxH = Math.max(0, dh - tPx - bPx)
+  cropBoxOutline.style.cssText = `left:${boxX}px;top:${boxY}px;width:${boxW}px;height:${boxH}px;`
 
-  // Position overlay to match canvas
-  cropOverlay.style.width  = dispW + 'px'
-  cropOverlay.style.height = dispH + 'px'
-  cropOverlay.style.top    = previewCanvas.offsetTop + 'px'
-  cropOverlay.style.left   = previewCanvas.offsetLeft + 'px'
+  // Drag handles positioned at the edge of the crop box
+  handleTop.style.cssText    = `left:0;right:0;top:${Math.max(0, tPx - 4)}px;height:8px;`
+  handleBottom.style.cssText = `left:0;right:0;bottom:${Math.max(0, bPx - 4)}px;height:8px;`
+  handleLeft.style.cssText   = `top:0;bottom:0;left:${Math.max(0, lPx - 4)}px;width:8px;`
+  handleRight.style.cssText  = `top:0;bottom:0;right:${Math.max(0, rPx - 4)}px;width:8px;`
 
-  overlayTop.style.height    = Math.min(tPx, dispH) + 'px'
-  overlayBottom.style.height = Math.min(bPx, dispH) + 'px'
-
-  const midTop = Math.min(tPx, dispH)
-  const midBot = Math.min(bPx, dispH)
-  const midH   = Math.max(0, dispH - midTop - midBot)
-
-  overlayLeft.style.top    = midTop + 'px'
-  overlayLeft.style.height = midH + 'px'
-  overlayLeft.style.width  = Math.min(lPx, dispW) + 'px'
-
-  overlayRight.style.top    = midTop + 'px'
-  overlayRight.style.height = midH + 'px'
-  overlayRight.style.width  = Math.min(rPx, dispW) + 'px'
+  // Crop dimensions text
+  const cropW = Math.max(0, pagePtWidth - m.left - m.right)
+  const cropH = Math.max(0, pagePtHeight - m.top - m.bottom)
+  cropDims.textContent = `Crop area: ${Math.round(cropW)} \u00d7 ${Math.round(cropH)} pt  (page: ${Math.round(pagePtWidth)} \u00d7 ${Math.round(pagePtHeight)} pt)`
 }
+
+/* -- Drag handling ----------------------------------------------------------- */
+function initDrag(edge, e) {
+  e.preventDefault()
+  dragging = edge
+  const startX = e.clientX || (e.touches && e.touches[0].clientX) || 0
+  const startY = e.clientY || (e.touches && e.touches[0].clientY) || 0
+  const m = getMargins()
+  const startMargin = { ...m }
+  const disp = getCanvasDisplay()
+  const ptToPxX = disp.w / pagePtWidth
+  const ptToPxY = disp.h / pagePtHeight
+  const minDim = 10 // minimum remaining points
+
+  function onMove(ev) {
+    ev.preventDefault()
+    const cx = ev.clientX || (ev.touches && ev.touches[0].clientX) || 0
+    const cy = ev.clientY || (ev.touches && ev.touches[0].clientY) || 0
+    const dx = cx - startX
+    const dy = cy - startY
+
+    const updated = { ...startMargin }
+
+    if (edge === 'top') {
+      const deltaPt = dy / ptToPxY
+      updated.top = Math.max(0, Math.min(startMargin.top + deltaPt, pagePtHeight - updated.bottom - minDim))
+    } else if (edge === 'bottom') {
+      const deltaPt = -dy / ptToPxY
+      updated.bottom = Math.max(0, Math.min(startMargin.bottom + deltaPt, pagePtHeight - updated.top - minDim))
+    } else if (edge === 'left') {
+      const deltaPt = dx / ptToPxX
+      updated.left = Math.max(0, Math.min(startMargin.left + deltaPt, pagePtWidth - updated.right - minDim))
+    } else if (edge === 'right') {
+      const deltaPt = -dx / ptToPxX
+      updated.right = Math.max(0, Math.min(startMargin.right + deltaPt, pagePtWidth - updated.left - minDim))
+    }
+
+    setMargins(updated)
+    updateCropOverlay()
+  }
+
+  function onUp() {
+    dragging = null
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+    document.removeEventListener('touchmove', onMove)
+    document.removeEventListener('touchend', onUp)
+  }
+
+  document.addEventListener('mousemove', onMove, { passive: false })
+  document.addEventListener('mouseup', onUp)
+  document.addEventListener('touchmove', onMove, { passive: false })
+  document.addEventListener('touchend', onUp)
+}
+
+handleTop.addEventListener('mousedown', e => initDrag('top', e))
+handleTop.addEventListener('touchstart', e => initDrag('top', e), { passive: false })
+handleBottom.addEventListener('mousedown', e => initDrag('bottom', e))
+handleBottom.addEventListener('touchstart', e => initDrag('bottom', e), { passive: false })
+handleLeft.addEventListener('mousedown', e => initDrag('left', e))
+handleLeft.addEventListener('touchstart', e => initDrag('left', e), { passive: false })
+handleRight.addEventListener('mousedown', e => initDrag('right', e))
+handleRight.addEventListener('touchstart', e => initDrag('right', e), { passive: false })
 
 /* -- Render page preview ----------------------------------------------------- */
 async function renderPage(pageIdx) {
@@ -282,6 +406,9 @@ async function renderPage(pageIdx) {
 
   // Calculate scale to fit max ~500px height
   const baseViewport = page.getViewport({ scale: 1 })
+  pagePtWidth  = baseViewport.width
+  pagePtHeight = baseViewport.height
+
   const maxH = 500
   const maxW = 660
   const scaleH = maxH / baseViewport.height
@@ -337,9 +464,9 @@ async function loadFile(file) {
     `
     document.getElementById('clearBtn').addEventListener('click', resetState)
 
-    optionsPanel.classList.add('on')
-    previewArea.style.display = 'flex'
     pageNav.style.display = pageCount > 1 ? 'flex' : 'none'
+    previewCenter.style.display = 'flex'
+    optionsPanel.classList.add('on')
     actionRow.style.display = 'flex'
 
     await renderPage(0)
@@ -366,28 +493,31 @@ nextPageBtn.addEventListener('click', () => {
 
 /* -- Reset ------------------------------------------------------------------- */
 function resetState() {
-  fileBytes    = null
-  fileName     = ''
-  pdfDocProxy  = null
-  pageCount    = 0
-  currentPage  = 0
-  pageViewport = null
-  lastResults  = []
+  fileBytes     = null
+  fileName      = ''
+  pdfDocProxy   = null
+  pageCount     = 0
+  currentPage   = 0
+  pageViewport  = null
+  pagePtWidth   = 0
+  pagePtHeight  = 0
+  lastResults   = []
 
-  uploadArea.style.display   = ''
-  fileHeader.style.display   = 'none'
-  fileHeader.innerHTML       = ''
+  uploadArea.style.display    = ''
+  fileHeader.style.display    = 'none'
+  fileHeader.innerHTML        = ''
   optionsPanel.classList.remove('on')
-  previewArea.style.display  = 'none'
-  pageNav.style.display      = 'none'
-  actionRow.style.display    = 'none'
-  statusText.textContent     = ''
+  previewCenter.style.display = 'none'
+  pageNav.style.display       = 'none'
+  actionRow.style.display     = 'none'
+  statusText.textContent      = ''
+  cropDims.textContent        = ''
   document.getElementById('nextSteps').style.display = 'none'
 
-  marginTop.value    = '0'
-  marginBottom.value = '0'
-  marginLeft.value   = '0'
-  marginRight.value  = '0'
+  marginTopEl.value    = '0'
+  marginBottomEl.value = '0'
+  marginLeftEl.value   = '0'
+  marginRightEl.value  = '0'
   applyAllCheck.checked = true
 }
 
@@ -492,7 +622,7 @@ function setButtonsDisabled(disabled) {
 
 /* -- Resize observer for overlay --------------------------------------------- */
 const resizeObs = new ResizeObserver(() => updateCropOverlay())
-resizeObs.observe(previewArea)
+resizeObs.observe(previewWrap)
 
 /* -- IndexedDB handoff ------------------------------------------------------- */
 function openDB() {
