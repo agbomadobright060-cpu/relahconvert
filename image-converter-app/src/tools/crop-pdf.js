@@ -203,6 +203,12 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
     <div class="status-text" id="statusText"></div>
+    <div id="croppdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="croppdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="croppdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow" style="display:none;"></div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.whats_next || "What's Next?"}</div>
@@ -254,6 +260,23 @@ let lastResults   = []
 let pagePtWidth   = 0     // current page width in PDF points
 let pagePtHeight  = 0     // current page height in PDF points
 let dragging      = null  // which edge is being dragged: 'top'|'bottom'|'left'|'right'|null
+
+/* -- Apply mode toggle ------------------------------------------------------- */
+const croppdf_applyModeToggle = document.getElementById('croppdf_applyModeToggle')
+const croppdf_modeAllBtn = document.getElementById('croppdf_modeAll')
+const croppdf_modeIndivBtn = document.getElementById('croppdf_modeIndiv')
+let croppdf_applyMode = 'all'
+
+croppdf_modeAllBtn.addEventListener('click', () => {
+  croppdf_applyMode = 'all'
+  croppdf_modeAllBtn.style.background = 'var(--accent)'; croppdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  croppdf_modeIndivBtn.style.background = 'var(--bg-card)'; croppdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+croppdf_modeIndivBtn.addEventListener('click', () => {
+  croppdf_applyMode = 'individual'
+  croppdf_modeIndivBtn.style.background = 'var(--accent)'; croppdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  croppdf_modeAllBtn.style.background = 'var(--bg-card)'; croppdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 /* -- Helpers ----------------------------------------------------------------- */
 function isMulti() { return files.length > 1 }
@@ -502,18 +525,19 @@ function updateLayout() {
     pageNav.style.display = f.pageCount > 1 ? 'flex' : 'none'
   }
 
-  // Action buttons
-  if (multi) {
-    actionRow.innerHTML = `
-      <button class="action-btn" id="applyCurrentBtn">${applyLbl}</button>
-      <button class="action-btn dark" id="applyAllBtn">${applyAllLbl}</button>
-    `
-    document.getElementById('applyCurrentBtn').addEventListener('click', () => applyCropSingle(activeFileIndex))
-    document.getElementById('applyAllBtn').addEventListener('click', applyCropAllZip)
-  } else {
-    actionRow.innerHTML = `<button class="action-btn" id="applySingleBtn">${applyLbl}</button>`
-    document.getElementById('applySingleBtn').addEventListener('click', () => applyCropSingle(0))
-  }
+  // Apply mode toggle: show only when multiple files
+  croppdf_applyModeToggle.style.display = files.length > 1 ? 'block' : 'none'
+
+  // Single action button
+  actionRow.innerHTML = `<button class="action-btn" id="croppdf_applyBtn">${applyLbl}</button>`
+  document.getElementById('croppdf_applyBtn').addEventListener('click', () => {
+    if (croppdf_applyMode === 'all' || files.length <= 1) {
+      if (files.length > 1) applyCropAllZip()
+      else applyCropSingle(0)
+    } else {
+      applyCropSingle(activeFileIndex)
+    }
+  })
 }
 
 /* -- Render file tabs -------------------------------------------------------- */
@@ -686,6 +710,7 @@ function resetState() {
   previewCenter.style.display = 'none'
   pageNav.style.display       = 'none'
   actionRow.style.display     = 'none'
+  croppdf_applyModeToggle.style.display = 'none'
   statusText.textContent      = ''
   cropDims.textContent        = ''
   document.getElementById('nextSteps').style.display = 'none'

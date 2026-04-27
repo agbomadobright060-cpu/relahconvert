@@ -95,9 +95,14 @@ document.querySelector('#app').innerHTML = `
     <div id="fileTabs" class="file-tabs" style="display:none;"></div>
     <div id="imageGrid"></div>
     <div class="status-text" id="statusText"></div>
+    <div id="extimgpdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="extimgpdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="extimgpdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow" style="display:none;">
       <button class="action-btn" id="extractBtn">${extractLbl}</button>
-      <button class="action-btn dark" id="extractAllBtn" style="display:none;">${extractAllLbl}</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
@@ -115,7 +120,6 @@ const fileMeta     = document.getElementById('fileMeta')
 const fileMetaText = document.getElementById('fileMetaText')
 const removeBtn    = document.getElementById('removeBtn')
 const extractBtn   = document.getElementById('extractBtn')
-const extractAllBtn = document.getElementById('extractAllBtn')
 const zipBtn       = document.getElementById('zipBtn')
 const statusText   = document.getElementById('statusText')
 const fileTabs     = document.getElementById('fileTabs')
@@ -127,6 +131,23 @@ let lastResults = []    // flat array for IDB handoff / next-steps
 
 const MAX_FILES = 25
 const MAX_SIZE  = 50 * 1024 * 1024
+
+// Apply mode toggle
+const extimgpdf_applyModeToggle = document.getElementById('extimgpdf_applyModeToggle')
+const extimgpdf_modeAllBtn = document.getElementById('extimgpdf_modeAll')
+const extimgpdf_modeIndivBtn = document.getElementById('extimgpdf_modeIndiv')
+let extimgpdf_applyMode = 'all'
+
+extimgpdf_modeAllBtn.addEventListener('click', () => {
+  extimgpdf_applyMode = 'all'
+  extimgpdf_modeAllBtn.style.background = 'var(--accent)'; extimgpdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  extimgpdf_modeIndivBtn.style.background = 'var(--bg-card)'; extimgpdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+extimgpdf_modeIndivBtn.addEventListener('click', () => {
+  extimgpdf_applyMode = 'individual'
+  extimgpdf_modeIndivBtn.style.background = 'var(--accent)'; extimgpdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  extimgpdf_modeAllBtn.style.background = 'var(--bg-card)'; extimgpdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 // -- Lazy-load pdf.js --------------------------------------------------------
 let pdfjsLib = null
@@ -216,7 +237,7 @@ function resetState() {
   fileTabs.innerHTML = ''
   if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
   document.getElementById('actionRow').style.display = 'none'
-  extractAllBtn.style.display = 'none'
+  extimgpdf_applyModeToggle.style.display = 'none'
   zipBtn.style.display = 'none'
   statusText.textContent = ''
   document.getElementById('nextSteps').style.display = 'none'
@@ -359,10 +380,8 @@ async function loadPdfFiles(rawFiles) {
     renderFileTabs()
     document.getElementById('actionRow').style.display = 'flex'
 
-    // Show "Extract All" button only when multiple files
-    if (files.length > 1) {
-      extractAllBtn.style.display = 'block'
-    }
+    // Show apply mode toggle only when multiple files
+    extimgpdf_applyModeToggle.style.display = files.length > 1 ? 'block' : 'none'
 
     statusText.textContent = ''
   } catch (err) {
@@ -509,104 +528,110 @@ async function extractFromFile(fileEntry) {
   return results
 }
 
-// -- Extract from current file -----------------------------------------------
+// -- Extract — branches based on toggle --------------------------------------
 extractBtn.addEventListener('click', async () => {
-  const f = files[activeFileIndex]
-  if (!f) return
+  if (files.length === 0) return
   extractBtn.disabled = true
-  extractAllBtn.disabled = true
   extractBtn.textContent = extractingLbl
   imageGrid.innerHTML = ''
   zipBtn.style.display = 'none'
 
-  const results = await extractFromFile(f)
-  renderFileTabs()
-  renderActiveFileGrid()
+  if (extimgpdf_applyMode === 'all' || files.length <= 1) {
+    if (files.length <= 1) {
+      // Single file extract
+      const f = files[activeFileIndex]
+      if (!f) { extractBtn.disabled = false; extractBtn.textContent = extractLbl; return }
+      const results = await extractFromFile(f)
+      renderFileTabs()
+      renderActiveFileGrid()
+      rebuildLastResults()
 
-  // Rebuild flat lastResults for IDB handoff
-  rebuildLastResults()
+      extractBtn.disabled = false
+      extractBtn.textContent = extractLbl
 
-  extractBtn.disabled = false
-  extractAllBtn.disabled = false
-  extractBtn.textContent = extractLbl
-
-  if (results.length > 0) {
-    buildNextSteps()
-    if (window.showReviewPrompt) window.showReviewPrompt()
-  }
-
-  updateButtonVisibility()
-})
-
-// -- Extract All & Download ZIP ----------------------------------------------
-extractAllBtn.addEventListener('click', async () => {
-  extractBtn.disabled = true
-  extractAllBtn.disabled = true
-  extractAllBtn.textContent = extractingLbl
-  zipBtn.style.display = 'none'
-
-  let totalImages = 0
-  for (let i = 0; i < files.length; i++) {
-    const f = files[i]
-    // Only extract if not already extracted
-    if (!f.extractedImages) {
-      await extractFromFile(f)
-    }
-    totalImages += f.extractedImages.length
-    renderFileTabs()
-  }
-
-  rebuildLastResults()
-
-  if (totalImages === 0) {
-    statusText.textContent = t.extimg_no_images || 'No embedded images found in any PDF.'
-    extractBtn.disabled = false
-    extractAllBtn.disabled = false
-    extractAllBtn.textContent = extractAllLbl
-    renderActiveFileGrid()
-    return
-  }
-
-  // Show active file grid
-  renderActiveFileGrid()
-  statusText.textContent = `${totalImages} images extracted from ${files.length} files. Zipping\u2026`
-
-  // Build ZIP with all images from all files
-  try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
-    const JSZip = mod.default || window.JSZip
-    const zip = new JSZip()
-
-    for (const f of files) {
-      if (!f.extractedImages || f.extractedImages.length === 0) continue
-      const folderName = files.length > 1 ? f.name.replace(/\.[^.]+$/, '') : null
-      for (const item of f.extractedImages) {
-        const path = folderName ? `${folderName}/${item.name}` : item.name
-        zip.file(path, await item.blob.arrayBuffer())
+      if (results.length > 0) {
+        buildNextSteps()
+        if (window.showReviewPrompt) window.showReviewPrompt()
       }
+      updateButtonVisibility()
+    } else {
+      // Extract all & download ZIP
+      let totalImages = 0
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i]
+        if (!f.extractedImages) {
+          await extractFromFile(f)
+        }
+        totalImages += f.extractedImages.length
+        renderFileTabs()
+      }
+
+      rebuildLastResults()
+
+      if (totalImages === 0) {
+        statusText.textContent = t.extimg_no_images || 'No embedded images found in any PDF.'
+        extractBtn.disabled = false
+        extractBtn.textContent = extractLbl
+        renderActiveFileGrid()
+        return
+      }
+
+      renderActiveFileGrid()
+      statusText.textContent = `${totalImages} images extracted from ${files.length} files. Zipping\u2026`
+
+      try {
+        const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+        const JSZip = mod.default || window.JSZip
+        const zip = new JSZip()
+
+        for (const f of files) {
+          if (!f.extractedImages || f.extractedImages.length === 0) continue
+          const folderName = files.length > 1 ? f.name.replace(/\.[^.]+$/, '') : null
+          for (const item of f.extractedImages) {
+            const path = folderName ? `${folderName}/${item.name}` : item.name
+            zip.file(path, await item.blob.arrayBuffer())
+          }
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(zipBlob)
+        const zipName = files.length === 1
+          ? `${files[0].name.replace(/\.[^.]+$/, '')}-images.zip`
+          : 'pdf-images-all.zip'
+        a.download = zipName
+        a.click()
+        setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+        window.rcShowSaveButton?.(extractBtn.parentElement, zipBlob, zipName, 'extract-images-pdf')
+
+        statusText.textContent = `${totalImages} images from ${files.length} files downloaded as ZIP.`
+        if (window.showReviewPrompt) window.showReviewPrompt()
+      } catch (e) {
+        alert('ZIP failed: ' + e.message)
+      }
+
+      extractBtn.disabled = false
+      extractBtn.textContent = extractLbl
+      buildNextSteps()
     }
+  } else {
+    // Individual: extract only the active file
+    const f = files[activeFileIndex]
+    if (!f) { extractBtn.disabled = false; extractBtn.textContent = extractLbl; return }
+    const results = await extractFromFile(f)
+    renderFileTabs()
+    renderActiveFileGrid()
+    rebuildLastResults()
 
-    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(zipBlob)
-    const zipName = files.length === 1
-      ? `${files[0].name.replace(/\.[^.]+$/, '')}-images.zip`
-      : 'pdf-images-all.zip'
-    a.download = zipName
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-    window.rcShowSaveButton?.(extractAllBtn.parentElement, zipBlob, zipName, 'extract-images-pdf')
+    extractBtn.disabled = false
+    extractBtn.textContent = extractLbl
 
-    statusText.textContent = `${totalImages} images from ${files.length} files downloaded as ZIP.`
-    if (window.showReviewPrompt) window.showReviewPrompt()
-  } catch (e) {
-    alert('ZIP failed: ' + e.message)
+    if (results.length > 0) {
+      buildNextSteps()
+      if (window.showReviewPrompt) window.showReviewPrompt()
+    }
+    updateButtonVisibility()
   }
-
-  extractBtn.disabled = false
-  extractAllBtn.disabled = false
-  extractAllBtn.textContent = extractAllLbl
-  buildNextSteps()
 })
 
 // -- Rebuild flat lastResults for IDB handoff --------------------------------

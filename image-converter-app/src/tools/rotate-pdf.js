@@ -142,6 +142,12 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div id="pageGrid"></div>
     <div class="status-text" id="statusText"></div>
+    <div id="rotatepdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="rotatepdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="rotatepdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow" style="display:none;">
       <button class="action-btn" id="applyBtn">${applyLbl}</button>
     </div>
@@ -166,6 +172,22 @@ const pageGrid      = document.getElementById('pageGrid')
 const statusText    = document.getElementById('statusText')
 const actionRow     = document.getElementById('actionRow')
 const applyBtn      = document.getElementById('applyBtn')
+const rotatepdf_applyModeToggle = document.getElementById('rotatepdf_applyModeToggle')
+const rotatepdf_modeAllBtn = document.getElementById('rotatepdf_modeAll')
+const rotatepdf_modeIndivBtn = document.getElementById('rotatepdf_modeIndiv')
+
+let rotatepdf_applyMode = 'all'
+
+rotatepdf_modeAllBtn.addEventListener('click', () => {
+  rotatepdf_applyMode = 'all'
+  rotatepdf_modeAllBtn.style.background = 'var(--accent)'; rotatepdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  rotatepdf_modeIndivBtn.style.background = 'var(--bg-card)'; rotatepdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+rotatepdf_modeIndivBtn.addEventListener('click', () => {
+  rotatepdf_applyMode = 'individual'
+  rotatepdf_modeIndivBtn.style.background = 'var(--accent)'; rotatepdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  rotatepdf_modeAllBtn.style.background = 'var(--bg-card)'; rotatepdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 let files = [] // { name, bytes (Uint8Array), pageCount, rotations: [0,0,...], canvases: [canvas,...] }
@@ -203,18 +225,19 @@ function updateLayout() {
   // Action row
   actionRow.style.display = files.length > 0 ? 'flex' : 'none'
 
-  // Action buttons
-  if (multi) {
-    actionRow.innerHTML = `
-      <button class="action-btn" id="applyCurrentBtn">${applyLbl}</button>
-      <button class="action-btn dark" id="applyAllBtn">${applyAllLbl}</button>
-    `
-    document.getElementById('applyCurrentBtn').addEventListener('click', () => applyAndDownloadSingle(activeFileIndex))
-    document.getElementById('applyAllBtn').addEventListener('click', applyAllAndDownloadZip)
-  } else {
-    actionRow.innerHTML = `<button class="action-btn" id="applySingleBtn">${applyLbl}</button>`
-    document.getElementById('applySingleBtn').addEventListener('click', () => applyAndDownloadSingle(0))
-  }
+  // Apply mode toggle: show only when multiple files
+  rotatepdf_applyModeToggle.style.display = files.length > 1 ? 'block' : 'none'
+
+  // Single action button
+  actionRow.innerHTML = `<button class="action-btn" id="rotatepdf_applyBtn">${applyLbl}</button>`
+  document.getElementById('rotatepdf_applyBtn').addEventListener('click', () => {
+    if (rotatepdf_applyMode === 'all' || files.length <= 1) {
+      if (files.length > 1) applyAllAndDownloadZip()
+      else applyAndDownloadSingle(0)
+    } else {
+      applyAndDownloadSingle(activeFileIndex)
+    }
+  })
 }
 
 /* ── Render file tabs ─────────────────────────────────────────────────────── */
@@ -382,6 +405,7 @@ function resetState() {
   fileTabs.style.display = 'none'
   rotateAllBar.style.display = 'none'
   actionRow.style.display = 'none'
+  rotatepdf_applyModeToggle.style.display = 'none'
   statusText.textContent = ''
   uploadArea.style.display = ''
   toolWrap.style.maxWidth = '700px'

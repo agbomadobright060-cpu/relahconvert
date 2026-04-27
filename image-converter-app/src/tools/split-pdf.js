@@ -141,9 +141,14 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div id="pageGrid"></div>
     <div class="status-text" id="statusText"></div>
+    <div id="splitpdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="splitpdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="splitpdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow">
       <button class="action-btn disabled" id="splitBtn" disabled>${splitBtnLbl}</button>
-      <button class="action-btn dark" id="splitAllZipBtn" style="display:none;">${splitAllZipLbl}</button>
     </div>
     <div id="resultArea">
       <div id="resultGrid"></div>
@@ -177,10 +182,26 @@ const customRangeInput = document.getElementById('customRangeInput')
 const pageGrid        = document.getElementById('pageGrid')
 const statusText      = document.getElementById('statusText')
 const splitBtn        = document.getElementById('splitBtn')
-const splitAllZipBtn  = document.getElementById('splitAllZipBtn')
 const resultArea      = document.getElementById('resultArea')
 const resultGrid      = document.getElementById('resultGrid')
 const dlZipBtn        = document.getElementById('dlZipBtn')
+
+/* ---- Apply mode toggle ---- */
+const splitpdf_applyModeToggle = document.getElementById('splitpdf_applyModeToggle')
+const splitpdf_modeAllBtn = document.getElementById('splitpdf_modeAll')
+const splitpdf_modeIndivBtn = document.getElementById('splitpdf_modeIndiv')
+let splitpdf_applyMode = 'all'
+
+splitpdf_modeAllBtn.addEventListener('click', () => {
+  splitpdf_applyMode = 'all'
+  splitpdf_modeAllBtn.style.background = 'var(--accent)'; splitpdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  splitpdf_modeIndivBtn.style.background = 'var(--bg-card)'; splitpdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+splitpdf_modeIndivBtn.addEventListener('click', () => {
+  splitpdf_applyMode = 'individual'
+  splitpdf_modeIndivBtn.style.background = 'var(--accent)'; splitpdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  splitpdf_modeAllBtn.style.background = 'var(--bg-card)'; splitpdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 /* ---- State ---- */
 let files = [] // { name, bytes, pageCount, pdfJsDoc, mode:'all'|'custom', customRanges:'', selectedPages:Set }
@@ -364,7 +385,7 @@ function renderActiveFile() {
     customRangeRow.classList.remove('on')
     pageGrid.innerHTML = ''
     disableBtn(splitBtn)
-    splitAllZipBtn.style.display = 'none'
+    splitpdf_applyModeToggle.style.display = 'none'
     dropZone.classList.remove('hidden')
     return
   }
@@ -385,9 +406,9 @@ function renderActiveFile() {
   customRangeRow.classList.toggle('on', f.mode === 'custom')
   customRangeInput.value = f.customRanges
 
-  // Multi-file buttons
-  splitBtn.textContent = files.length > 1 ? splitCurrentLbl : splitBtnLbl
-  splitAllZipBtn.style.display = files.length > 1 ? '' : 'none'
+  // Apply mode toggle: show only when multiple files
+  splitpdf_applyModeToggle.style.display = files.length > 1 ? 'block' : 'none'
+  splitBtn.textContent = splitBtnLbl
 
   enableBtn(splitBtn)
 
@@ -718,75 +739,81 @@ async function splitFile(f) {
   return results
 }
 
-/* Split current file */
+/* Split — branches based on toggle */
 splitBtn.addEventListener('click', async () => {
   if (files.length === 0) return
   disableBtn(splitBtn)
-  disableBtn(splitAllZipBtn)
   clearResults()
 
-  try {
-    const f = files[activeFileIndex]
-    const results = await splitFile(f)
-    if (results.length > 0) {
-      statusText.textContent = `${results.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
-      await showResults(results)
-      window.rcShowSaveButton?.(document.getElementById('actionRow'), results.length === 1 ? results[0].blob : null, results.length === 1 ? results[0].name : null, 'split-pdf')
+  if (splitpdf_applyMode === 'all' || files.length <= 1) {
+    if (files.length <= 1) {
+      // Single file split
+      try {
+        const f = files[activeFileIndex]
+        const results = await splitFile(f)
+        if (results.length > 0) {
+          statusText.textContent = `${results.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
+          await showResults(results)
+          window.rcShowSaveButton?.(document.getElementById('actionRow'), results.length === 1 ? results[0].blob : null, results.length === 1 ? results[0].name : null, 'split-pdf')
+        }
+      } catch (err) {
+        console.error('[split-pdf] split failed:', err)
+        statusText.textContent = (t.splitpdf_error || 'Split failed: ') + (err?.message || err)
+      }
+    } else {
+      // Split all files & download ZIP
+      try {
+        const allResults = []
+        for (let i = 0; i < files.length; i++) {
+          statusText.textContent = `${splittingLbl} ${files[i].name} (${i + 1}/${files.length})`
+          const results = await splitFile(files[i])
+          allResults.push(...results)
+        }
+
+        if (allResults.length === 0) {
+          statusText.textContent = t.splitpdf_no_pages || 'No valid pages selected.'
+          enableBtn(splitBtn)
+          return
+        }
+
+        statusText.textContent = `${allResults.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'} Zipping...`
+
+        const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+        const JSZip = mod.default || window.JSZip
+        const zip = new JSZip()
+        for (const r of allResults) {
+          zip.file(r.name, await r.blob.arrayBuffer())
+        }
+        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+
+        triggerDownload(zipBlob, 'split-pdfs.zip')
+        statusText.textContent = `${allResults.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
+
+        await showResults(allResults)
+        if (window.showReviewPrompt) window.showReviewPrompt()
+        window.rcShowSaveButton?.(document.getElementById('actionRow'), zipBlob, 'split-pdfs.zip', 'split-pdf')
+      } catch (err) {
+        console.error('[split-pdf] split-all failed:', err)
+        statusText.textContent = (t.splitpdf_error || 'Split failed: ') + (err?.message || err)
+      }
     }
-  } catch (err) {
-    console.error('[split-pdf] split failed:', err)
-    statusText.textContent = (t.splitpdf_error || 'Split failed: ') + (err?.message || err)
+  } else {
+    // Individual: split only the active file
+    try {
+      const f = files[activeFileIndex]
+      const results = await splitFile(f)
+      if (results.length > 0) {
+        statusText.textContent = `${results.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
+        await showResults(results)
+        window.rcShowSaveButton?.(document.getElementById('actionRow'), results.length === 1 ? results[0].blob : null, results.length === 1 ? results[0].name : null, 'split-pdf')
+      }
+    } catch (err) {
+      console.error('[split-pdf] split failed:', err)
+      statusText.textContent = (t.splitpdf_error || 'Split failed: ') + (err?.message || err)
+    }
   }
 
   enableBtn(splitBtn)
-  if (files.length > 1) enableBtn(splitAllZipBtn)
-})
-
-/* Split all files & download ZIP */
-splitAllZipBtn.addEventListener('click', async () => {
-  if (files.length === 0) return
-  disableBtn(splitBtn)
-  disableBtn(splitAllZipBtn)
-  clearResults()
-
-  try {
-    const allResults = []
-    for (let i = 0; i < files.length; i++) {
-      statusText.textContent = `${splittingLbl} ${files[i].name} (${i + 1}/${files.length})`
-      const results = await splitFile(files[i])
-      allResults.push(...results)
-    }
-
-    if (allResults.length === 0) {
-      statusText.textContent = t.splitpdf_no_pages || 'No valid pages selected.'
-      enableBtn(splitBtn)
-      enableBtn(splitAllZipBtn)
-      return
-    }
-
-    statusText.textContent = `${allResults.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'} Zipping...`
-
-    const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
-    const JSZip = mod.default || window.JSZip
-    const zip = new JSZip()
-    for (const r of allResults) {
-      zip.file(r.name, await r.blob.arrayBuffer())
-    }
-    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
-
-    triggerDownload(zipBlob, 'split-pdfs.zip')
-    statusText.textContent = `${allResults.length} ${t.splitpdf_pdfs_ready || 'PDFs ready.'}`
-
-    await showResults(allResults)
-    if (window.showReviewPrompt) window.showReviewPrompt()
-    window.rcShowSaveButton?.(document.getElementById('actionRow'), zipBlob, 'split-pdfs.zip', 'split-pdf')
-  } catch (err) {
-    console.error('[split-pdf] split-all failed:', err)
-    statusText.textContent = (t.splitpdf_error || 'Split failed: ') + (err?.message || err)
-  }
-
-  enableBtn(splitBtn)
-  if (files.length > 1) enableBtn(splitAllZipBtn)
 })
 
 /* ZIP download for results of single-file split */

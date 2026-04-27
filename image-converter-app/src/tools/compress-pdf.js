@@ -138,6 +138,12 @@ document.querySelector('#app').innerHTML = `
       <div class="size-bar-wrap"><div class="size-bar" id="sizeBar" style="width:100%;"></div></div>
     </div>
     <div class="status-text" id="statusText"></div>
+    <div id="compresspdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="compresspdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="compresspdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow" style="display:none;">
       <button class="action-btn" id="compressBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${compressLbl}</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
@@ -167,6 +173,24 @@ const compSizeEl   = document.getElementById('compSize')
 const savedPctEl   = document.getElementById('savedPct')
 const sizeBar      = document.getElementById('sizeBar')
 const uploadArea   = document.getElementById('uploadArea')
+
+// Apply mode toggle
+const compresspdf_applyModeToggle = document.getElementById('compresspdf_applyModeToggle')
+const compresspdf_modeAllBtn = document.getElementById('compresspdf_modeAll')
+const compresspdf_modeIndivBtn = document.getElementById('compresspdf_modeIndiv')
+let compresspdf_applyMode = 'all'
+let compresspdf_activeIndex = 0
+
+compresspdf_modeAllBtn.addEventListener('click', () => {
+  compresspdf_applyMode = 'all'
+  compresspdf_modeAllBtn.style.background = 'var(--accent)'; compresspdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  compresspdf_modeIndivBtn.style.background = 'var(--bg-card)'; compresspdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+compresspdf_modeIndivBtn.addEventListener('click', () => {
+  compresspdf_applyMode = 'individual'
+  compresspdf_modeIndivBtn.style.background = 'var(--accent)'; compresspdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  compresspdf_modeAllBtn.style.background = 'var(--bg-card)'; compresspdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 // State
 let pdfEntries = [] // { file, name, originalSize, compressedBlob?, compressedSize?, itemEl }
@@ -296,10 +320,12 @@ function updateUI() {
     compressBtn.style.background = 'var(--btn-disabled)'
     uploadArea.style.display = ''
     document.getElementById('actionRow').style.display = 'none'
+    compresspdf_applyModeToggle.style.display = 'none'
     return
   }
   uploadArea.style.display = 'none'
   document.getElementById('actionRow').style.display = 'flex'
+  compresspdf_applyModeToggle.style.display = pdfEntries.length > 1 ? 'block' : 'none'
   const totalSize = pdfEntries.reduce((s, e) => s + e.originalSize, 0)
   fileMetaText.textContent = `${pdfEntries.length} file${pdfEntries.length > 1 ? 's' : ''} \u2014 ${formatSize(totalSize)}`
   fileMeta.classList.add('on')
@@ -329,6 +355,14 @@ function renderFileList() {
       <button class="fremove" title="Remove">\u00D7</button>
     `
     div.querySelector('.fremove').addEventListener('click', () => removeEntry(i))
+    div.addEventListener('click', (e) => {
+      if (e.target.classList.contains('fremove') || e.target.tagName === 'A') return
+      compresspdf_activeIndex = i
+      fileList.querySelectorAll('.file-item').forEach((el, j) => {
+        el.style.borderColor = j === i ? 'var(--accent)' : ''
+      })
+    })
+    if (i === compresspdf_activeIndex) div.style.borderColor = 'var(--accent)'
     fileList.appendChild(div)
     entry.itemEl = div
   })
@@ -432,7 +466,12 @@ compressBtn.addEventListener('click', async () => {
   let totalOriginal = 0
   let totalCompressed = 0
 
-  for (let i = 0; i < pdfEntries.length; i++) {
+  // Determine which entries to process
+  const indicesToProcess = (compresspdf_applyMode === 'individual' && pdfEntries.length > 1)
+    ? [compresspdf_activeIndex]
+    : pdfEntries.map((_, i) => i)
+
+  for (const i of indicesToProcess) {
     const entry = pdfEntries[i]
     try {
       const blob = await compressSinglePdf(entry.file, preset, (page, total) => {
@@ -465,6 +504,17 @@ compressBtn.addEventListener('click', async () => {
         a.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 10000))
         dlEl.appendChild(a)
       }
+
+      // Auto-download for individual mode
+      if (compresspdf_applyMode === 'individual' && pdfEntries.length > 1) {
+        const outName = entry.name.replace(/\.pdf$/i, '') + '-compressed.pdf'
+        const dlUrl = URL.createObjectURL(blob)
+        const dlA = document.createElement('a')
+        dlA.href = dlUrl
+        dlA.download = outName
+        dlA.click()
+        setTimeout(() => URL.revokeObjectURL(dlUrl), 10000)
+      }
     } catch (err) {
       console.error('[compress-pdf] failed:', entry.name, err)
       const resultEl = document.getElementById('result-' + i)
@@ -496,9 +546,9 @@ compressBtn.addEventListener('click', async () => {
   compressBtn.textContent = compressLbl
   compressBtn.disabled = false
 
-  // Show ZIP button if multiple files
+  // Show ZIP button if multiple files compressed in 'all' mode
   const successEntries = pdfEntries.filter(e => e.compressedBlob)
-  if (successEntries.length > 1) {
+  if (successEntries.length > 1 && compresspdf_applyMode === 'all') {
     zipBtn.style.display = 'block'
   }
 

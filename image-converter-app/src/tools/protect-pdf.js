@@ -126,6 +126,12 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div id="fileMeta"><span id="fileMetaText"></span><button id="removeBtn">${t.remove || 'Clear all'}</button></div>
     <div class="status-text" id="statusText"></div>
+    <div id="protectpdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="protectpdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="protectpdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow" style="display:none;">
       <button class="action-btn" id="protectBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${protectLbl}</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
@@ -158,6 +164,24 @@ const pwToggle2    = document.getElementById('pwToggle2')
 // State
 let pdfEntries = [] // { file, name, originalSize, protectedBlob?, itemEl }
 let lastResults = []
+let protectpdf_activeIndex = 0
+
+// Apply mode toggle
+const protectpdf_applyModeToggle = document.getElementById('protectpdf_applyModeToggle')
+const protectpdf_modeAllBtn = document.getElementById('protectpdf_modeAll')
+const protectpdf_modeIndivBtn = document.getElementById('protectpdf_modeIndiv')
+let protectpdf_applyMode = 'all'
+
+protectpdf_modeAllBtn.addEventListener('click', () => {
+  protectpdf_applyMode = 'all'
+  protectpdf_modeAllBtn.style.background = 'var(--accent)'; protectpdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  protectpdf_modeIndivBtn.style.background = 'var(--bg-card)'; protectpdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+protectpdf_modeIndivBtn.addEventListener('click', () => {
+  protectpdf_applyMode = 'individual'
+  protectpdf_modeIndivBtn.style.background = 'var(--accent)'; protectpdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  protectpdf_modeAllBtn.style.background = 'var(--bg-card)'; protectpdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 // ── Password show/hide toggles ──────────────────────────────────────────────
 function setupToggle(toggleBtn, inputEl) {
@@ -292,10 +316,12 @@ function updateUI() {
     optionsRow.classList.remove('on')
     uploadArea.style.display = ''
     document.getElementById('actionRow').style.display = 'none'
+    protectpdf_applyModeToggle.style.display = 'none'
     return
   }
   uploadArea.style.display = 'none'
   document.getElementById('actionRow').style.display = 'flex'
+  protectpdf_applyModeToggle.style.display = pdfEntries.length > 1 ? 'block' : 'none'
   optionsRow.classList.add('on')
   const totalSize = pdfEntries.reduce((s, e) => s + e.originalSize, 0)
   fileMetaText.textContent = `${pdfEntries.length} file${pdfEntries.length > 1 ? 's' : ''} \u2014 ${formatSize(totalSize)}`
@@ -322,6 +348,14 @@ function renderFileList() {
       <button class="fremove" title="Remove">\u00D7</button>
     `
     div.querySelector('.fremove').addEventListener('click', () => removeEntry(i))
+    div.addEventListener('click', (e) => {
+      if (e.target.classList.contains('fremove') || e.target.tagName === 'A') return
+      protectpdf_activeIndex = i
+      fileList.querySelectorAll('.file-item').forEach((el, j) => {
+        el.style.borderColor = j === i ? 'var(--accent)' : ''
+      })
+    })
+    if (i === protectpdf_activeIndex) div.style.borderColor = 'var(--accent)'
     fileList.appendChild(div)
     entry.itemEl = div
   })
@@ -394,9 +428,13 @@ protectBtn.addEventListener('click', async () => {
   protectBtn.textContent = protectingLbl
   zipBtn.style.display = 'none'
 
-  const isSingle = pdfEntries.length === 1
+  // Determine which entries to process
+  const indicesToProcess = (protectpdf_applyMode === 'individual' && pdfEntries.length > 1)
+    ? [protectpdf_activeIndex]
+    : pdfEntries.map((_, i) => i)
+  const isSingle = indicesToProcess.length === 1
 
-  for (let i = 0; i < pdfEntries.length; i++) {
+  for (const i of indicesToProcess) {
     const entry = pdfEntries[i]
     statusText.textContent = `Encrypting (${i + 1}/${pdfEntries.length}) \u2014 ${entry.name}`
     try {
@@ -436,9 +474,9 @@ protectBtn.addEventListener('click', async () => {
   protectBtn.textContent = protectLbl
   protectBtn.disabled = false
 
-  // Show ZIP button if multiple files
+  // Show ZIP button if multiple files in 'all' mode
   const successEntries = pdfEntries.filter(e => e.protectedBlob)
-  if (successEntries.length > 1) {
+  if (successEntries.length > 1 && protectpdf_applyMode === 'all') {
     zipBtn.style.display = 'block'
   }
 

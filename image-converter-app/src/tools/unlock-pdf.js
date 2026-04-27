@@ -112,6 +112,12 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div id="fileMeta"><span id="fileMetaText"></span><button id="removeBtn">${t.remove || 'Clear all'}</button></div>
     <div class="status-text" id="statusText"></div>
+    <div id="unlockpdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+        <button id="unlockpdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+        <button id="unlockpdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+      </div>
+    </div>
     <div id="actionRow" style="display:none;">
       <button class="action-btn" id="unlockBtn" disabled style="background:var(--btn-disabled);opacity:0.7;cursor:not-allowed;">${unlockLbl}</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
@@ -141,6 +147,24 @@ const uploadArea   = document.getElementById('uploadArea')
 // State
 let pdfEntries = [] // { file, name, originalSize, unlockedBlob?, itemEl }
 let lastResults = []
+let unlockpdf_activeIndex = 0
+
+// Apply mode toggle
+const unlockpdf_applyModeToggle = document.getElementById('unlockpdf_applyModeToggle')
+const unlockpdf_modeAllBtn = document.getElementById('unlockpdf_modeAll')
+const unlockpdf_modeIndivBtn = document.getElementById('unlockpdf_modeIndiv')
+let unlockpdf_applyMode = 'all'
+
+unlockpdf_modeAllBtn.addEventListener('click', () => {
+  unlockpdf_applyMode = 'all'
+  unlockpdf_modeAllBtn.style.background = 'var(--accent)'; unlockpdf_modeAllBtn.style.color = 'var(--text-on-accent)'
+  unlockpdf_modeIndivBtn.style.background = 'var(--bg-card)'; unlockpdf_modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+unlockpdf_modeIndivBtn.addEventListener('click', () => {
+  unlockpdf_applyMode = 'individual'
+  unlockpdf_modeIndivBtn.style.background = 'var(--accent)'; unlockpdf_modeIndivBtn.style.color = 'var(--text-on-accent)'
+  unlockpdf_modeAllBtn.style.background = 'var(--bg-card)'; unlockpdf_modeAllBtn.style.color = 'var(--text-secondary)'
+})
 
 // ── Password show/hide toggle ────────────────────────────────────────────────
 togglePwBtn.addEventListener('click', () => {
@@ -264,11 +288,13 @@ function updateUI() {
     passwordRow.classList.remove('on')
     uploadArea.style.display = ''
     document.getElementById('actionRow').style.display = 'none'
+    unlockpdf_applyModeToggle.style.display = 'none'
     updateUnlockBtnState()
     return
   }
   uploadArea.style.display = 'none'
   document.getElementById('actionRow').style.display = 'flex'
+  unlockpdf_applyModeToggle.style.display = pdfEntries.length > 1 ? 'block' : 'none'
   const totalSize = pdfEntries.reduce((s, e) => s + e.originalSize, 0)
   fileMetaText.textContent = `${pdfEntries.length} file${pdfEntries.length > 1 ? 's' : ''} \u2014 ${formatSize(totalSize)}`
   fileMeta.classList.add('on')
@@ -295,6 +321,14 @@ function renderFileList() {
       <button class="fremove" title="Remove">\u00D7</button>
     `
     div.querySelector('.fremove').addEventListener('click', () => removeEntry(i))
+    div.addEventListener('click', (e) => {
+      if (e.target.classList.contains('fremove') || e.target.tagName === 'A') return
+      unlockpdf_activeIndex = i
+      fileList.querySelectorAll('.file-item').forEach((el, j) => {
+        el.style.borderColor = j === i ? 'var(--accent)' : ''
+      })
+    })
+    if (i === unlockpdf_activeIndex) div.style.borderColor = 'var(--accent)'
     fileList.appendChild(div)
     entry.itemEl = div
   })
@@ -379,7 +413,12 @@ unlockBtn.addEventListener('click', async () => {
 
   let successCount = 0
 
-  for (let i = 0; i < pdfEntries.length; i++) {
+  // Determine which entries to process
+  const indicesToProcess = (unlockpdf_applyMode === 'individual' && pdfEntries.length > 1)
+    ? [unlockpdf_activeIndex]
+    : pdfEntries.map((_, i) => i)
+
+  for (const i of indicesToProcess) {
     const entry = pdfEntries[i]
     statusText.textContent = pdfEntries.length > 1
       ? `Unlocking (${i + 1}/${pdfEntries.length}) \u2014 ${entry.name}`
@@ -421,19 +460,22 @@ unlockBtn.addEventListener('click', async () => {
     }
   }
 
-  // Auto-download for single file
-  if (pdfEntries.length === 1 && pdfEntries[0].unlockedBlob) {
-    triggerDownload(
-      pdfEntries[0].unlockedBlob,
-      pdfEntries[0].name.replace(/\.pdf$/i, '') + '-unlocked.pdf'
-    )
+  // Auto-download for single file or individual mode
+  if (indicesToProcess.length === 1) {
+    const idx = indicesToProcess[0]
+    if (pdfEntries[idx] && pdfEntries[idx].unlockedBlob) {
+      triggerDownload(
+        pdfEntries[idx].unlockedBlob,
+        pdfEntries[idx].name.replace(/\.pdf$/i, '') + '-unlocked.pdf'
+      )
+    }
   }
 
-  if (successCount === pdfEntries.length) {
+  if (successCount === indicesToProcess.length) {
     statusText.textContent = t.unlkpdf_done || 'All PDFs unlocked successfully.'
     statusText.className = 'status-text'
   } else if (successCount > 0) {
-    statusText.textContent = t.unlkpdf_partial || `${successCount} of ${pdfEntries.length} PDFs unlocked.`
+    statusText.textContent = t.unlkpdf_partial || `${successCount} of ${indicesToProcess.length} PDFs unlocked.`
     statusText.className = 'status-text'
   } else {
     statusText.textContent = wrongPwLbl
@@ -444,9 +486,9 @@ unlockBtn.addEventListener('click', async () => {
   unlockBtn.disabled = false
   updateUnlockBtnState()
 
-  // Show ZIP button if multiple successful
+  // Show ZIP button if multiple successful in 'all' mode
   const successEntries = pdfEntries.filter(e => e.unlockedBlob)
-  if (successEntries.length > 1) {
+  if (successEntries.length > 1 && unlockpdf_applyMode === 'all') {
     zipBtn.style.display = 'block'
   }
 
