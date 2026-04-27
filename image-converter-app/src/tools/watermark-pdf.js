@@ -224,11 +224,13 @@ document.querySelector('#app').innerHTML = `
         <div class="pos-grid" id="wmpdf_posGrid"></div>
 
         <div class="divider"></div>
-        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--text-primary);font-family:'DM Sans',sans-serif;cursor:pointer;user-select:none;">
-          <input type="checkbox" id="wmpdf_allPages" checked /> ${t.wmpdf_all_pages || 'Apply to all pages'}
-        </label>
+        <div id="wmpdf_applyModeToggle" style="display:none;margin-bottom:12px;">
+          <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;">
+            <button id="wmpdf_modeAll" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Apply to All</button>
+            <button id="wmpdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
+          </div>
+        </div>
         <button class="action-btn" id="wmpdf_applyBtn" disabled>${applyLbl}</button>
-        <button class="action-btn dark" id="wmpdf_applyAllBtn" style="display:none;margin-top:8px;">${t.wmpdf_apply_all || 'Apply All & Download ZIP'}</button>
         <div id="wmpdf_zipWrap" style="display:none;">
           <a id="wmpdf_zipBtn" class="action-btn dark" style="display:block;text-align:center;text-decoration:none;">\u2B07 ${dlZipBtn}</a>
           <p id="wmpdf_zipNote" style="font-size:11px;color:var(--text-muted);text-align:center;margin:4px 0 0;font-family:'DM Sans',sans-serif;"></p>
@@ -791,14 +793,27 @@ function makeUnique(usedNames, name) {
 }
 
 /* ── Apply watermark ─────────────────────────────────────────────────── */
-const applyAllBtn = document.getElementById('wmpdf_applyAllBtn')
+const applyModeToggle = document.getElementById('wmpdf_applyModeToggle')
+const modeAllBtn = document.getElementById('wmpdf_modeAll')
+const modeIndivBtn = document.getElementById('wmpdf_modeIndiv')
+let applyMode = 'all'
 
-// Show/hide applyAllBtn based on file count
+modeAllBtn.addEventListener('click', () => {
+  applyMode = 'all'
+  modeAllBtn.style.background = 'var(--accent)'; modeAllBtn.style.color = 'var(--text-on-accent)'
+  modeIndivBtn.style.background = 'var(--bg-card)'; modeIndivBtn.style.color = 'var(--text-secondary)'
+})
+modeIndivBtn.addEventListener('click', () => {
+  applyMode = 'individual'
+  modeIndivBtn.style.background = 'var(--accent)'; modeIndivBtn.style.color = 'var(--text-on-accent)'
+  modeAllBtn.style.background = 'var(--bg-card)'; modeAllBtn.style.color = 'var(--text-secondary)'
+})
+
 function updateApplyButtons() {
-  applyAllBtn.style.display = pdfFiles.length > 1 ? 'block' : 'none'
+  applyModeToggle.style.display = pdfFiles.length > 1 ? 'block' : 'none'
 }
 
-// Apply to CURRENT file only
+// Apply watermark — respects Apply to All / Individual toggle
 applyBtn.addEventListener('click', async () => {
   if (!pdfFiles.length) return
   if (wmMode === 'image' && !wmImageFile) {
@@ -811,75 +826,58 @@ applyBtn.addEventListener('click', async () => {
   nextStepsDiv.style.display = 'none'
   lastResults = []
 
-  try {
-    const entry = pdfFiles[activeIdx]
-    const result = await processOnePdf(entry, (page, total) => {
-      statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
-    })
-    triggerDownload(result.blob, result.filename)
-    lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
-    statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
-    if (window.showReviewPrompt) window.showReviewPrompt()
-    window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf')
-    buildNextSteps()
-  } catch (err) {
-    console.error('[watermark-pdf] apply failed:', err)
-    statusText.textContent = `Failed: ${err?.message || err}`
-  }
-
-  applyBtn.disabled = false
-  applyBtn.textContent = applyLbl
-})
-
-// Apply to ALL files & ZIP
-applyAllBtn.addEventListener('click', async () => {
-  if (pdfFiles.length < 2) return
-  if (wmMode === 'image' && !wmImageFile) {
-    statusText.textContent = 'Please choose a watermark image first.'
-    return
-  }
-  applyAllBtn.disabled = true
-  applyBtn.disabled = true
-  applyAllBtn.textContent = applyingLbl
-  statusText.textContent = ''
-  zipWrap.style.display = 'none'
-  nextStepsDiv.style.display = 'none'
-  lastResults = []
+  const doAll = applyMode === 'all' || pdfFiles.length === 1
 
   try {
-    const results = []
-    for (let i = 0; i < pdfFiles.length; i++) {
-      const entry = pdfFiles[i]
+    if (!doAll) {
+      // Individual: apply to current file only
+      const entry = pdfFiles[activeIdx]
       const result = await processOnePdf(entry, (page, total) => {
-        statusText.textContent = `Adding watermark (${i+1}/${pdfFiles.length}) \u2014 ${entry.name} (page ${page}/${total})`
+        statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
       })
-      results.push(result)
+      triggerDownload(result.blob, result.filename)
+      lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
+      statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
+      if (window.showReviewPrompt) window.showReviewPrompt()
+      window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf')
+    } else {
+      // Apply to All: process all files
+      const results = []
+      for (let i = 0; i < pdfFiles.length; i++) {
+        const entry = pdfFiles[i]
+        const result = await processOnePdf(entry, (page, total) => {
+          statusText.textContent = `Adding watermark (${i+1}/${pdfFiles.length}) \u2014 ${entry.name} (page ${page}/${total})`
+        })
+        results.push(result)
+      }
+
+      if (results.length === 1) {
+        triggerDownload(results[0].blob, results[0].filename)
+        lastResults = [{ blob: results[0].blob, name: results[0].filename, type: 'application/pdf' }]
+      } else {
+        statusText.textContent = 'Creating ZIP\u2026'
+        const JSZip = (await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+        const zip = new JSZip()
+        const usedNames = new Set()
+        for (const r of results) { zip.file(makeUnique(usedNames, r.filename), r.blob) }
+        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+        triggerDownload(zipBlob, 'watermarked-pdfs.zip')
+        lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
+      }
+
+      const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
+      statusText.textContent = `Done! Watermark added to ${totalPgs} pages across ${results.length} files.`
+      if (window.showReviewPrompt) window.showReviewPrompt()
     }
 
-    statusText.textContent = 'Creating ZIP\u2026'
-    const JSZip = (await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
-    const zip = new JSZip()
-    const usedNames = new Set()
-    for (const r of results) {
-      const safeName = makeUnique(usedNames, r.filename)
-      zip.file(safeName, r.blob)
-    }
-    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
-    triggerDownload(zipBlob, 'watermarked-pdfs.zip')
-
-    lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
-    const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
-    statusText.textContent = `Done! Watermark added to ${totalPgs} pages across ${results.length} files.`
-    if (window.showReviewPrompt) window.showReviewPrompt()
     buildNextSteps()
   } catch (err) {
     console.error('[watermark-pdf] apply all failed:', err)
     statusText.textContent = `Failed: ${err?.message || err}`
   }
 
-  applyAllBtn.disabled = false
   applyBtn.disabled = false
-  applyAllBtn.textContent = t.wmpdf_apply_all || 'Apply All & Download ZIP'
+  applyBtn.textContent = applyLbl
 })
 
 /* ── IndexedDB handoff ───────────────────────────────────────────────── */
