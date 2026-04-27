@@ -184,17 +184,8 @@ document.querySelector('#app').innerHTML = `
 
         <div class="section-label">${t.wmpdf_color || 'Color'}</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <input type="color" id="wmpdf_colorPicker" value="#808080" style="width:40px;height:32px;border:1.5px solid var(--border-light);border-radius:6px;cursor:pointer;padding:2px;background:var(--bg-card);" />
-          <div class="swatches" id="wmpdf_swatches" style="margin:0;">
-            <div class="swatch active" data-color="#808080" style="background:#808080;" title="Gray"></div>
-            <div class="swatch" data-color="#CC0000" style="background:#CC0000;" title="Red"></div>
-            <div class="swatch" data-color="#0000CC" style="background:#0000CC;" title="Blue"></div>
-            <div class="swatch" data-color="#000000" style="background:#000000;" title="Black"></div>
-            <div class="swatch" data-color="#FFFFFF" style="background:#FFFFFF;" title="White"></div>
-            <div class="swatch" data-color="#059669" style="background:#059669;" title="Green"></div>
-            <div class="swatch" data-color="#D97706" style="background:#D97706;" title="Orange"></div>
-            <div class="swatch" data-color="#7C3AED" style="background:#7C3AED;" title="Purple"></div>
-          </div>
+          <input type="color" id="wmpdf_colorPicker" value="#808080" style="width:44px;height:36px;border:1.5px solid var(--border-light);border-radius:8px;cursor:pointer;padding:2px;background:var(--bg-card);" />
+          <span id="wmpdf_colorHex" style="font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">#808080</span>
         </div>
 
         <div class="section-label">${t.wmpdf_position || 'Position'}</div>
@@ -213,6 +204,7 @@ document.querySelector('#app').innerHTML = `
           <input type="checkbox" id="wmpdf_allPages" checked /> ${t.wmpdf_all_pages || 'Apply to all pages'}
         </label>
         <button class="action-btn" id="wmpdf_applyBtn" disabled>${applyLbl}</button>
+        <button class="action-btn dark" id="wmpdf_applyAllBtn" style="display:none;margin-top:8px;">${t.wmpdf_apply_all || 'Apply All & Download ZIP'}</button>
         <div id="wmpdf_zipWrap" style="display:none;">
           <a id="wmpdf_zipBtn" class="action-btn dark" style="display:block;text-align:center;text-decoration:none;">\u2B07 ${dlZipBtn}</a>
           <p id="wmpdf_zipNote" style="font-size:11px;color:var(--text-muted);text-align:center;margin:4px 0 0;font-family:'DM Sans',sans-serif;"></p>
@@ -265,7 +257,7 @@ const textInput    = document.getElementById('wmpdf_text')
 const fontSizeInput = document.getElementById('wmpdf_fontSize')
 const opacitySlider = document.getElementById('wmpdf_opacity')
 const opacityVal   = document.getElementById('wmpdf_opacityVal')
-const swatchesEl   = document.getElementById('wmpdf_swatches')
+// color picker handled below
 const posGrid      = document.getElementById('wmpdf_posGrid')
 const diagCheck    = document.getElementById('wmpdf_diagonal')
 const rotSlider    = document.getElementById('wmpdf_rotation')
@@ -319,19 +311,11 @@ opacitySlider.addEventListener('input', () => {
 })
 
 const colorPicker = document.getElementById('wmpdf_colorPicker')
-
-swatchesEl.addEventListener('click', e => {
-  const sw = e.target.closest('.swatch')
-  if (!sw) return
-  opts.color = sw.dataset.color
-  colorPicker.value = opts.color
-  swatchesEl.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.color === opts.color))
-  updateOverlays()
-})
+const colorHex = document.getElementById('wmpdf_colorHex')
 
 colorPicker.addEventListener('input', () => {
   opts.color = colorPicker.value
-  swatchesEl.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'))
+  colorHex.textContent = colorPicker.value.toUpperCase()
   updateOverlays()
 })
 
@@ -548,6 +532,7 @@ async function loadPdfFiles(rawFiles) {
     dropZone.style.display = 'none'
     applyBtn.disabled = false
     statusText.textContent = ''
+    updateApplyButtons()
     renderFileChips()
     await renderThumbnails()
   }
@@ -661,68 +646,87 @@ function makeUnique(usedNames, name) {
 }
 
 /* ── Apply watermark ─────────────────────────────────────────────────── */
+const applyAllBtn = document.getElementById('wmpdf_applyAllBtn')
+
+// Show/hide applyAllBtn based on file count
+function updateApplyButtons() {
+  applyAllBtn.style.display = pdfFiles.length > 1 ? 'block' : 'none'
+}
+
+// Apply to CURRENT file only
 applyBtn.addEventListener('click', async () => {
   if (!pdfFiles.length) return
   applyBtn.disabled = true
   applyBtn.textContent = applyingLbl
+  statusText.textContent = ''
+  nextStepsDiv.style.display = 'none'
+  lastResults = []
+
+  try {
+    const entry = pdfFiles[activeIdx]
+    const result = await processOnePdf(entry, (page, total) => {
+      statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
+    })
+    triggerDownload(result.blob, result.filename)
+    lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
+    statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
+    if (window.showReviewPrompt) window.showReviewPrompt()
+    window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf')
+    buildNextSteps()
+  } catch (err) {
+    console.error('[watermark-pdf] apply failed:', err)
+    statusText.textContent = `Failed: ${err?.message || err}`
+  }
+
+  applyBtn.disabled = false
+  applyBtn.textContent = applyLbl
+})
+
+// Apply to ALL files & ZIP
+applyAllBtn.addEventListener('click', async () => {
+  if (pdfFiles.length < 2) return
+  applyAllBtn.disabled = true
+  applyBtn.disabled = true
+  applyAllBtn.textContent = applyingLbl
   statusText.textContent = ''
   zipWrap.style.display = 'none'
   nextStepsDiv.style.display = 'none'
   lastResults = []
 
   try {
-    if (pdfFiles.length === 1) {
-      const entry = pdfFiles[0]
+    const results = []
+    for (let i = 0; i < pdfFiles.length; i++) {
+      const entry = pdfFiles[i]
       const result = await processOnePdf(entry, (page, total) => {
-        statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
+        statusText.textContent = `Adding watermark (${i+1}/${pdfFiles.length}) \u2014 ${entry.name} (page ${page}/${total})`
       })
-      triggerDownload(result.blob, result.filename)
-      lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
-      statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
-      if (window.showReviewPrompt) window.showReviewPrompt()
-      window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf')
-      buildNextSteps()
-    } else {
-      // Multiple files -> ZIP
-      const results = []
-      for (let i = 0; i < pdfFiles.length; i++) {
-        const entry = pdfFiles[i]
-        const result = await processOnePdf(entry, (page, total) => {
-          statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
-        })
-        results.push(result)
-      }
-
-      statusText.textContent = t.wmpdf_zipping || 'Creating ZIP\u2026'
-      const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
-      const zip = new JSZip()
-      const usedNames = new Set()
-      for (const r of results) {
-        const safeName = makeUnique(usedNames, r.filename)
-        zip.file(safeName, r.blob)
-      }
-      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
-      const zipUrl = URL.createObjectURL(zipBlob)
-      zipBtn.href = zipUrl
-      zipBtn.download = 'watermarked-pdfs.zip'
-      zipBtn.onclick = () => setTimeout(() => URL.revokeObjectURL(zipUrl), 10000)
-      const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
-      zipNote.textContent = `${pdfFiles.length} files, ${totalPgs} pages \u2014 ${Math.round(zipBlob.size / 1024)} KB`
-      zipWrap.style.display = 'block'
-
-      lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
-      statusText.textContent = `Done! Watermark added to ${totalPgs} pages across ${results.length} files.`
-      if (window.showReviewPrompt) window.showReviewPrompt()
-      window.rcShowSaveButton?.(applyBtn.parentElement, zipBlob, 'watermarked-pdfs.zip', 'watermark-pdf')
-      buildNextSteps()
+      results.push(result)
     }
+
+    statusText.textContent = 'Creating ZIP\u2026'
+    const JSZip = (await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+    const zip = new JSZip()
+    const usedNames = new Set()
+    for (const r of results) {
+      const safeName = makeUnique(usedNames, r.filename)
+      zip.file(safeName, r.blob)
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+    triggerDownload(zipBlob, 'watermarked-pdfs.zip')
+
+    lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
+    const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
+    statusText.textContent = `Done! Watermark added to ${totalPgs} pages across ${results.length} files.`
+    if (window.showReviewPrompt) window.showReviewPrompt()
+    buildNextSteps()
   } catch (err) {
-    console.error('[watermark-pdf] failed:', err)
-    statusText.textContent = (t.wmpdf_error || 'Error: ') + (err?.message || err)
+    console.error('[watermark-pdf] apply all failed:', err)
+    statusText.textContent = `Failed: ${err?.message || err}`
   }
 
+  applyAllBtn.disabled = false
   applyBtn.disabled = false
-  applyBtn.textContent = applyLbl
+  applyAllBtn.textContent = t.wmpdf_apply_all || 'Apply All & Download ZIP'
 })
 
 /* ── IndexedDB handoff ───────────────────────────────────────────────── */
