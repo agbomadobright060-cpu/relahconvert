@@ -167,11 +167,7 @@ document.querySelector('#app').innerHTML = `
       <div class="controls-col" id="wmpdf_controlsCol">
         <h3>${t.wmpdf_options_title || 'Watermark Options'}</h3>
 
-        <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;margin-bottom:14px;">
-          <button id="wmpdf_modeText" style="flex:1;padding:9px 0;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Text</button>
-          <button id="wmpdf_modeImage" style="flex:1;padding:9px 0;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Image</button>
-        </div>
-
+        <div class="section-label" style="font-size:13px;font-weight:700;color:var(--text-primary);text-transform:none;letter-spacing:0;">Text Watermark</div>
         <div id="wmpdf_textPanel">
           <div class="section-label">${t.wmpdf_text_label || 'Text'}</div>
           <input type="text" class="ctrl-input" id="wmpdf_text" value="CONFIDENTIAL" maxlength="100" style="margin-bottom:10px;" />
@@ -197,7 +193,9 @@ document.querySelector('#app').innerHTML = `
           </div>
         </div>
 
-        <div id="wmpdf_imagePanel" style="display:none;">
+        <div class="divider"></div>
+        <div class="section-label" style="font-size:13px;font-weight:700;color:var(--text-primary);text-transform:none;letter-spacing:0;">Image Watermark <span style="font-size:11px;color:var(--text-muted);font-weight:400;">(optional)</span></div>
+        <div id="wmpdf_imagePanel">
           <label class="upload-label" for="wmpdf_imgInput" style="width:100%;justify-content:center;margin-bottom:10px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
             Choose Image
@@ -445,20 +443,6 @@ rotSlider.addEventListener('input', () => {
 })
 
 /* ── Mode toggle (Text / Image) ──────────────────────────────────────── */
-function setWmMode(mode) {
-  wmMode = mode
-  const isText = mode === 'text'
-  modeTextBtn.style.background = isText ? 'var(--accent)' : 'var(--bg-card)'
-  modeTextBtn.style.color = isText ? 'var(--text-on-accent)' : 'var(--text-secondary)'
-  modeImageBtn.style.background = isText ? 'var(--bg-card)' : 'var(--accent)'
-  modeImageBtn.style.color = isText ? 'var(--text-secondary)' : 'var(--text-on-accent)'
-  textPanel.style.display = isText ? 'block' : 'none'
-  imagePanel.style.display = isText ? 'none' : 'block'
-  updateOverlays()
-}
-modeTextBtn.addEventListener('click', () => setWmMode('text'))
-modeImageBtn.addEventListener('click', () => setWmMode('image'))
-
 /* ── Image watermark input ───────────────────────────────────────────── */
 imgInput.addEventListener('change', () => {
   const file = imgInput.files[0]
@@ -773,20 +757,20 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
   const totalPages = doc.getPageCount()
   const actualOpacity = o.opacity / 100
   const fileImgFile = entry.wmImageFile || wmImageFile
-  const fileWmMode = entry.wmMode || wmMode
-  const isImageMode = fileWmMode === 'image' && fileImgFile
+  const hasText = o.text && o.text.trim().length > 0
+  const hasImage = !!fileImgFile
 
-  // Embed font for text mode
+  // Embed font for text
   let font, textColor
-  if (!isImageMode) {
+  if (hasText) {
     font = await doc.embedFont(StandardFonts.Helvetica)
     const c = hexToRgb01(o.color)
     textColor = rgb(c.r, c.g, c.b)
   }
 
-  // Embed image for image mode
+  // Embed image if provided
   let embeddedImg
-  if (isImageMode) {
+  if (hasImage) {
     const imgBytes = new Uint8Array(await fileImgFile.arrayBuffer())
     if (fileImgFile.type === 'image/png') {
       embeddedImg = await doc.embedPng(imgBytes)
@@ -805,21 +789,8 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
     const page = doc.getPage(i)
     const { width, height } = page.getSize()
 
-    if (isImageMode && embeddedImg) {
-      // Image watermark
-      const imgAspect = embeddedImg.width / embeddedImg.height
-      const drawWidth = width * (o.imgScale / 100)
-      const drawHeight = drawWidth / imgAspect
-      const pos = calcImagePosition(o.position, width, height, drawWidth, drawHeight)
-      page.drawImage(embeddedImg, {
-        x: pos.x,
-        y: pos.y,
-        width: drawWidth,
-        height: drawHeight,
-        opacity: actualOpacity,
-      })
-    } else {
-      // Text watermark
+    // Apply text watermark if text is set
+    if (hasText && font) {
       const textWidth = font.widthOfTextAtSize(text, fontSize)
       let x, y
 
@@ -837,13 +808,19 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
       }
 
       page.drawText(text, {
-        x,
-        y,
-        size: fontSize,
-        font,
-        color: textColor,
-        opacity: actualOpacity,
-        rotate: degrees(rotation),
+        x, y, size: fontSize, font, color: textColor,
+        opacity: actualOpacity, rotate: degrees(rotation),
+      })
+    }
+
+    // Apply image watermark if image is set
+    if (hasImage && embeddedImg) {
+      const imgAspect = embeddedImg.width / embeddedImg.height
+      const drawWidth = width * (o.imgScale / 100)
+      const drawHeight = drawWidth / imgAspect
+      const pos = calcImagePosition(o.position, width, height, drawWidth, drawHeight)
+      page.drawImage(embeddedImg, {
+        x: pos.x, y: pos.y, width: drawWidth, height: drawHeight, opacity: actualOpacity,
       })
     }
   }
@@ -901,8 +878,10 @@ function updateApplyButtons() {
 // Apply watermark — respects Apply to All / Individual toggle
 applyBtn.addEventListener('click', async () => {
   if (!pdfFiles.length) return
-  if (wmMode === 'image' && !wmImageFile) {
-    statusText.textContent = 'Please choose a watermark image first.'
+  // Need at least text or image
+  const hasAnyWatermark = (opts.text && opts.text.trim()) || wmImageFile || (pdfFiles[activeIdx] && pdfFiles[activeIdx].wmImageFile)
+  if (!hasAnyWatermark) {
+    statusText.textContent = 'Enter watermark text or choose an image.'
     return
   }
   applyBtn.disabled = true
