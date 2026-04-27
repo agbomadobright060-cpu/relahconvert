@@ -10,7 +10,7 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['crop-pdf']) || 'Crop PDF'
 const seoData   = t.seo && t.seo['crop-pdf']
 const descText  = t.croppdf_desc || t.card_crop_pdf_desc || 'Crop PDF pages by adjusting margins. Set custom top, bottom, left, and right margins in points.'
-const selectLbl = t.croppdf_select || 'Select PDFs'
+const selectLbl = t.croppdf_select || t.select_images || 'Select PDFs'
 const dropHint  = t.croppdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const applyLbl  = t.croppdf_apply_btn || 'Apply & Download'
 const applyAllLbl = t.croppdf_apply_all || 'Apply All & Download ZIP'
@@ -160,7 +160,7 @@ document.querySelector('#app').innerHTML = `
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
       </div>
-      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
+      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">${t.drop_images || 'Drop PDFs here'}</span></label>
     </div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
     <input type="file" id="addMoreInput" accept="application/pdf,.pdf" multiple style="display:none;" />

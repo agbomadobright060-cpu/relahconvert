@@ -11,8 +11,8 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['protect-pdf']) || 'Protect PDF'
 const seoData   = t.seo && t.seo['protect-pdf']
 const descText  = t.protpdf_desc || t.card_protect_pdf_desc || 'Add password protection to your PDF files.'
-const selectLbl = t.protpdf_select || 'Select PDFs'
-const dropHint  = t.protpdf_drop_hint || 'or drop PDFs anywhere'
+const selectLbl = t.protpdf_select || t.select_images || 'Select PDFs'
+const dropHint  = t.protpdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'
 const dlZipBtn  = t.download_zip || 'Download All as ZIP'
 const protectLbl    = t.protpdf_protect_btn || 'Protect PDFs'
@@ -103,7 +103,7 @@ document.querySelector('#app').innerHTML = `
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
       </div>
-      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
+      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">${t.drop_images || 'Drop PDFs here'}</span></label>
     </div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
     <div id="fileList"></div>
