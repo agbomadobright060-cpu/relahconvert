@@ -10,8 +10,8 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['watermark-pdf']) || 'Watermark PDF'
 const seoData   = t.seo && t.seo['watermark-pdf']
 const descText  = t.wmpdf_desc || t.card_watermark_pdf_desc || 'Add text watermarks to your PDF files. Choose text, font size, opacity, color, and position.'
-const selectLbl = t.wmpdf_select || t.select_image || 'Select PDFs'
-const dropHint  = t.wmpdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
+const selectLbl = t.wmpdf_select || 'Select PDFs'
+const dropHint  = t.wmpdf_drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'
 const dlZipBtn  = t.download_zip || 'Download ZIP'
 const applyLbl  = t.wmpdf_apply || 'Add Watermark'
@@ -183,12 +183,18 @@ document.querySelector('#app').innerHTML = `
         </div>
 
         <div class="section-label">${t.wmpdf_color || 'Color'}</div>
-        <div class="swatches" id="wmpdf_swatches">
-          <div class="swatch active" data-color="gray" style="background:#808080;" title="Gray"></div>
-          <div class="swatch" data-color="red" style="background:#CC0000;" title="Red"></div>
-          <div class="swatch" data-color="blue" style="background:#0000CC;" title="Blue"></div>
-          <div class="swatch" data-color="black" style="background:#000000;" title="Black"></div>
-          <div class="swatch" data-color="white" style="background:#FFFFFF;" title="White"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <input type="color" id="wmpdf_colorPicker" value="#808080" style="width:40px;height:32px;border:1.5px solid var(--border-light);border-radius:6px;cursor:pointer;padding:2px;background:var(--bg-card);" />
+          <div class="swatches" id="wmpdf_swatches" style="margin:0;">
+            <div class="swatch active" data-color="#808080" style="background:#808080;" title="Gray"></div>
+            <div class="swatch" data-color="#CC0000" style="background:#CC0000;" title="Red"></div>
+            <div class="swatch" data-color="#0000CC" style="background:#0000CC;" title="Blue"></div>
+            <div class="swatch" data-color="#000000" style="background:#000000;" title="Black"></div>
+            <div class="swatch" data-color="#FFFFFF" style="background:#FFFFFF;" title="White"></div>
+            <div class="swatch" data-color="#059669" style="background:#059669;" title="Green"></div>
+            <div class="swatch" data-color="#D97706" style="background:#D97706;" title="Orange"></div>
+            <div class="swatch" data-color="#7C3AED" style="background:#7C3AED;" title="Purple"></div>
+          </div>
         </div>
 
         <div class="section-label">${t.wmpdf_position || 'Position'}</div>
@@ -203,6 +209,9 @@ document.querySelector('#app').innerHTML = `
         </div>
 
         <div class="divider"></div>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--text-primary);font-family:'DM Sans',sans-serif;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="wmpdf_allPages" checked /> ${t.wmpdf_all_pages || 'Apply to all pages'}
+        </label>
         <button class="action-btn" id="wmpdf_applyBtn" disabled>${applyLbl}</button>
         <div id="wmpdf_zipWrap" style="display:none;">
           <a id="wmpdf_zipBtn" class="action-btn dark" style="display:block;text-align:center;text-decoration:none;">\u2B07 ${dlZipBtn}</a>
@@ -229,22 +238,21 @@ const opts = {
   text: 'CONFIDENTIAL',
   fontSize: 48,
   opacity: 15,       // 5-50 => actual 0.05-0.50
-  color: 'gray',     // gray|red|blue|black|white
-  position: 'center', // top-left|top-center|top-right|center-left|center|center-right|bottom-left|bottom-center|bottom-right
+  color: '#808080',
+  position: 'center',
   diagonal: true,
   rotation: -45,
 }
 
-/* ── Color map ─────────────────────────────────────────────────────── */
-const COLOR_MAP = {
-  gray:  { r: 0x80/255, g: 0x80/255, b: 0x80/255 },
-  red:   { r: 0xCC/255, g: 0x00/255, b: 0x00/255 },
-  blue:  { r: 0x00/255, g: 0x00/255, b: 0xCC/255 },
-  black: { r: 0x00/255, g: 0x00/255, b: 0x00/255 },
-  white: { r: 1, g: 1, b: 1 },
+/* ── Color helpers ────────────────────────────────────────────────── */
+function hexToRgb01(hex) {
+  const h = hex.replace('#', '')
+  return {
+    r: parseInt(h.substring(0, 2), 16) / 255,
+    g: parseInt(h.substring(2, 4), 16) / 255,
+    b: parseInt(h.substring(4, 6), 16) / 255,
+  }
 }
-
-const CSS_COLORS = { gray: '#808080', red: '#CC0000', blue: '#0000CC', black: '#000000', white: '#FFFFFF' }
 
 /* ── DOM refs ────────────────────────────────────────────────────────── */
 const fileInput    = document.getElementById('wmpdf_fileInput')
@@ -310,11 +318,20 @@ opacitySlider.addEventListener('input', () => {
   updateOverlays()
 })
 
+const colorPicker = document.getElementById('wmpdf_colorPicker')
+
 swatchesEl.addEventListener('click', e => {
   const sw = e.target.closest('.swatch')
   if (!sw) return
   opts.color = sw.dataset.color
+  colorPicker.value = opts.color
   swatchesEl.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.color === opts.color))
+  updateOverlays()
+})
+
+colorPicker.addEventListener('input', () => {
+  opts.color = colorPicker.value
+  swatchesEl.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'))
   updateOverlays()
 })
 
@@ -343,7 +360,7 @@ rotSlider.addEventListener('input', () => {
 
 /* ── Overlay positioning helper ──────────────────────────────────────── */
 function getOverlayStyles() {
-  const color = CSS_COLORS[opts.color] || '#808080'
+  const color = opts.color || '#808080'
   const opac = opts.opacity / 100
   const rot = opts.rotation
 
@@ -570,7 +587,7 @@ async function processOnePdf(entry, onPageProgress) {
   const doc = await PDFDocument.load(entry.bytes)
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const totalPages = doc.getPageCount()
-  const c = COLOR_MAP[opts.color] || COLOR_MAP.gray
+  const c = hexToRgb01(opts.color)
   const textColor = rgb(c.r, c.g, c.b)
   const actualOpacity = opts.opacity / 100
   const text = opts.text || 'CONFIDENTIAL'
