@@ -167,7 +167,11 @@ document.querySelector('#app').innerHTML = `
       <div class="controls-col" id="wmpdf_controlsCol">
         <h3>${t.wmpdf_options_title || 'Watermark Options'}</h3>
 
-        <div class="section-label" style="font-size:13px;font-weight:700;color:var(--text-primary);text-transform:none;letter-spacing:0;">Text Watermark</div>
+        <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;margin-bottom:14px;">
+          <button id="wmpdf_modeText" style="flex:1;padding:9px 0;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Text</button>
+          <button id="wmpdf_modeImage" style="flex:1;padding:9px 0;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Image</button>
+        </div>
+
         <div id="wmpdf_textPanel">
           <div class="section-label">${t.wmpdf_text_label || 'Text'}</div>
           <input type="text" class="ctrl-input" id="wmpdf_text" value="CONFIDENTIAL" maxlength="100" style="margin-bottom:10px;" />
@@ -193,9 +197,7 @@ document.querySelector('#app').innerHTML = `
           </div>
         </div>
 
-        <div class="divider"></div>
-        <div class="section-label" style="font-size:13px;font-weight:700;color:var(--text-primary);text-transform:none;letter-spacing:0;">Image Watermark <span style="font-size:11px;color:var(--text-muted);font-weight:400;">(optional)</span></div>
-        <div id="wmpdf_imagePanel">
+        <div id="wmpdf_imagePanel" style="display:none;">
           <label class="upload-label" for="wmpdf_imgInput" style="width:100%;justify-content:center;margin-bottom:10px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
             Choose Image
@@ -369,6 +371,21 @@ const zipNote      = document.getElementById('wmpdf_zipNote')
 const statusText   = document.getElementById('wmpdf_status')
 const nextStepsDiv = document.getElementById('wmpdf_nextSteps')
 const nextButtons  = document.getElementById('wmpdf_nextButtons')
+
+/* ── Text/Image mode toggle ─────────────────────────────────────────── */
+function setWmMode(mode) {
+  wmMode = mode
+  const isText = mode === 'text'
+  modeTextBtn.style.background = isText ? 'var(--accent)' : 'var(--bg-card)'
+  modeTextBtn.style.color = isText ? 'var(--text-on-accent)' : 'var(--text-secondary)'
+  modeImageBtn.style.background = isText ? 'var(--bg-card)' : 'var(--accent)'
+  modeImageBtn.style.color = isText ? 'var(--text-secondary)' : 'var(--text-on-accent)'
+  textPanel.style.display = isText ? 'block' : 'none'
+  imagePanel.style.display = isText ? 'none' : 'block'
+  updateOverlays()
+}
+modeTextBtn.addEventListener('click', () => setWmMode('text'))
+modeImageBtn.addEventListener('click', () => setWmMode('image'))
 
 /* ── Position grid ───────────────────────────────────────────────────── */
 const POSITIONS = [
