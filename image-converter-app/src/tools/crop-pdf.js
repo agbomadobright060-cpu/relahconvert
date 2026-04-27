@@ -601,7 +601,8 @@ async function applyCrop() {
         return
       }
 
-      // Set CropBox to apply the visual crop
+      // Set both MediaBox and CropBox for maximum compatibility
+      page.setMediaBox(newX, newY, newW, newH)
       page.setCropBox(newX, newY, newW, newH)
     }
 
