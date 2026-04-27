@@ -10,8 +10,8 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['watermark-pdf']) || 'Watermark PDF'
 const seoData   = t.seo && t.seo['watermark-pdf']
 const descText  = t.wmpdf_desc || t.card_watermark_pdf_desc || 'Add text watermarks to your PDF files. Choose text, font size, opacity, color, and position.'
-const selectLbl = t.wmpdf_select || t.select_images || 'Select PDFs'
-const dropHint  = t.wmpdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
+const selectLbl = t.wmpdf_select || t.pdfpng_select || 'Select PDFs'
+const dropHint  = t.wmpdf_drop_hint || t.pdfpng_drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'
 const dlZipBtn  = t.download_zip || 'Download ZIP'
 const applyLbl  = t.wmpdf_apply || 'Add Watermark'
@@ -156,7 +156,7 @@ document.querySelector('#app').innerHTML = `
       <input type="file" id="wmpdf_fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
       <label for="wmpdf_fileInput" id="wmpdf_dropZone" class="wmpdf-drop-zone">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-        <span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">${t.drop_images || 'Drop PDFs here'}</span>
+        <span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">${t.pdfpng_drop_hint || 'Drop PDFs here'}</span>
       </label>
     </div>
     <div class="tool-layout" id="wmpdf_toolLayout" style="display:none;">
