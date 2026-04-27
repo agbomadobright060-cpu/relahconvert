@@ -244,6 +244,7 @@ let lastResults   = []
 let pagePtWidth   = 0     // current page width in PDF points
 let pagePtHeight  = 0     // current page height in PDF points
 let dragging      = null  // which edge is being dragged: 'top'|'bottom'|'left'|'right'|null
+let pageMargins   = []    // per-page margins: [{top,bottom,left,right}, ...]
 
 /* -- Margin helpers ---------------------------------------------------------- */
 function getMargins() {
@@ -263,7 +264,7 @@ function setMargins(m) {
 }
 
 ;[marginTopEl, marginBottomEl, marginLeftEl, marginRightEl].forEach(inp => {
-  inp.addEventListener('input', () => { clampMargins(); updateCropOverlay() })
+  inp.addEventListener('input', () => { clampMargins(); updateCropOverlay(); saveCurrentMargins() })
 })
 
 function clampMargins() {
@@ -454,6 +455,7 @@ async function loadFile(file) {
     pdfDocProxy = await pdfjs.getDocument({ data: buf }).promise
     pageCount   = pdfDocProxy.numPages
     currentPage = 0
+    pageMargins = Array.from({ length: pageCount }, () => ({ top: 0, bottom: 0, left: 0, right: 0 }))
 
     // Show UI
     uploadArea.style.display = 'none'
@@ -478,16 +480,35 @@ async function loadFile(file) {
 }
 
 /* -- Page navigation --------------------------------------------------------- */
+function saveCurrentMargins() {
+  if (!pageMargins.length) return
+  const m = getMargins()
+  if (applyAllCheck.checked) {
+    // Apply same margins to all pages
+    for (let i = 0; i < pageMargins.length; i++) pageMargins[i] = { ...m }
+  } else {
+    pageMargins[currentPage] = { ...m }
+  }
+}
+
+function loadCurrentMargins() {
+  if (!pageMargins.length || !pageMargins[currentPage]) return
+  setMargins(pageMargins[currentPage])
+  updateCropOverlay()
+}
+
 prevPageBtn.addEventListener('click', () => {
   if (currentPage > 0) {
+    saveCurrentMargins()
     currentPage--
-    renderPage(currentPage)
+    renderPage(currentPage).then(() => loadCurrentMargins())
   }
 })
 nextPageBtn.addEventListener('click', () => {
   if (currentPage < pageCount - 1) {
+    saveCurrentMargins()
     currentPage++
-    renderPage(currentPage)
+    renderPage(currentPage).then(() => loadCurrentMargins())
   }
 })
 
@@ -498,6 +519,7 @@ function resetState() {
   pdfDocProxy   = null
   pageCount     = 0
   currentPage   = 0
+  pageMargins   = []
   pageViewport  = null
   pagePtWidth   = 0
   pagePtHeight  = 0
@@ -550,6 +572,7 @@ async function applyCrop() {
   setButtonsDisabled(true)
 
   try {
+    saveCurrentMargins()
     const pdfDoc = await PDFDocument.load(fileBytes)
     const pages  = pdfDoc.getPages()
     const total  = pages.length
@@ -562,14 +585,15 @@ async function applyCrop() {
     for (const i of pagesToCrop) {
       statusText.textContent = `${applyingLbl} ${pageLabel} ${i + 1}/${total}`
       const page = pages[i]
+      const pm = pageMargins[i] || m
 
       // Get the current MediaBox (the full page boundary)
       const mediaBox = page.getMediaBox()
 
-      const newX = mediaBox.x + m.left
-      const newY = mediaBox.y + m.bottom
-      const newW = mediaBox.width - m.left - m.right
-      const newH = mediaBox.height - m.top - m.bottom
+      const newX = mediaBox.x + pm.left
+      const newY = mediaBox.y + pm.bottom
+      const newW = mediaBox.width - pm.left - pm.right
+      const newH = mediaBox.height - pm.top - pm.bottom
 
       if (newW <= 0 || newH <= 0) {
         statusText.textContent = t.croppdf_margins_too_large || `Margins too large for page ${i + 1}. Reduce margin values.`
