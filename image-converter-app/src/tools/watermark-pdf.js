@@ -205,6 +205,7 @@ document.querySelector('#app').innerHTML = `
           <input type="file" id="wmpdf_imgInput" accept="image/png,image/jpeg" style="display:none;" />
           <div id="wmpdf_imgPreview" style="display:none;margin:0 0 12px;text-align:center;">
             <img id="wmpdf_imgPreviewImg" style="max-width:100%;max-height:120px;border-radius:8px;border:1.5px solid var(--border-light);" />
+            <button id="wmpdf_imgRemove" style="display:block;margin:6px auto 0;background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">Remove image</button>
           </div>
 
           <div class="section-label">Scale</div>
@@ -274,6 +275,8 @@ function defaultOpts() {
 function saveOptsToFile() {
   if (applyMode !== 'individual' || !pdfFiles[activeIdx]) return
   pdfFiles[activeIdx].opts = { ...opts }
+  pdfFiles[activeIdx].wmImageFile = wmImageFile
+  pdfFiles[activeIdx].wmMode = wmMode
 }
 
 function loadOptsFromFile() {
@@ -304,6 +307,25 @@ function loadOptsFromFile() {
   document.querySelectorAll('.pos-cell').forEach(c => {
     c.classList.toggle('active', c.dataset.pos === opts.position)
   })
+  // Load per-file image and mode
+  const fileImg = pdfFiles[activeIdx].wmImageFile
+  const fileMode = pdfFiles[activeIdx].wmMode || 'text'
+  wmImageFile = fileImg || null
+  if (fileImg) {
+    if (wmImageUrl) URL.revokeObjectURL(wmImageUrl)
+    wmImageUrl = URL.createObjectURL(fileImg)
+    document.getElementById('wmpdf_imgPreviewImg').src = wmImageUrl
+    document.getElementById('wmpdf_imgPreview').style.display = 'block'
+    const img = new Image(); img.onload = () => { wmImageEl = img; updateOverlays() }; img.src = wmImageUrl
+  } else {
+    wmImageEl = null
+    if (wmImageUrl) { URL.revokeObjectURL(wmImageUrl); wmImageUrl = null }
+    document.getElementById('wmpdf_imgPreviewImg').src = ''
+    document.getElementById('wmpdf_imgPreview').style.display = 'none'
+  }
+  // Set mode toggle
+  if (typeof setWmMode === 'function') setWmMode(fileMode)
+  else wmMode = fileMode
   updateOverlays()
 }
 
@@ -446,11 +468,28 @@ imgInput.addEventListener('change', () => {
   wmImageUrl = URL.createObjectURL(file)
   imgPreviewImg.src = wmImageUrl
   imgPreview.style.display = 'block'
+  // Save to current file in Individual mode
+  if (applyMode === 'individual' && pdfFiles[activeIdx]) {
+    pdfFiles[activeIdx].wmImageFile = file
+  }
   // Load into an Image element for overlay preview
   const img = new Image()
   img.onload = () => { wmImageEl = img; updateOverlays() }
   img.src = wmImageUrl
   imgInput.value = ''
+})
+
+// Remove image button
+document.getElementById('wmpdf_imgRemove').addEventListener('click', () => {
+  wmImageFile = null
+  wmImageEl = null
+  if (wmImageUrl) { URL.revokeObjectURL(wmImageUrl); wmImageUrl = null }
+  imgPreviewImg.src = ''
+  imgPreview.style.display = 'none'
+  if (applyMode === 'individual' && pdfFiles[activeIdx]) {
+    pdfFiles[activeIdx].wmImageFile = null
+  }
+  updateOverlays()
 })
 
 imgScaleSlider.addEventListener('input', () => {
@@ -733,7 +772,9 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
   const doc = await PDFDocument.load(entry.bytes)
   const totalPages = doc.getPageCount()
   const actualOpacity = o.opacity / 100
-  const isImageMode = wmMode === 'image' && wmImageFile
+  const fileImgFile = entry.wmImageFile || wmImageFile
+  const fileWmMode = entry.wmMode || wmMode
+  const isImageMode = fileWmMode === 'image' && fileImgFile
 
   // Embed font for text mode
   let font, textColor
@@ -746,8 +787,8 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
   // Embed image for image mode
   let embeddedImg
   if (isImageMode) {
-    const imgBytes = new Uint8Array(await wmImageFile.arrayBuffer())
-    if (wmImageFile.type === 'image/png') {
+    const imgBytes = new Uint8Array(await fileImgFile.arrayBuffer())
+    if (fileImgFile.type === 'image/png') {
       embeddedImg = await doc.embedPng(imgBytes)
     } else {
       embeddedImg = await doc.embedJpg(imgBytes)
