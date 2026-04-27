@@ -167,13 +167,51 @@ document.querySelector('#app').innerHTML = `
       <div class="controls-col" id="wmpdf_controlsCol">
         <h3>${t.wmpdf_options_title || 'Watermark Options'}</h3>
 
-        <div class="section-label">${t.wmpdf_text_label || 'Text'}</div>
-        <input type="text" class="ctrl-input" id="wmpdf_text" value="CONFIDENTIAL" maxlength="100" style="margin-bottom:10px;" />
+        <div style="display:flex;gap:0;border:1.5px solid var(--border-light);border-radius:10px;overflow:hidden;margin-bottom:14px;">
+          <button id="wmpdf_modeText" style="flex:1;padding:9px 0;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--accent);color:var(--text-on-accent);transition:all 0.15s;">Text</button>
+          <button id="wmpdf_modeImage" style="flex:1;padding:9px 0;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Image</button>
+        </div>
 
-        <div class="section-label">${t.wmpdf_font_size || 'Font Size'}</div>
-        <div class="range-row">
-          <input type="number" class="ctrl-input" id="wmpdf_fontSize" value="48" min="20" max="120" step="1" style="width:70px;" />
-          <span class="range-val">pt</span>
+        <div id="wmpdf_textPanel">
+          <div class="section-label">${t.wmpdf_text_label || 'Text'}</div>
+          <input type="text" class="ctrl-input" id="wmpdf_text" value="CONFIDENTIAL" maxlength="100" style="margin-bottom:10px;" />
+
+          <div class="section-label">${t.wmpdf_font_size || 'Font Size'}</div>
+          <div class="range-row">
+            <input type="number" class="ctrl-input" id="wmpdf_fontSize" value="48" min="20" max="120" step="1" style="width:70px;" />
+            <span class="range-val">pt</span>
+          </div>
+
+          <div class="section-label">${t.wmpdf_color || 'Color'}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <input type="color" id="wmpdf_colorPicker" value="#808080" style="width:44px;height:36px;border:1.5px solid var(--border-light);border-radius:8px;cursor:pointer;padding:2px;background:var(--bg-card);" />
+            <span id="wmpdf_colorHex" style="font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">#808080</span>
+          </div>
+
+          <label class="diag-row"><input type="checkbox" id="wmpdf_diagonal" checked /> ${t.wmpdf_diagonal || 'Diagonal'}</label>
+
+          <div class="section-label">${t.wmpdf_rotation || 'Rotation'}</div>
+          <div class="range-row">
+            <input type="range" id="wmpdf_rotation" min="-90" max="90" step="1" value="-45" />
+            <span class="range-val" id="wmpdf_rotationVal">-45&deg;</span>
+          </div>
+        </div>
+
+        <div id="wmpdf_imagePanel" style="display:none;">
+          <label class="upload-label" for="wmpdf_imgInput" style="width:100%;justify-content:center;margin-bottom:10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            Choose Image
+          </label>
+          <input type="file" id="wmpdf_imgInput" accept="image/png,image/jpeg" style="display:none;" />
+          <div id="wmpdf_imgPreview" style="display:none;margin:0 0 12px;text-align:center;">
+            <img id="wmpdf_imgPreviewImg" style="max-width:100%;max-height:120px;border-radius:8px;border:1.5px solid var(--border-light);" />
+          </div>
+
+          <div class="section-label">Scale</div>
+          <div class="range-row">
+            <input type="range" id="wmpdf_imgScale" min="10" max="100" value="30" />
+            <span class="range-val" id="wmpdf_imgScaleVal">30%</span>
+          </div>
         </div>
 
         <div class="section-label">${t.wmpdf_opacity || 'Opacity'}</div>
@@ -182,22 +220,8 @@ document.querySelector('#app').innerHTML = `
           <span class="range-val" id="wmpdf_opacityVal">15%</span>
         </div>
 
-        <div class="section-label">${t.wmpdf_color || 'Color'}</div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <input type="color" id="wmpdf_colorPicker" value="#808080" style="width:44px;height:36px;border:1.5px solid var(--border-light);border-radius:8px;cursor:pointer;padding:2px;background:var(--bg-card);" />
-          <span id="wmpdf_colorHex" style="font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;">#808080</span>
-        </div>
-
         <div class="section-label">${t.wmpdf_position || 'Position'}</div>
         <div class="pos-grid" id="wmpdf_posGrid"></div>
-
-        <label class="diag-row"><input type="checkbox" id="wmpdf_diagonal" checked /> ${t.wmpdf_diagonal || 'Diagonal'}</label>
-
-        <div class="section-label">${t.wmpdf_rotation || 'Rotation'}</div>
-        <div class="range-row">
-          <input type="range" id="wmpdf_rotation" min="-90" max="90" step="1" value="-45" />
-          <span class="range-val" id="wmpdf_rotationVal">-45&deg;</span>
-        </div>
 
         <div class="divider"></div>
         <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--text-primary);font-family:'DM Sans',sans-serif;cursor:pointer;user-select:none;">
@@ -225,6 +249,10 @@ injectHeader()
 let pdfFiles = []        // { name, bytes, pageCount, thumbCanvases[] }
 let activeIdx = 0
 let lastResults = []
+let wmMode = 'text' // 'text' or 'image'
+let wmImageFile = null   // File object for image watermark
+let wmImageEl = null     // HTMLImageElement for preview
+let wmImageUrl = null    // object URL for preview
 
 const opts = {
   text: 'CONFIDENTIAL',
@@ -234,6 +262,7 @@ const opts = {
   position: 'center',
   diagonal: true,
   rotation: -45,
+  imgScale: 30,      // 10-100, % of page width
 }
 
 /* ── Color helpers ────────────────────────────────────────────────── */
@@ -263,6 +292,15 @@ const diagCheck    = document.getElementById('wmpdf_diagonal')
 const rotSlider    = document.getElementById('wmpdf_rotation')
 const rotVal       = document.getElementById('wmpdf_rotationVal')
 const applyBtn     = document.getElementById('wmpdf_applyBtn')
+const modeTextBtn  = document.getElementById('wmpdf_modeText')
+const modeImageBtn = document.getElementById('wmpdf_modeImage')
+const textPanel    = document.getElementById('wmpdf_textPanel')
+const imagePanel   = document.getElementById('wmpdf_imagePanel')
+const imgInput     = document.getElementById('wmpdf_imgInput')
+const imgPreview   = document.getElementById('wmpdf_imgPreview')
+const imgPreviewImg = document.getElementById('wmpdf_imgPreviewImg')
+const imgScaleSlider = document.getElementById('wmpdf_imgScale')
+const imgScaleVal  = document.getElementById('wmpdf_imgScaleVal')
 const zipWrap      = document.getElementById('wmpdf_zipWrap')
 const zipBtn       = document.getElementById('wmpdf_zipBtn')
 const zipNote      = document.getElementById('wmpdf_zipNote')
@@ -342,6 +380,43 @@ rotSlider.addEventListener('input', () => {
   updateOverlays()
 })
 
+/* ── Mode toggle (Text / Image) ──────────────────────────────────────── */
+function setWmMode(mode) {
+  wmMode = mode
+  const isText = mode === 'text'
+  modeTextBtn.style.background = isText ? 'var(--accent)' : 'var(--bg-card)'
+  modeTextBtn.style.color = isText ? 'var(--text-on-accent)' : 'var(--text-secondary)'
+  modeImageBtn.style.background = isText ? 'var(--bg-card)' : 'var(--accent)'
+  modeImageBtn.style.color = isText ? 'var(--text-secondary)' : 'var(--text-on-accent)'
+  textPanel.style.display = isText ? 'block' : 'none'
+  imagePanel.style.display = isText ? 'none' : 'block'
+  updateOverlays()
+}
+modeTextBtn.addEventListener('click', () => setWmMode('text'))
+modeImageBtn.addEventListener('click', () => setWmMode('image'))
+
+/* ── Image watermark input ───────────────────────────────────────────── */
+imgInput.addEventListener('change', () => {
+  const file = imgInput.files[0]
+  if (!file) return
+  wmImageFile = file
+  if (wmImageUrl) URL.revokeObjectURL(wmImageUrl)
+  wmImageUrl = URL.createObjectURL(file)
+  imgPreviewImg.src = wmImageUrl
+  imgPreview.style.display = 'block'
+  // Load into an Image element for overlay preview
+  const img = new Image()
+  img.onload = () => { wmImageEl = img; updateOverlays() }
+  img.src = wmImageUrl
+  imgInput.value = ''
+})
+
+imgScaleSlider.addEventListener('input', () => {
+  opts.imgScale = parseInt(imgScaleSlider.value)
+  imgScaleVal.textContent = opts.imgScale + '%'
+  updateOverlays()
+})
+
 /* ── Overlay positioning helper ──────────────────────────────────────── */
 function getOverlayStyles() {
   const color = opts.color || '#808080'
@@ -376,17 +451,42 @@ function updateOverlays() {
     ov.style.paddingBottom = s.padBottom
     ov.style.paddingLeft = s.padLeft
     ov.style.paddingRight = s.padRight
+
     const txt = ov.querySelector('.thumb-overlay-text')
-    if (txt) {
-      txt.textContent = opts.text || 'CONFIDENTIAL'
-      txt.style.color = s.color
-      txt.style.opacity = s.opac
-      txt.style.transform = `rotate(${s.rot}deg)`
-      // Scale font size relative to thumbnail
-      const wrapW = ov.parentElement.offsetWidth || 120
-      const scaledFS = Math.max(6, Math.round(opts.fontSize * (wrapW / 600)))
-      txt.style.fontSize = scaledFS + 'px'
-      txt.style.fontWeight = 'bold'
+    let imgOv = ov.querySelector('.thumb-overlay-img')
+
+    if (wmMode === 'text') {
+      // Show text, hide image
+      if (txt) {
+        txt.style.display = ''
+        txt.textContent = opts.text || 'CONFIDENTIAL'
+        txt.style.color = s.color
+        txt.style.opacity = s.opac
+        txt.style.transform = `rotate(${s.rot}deg)`
+        const wrapW = ov.parentElement.offsetWidth || 120
+        const scaledFS = Math.max(6, Math.round(opts.fontSize * (wrapW / 600)))
+        txt.style.fontSize = scaledFS + 'px'
+        txt.style.fontWeight = 'bold'
+      }
+      if (imgOv) imgOv.style.display = 'none'
+    } else {
+      // Image mode: hide text, show image overlay
+      if (txt) txt.style.display = 'none'
+      if (wmImageEl) {
+        if (!imgOv) {
+          imgOv = document.createElement('img')
+          imgOv.className = 'thumb-overlay-img'
+          imgOv.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;'
+          ov.appendChild(imgOv)
+        }
+        imgOv.style.display = ''
+        imgOv.src = wmImageEl.src
+        imgOv.style.opacity = s.opac
+        imgOv.style.width = opts.imgScale + '%'
+        imgOv.style.height = 'auto'
+      } else if (imgOv) {
+        imgOv.style.display = 'none'
+      }
     }
   })
 }
@@ -567,14 +667,47 @@ function calcPosition(pos, pageW, pageH, textWidth, fontSize) {
   return { x, y }
 }
 
+function calcImagePosition(pos, pageW, pageH, drawW, drawH) {
+  const margin = Math.min(pageW, pageH) * 0.04
+  let x, y
+  // Horizontal
+  if (pos.endsWith('left')) x = margin
+  else if (pos.endsWith('right')) x = pageW - drawW - margin
+  else x = (pageW - drawW) / 2
+  // Vertical (pdf-lib y starts from bottom)
+  if (pos.startsWith('top')) y = pageH - drawH - margin
+  else if (pos.startsWith('bottom')) y = margin
+  else y = (pageH - drawH) / 2
+
+  return { x, y }
+}
+
 /* ── Process one PDF ─────────────────────────────────────────────────── */
 async function processOnePdf(entry, onPageProgress) {
   const doc = await PDFDocument.load(entry.bytes)
-  const font = await doc.embedFont(StandardFonts.Helvetica)
   const totalPages = doc.getPageCount()
-  const c = hexToRgb01(opts.color)
-  const textColor = rgb(c.r, c.g, c.b)
   const actualOpacity = opts.opacity / 100
+  const isImageMode = wmMode === 'image' && wmImageFile
+
+  // Embed font for text mode
+  let font, textColor
+  if (!isImageMode) {
+    font = await doc.embedFont(StandardFonts.Helvetica)
+    const c = hexToRgb01(opts.color)
+    textColor = rgb(c.r, c.g, c.b)
+  }
+
+  // Embed image for image mode
+  let embeddedImg
+  if (isImageMode) {
+    const imgBytes = new Uint8Array(await wmImageFile.arrayBuffer())
+    if (wmImageFile.type === 'image/png') {
+      embeddedImg = await doc.embedPng(imgBytes)
+    } else {
+      embeddedImg = await doc.embedJpg(imgBytes)
+    }
+  }
+
   const text = opts.text || 'CONFIDENTIAL'
   const fontSize = opts.fontSize
   const rotation = opts.rotation
@@ -584,36 +717,48 @@ async function processOnePdf(entry, onPageProgress) {
 
     const page = doc.getPage(i)
     const { width, height } = page.getSize()
-    const textWidth = font.widthOfTextAtSize(text, fontSize)
 
-    let x, y
-
-    if (opts.diagonal || Math.abs(rotation) > 5) {
-      // For rotated text, center it at the computed position then rotate
-      const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
-      // Adjust for rotation: when rotated, we position the starting point
-      // For diagonal across page from center, shift to account for rotation
-      const rad = (Math.abs(rotation) * Math.PI) / 180
-      const cosR = Math.cos(rad)
-      const sinR = Math.sin(rad)
-      // Approximate centering when rotated
-      x = pos.x + (textWidth / 2) * (1 - cosR)
-      y = pos.y + (textWidth / 2) * sinR * (rotation < 0 ? -1 : 1)
+    if (isImageMode && embeddedImg) {
+      // Image watermark
+      const imgAspect = embeddedImg.width / embeddedImg.height
+      const drawWidth = width * (opts.imgScale / 100)
+      const drawHeight = drawWidth / imgAspect
+      const pos = calcImagePosition(opts.position, width, height, drawWidth, drawHeight)
+      page.drawImage(embeddedImg, {
+        x: pos.x,
+        y: pos.y,
+        width: drawWidth,
+        height: drawHeight,
+        opacity: actualOpacity,
+      })
     } else {
-      const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
-      x = pos.x
-      y = pos.y
-    }
+      // Text watermark
+      const textWidth = font.widthOfTextAtSize(text, fontSize)
+      let x, y
 
-    page.drawText(text, {
-      x,
-      y,
-      size: fontSize,
-      font,
-      color: textColor,
-      opacity: actualOpacity,
-      rotate: degrees(rotation),
-    })
+      if (opts.diagonal || Math.abs(rotation) > 5) {
+        const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
+        const rad = (Math.abs(rotation) * Math.PI) / 180
+        const cosR = Math.cos(rad)
+        const sinR = Math.sin(rad)
+        x = pos.x + (textWidth / 2) * (1 - cosR)
+        y = pos.y + (textWidth / 2) * sinR * (rotation < 0 ? -1 : 1)
+      } else {
+        const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
+        x = pos.x
+        y = pos.y
+      }
+
+      page.drawText(text, {
+        x,
+        y,
+        size: fontSize,
+        font,
+        color: textColor,
+        opacity: actualOpacity,
+        rotate: degrees(rotation),
+      })
+    }
   }
 
   const watermarkedBytes = await doc.save()
@@ -656,6 +801,10 @@ function updateApplyButtons() {
 // Apply to CURRENT file only
 applyBtn.addEventListener('click', async () => {
   if (!pdfFiles.length) return
+  if (wmMode === 'image' && !wmImageFile) {
+    statusText.textContent = 'Please choose a watermark image first.'
+    return
+  }
   applyBtn.disabled = true
   applyBtn.textContent = applyingLbl
   statusText.textContent = ''
@@ -685,6 +834,10 @@ applyBtn.addEventListener('click', async () => {
 // Apply to ALL files & ZIP
 applyAllBtn.addEventListener('click', async () => {
   if (pdfFiles.length < 2) return
+  if (wmMode === 'image' && !wmImageFile) {
+    statusText.textContent = 'Please choose a watermark image first.'
+    return
+  }
   applyAllBtn.disabled = true
   applyBtn.disabled = true
   applyAllBtn.textContent = applyingLbl
