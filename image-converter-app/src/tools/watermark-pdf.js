@@ -267,6 +267,46 @@ const opts = {
   imgScale: 30,      // 10-100, % of page width
 }
 
+function defaultOpts() {
+  return { text:'CONFIDENTIAL', fontSize:48, opacity:15, color:'#808080', position:'center', diagonal:true, rotation:-45, imgScale:30 }
+}
+
+function saveOptsToFile() {
+  if (applyMode !== 'individual' || !pdfFiles[activeIdx]) return
+  pdfFiles[activeIdx].opts = { ...opts }
+}
+
+function loadOptsFromFile() {
+  if (applyMode !== 'individual' || !pdfFiles[activeIdx]) return
+  const fo = pdfFiles[activeIdx].opts
+  if (!fo) return
+  Object.assign(opts, fo)
+  // Sync UI from opts
+  const ti = document.getElementById('wmpdf_textInput')
+  const fsi = document.getElementById('wmpdf_fontSize')
+  const cp = document.getElementById('wmpdf_colorPicker')
+  const ch = document.getElementById('wmpdf_colorHex')
+  const dc = document.getElementById('wmpdf_diagonal')
+  const rs = document.getElementById('wmpdf_rotation')
+  const rv = document.getElementById('wmpdf_rotationVal')
+  const os = document.getElementById('wmpdf_opacity')
+  const ov = document.getElementById('wmpdf_opacityVal')
+  const is = document.getElementById('wmpdf_imgScale')
+  const iv = document.getElementById('wmpdf_imgScaleVal')
+  if (ti) ti.value = opts.text
+  if (fsi) fsi.value = opts.fontSize
+  if (cp) { cp.value = opts.color; if (ch) ch.textContent = opts.color.toUpperCase() }
+  if (dc) dc.checked = opts.diagonal
+  if (rs) { rs.value = opts.rotation; if (rv) rv.innerHTML = opts.rotation + '&deg;' }
+  if (os) { os.value = opts.opacity; if (ov) ov.textContent = opts.opacity + '%' }
+  if (is) { is.value = opts.imgScale; if (iv) iv.textContent = opts.imgScale + '%' }
+  // Update position grid
+  document.querySelectorAll('.pos-cell').forEach(c => {
+    c.classList.toggle('active', c.dataset.pos === opts.position)
+  })
+  updateOverlays()
+}
+
 /* ── Color helpers ────────────────────────────────────────────────── */
 function hexToRgb01(hex) {
   const h = hex.replace('#', '')
@@ -503,7 +543,9 @@ function renderFileChips() {
     const shortName = entry.name.replace(/\.[^.]+$/, '').slice(0, 14)
     chip.innerHTML = `<span>${shortName}</span><button data-idx="${idx}">\u2715</button>`
     chip.querySelector('span').addEventListener('click', () => {
+      saveOptsToFile()
       activeIdx = idx
+      loadOptsFromFile()
       renderFileChips()
       renderThumbnails()
     })
@@ -621,6 +663,7 @@ async function loadPdfFiles(rawFiles) {
         bytes: new Uint8Array(buf.slice(0)),
         pageCount: doc.getPageCount(),
         thumbCanvases: null,
+        opts: defaultOpts(),
       })
     } catch (err) {
       console.error('[watermark-pdf] load failed:', file.name, err)
@@ -685,17 +728,18 @@ function calcImagePosition(pos, pageW, pageH, drawW, drawH) {
 }
 
 /* ── Process one PDF ─────────────────────────────────────────────────── */
-async function processOnePdf(entry, onPageProgress) {
+async function processOnePdf(entry, onPageProgress, fileOpts) {
+  const o = fileOpts || opts
   const doc = await PDFDocument.load(entry.bytes)
   const totalPages = doc.getPageCount()
-  const actualOpacity = opts.opacity / 100
+  const actualOpacity = o.opacity / 100
   const isImageMode = wmMode === 'image' && wmImageFile
 
   // Embed font for text mode
   let font, textColor
   if (!isImageMode) {
     font = await doc.embedFont(StandardFonts.Helvetica)
-    const c = hexToRgb01(opts.color)
+    const c = hexToRgb01(o.color)
     textColor = rgb(c.r, c.g, c.b)
   }
 
@@ -710,9 +754,9 @@ async function processOnePdf(entry, onPageProgress) {
     }
   }
 
-  const text = opts.text || 'CONFIDENTIAL'
-  const fontSize = opts.fontSize
-  const rotation = opts.rotation
+  const text = o.text || 'CONFIDENTIAL'
+  const fontSize = o.fontSize
+  const rotation = o.rotation
 
   for (let i = 0; i < totalPages; i++) {
     if (onPageProgress) onPageProgress(i + 1, totalPages)
@@ -723,9 +767,9 @@ async function processOnePdf(entry, onPageProgress) {
     if (isImageMode && embeddedImg) {
       // Image watermark
       const imgAspect = embeddedImg.width / embeddedImg.height
-      const drawWidth = width * (opts.imgScale / 100)
+      const drawWidth = width * (o.imgScale / 100)
       const drawHeight = drawWidth / imgAspect
-      const pos = calcImagePosition(opts.position, width, height, drawWidth, drawHeight)
+      const pos = calcImagePosition(o.position, width, height, drawWidth, drawHeight)
       page.drawImage(embeddedImg, {
         x: pos.x,
         y: pos.y,
@@ -738,15 +782,15 @@ async function processOnePdf(entry, onPageProgress) {
       const textWidth = font.widthOfTextAtSize(text, fontSize)
       let x, y
 
-      if (opts.diagonal || Math.abs(rotation) > 5) {
-        const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
+      if (o.diagonal || Math.abs(rotation) > 5) {
+        const pos = calcPosition(o.position, width, height, textWidth, fontSize)
         const rad = (Math.abs(rotation) * Math.PI) / 180
         const cosR = Math.cos(rad)
         const sinR = Math.sin(rad)
         x = pos.x + (textWidth / 2) * (1 - cosR)
         y = pos.y + (textWidth / 2) * sinR * (rotation < 0 ? -1 : 1)
       } else {
-        const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
+        const pos = calcPosition(o.position, width, height, textWidth, fontSize)
         x = pos.x
         y = pos.y
       }
@@ -826,15 +870,16 @@ applyBtn.addEventListener('click', async () => {
   nextStepsDiv.style.display = 'none'
   lastResults = []
 
+  saveOptsToFile()
   const doAll = applyMode === 'all' || pdfFiles.length === 1
 
   try {
     if (!doAll) {
-      // Individual: apply to current file only
+      // Individual: apply to current file only with THIS file's saved opts
       const entry = pdfFiles[activeIdx]
       const result = await processOnePdf(entry, (page, total) => {
         statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
-      })
+      }, entry.opts)
       triggerDownload(result.blob, result.filename)
       lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
       statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
