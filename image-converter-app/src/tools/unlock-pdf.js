@@ -199,6 +199,19 @@ function updateUnlockBtnState() {
 }
 
 // ── IndexedDB handoff ────────────────────────────────────────────────────────
+
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(base + '-' + i + ext)) i++
+  const unique = base + '-' + i + ext
+  usedNames.add(unique)
+  return unique
+}
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)

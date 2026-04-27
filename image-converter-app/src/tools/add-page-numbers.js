@@ -510,7 +510,7 @@ applyAllBtn.addEventListener('click', async () => {
     const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
     const zip = new JSZip()
     for (const r of results) {
-      zip.file(r.filename, r.blob)
+      zip.file(makeUnique(usedNames, r.filename), r.blob)
     }
     const zipBlob = await zip.generateAsync({ type: 'blob' })
     triggerDownload(zipBlob, 'numbered-pdfs.zip')
@@ -532,6 +532,19 @@ applyAllBtn.addEventListener('click', async () => {
 /* -- Next steps -------------------------------------------------------------- */
 
 // ── IndexedDB handoff ────────────────────────────────────────────────────────
+
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(base + '-' + i + ext)) i++
+  const unique = base + '-' + i + ext
+  usedNames.add(unique)
+  return unique
+}
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)

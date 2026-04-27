@@ -823,7 +823,7 @@ async function applyCropAllZip() {
       statusText.textContent = `${applyingLbl} (${i + 1}/${files.length})`
       const blob = await buildCroppedPdf(files[i])
       const baseName = files[i].name.replace(/\.[^.]+$/, '')
-      zip.file(`${baseName}-cropped.pdf`, blob)
+      zip.file(makeUnique(usedNames, `${baseName}-cropped.pdf`), blob)
     }
 
     statusText.textContent = t.croppdf_zipping || 'Creating ZIP\u2026'
@@ -865,6 +865,19 @@ const resizeObs = new ResizeObserver(() => updateCropOverlay())
 resizeObs.observe(previewWrap)
 
 /* -- IndexedDB handoff ------------------------------------------------------- */
+
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(base + '-' + i + ext)) i++
+  const unique = base + '-' + i + ext
+  usedNames.add(unique)
+  return unique
+}
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)
