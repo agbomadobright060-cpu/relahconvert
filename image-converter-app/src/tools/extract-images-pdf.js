@@ -498,7 +498,12 @@ async function extractFromFile(fileEntry) {
       seenImages.add(imgName)
 
       let imgData
-      try { imgData = await page.objs.get(imgName) } catch (e) { continue }
+      try {
+        imgData = await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('timeout')), 3000)
+          page.objs.get(imgName, (data) => { clearTimeout(timeout); resolve(data) })
+        })
+      } catch (e) { continue }
       if (!imgData || !imgData.width || !imgData.height) continue
 
       // Skip tiny images (likely artifacts, spacing pixels, or decorative dots)
@@ -521,6 +526,30 @@ async function extractFromFile(fileEntry) {
         h: result.h,
         size: result.blob.size
       })
+    }
+  }
+
+  // Fallback: if no embedded images found, render pages as PNG
+  if (results.length === 0) {
+    statusText.textContent = `${fileEntry.name}: no embedded images found. Rendering pages as images...`
+    for (let p = 1; p <= pdfDoc.numPages; p++) {
+      statusText.textContent = `${fileEntry.name}: rendering page ${p}/${pdfDoc.numPages} as image`
+      try {
+        const page = await pdfDoc.getPage(p)
+        const viewport = page.getViewport({ scale: 2.0 })
+        const canvas = document.createElement('canvas')
+        canvas.width = viewport.width
+        canvas.height = viewport.height
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        await page.render({ canvasContext: ctx, viewport }).promise
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'))
+        if (!blob) continue
+        const safeName = `${pdfFileName || 'page'}-page-${String(p).padStart(3, '0')}.png`
+        const url = URL.createObjectURL(blob)
+        results.push({ name: safeName, label: `Page ${p}`, blob, url, w: viewport.width, h: viewport.height, size: blob.size })
+      } catch (e) { continue }
     }
   }
 
