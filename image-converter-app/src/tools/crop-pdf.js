@@ -10,9 +10,10 @@ const t = getT()
 const toolName  = (t.nav_short && t.nav_short['crop-pdf']) || 'Crop PDF'
 const seoData   = t.seo && t.seo['crop-pdf']
 const descText  = t.croppdf_desc || t.card_crop_pdf_desc || 'Crop PDF pages by adjusting margins. Set custom top, bottom, left, and right margins in points.'
-const selectLbl = t.croppdf_select || 'Select PDF'
-const dropHint  = t.croppdf_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
+const selectLbl = t.croppdf_select || 'Select PDFs'
+const dropHint  = t.croppdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const applyLbl  = t.croppdf_apply_btn || 'Apply & Download'
+const applyAllLbl = t.croppdf_apply_all || 'Apply All & Download ZIP'
 const applyingLbl = t.croppdf_applying || 'Applying crop\u2026'
 const loadingLbl = t.croppdf_loading || 'Loading PDF\u2026'
 const pageLabel = t.croppdf_page || t.pdfpng_page || 'Page'
@@ -23,6 +24,7 @@ const leftLbl   = t.croppdf_left || 'Left'
 const rightLbl  = t.croppdf_right || 'Right'
 const applyAllPagesLbl = t.croppdf_apply_all_pages || 'Apply to all pages'
 const marginsLbl = t.croppdf_margins || 'Crop Margins (points)'
+const addMoreLbl = t.croppdf_add_more || '+ Add More'
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
@@ -45,6 +47,16 @@ style.textContent = `
   .upload-label:hover{background:var(--accent-hover);}
   .drop-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:40px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);}
   .drop-zone:hover{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
+
+  /* File tabs */
+  .file-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+  .file-tab{padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-card);color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;position:relative;}
+  .file-tab:hover{border-color:var(--accent);color:var(--accent);}
+  .file-tab.active{border-color:var(--accent);background:var(--accent);color:var(--text-on-accent);}
+  .file-tab .tab-close{margin-left:6px;font-size:14px;opacity:0.7;font-weight:400;}
+  .file-tab .tab-close:hover{opacity:1;}
+  .file-tab-add{padding:8px 14px;border:1.5px dashed var(--border-light);border-radius:8px;background:transparent;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .file-tab-add:hover{border-color:var(--accent);color:var(--accent);}
 
   /* Options panel */
   .options-panel{display:none;background:var(--bg-card);border-radius:12px;border:1.5px solid var(--border);padding:16px 20px;margin-bottom:16px;}
@@ -148,9 +160,11 @@ document.querySelector('#app').innerHTML = `
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
       </div>
-      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDF here</span></label>
+      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
     </div>
-    <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none;" />
+    <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
+    <input type="file" id="addMoreInput" accept="application/pdf,.pdf" multiple style="display:none;" />
+    <div id="fileTabs" class="file-tabs" style="display:none;"></div>
     <div id="fileHeader" class="file-header" style="display:none;"></div>
     <div id="pageNav" class="page-nav" style="display:none;">
       <button id="prevPageBtn">\u2190 Prev</button>
@@ -189,9 +203,7 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
     <div class="status-text" id="statusText"></div>
-    <div id="actionRow" style="display:none;">
-      <button class="action-btn" id="applyBtn">${applyLbl}</button>
-    </div>
+    <div id="actionRow" style="display:none;"></div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.whats_next || "What's Next?"}</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
@@ -204,6 +216,8 @@ injectHeader()
 /* -- DOM refs ---------------------------------------------------------------- */
 const uploadArea     = document.getElementById('uploadArea')
 const fileInput      = document.getElementById('fileInput')
+const addMoreInput   = document.getElementById('addMoreInput')
+const fileTabs       = document.getElementById('fileTabs')
 const fileHeader     = document.getElementById('fileHeader')
 const optionsPanel   = document.getElementById('optionsPanel')
 const previewCenter  = document.getElementById('previewCenter')
@@ -225,7 +239,6 @@ const nextPageBtn    = document.getElementById('nextPageBtn')
 const pageInfo       = document.getElementById('pageInfo')
 const statusText     = document.getElementById('statusText')
 const actionRow      = document.getElementById('actionRow')
-const applyBtn       = document.getElementById('applyBtn')
 const marginTopEl    = document.getElementById('marginTop')
 const marginBottomEl = document.getElementById('marginBottom')
 const marginLeftEl   = document.getElementById('marginLeft')
@@ -233,18 +246,18 @@ const marginRightEl  = document.getElementById('marginRight')
 const applyAllCheck  = document.getElementById('applyAllCheck')
 
 /* -- State ------------------------------------------------------------------- */
-let fileBytes     = null  // Uint8Array
-let fileName      = ''
-let pdfDocProxy   = null  // PDF.js document
-let pageCount     = 0
-let currentPage   = 0     // 0-indexed
+let files = []          // Array of { name, bytes, pdfDocProxy, pageCount, pageMargins, currentPage }
+let activeFileIndex = 0
 let pageViewport  = null  // viewport of current rendered page
 let renderScale   = 1
 let lastResults   = []
 let pagePtWidth   = 0     // current page width in PDF points
 let pagePtHeight  = 0     // current page height in PDF points
 let dragging      = null  // which edge is being dragged: 'top'|'bottom'|'left'|'right'|null
-let pageMargins   = []    // per-page margins: [{top,bottom,left,right}, ...]
+
+/* -- Helpers ----------------------------------------------------------------- */
+function isMulti() { return files.length > 1 }
+function activeFile() { return files[activeFileIndex] || null }
 
 /* -- Margin helpers ---------------------------------------------------------- */
 function getMargins() {
@@ -290,7 +303,8 @@ function getCanvasDisplay() {
 
 /* -- Update crop overlay + handles + dimensions ------------------------------ */
 function updateCropOverlay() {
-  if (!pageViewport || !pdfDocProxy) return
+  const f = activeFile()
+  if (!pageViewport || !f) return
   const m = getMargins()
   const disp = getCanvasDisplay()
   const dw = disp.w
@@ -308,14 +322,10 @@ function updateCropOverlay() {
   const rPx = Math.min(m.right * ptToPxX, dw)
 
   // Shade regions
-  // Top shade: full width, from top to tPx
   shadeTop.style.cssText    = `top:0;left:0;width:${dw}px;height:${tPx}px;`
-  // Bottom shade: full width, from bottom up bPx
   shadeBottom.style.cssText = `bottom:0;left:0;width:${dw}px;height:${bPx}px;`
-  // Left shade: between top and bottom shades
   const midH = Math.max(0, dh - tPx - bPx)
   shadeLeft.style.cssText   = `top:${tPx}px;left:0;width:${lPx}px;height:${midH}px;`
-  // Right shade: between top and bottom shades
   shadeRight.style.cssText  = `top:${tPx}px;right:0;width:${rPx}px;height:${midH}px;`
 
   // Crop box outline
@@ -348,7 +358,7 @@ function initDrag(edge, e) {
   const disp = getCanvasDisplay()
   const ptToPxX = disp.w / pagePtWidth
   const ptToPxY = disp.h / pagePtHeight
-  const minDim = 10 // minimum remaining points
+  const minDim = 10
 
   function onMove(ev) {
     ev.preventDefault()
@@ -379,6 +389,7 @@ function initDrag(edge, e) {
 
   function onUp() {
     dragging = null
+    saveCurrentMargins()
     document.removeEventListener('mousemove', onMove)
     document.removeEventListener('mouseup', onUp)
     document.removeEventListener('touchmove', onMove)
@@ -402,8 +413,9 @@ handleRight.addEventListener('touchstart', e => initDrag('right', e), { passive:
 
 /* -- Render page preview ----------------------------------------------------- */
 async function renderPage(pageIdx) {
-  if (!pdfDocProxy) return
-  const page = await pdfDocProxy.getPage(pageIdx + 1)
+  const f = activeFile()
+  if (!f || !f.pdfDocProxy) return
+  const page = await f.pdfDocProxy.getPage(pageIdx + 1)
 
   // Calculate scale to fit max ~500px height
   const baseViewport = page.getViewport({ scale: 1 })
@@ -424,102 +436,242 @@ async function renderPage(pageIdx) {
   await page.render({ canvasContext: ctx, viewport: pageViewport, intent: 'display' }).promise
 
   // Update page nav
-  pageInfo.textContent = `${pageLabel} ${pageIdx + 1} / ${pageCount}`
+  pageInfo.textContent = `${pageLabel} ${pageIdx + 1} / ${f.pageCount}`
   prevPageBtn.disabled = pageIdx <= 0
-  nextPageBtn.disabled = pageIdx >= pageCount - 1
+  nextPageBtn.disabled = pageIdx >= f.pageCount - 1
 
   // Wait a frame for layout then update overlay
   requestAnimationFrame(updateCropOverlay)
 }
 
-/* -- Load file --------------------------------------------------------------- */
-async function loadFile(file) {
-  if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
-    statusText.textContent = t.warn_wrong_fmt_short || 'Please select a PDF file.'
-    return
-  }
-  if (file.size > 50 * 1024 * 1024) {
-    statusText.textContent = `File too large. Max 50 MB.`
-    return
-  }
-
-  statusText.textContent = loadingLbl
-  document.getElementById('nextSteps').style.display = 'none'
-
-  try {
-    const pdfjs = await loadPdfJs()
-    const buf = await file.arrayBuffer()
-    fileBytes = new Uint8Array(buf.slice(0))
-    fileName  = file.name
-
-    pdfDocProxy = await pdfjs.getDocument({ data: buf }).promise
-    pageCount   = pdfDocProxy.numPages
-    currentPage = 0
-    pageMargins = Array.from({ length: pageCount }, () => ({ top: 0, bottom: 0, left: 0, right: 0 }))
-
-    // Show UI
-    uploadArea.style.display = 'none'
-    fileHeader.style.display = 'flex'
-    fileHeader.innerHTML = `
-      <span><span class="fname">${fileName}</span> <span class="fmeta">\u2014 ${pageCount} ${pagesLabel}</span></span>
-      <button class="clear-btn" id="clearBtn">${t.remove || 'Clear'}</button>
-    `
-    document.getElementById('clearBtn').addEventListener('click', resetState)
-
-    pageNav.style.display = pageCount > 1 ? 'flex' : 'none'
-    previewCenter.style.display = 'flex'
-    optionsPanel.classList.add('on')
-    actionRow.style.display = 'flex'
-
-    await renderPage(0)
-    statusText.textContent = ''
-  } catch (err) {
-    console.error('[crop-pdf] load failed:', err)
-    statusText.textContent = `Failed to load PDF: ${err?.message || err}`
-  }
-}
-
-/* -- Page navigation --------------------------------------------------------- */
+/* -- Save / load per-file state ---------------------------------------------- */
 function saveCurrentMargins() {
-  if (!pageMargins.length) return
+  const f = activeFile()
+  if (!f || !f.pageMargins.length) return
   const m = getMargins()
   if (applyAllCheck.checked) {
-    // Apply same margins to all pages
-    for (let i = 0; i < pageMargins.length; i++) pageMargins[i] = { ...m }
+    for (let i = 0; i < f.pageMargins.length; i++) f.pageMargins[i] = { ...m }
   } else {
-    pageMargins[currentPage] = { ...m }
+    f.pageMargins[f.currentPage] = { ...m }
   }
 }
 
 function loadCurrentMargins() {
-  if (!pageMargins.length || !pageMargins[currentPage]) return
-  setMargins(pageMargins[currentPage])
+  const f = activeFile()
+  if (!f || !f.pageMargins.length || !f.pageMargins[f.currentPage]) return
+  setMargins(f.pageMargins[f.currentPage])
   updateCropOverlay()
 }
 
-prevPageBtn.addEventListener('click', () => {
-  if (currentPage > 0) {
+/* -- Switch active file ------------------------------------------------------ */
+function switchToFile(idx) {
+  if (idx === activeFileIndex && files.length > 0) return
+  // Save state of current file
+  const prev = activeFile()
+  if (prev) {
     saveCurrentMargins()
-    currentPage--
-    renderPage(currentPage).then(() => loadCurrentMargins())
   }
+
+  activeFileIndex = idx
+  const f = activeFile()
+  if (!f) return
+
+  // Load new file's state
+  setMargins(f.pageMargins[f.currentPage] || { top: 0, bottom: 0, left: 0, right: 0 })
+
+  pageNav.style.display = f.pageCount > 1 ? 'flex' : 'none'
+  renderPage(f.currentPage).then(() => loadCurrentMargins())
+
+  renderFileTabs()
+  renderFileHeader()
+}
+
+/* -- Layout update ----------------------------------------------------------- */
+function updateLayout() {
+  const multi = isMulti()
+
+  fileTabs.style.display = multi ? 'flex' : 'none'
+  fileHeader.style.display = files.length > 0 ? 'flex' : 'none'
+  uploadArea.style.display = files.length > 0 ? 'none' : ''
+  previewCenter.style.display = files.length > 0 ? 'flex' : 'none'
+  optionsPanel.classList.toggle('on', files.length > 0)
+  actionRow.style.display = files.length > 0 ? 'flex' : 'none'
+
+  const f = activeFile()
+  if (f) {
+    pageNav.style.display = f.pageCount > 1 ? 'flex' : 'none'
+  }
+
+  // Action buttons
+  if (multi) {
+    actionRow.innerHTML = `
+      <button class="action-btn" id="applyCurrentBtn">${applyLbl}</button>
+      <button class="action-btn dark" id="applyAllBtn">${applyAllLbl}</button>
+    `
+    document.getElementById('applyCurrentBtn').addEventListener('click', () => applyCropSingle(activeFileIndex))
+    document.getElementById('applyAllBtn').addEventListener('click', applyCropAllZip)
+  } else {
+    actionRow.innerHTML = `<button class="action-btn" id="applySingleBtn">${applyLbl}</button>`
+    document.getElementById('applySingleBtn').addEventListener('click', () => applyCropSingle(0))
+  }
+}
+
+/* -- Render file tabs -------------------------------------------------------- */
+function renderFileTabs() {
+  fileTabs.innerHTML = ''
+  files.forEach((f, i) => {
+    const tab = document.createElement('button')
+    tab.className = 'file-tab' + (i === activeFileIndex ? ' active' : '')
+    const shortName = f.name.length > 20 ? f.name.slice(0, 17) + '\u2026' : f.name
+    tab.innerHTML = `${shortName}<span class="tab-close">\u00D7</span>`
+    tab.title = f.name
+    tab.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-close')) {
+        removeFile(i)
+        return
+      }
+      switchToFile(i)
+    })
+    fileTabs.appendChild(tab)
+  })
+  // Add more button
+  const addBtn = document.createElement('button')
+  addBtn.className = 'file-tab-add'
+  addBtn.textContent = addMoreLbl
+  addBtn.addEventListener('click', () => addMoreInput.click())
+  fileTabs.appendChild(addBtn)
+}
+
+/* -- Render file header ------------------------------------------------------ */
+function renderFileHeader() {
+  if (files.length === 0) {
+    fileHeader.style.display = 'none'
+    return
+  }
+  fileHeader.style.display = 'flex'
+  const f = activeFile()
+  if (!f) return
+
+  if (isMulti()) {
+    fileHeader.innerHTML = `
+      <span><span class="fname">${f.name}</span> <span class="fmeta">\u2014 ${f.pageCount} ${pagesLabel}</span></span>
+    `
+  } else {
+    fileHeader.innerHTML = `
+      <span><span class="fname">${f.name}</span> <span class="fmeta">\u2014 ${f.pageCount} ${pagesLabel}</span></span>
+      <button class="clear-btn" id="clearAllBtn">${t.remove || 'Clear'}</button>
+    `
+    document.getElementById('clearAllBtn').addEventListener('click', resetState)
+  }
+}
+
+/* -- Remove file ------------------------------------------------------------- */
+function removeFile(idx) {
+  files.splice(idx, 1)
+  if (files.length === 0) {
+    resetState()
+    return
+  }
+  if (activeFileIndex >= files.length) activeFileIndex = files.length - 1
+  updateLayout()
+  renderFileTabs()
+  renderFileHeader()
+  const f = activeFile()
+  if (f) {
+    setMargins(f.pageMargins[f.currentPage] || { top: 0, bottom: 0, left: 0, right: 0 })
+    pageNav.style.display = f.pageCount > 1 ? 'flex' : 'none'
+    renderPage(f.currentPage).then(() => loadCurrentMargins())
+  }
+}
+
+/* -- Load files -------------------------------------------------------------- */
+async function addFiles(inputFiles) {
+  statusText.textContent = loadingLbl
+  document.getElementById('nextSteps').style.display = 'none'
+
+  const pdfjs = await loadPdfJs()
+
+  for (const file of inputFiles) {
+    if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
+      statusText.textContent = t.warn_wrong_fmt_short || 'Please select PDF files only.'
+      continue
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      statusText.textContent = `${file.name}: too large. Max 50 MB per file.`
+      continue
+    }
+    if (files.length >= 25) {
+      statusText.textContent = 'Maximum 25 files allowed.'
+      break
+    }
+
+    try {
+      const buf = await file.arrayBuffer()
+      const bytes = new Uint8Array(buf.slice(0))
+      const pdfDocProxy = await pdfjs.getDocument({ data: buf }).promise
+      const pageCount = pdfDocProxy.numPages
+      const pageMargins = Array.from({ length: pageCount }, () => ({ top: 0, bottom: 0, left: 0, right: 0 }))
+
+      const entry = {
+        name: file.name,
+        bytes,
+        pdfDocProxy,
+        pageCount,
+        pageMargins,
+        currentPage: 0,
+      }
+      files.push(entry)
+      activeFileIndex = files.length - 1
+
+      updateLayout()
+      renderFileTabs()
+      renderFileHeader()
+
+      // Render preview for this file
+      setMargins(entry.pageMargins[0])
+      await renderPage(0)
+      statusText.textContent = ''
+    } catch (err) {
+      console.error('[crop-pdf] load failed:', file.name, err)
+      statusText.textContent = `Failed to load ${file.name}: ${err?.message || err}`
+    }
+  }
+
+  if (files.length > 0) {
+    statusText.textContent = ''
+    activeFileIndex = Math.min(activeFileIndex, files.length - 1)
+    updateLayout()
+    renderFileTabs()
+    renderFileHeader()
+    const f = activeFile()
+    if (f) {
+      setMargins(f.pageMargins[f.currentPage] || { top: 0, bottom: 0, left: 0, right: 0 })
+      await renderPage(f.currentPage)
+      loadCurrentMargins()
+    }
+  }
+}
+
+/* -- Page navigation --------------------------------------------------------- */
+prevPageBtn.addEventListener('click', () => {
+  const f = activeFile()
+  if (!f || f.currentPage <= 0) return
+  saveCurrentMargins()
+  f.currentPage--
+  renderPage(f.currentPage).then(() => loadCurrentMargins())
 })
 nextPageBtn.addEventListener('click', () => {
-  if (currentPage < pageCount - 1) {
-    saveCurrentMargins()
-    currentPage++
-    renderPage(currentPage).then(() => loadCurrentMargins())
-  }
+  const f = activeFile()
+  if (!f || f.currentPage >= f.pageCount - 1) return
+  saveCurrentMargins()
+  f.currentPage++
+  renderPage(f.currentPage).then(() => loadCurrentMargins())
 })
 
 /* -- Reset ------------------------------------------------------------------- */
 function resetState() {
-  fileBytes     = null
-  fileName      = ''
-  pdfDocProxy   = null
-  pageCount     = 0
-  currentPage   = 0
-  pageMargins   = []
+  files = []
+  activeFileIndex = 0
   pageViewport  = null
   pagePtWidth   = 0
   pagePtHeight  = 0
@@ -528,6 +680,8 @@ function resetState() {
   uploadArea.style.display    = ''
   fileHeader.style.display    = 'none'
   fileHeader.innerHTML        = ''
+  fileTabs.style.display      = 'none'
+  fileTabs.innerHTML          = ''
   optionsPanel.classList.remove('on')
   previewCenter.style.display = 'none'
   pageNav.style.display       = 'none'
@@ -545,25 +699,63 @@ function resetState() {
 
 /* -- File input handlers ----------------------------------------------------- */
 fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) loadFile(fileInput.files[0])
+  if (fileInput.files.length) addFiles(Array.from(fileInput.files))
   fileInput.value = ''
+})
+
+addMoreInput.addEventListener('change', () => {
+  if (addMoreInput.files.length) addFiles(Array.from(addMoreInput.files))
+  addMoreInput.value = ''
 })
 
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => {
   e.preventDefault()
-  const f = e.dataTransfer.files
-  if (f.length) loadFile(f[0])
+  if (e.dataTransfer.files.length) addFiles(Array.from(e.dataTransfer.files))
 })
 
-/* -- Apply crop & download --------------------------------------------------- */
-applyBtn.addEventListener('click', applyCrop)
+/* -- Build cropped PDF for a single file entry ------------------------------- */
+async function buildCroppedPdf(fileEntry) {
+  const pdfDoc = await PDFDocument.load(fileEntry.bytes)
+  const pages  = pdfDoc.getPages()
+  const applyAll = applyAllCheck.checked
 
-async function applyCrop() {
-  if (!fileBytes) return
-  const m = getMargins()
+  const pagesToCrop = applyAll
+    ? pages.map((_, i) => i)
+    : [fileEntry.currentPage]
 
-  if (m.top === 0 && m.bottom === 0 && m.left === 0 && m.right === 0) {
+  for (const i of pagesToCrop) {
+    const page = pages[i]
+    const pm = fileEntry.pageMargins[i] || { top: 0, bottom: 0, left: 0, right: 0 }
+
+    const mediaBox = page.getMediaBox()
+    const newX = mediaBox.x + pm.left
+    const newY = mediaBox.y + pm.bottom
+    const newW = mediaBox.width - pm.left - pm.right
+    const newH = mediaBox.height - pm.top - pm.bottom
+
+    if (newW <= 0 || newH <= 0) {
+      throw new Error(t.croppdf_margins_too_large || `Margins too large for page ${i + 1}. Reduce margin values.`)
+    }
+
+    page.setMediaBox(newX, newY, newW, newH)
+    page.setCropBox(newX, newY, newW, newH)
+  }
+
+  const croppedBytes = await pdfDoc.save()
+  return new Blob([croppedBytes], { type: 'application/pdf' })
+}
+
+/* -- Apply crop & download single file --------------------------------------- */
+async function applyCropSingle(idx) {
+  const f = files[idx]
+  if (!f) return
+
+  saveCurrentMargins()
+
+  // Check if any margins are set for this file
+  const hasMargins = f.pageMargins.some(pm => pm.top > 0 || pm.bottom > 0 || pm.left > 0 || pm.right > 0)
+  if (!hasMargins) {
     statusText.textContent = t.croppdf_no_margins || 'Set at least one margin to crop.'
     return
   }
@@ -572,57 +764,55 @@ async function applyCrop() {
   setButtonsDisabled(true)
 
   try {
-    saveCurrentMargins()
-    const pdfDoc = await PDFDocument.load(fileBytes)
-    const pages  = pdfDoc.getPages()
-    const total  = pages.length
-    const applyAll = applyAllCheck.checked
-
-    const pagesToCrop = applyAll
-      ? pages.map((_, i) => i)
-      : [currentPage]
-
-    for (const i of pagesToCrop) {
-      statusText.textContent = `${applyingLbl} ${pageLabel} ${i + 1}/${total}`
-      const page = pages[i]
-      const pm = pageMargins[i] || m
-
-      // Get the current MediaBox (the full page boundary)
-      const mediaBox = page.getMediaBox()
-
-      const newX = mediaBox.x + pm.left
-      const newY = mediaBox.y + pm.bottom
-      const newW = mediaBox.width - pm.left - pm.right
-      const newH = mediaBox.height - pm.top - pm.bottom
-
-      if (newW <= 0 || newH <= 0) {
-        statusText.textContent = t.croppdf_margins_too_large || `Margins too large for page ${i + 1}. Reduce margin values.`
-        setButtonsDisabled(false)
-        return
-      }
-
-      // Set both MediaBox and CropBox for maximum compatibility
-      page.setMediaBox(newX, newY, newW, newH)
-      page.setCropBox(newX, newY, newW, newH)
-    }
-
-    const croppedBytes = await pdfDoc.save()
-    const blob = new Blob([croppedBytes], { type: 'application/pdf' })
-    const baseName = fileName.replace(/\.[^.]+$/, '')
+    const blob = await buildCroppedPdf(f)
+    const baseName = f.name.replace(/\.[^.]+$/, '')
     const outName = `${baseName}-cropped.pdf`
     lastResults = [{ blob, name: outName, type: 'application/pdf' }]
     downloadBlob(blob, outName)
 
-    const doneMsg = applyAll
-      ? `${total} ${pagesLabel} cropped.`
-      : `${pageLabel} ${currentPage + 1} cropped.`
-    statusText.textContent = (t.croppdf_done || 'Done!') + ' ' + doneMsg
+    statusText.textContent = (t.croppdf_done || 'Done!') + ` ${f.name} cropped.`
     window.rcShowSaveButton?.()
     buildNextSteps()
     if (window.showReviewPrompt) window.showReviewPrompt()
   } catch (err) {
     console.error('[crop-pdf] apply failed:', err)
     statusText.textContent = (t.croppdf_error || 'Failed to crop PDF: ') + (err?.message || err)
+  }
+  setButtonsDisabled(false)
+}
+
+/* -- Apply All & Download ZIP ------------------------------------------------ */
+async function applyCropAllZip() {
+  if (files.length === 0) return
+  saveCurrentMargins()
+
+  statusText.textContent = applyingLbl
+  setButtonsDisabled(true)
+
+  try {
+    const JSZipModule = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+    const JSZip = JSZipModule.default || window.JSZip
+    const zip = new JSZip()
+
+    for (let i = 0; i < files.length; i++) {
+      statusText.textContent = `${applyingLbl} (${i + 1}/${files.length})`
+      const blob = await buildCroppedPdf(files[i])
+      const baseName = files[i].name.replace(/\.[^.]+$/, '')
+      zip.file(`${baseName}-cropped.pdf`, blob)
+    }
+
+    statusText.textContent = t.croppdf_zipping || 'Creating ZIP\u2026'
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    lastResults = [{ blob: zipBlob, name: 'cropped-pdfs.zip', type: 'application/zip' }]
+    downloadBlob(zipBlob, 'cropped-pdfs.zip')
+
+    statusText.textContent = (t.croppdf_done || 'Done!') + ` ${files.length} files cropped.`
+    window.rcShowSaveButton?.()
+    buildNextSteps()
+    if (window.showReviewPrompt) window.showReviewPrompt()
+  } catch (err) {
+    console.error('[crop-pdf] zip failed:', err)
+    statusText.textContent = (t.croppdf_zip_error || 'Failed to create ZIP: ') + (err?.message || err)
   }
   setButtonsDisabled(false)
 }
@@ -687,8 +877,8 @@ async function loadPendingFiles() {
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
-    const file = new File([records[0].blob], records[0].name, { type: records[0].type || 'application/pdf' })
-    loadFile(file)
+    const pendingFiles = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
+    addFiles(pendingFiles)
   } catch (e) { console.warn('[crop-pdf] IDB autoload failed:', e) }
 }
 

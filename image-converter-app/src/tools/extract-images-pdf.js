@@ -9,9 +9,10 @@ const t = getT()
 const toolName    = (t.nav_short && t.nav_short['extract-images-pdf']) || 'Extract Images from PDF'
 const seoData     = t.seo && t.seo['extract-images-pdf']
 const descText    = t.extimg_desc || (seoData ? seoData.h2a : 'Extract actual embedded images from any PDF — photos, logos, diagrams — at their original resolution.')
-const selectLbl   = t.extimg_select || 'Select PDF'
-const dropHint    = t.extimg_drop_hint || t.drop_hint || 'or drop a PDF anywhere'
+const selectLbl   = t.extimg_select || 'Select PDFs'
+const dropHint    = t.extimg_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const extractLbl  = t.extimg_extract_btn || 'Extract Images'
+const extractAllLbl = t.extimg_extract_all_btn || 'Extract All & Download ZIP'
 const extractingLbl = t.extimg_extracting || 'Extracting\u2026'
 const dlBtn       = t.download || 'Download'
 const dlZipBtn    = t.download_zip || 'Download All as ZIP'
@@ -44,6 +45,11 @@ style.textContent = `
   .action-btn:hover{background:var(--accent-hover);}
   .action-btn.dark{background:var(--btn-dark);color:var(--text-on-dark-btn);}
   .action-btn.dark:hover{background:var(--btn-dark-hover);}
+  .file-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .file-tab{padding:7px 14px;border:1.5px solid var(--border-light);border-radius:8px;background:var(--bg-card);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-tab:hover{border-color:var(--accent);color:var(--accent);}
+  .file-tab.active{background:var(--accent);color:var(--text-on-accent);border-color:var(--accent);}
+  .file-tab .tab-badge{display:inline-block;margin-left:5px;font-size:10px;font-weight:700;opacity:0.7;}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
   .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
   .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
@@ -82,14 +88,16 @@ document.querySelector('#app').innerHTML = `
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
         <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
       </div>
-      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop a PDF here</span></label>
+      <label for="fileInput" class="drop-zone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
     </div>
-    <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none;" />
+    <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
     <div id="fileMeta"><span id="fileMetaText"></span><button id="removeBtn">${t.remove || 'Remove'}</button></div>
+    <div id="fileTabs" class="file-tabs" style="display:none;"></div>
     <div id="imageGrid"></div>
     <div class="status-text" id="statusText"></div>
     <div id="actionRow" style="display:none;">
       <button class="action-btn" id="extractBtn">${extractLbl}</button>
+      <button class="action-btn dark" id="extractAllBtn" style="display:none;">${extractAllLbl}</button>
       <button class="action-btn dark" id="zipBtn" style="display:none;">${dlZipBtn}</button>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
@@ -107,12 +115,18 @@ const fileMeta     = document.getElementById('fileMeta')
 const fileMetaText = document.getElementById('fileMetaText')
 const removeBtn    = document.getElementById('removeBtn')
 const extractBtn   = document.getElementById('extractBtn')
+const extractAllBtn = document.getElementById('extractAllBtn')
 const zipBtn       = document.getElementById('zipBtn')
 const statusText   = document.getElementById('statusText')
+const fileTabs     = document.getElementById('fileTabs')
 
-let pdfDoc = null
-let pdfFileName = ''
-let lastResults = []
+/* -- Multi-file state -------------------------------------------------------- */
+let files = []          // { name, bytes, pdfDocProxy, pageCount, extractedImages }
+let activeFileIndex = 0
+let lastResults = []    // flat array for IDB handoff / next-steps
+
+const MAX_FILES = 25
+const MAX_SIZE  = 50 * 1024 * 1024
 
 // -- Lazy-load pdf.js --------------------------------------------------------
 let pdfjsLib = null
@@ -162,8 +176,8 @@ async function loadPendingFiles() {
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
-    const files = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
-    loadPdfFile(files[0])
+    const rawFiles = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
+    loadPdfFiles(rawFiles)
   } catch (e) { console.warn('[extract-images-pdf] IDB autoload failed:', e) }
 }
 
@@ -193,13 +207,16 @@ function buildNextSteps() {
 
 // -- Reset -------------------------------------------------------------------
 function resetState() {
-  pdfDoc = null
-  pdfFileName = ''
+  files = []
+  activeFileIndex = 0
   lastResults = []
   imageGrid.innerHTML = ''
   fileMeta.classList.remove('on')
+  fileTabs.style.display = 'none'
+  fileTabs.innerHTML = ''
   if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
   document.getElementById('actionRow').style.display = 'none'
+  extractAllBtn.style.display = 'none'
   zipBtn.style.display = 'none'
   statusText.textContent = ''
   document.getElementById('nextSteps').style.display = 'none'
@@ -207,28 +224,146 @@ function resetState() {
 
 removeBtn.addEventListener('click', resetState)
 
-// -- Load PDF ----------------------------------------------------------------
-async function loadPdfFile(file) {
-  if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
-    statusText.textContent = t.warn_wrong_fmt_short || 'Wrong format.'
+// -- File tabs UI ------------------------------------------------------------
+function renderFileTabs() {
+  fileTabs.innerHTML = ''
+  if (files.length <= 1) { fileTabs.style.display = 'none'; return }
+  fileTabs.style.display = 'flex'
+  files.forEach((f, i) => {
+    const tab = document.createElement('button')
+    tab.className = 'file-tab' + (i === activeFileIndex ? ' active' : '')
+    const shortName = f.name.length > 22 ? f.name.slice(0, 19) + '\u2026' : f.name
+    let badge = ''
+    if (f.extractedImages && f.extractedImages.length > 0) badge = `<span class="tab-badge">(${f.extractedImages.length})</span>`
+    tab.innerHTML = shortName + badge
+    tab.title = f.name
+    tab.addEventListener('click', () => switchToFile(i))
+    fileTabs.appendChild(tab)
+  })
+}
+
+function switchToFile(idx) {
+  if (idx < 0 || idx >= files.length) return
+  activeFileIndex = idx
+  renderFileTabs()
+  renderActiveFileGrid()
+  updateFileMetaText()
+  updateButtonVisibility()
+}
+
+function updateFileMetaText() {
+  const f = files[activeFileIndex]
+  if (!f) return
+  const totalText = files.length > 1 ? ` (file ${activeFileIndex + 1} of ${files.length})` : ''
+  fileMetaText.textContent = `${f.name} \u2014 ${f.pageCount} ${pagesLabel}${totalText}`
+}
+
+function renderActiveFileGrid() {
+  imageGrid.innerHTML = ''
+  const f = files[activeFileIndex]
+  if (!f || !f.extractedImages || f.extractedImages.length === 0) {
+    if (f && f.extractedImages) {
+      statusText.textContent = t.extimg_no_images || 'No embedded images found in this PDF.'
+    } else {
+      statusText.textContent = ''
+    }
+    zipBtn.style.display = 'none'
     return
   }
-  if (file.size > 50 * 1024 * 1024) {
-    statusText.textContent = 'File too large. Maximum size is 50 MB.'
+
+  f.extractedImages.forEach(item => {
+    const card = document.createElement('div')
+    card.className = 'img-card'
+    const img = document.createElement('img')
+    img.src = item.url
+    img.alt = item.label
+    const iname = document.createElement('div')
+    iname.className = 'iname'
+    iname.textContent = item.label
+    const imeta = document.createElement('div')
+    imeta.className = 'imeta'
+    imeta.textContent = `${item.w} \u00D7 ${item.h} \u2014 ${formatSize(item.size)}`
+    const dlLink = document.createElement('a')
+    dlLink.className = 'dl-link'
+    dlLink.href = item.url
+    dlLink.download = item.name
+    dlLink.textContent = `\u2B07 ${dlBtn} PNG`
+    dlLink.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(item.url), 10000))
+    card.append(img, iname, imeta, dlLink)
+    imageGrid.appendChild(card)
+  })
+
+  const count = f.extractedImages.length
+  statusText.textContent = count === 1
+    ? (t.extimg_image_ready || '1 image extracted.')
+    : `${count} ${t.extimg_images_ready || 'images extracted.'}`
+
+  if (count > 1) {
+    zipBtn.style.display = 'block'
+    zipBtn._results = f.extractedImages.map(item => ({ name: item.name, blob: item.blob }))
+  } else {
+    zipBtn.style.display = 'none'
+  }
+}
+
+function updateButtonVisibility() {
+  const anyExtracted = files.some(f => f.extractedImages && f.extractedImages.length > 0)
+  if (anyExtracted) buildNextSteps()
+}
+
+// -- Load PDFs ---------------------------------------------------------------
+async function loadPdfFiles(rawFiles) {
+  const validFiles = []
+  for (const file of rawFiles) {
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) continue
+    if (file.size > MAX_SIZE) {
+      statusText.textContent = `"${file.name}" exceeds 50 MB limit — skipped.`
+      continue
+    }
+    validFiles.push(file)
+  }
+
+  if (validFiles.length === 0) {
+    statusText.textContent = t.warn_wrong_fmt_short || 'No valid PDF files selected.'
     return
   }
+
+  if (validFiles.length > MAX_FILES) {
+    statusText.textContent = `Maximum ${MAX_FILES} files allowed. Only the first ${MAX_FILES} will be loaded.`
+    validFiles.length = MAX_FILES
+  }
+
   resetState()
   statusText.textContent = loadingLbl
+
   try {
     const pdfjs = await loadPdfJs()
-    const buf = await file.arrayBuffer()
-    const data = new Uint8Array(buf.slice(0))
-    pdfDoc = await pdfjs.getDocument({ data }).promise
-    pdfFileName = file.name.replace(/\.[^.]+$/, '')
-    fileMetaText.textContent = `${file.name} \u2014 ${pdfDoc.numPages} ${pagesLabel}`
+
+    for (const file of validFiles) {
+      const buf = await file.arrayBuffer()
+      const data = new Uint8Array(buf.slice(0))
+      const pdfDocProxy = await pdfjs.getDocument({ data }).promise
+      files.push({
+        name: file.name,
+        bytes: data,
+        pdfDocProxy,
+        pageCount: pdfDocProxy.numPages,
+        extractedImages: null   // null = not yet extracted
+      })
+    }
+
+    activeFileIndex = 0
     document.getElementById('uploadArea').style.display = 'none'
     fileMeta.classList.add('on')
+    updateFileMetaText()
+    renderFileTabs()
     document.getElementById('actionRow').style.display = 'flex'
+
+    // Show "Extract All" button only when multiple files
+    if (files.length > 1) {
+      extractAllBtn.style.display = 'block'
+    }
+
     statusText.textContent = ''
   } catch (err) {
     console.error('[extract-images-pdf] load failed:', err)
@@ -237,13 +372,13 @@ async function loadPdfFile(file) {
 }
 
 fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) loadPdfFile(fileInput.files[0])
+  if (fileInput.files.length) loadPdfFiles(Array.from(fileInput.files))
   fileInput.value = ''
 })
 document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => {
   e.preventDefault()
-  if (e.dataTransfer.files.length) loadPdfFile(e.dataTransfer.files[0])
+  if (e.dataTransfer.files.length) loadPdfFiles(Array.from(e.dataTransfer.files))
 })
 
 // -- Convert raw image data to a PNG blob ------------------------------------
@@ -317,22 +452,17 @@ function imageDataToBlob(imgData) {
   })
 }
 
-// -- Extract actual embedded images ------------------------------------------
-extractBtn.addEventListener('click', async () => {
-  if (!pdfDoc) return
-  extractBtn.disabled = true
-  extractBtn.textContent = extractingLbl
-  imageGrid.innerHTML = ''
-  lastResults = []
-  zipBtn.style.display = 'none'
-
+// -- Extract images from a single file entry ---------------------------------
+async function extractFromFile(fileEntry) {
+  const pdfDoc = fileEntry.pdfDocProxy
+  const pdfFileName = fileEntry.name.replace(/\.[^.]+$/, '')
   const pdfjs = await loadPdfJs()
   const results = []
   const seenImages = new Set()
   let imgCount = 0
 
   for (let p = 1; p <= pdfDoc.numPages; p++) {
-    statusText.textContent = `Scanning page ${p}/${pdfDoc.numPages}` + (imgCount > 0 ? ` \u2014 found ${imgCount} image${imgCount !== 1 ? 's' : ''} so far` : '')
+    statusText.textContent = `${fileEntry.name}: scanning page ${p}/${pdfDoc.numPages}` + (imgCount > 0 ? ` \u2014 found ${imgCount} image${imgCount !== 1 ? 's' : ''} so far` : '')
 
     let page
     try { page = await pdfDoc.getPage(p) } catch (e) { continue }
@@ -363,63 +493,134 @@ extractBtn.addEventListener('click', async () => {
       const safeName = `${pdfFileName || 'image'}-img-${String(imgCount).padStart(3, '0')}.png`
       const url = URL.createObjectURL(result.blob)
 
-      // Build image card
-      const card = document.createElement('div')
-      card.className = 'img-card'
-
-      const img = document.createElement('img')
-      img.src = url
-      img.alt = `Image ${imgCount}`
-
-      const iname = document.createElement('div')
-      iname.className = 'iname'
-      iname.textContent = `Image ${imgCount}`
-
-      const imeta = document.createElement('div')
-      imeta.className = 'imeta'
-      imeta.textContent = `${result.w} \u00D7 ${result.h} \u2014 ${formatSize(result.blob.size)}`
-
-      const dlLink = document.createElement('a')
-      dlLink.className = 'dl-link'
-      dlLink.href = url
-      dlLink.download = safeName
-      dlLink.textContent = `\u2B07 ${dlBtn} PNG`
-      dlLink.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 10000))
-
-      card.append(img, iname, imeta, dlLink)
-      imageGrid.appendChild(card)
-
-      results.push({ name: safeName, blob: result.blob })
+      results.push({
+        name: safeName,
+        label: `Image ${imgCount}`,
+        blob: result.blob,
+        url,
+        w: result.w,
+        h: result.h,
+        size: result.blob.size
+      })
     }
   }
 
-  if (results.length === 0) {
-    statusText.textContent = t.extimg_no_images || 'No embedded images found in this PDF.'
+  fileEntry.extractedImages = results
+  return results
+}
+
+// -- Extract from current file -----------------------------------------------
+extractBtn.addEventListener('click', async () => {
+  const f = files[activeFileIndex]
+  if (!f) return
+  extractBtn.disabled = true
+  extractAllBtn.disabled = true
+  extractBtn.textContent = extractingLbl
+  imageGrid.innerHTML = ''
+  zipBtn.style.display = 'none'
+
+  const results = await extractFromFile(f)
+  renderFileTabs()
+  renderActiveFileGrid()
+
+  // Rebuild flat lastResults for IDB handoff
+  rebuildLastResults()
+
+  extractBtn.disabled = false
+  extractAllBtn.disabled = false
+  extractBtn.textContent = extractLbl
+
+  if (results.length > 0) {
+    buildNextSteps()
+    if (window.showReviewPrompt) window.showReviewPrompt()
+  }
+
+  updateButtonVisibility()
+})
+
+// -- Extract All & Download ZIP ----------------------------------------------
+extractAllBtn.addEventListener('click', async () => {
+  extractBtn.disabled = true
+  extractAllBtn.disabled = true
+  extractAllBtn.textContent = extractingLbl
+  zipBtn.style.display = 'none'
+
+  let totalImages = 0
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i]
+    // Only extract if not already extracted
+    if (!f.extractedImages) {
+      await extractFromFile(f)
+    }
+    totalImages += f.extractedImages.length
+    renderFileTabs()
+  }
+
+  rebuildLastResults()
+
+  if (totalImages === 0) {
+    statusText.textContent = t.extimg_no_images || 'No embedded images found in any PDF.'
     extractBtn.disabled = false
-    extractBtn.textContent = extractLbl
+    extractAllBtn.disabled = false
+    extractAllBtn.textContent = extractAllLbl
+    renderActiveFileGrid()
     return
   }
 
-  lastResults = results.map(r => ({ blob: r.blob, name: r.name, type: 'image/png' }))
+  // Show active file grid
+  renderActiveFileGrid()
+  statusText.textContent = `${totalImages} images extracted from ${files.length} files. Zipping\u2026`
 
-  statusText.textContent = results.length === 1
-    ? (t.extimg_image_ready || '1 image extracted.')
-    : `${results.length} ${t.extimg_images_ready || 'images extracted.'}`
+  // Build ZIP with all images from all files
+  try {
+    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+    const JSZip = mod.default || window.JSZip
+    const zip = new JSZip()
 
-  if (results.length > 1) {
-    zipBtn.style.display = 'block'
-    zipBtn._results = results
+    for (const f of files) {
+      if (!f.extractedImages || f.extractedImages.length === 0) continue
+      const folderName = files.length > 1 ? f.name.replace(/\.[^.]+$/, '') : null
+      for (const item of f.extractedImages) {
+        const path = folderName ? `${folderName}/${item.name}` : item.name
+        zip.file(path, await item.blob.arrayBuffer())
+      }
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(zipBlob)
+    const zipName = files.length === 1
+      ? `${files[0].name.replace(/\.[^.]+$/, '')}-images.zip`
+      : 'pdf-images-all.zip'
+    a.download = zipName
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+    window.rcShowSaveButton?.(extractAllBtn.parentElement, zipBlob, zipName, 'extract-images-pdf')
+
+    statusText.textContent = `${totalImages} images from ${files.length} files downloaded as ZIP.`
+    if (window.showReviewPrompt) window.showReviewPrompt()
+  } catch (e) {
+    alert('ZIP failed: ' + e.message)
   }
 
   extractBtn.disabled = false
-  extractBtn.textContent = extractLbl
-
+  extractAllBtn.disabled = false
+  extractAllBtn.textContent = extractAllLbl
   buildNextSteps()
-
-  if (window.showReviewPrompt) window.showReviewPrompt()
 })
 
-// -- Download All as ZIP -----------------------------------------------------
+// -- Rebuild flat lastResults for IDB handoff --------------------------------
+function rebuildLastResults() {
+  lastResults = []
+  for (const f of files) {
+    if (!f.extractedImages) continue
+    for (const item of f.extractedImages) {
+      lastResults.push({ blob: item.blob, name: item.name, type: 'image/png' })
+    }
+  }
+}
+
+// -- Download All as ZIP (current file only) ---------------------------------
 zipBtn.addEventListener('click', async () => {
   const results = zipBtn._results
   if (!results || !results.length) return
@@ -431,13 +632,15 @@ zipBtn.addEventListener('click', async () => {
     const zip = new JSZip()
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+    const f = files[activeFileIndex]
+    const zipName = `${f ? f.name.replace(/\.[^.]+$/, '') : 'pdf-images'}.zip`
     const a = document.createElement('a')
     a.href = URL.createObjectURL(zipBlob)
-    a.download = `${pdfFileName || 'pdf-images'}.zip`
+    a.download = zipName
     a.click()
     if (window.showReviewPrompt) window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, `${pdfFileName || 'pdf-images'}.zip`, 'extract-images-pdf')
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, zipName, 'extract-images-pdf')
   } catch (e) {
     alert('ZIP failed: ' + e.message)
   }
