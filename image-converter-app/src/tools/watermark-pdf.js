@@ -13,17 +13,61 @@ const descText  = t.wmpdf_desc || t.card_watermark_pdf_desc || 'Add text waterma
 const selectLbl = t.wmpdf_select || t.select_image || 'Select PDFs'
 const dropHint  = t.wmpdf_drop_hint || t.drop_hint || 'or drop PDFs anywhere'
 const dlBtn     = t.download || 'Download'
-const applyLbl  = t.wmpdf_apply || 'Add Watermark & Download'
-const applyAllLbl = t.wmpdf_apply_all || 'Apply to All & Download ZIP'
+const dlZipBtn  = t.download_zip || 'Download ZIP'
+const applyLbl  = t.wmpdf_apply || 'Add Watermark'
 const applyingLbl = t.wmpdf_applying || 'Adding watermark\u2026'
 const loadingLbl  = t.wmpdf_loading || 'Loading PDFs\u2026'
 const pagesLabel  = t.wmpdf_pages || t.pdfpng_pages || 'pages'
-const clearLbl    = t.wmpdf_clear || 'Clear'
-const addMoreLbl  = t.wmpdf_add_more || '+ Add more'
 
 const MAX_FILES = LIMITS.MAX_FILES || 25
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 
+const _tp = toolName.split(' ')
+const h1Main = _tp[0]
+const h1Em = _tp.slice(1).join(' ')
+
+/* ── PDF.js CDN ─────────────────────────────────────────────────────────── */
+const PDFJS_CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build'
+let pdfjsLib = null
+
+async function ensurePdfJs() {
+  if (pdfjsLib) return pdfjsLib
+  if (window.pdfjsLib) { pdfjsLib = window.pdfjsLib; return pdfjsLib }
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = `${PDFJS_CDN}/pdf.min.mjs`
+    s.type = 'module'
+    s.onload = () => {
+      pdfjsLib = window.pdfjsLib
+      if (pdfjsLib) { pdfjsLib.GlobalWorkerOptions.workerSrc = `${PDFJS_CDN}/pdf.worker.min.mjs`; resolve(pdfjsLib) }
+      else reject(new Error('PDF.js did not load'))
+    }
+    s.onerror = () => reject(new Error('PDF.js CDN failed'))
+    document.head.appendChild(s)
+  })
+}
+
+/* Fallback: load PDF.js via classic script tag if module fails */
+async function loadPdfJsFallback() {
+  if (pdfjsLib) return pdfjsLib
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'
+    s.onload = () => {
+      pdfjsLib = window.pdfjsLib
+      if (pdfjsLib) { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; resolve(pdfjsLib) }
+      else reject(new Error('PDF.js fallback did not load'))
+    }
+    s.onerror = () => reject(new Error('PDF.js fallback CDN failed'))
+    document.head.appendChild(s)
+  })
+}
+
+async function getPdfJs() {
+  try { return await ensurePdfJs() } catch(e) { return await loadPdfJsFallback() }
+}
+
+/* ── Styles ──────────────────────────────────────────────────────────── */
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
 const style = document.createElement('style')
@@ -32,39 +76,54 @@ style.textContent = `
   #app>div{animation:fadeUp 0.4s ease both}
   .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
   .upload-label:hover{background:var(--accent-hover);}
-  .drop-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:48px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);}
-  .drop-zone:hover{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
-  .drop-zone.over{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
-  .file-tabs{display:flex;gap:0;margin-bottom:0;overflow-x:auto;border-bottom:1.5px solid var(--border);}
-  .file-tab{padding:10px 18px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--text-secondary);background:transparent;border:none;border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
-  .file-tab:hover{color:var(--text-primary);}
-  .file-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-  .file-tab-add{padding:10px 14px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--accent);background:transparent;border:none;border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
-  .file-tab-add:hover{color:var(--accent-hover);}
-  .file-info{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:12px;font-family:'DM Sans',sans-serif;}
-  .file-info-left{font-size:13px;color:var(--text-primary);font-weight:600;}
-  .file-info-left span{color:var(--text-muted);font-weight:400;margin-left:6px;}
-  .file-info-clear{background:transparent;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;}
-  .file-info-clear:hover{opacity:0.7;}
-  .opt-card{background:var(--bg-card);border-radius:14px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px;font-family:'DM Sans',sans-serif;}
-  .opt-card h3{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 14px;}
-  .opt-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
-  .opt-row:last-child{margin-bottom:0;}
-  .opt-label{font-size:12px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;min-width:100px;}
-  .opt-select,.opt-number,.opt-text{padding:8px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg-card);color:var(--text-primary);outline:none;}
-  .opt-select:focus,.opt-number:focus,.opt-text:focus{border-color:var(--accent);}
-  .opt-number{width:80px;}
-  .opt-text{flex:1;min-width:160px;}
-  .opt-range{flex:1;min-width:100px;accent-color:var(--accent);}
-  .opt-range-val{font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;min-width:36px;text-align:center;}
-  .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;width:100%;}
+  .wmpdf-drop-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px;padding:48px 24px;border:2px dashed var(--border-light);border-radius:14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;background:var(--bg-card);}
+  .wmpdf-drop-zone:hover,.wmpdf-drop-zone.over{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
+  .tool-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+  .image-col{background:var(--bg-card);border-radius:14px;border:1.5px solid var(--border);min-height:320px;display:flex;flex-direction:column;padding:16px;gap:10px;overflow:hidden;}
+  .controls-col{background:var(--bg-card);border-radius:14px;border:1.5px solid var(--border);padding:16px;font-family:'DM Sans',sans-serif;max-height:85vh;overflow-y:auto;}
+  .controls-col h3{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 12px;}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;font-family:'DM Sans',sans-serif;}
+  .divider{height:1px;background:#F0EAE3;margin:12px 0;}
+  .ctrl-input{width:100%;padding:8px 10px;border:1.5px solid var(--border-light);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg-card);color:var(--text-primary);outline:none;box-sizing:border-box;}
+  .ctrl-input:focus{border-color:var(--accent);}
+  input[type=range]{width:100%;accent-color:var(--accent);margin:3px 0;}
+  .range-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .range-val{font-size:12px;color:var(--text-muted);min-width:36px;text-align:right;font-family:'DM Sans',sans-serif;}
+  .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;margin-bottom:10px;}
+  .swatch{width:24px;height:24px;border-radius:50%;border:2.5px solid var(--border);cursor:pointer;transition:transform 0.15s,border-color 0.15s;flex-shrink:0;}
+  .swatch:hover{transform:scale(1.15);}
+  .swatch.active{border-color:var(--accent);transform:scale(1.15);}
+  .pos-grid{display:grid;grid-template-columns:repeat(3,28px);grid-template-rows:repeat(3,28px);gap:3px;margin-top:5px;margin-bottom:10px;}
+  .pos-cell{background:var(--bg-surface,#F5F0EB);border:1.5px solid var(--border-light);border-radius:5px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;}
+  .pos-cell:hover{border-color:var(--accent);background:var(--accent-bg,rgba(200,75,49,0.04));}
+  .pos-cell.active{background:var(--accent);border-color:var(--accent);}
+  .pos-cell.active .pos-dot{background:#fff;}
+  .pos-dot{width:8px;height:8px;border-radius:50%;background:var(--text-muted);}
+  .file-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .file-chip{display:flex;align-items:center;gap:5px;background:var(--bg-surface);border-radius:20px;padding:4px 10px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;border:1.5px solid transparent;}
+  .file-chip:hover{border-color:var(--accent);}
+  .file-chip.active{border-color:var(--accent);color:var(--accent);}
+  .file-chip button{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:12px;line-height:1;padding:0;}
+  .file-chip button:hover{color:var(--accent);}
+  .thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;width:100%;}
+  .thumb-wrap{position:relative;background:var(--bg-surface,#F5F0EB);border-radius:8px;overflow:hidden;border:1.5px solid var(--border-light);aspect-ratio:0.707;}
+  .thumb-wrap canvas{width:100%;height:100%;object-fit:contain;display:block;}
+  .thumb-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;overflow:hidden;}
+  .thumb-overlay-text{font-family:Helvetica,Arial,sans-serif;white-space:nowrap;transform-origin:center center;}
+  .thumb-label{position:absolute;bottom:4px;right:6px;font-size:10px;color:var(--text-muted);font-family:'DM Sans',sans-serif;background:rgba(255,255,255,0.75);border-radius:4px;padding:1px 5px;}
+  .action-btn{padding:12px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--text-on-accent);font-size:14px;font-family:'Fraunces',serif;font-weight:700;cursor:pointer;transition:all 0.18s;width:100%;margin-bottom:8px;}
   .action-btn:hover{background:var(--accent-hover);transform:translateY(-1px);}
   .action-btn:disabled{background:var(--btn-disabled);cursor:not-allowed;opacity:0.7;transform:none;}
   .action-btn.dark{background:var(--btn-dark);color:var(--text-on-dark-btn);}
   .action-btn.dark:hover{background:var(--btn-dark-hover);}
-  .status-text{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
+  .status-text{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-top:6px;min-height:18px;}
+  .diag-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--text-primary);font-family:'DM Sans',sans-serif;cursor:pointer;user-select:none;}
+  .diag-row input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
+  .next-steps{margin-top:20px;}
+  .next-steps-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;}
   .next-link{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
   .next-link:hover{border-color:var(--accent);color:var(--accent);}
+  @media(max-width:700px){.tool-layout{grid-template-columns:1fr;}.image-col{min-height:220px;}}
   .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
   .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
   .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
@@ -86,205 +145,344 @@ _metaDesc.name = 'description'
 _metaDesc.content = t.wmpdf_meta_desc || 'Add text watermarks to PDF files free. Choose text, font size, opacity, color, and placement style.'
 document.head.appendChild(_metaDesc)
 
-const _tp = toolName.split(' ')
-const titlePart1 = _tp[0]
-const titlePart2 = _tp.slice(1).join(' ')
-
-/* Color labels */
-const colorLabels = {
-  gray:  t.wmpdf_color_gray  || 'Gray',
-  red:   t.wmpdf_color_red   || 'Red',
-  blue:  t.wmpdf_color_blue  || 'Blue',
-  black: t.wmpdf_color_black || 'Black',
-}
-
-/* Style labels */
-const styleLabels = {
-  diagonal: t.wmpdf_style_diagonal || 'Diagonal across page',
-  center:   t.wmpdf_style_center   || 'Center',
-  top:      t.wmpdf_style_top      || 'Top',
-  bottom:   t.wmpdf_style_bottom   || 'Bottom',
-}
-
+/* ── HTML ───────────────────────────────────────────────────────────── */
 document.querySelector('#app').innerHTML = `
-  <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
+  <div id="wmpdf_main" style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">
-      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${titlePart1} <em style="font-style:italic;color:var(--accent);">${titlePart2}</em></h1>
+      <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${h1Main} <em style="font-style:italic;color:var(--accent);">${h1Em}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${descText}</p>
+      <label class="upload-label" for="wmpdf_fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${dropHint}</span>
+      <input type="file" id="wmpdf_fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
+      <label for="wmpdf_fileInput" id="wmpdf_dropZone" class="wmpdf-drop-zone">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span>
+      </label>
     </div>
-    <div id="uploadArea" style="margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-        <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${selectLbl}</label>
-        <span style="font-size:12px;color:var(--text-muted);">${dropHint}</span>
+    <div class="tool-layout" id="wmpdf_toolLayout" style="display:none;">
+      <div class="image-col" id="wmpdf_imageCol">
+        <div class="file-chips" id="wmpdf_fileChips"></div>
+        <div class="thumb-grid" id="wmpdf_thumbGrid"></div>
       </div>
-      <label for="fileInput" class="drop-zone" id="dropZone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">Drop PDFs here</span></label>
-    </div>
-    <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
-    <div id="fileTabs" class="file-tabs" style="display:none;"></div>
-    <div id="fileInfoRow" class="file-info" style="display:none;">
-      <div class="file-info-left"><span id="fileInfoName"></span><span id="fileInfoMeta"></span></div>
-      <button class="file-info-clear" id="clearBtn">${clearLbl}</button>
-    </div>
-    <div id="optionsPanel" style="display:none;">
-      <div class="opt-card">
+      <div class="controls-col" id="wmpdf_controlsCol">
         <h3>${t.wmpdf_options_title || 'Watermark Options'}</h3>
-        <div class="opt-row">
-          <span class="opt-label">${t.wmpdf_text_label || 'Watermark Text'}</span>
-          <input type="text" class="opt-text" id="watermarkTextInput" value="CONFIDENTIAL" maxlength="100" />
+
+        <div class="section-label">${t.wmpdf_text_label || 'Text'}</div>
+        <input type="text" class="ctrl-input" id="wmpdf_text" value="CONFIDENTIAL" maxlength="100" style="margin-bottom:10px;" />
+
+        <div class="section-label">${t.wmpdf_font_size || 'Font Size'}</div>
+        <div class="range-row">
+          <input type="number" class="ctrl-input" id="wmpdf_fontSize" value="48" min="20" max="120" step="1" style="width:70px;" />
+          <span class="range-val">pt</span>
         </div>
-        <div class="opt-row">
-          <span class="opt-label">${t.wmpdf_font_size || 'Font Size'}</span>
-          <input type="number" class="opt-number" id="fontSizeInput" value="48" min="20" max="120" step="1" />
-          <span style="font-size:11px;color:var(--text-muted);">pt (20\u2013120)</span>
+
+        <div class="section-label">${t.wmpdf_opacity || 'Opacity'}</div>
+        <div class="range-row">
+          <input type="range" id="wmpdf_opacity" min="5" max="50" step="1" value="15" />
+          <span class="range-val" id="wmpdf_opacityVal">15%</span>
         </div>
-        <div class="opt-row">
-          <span class="opt-label">${t.wmpdf_opacity || 'Opacity'}</span>
-          <input type="range" class="opt-range" id="opacityRange" min="0.05" max="0.5" step="0.01" value="0.15" />
-          <span class="opt-range-val" id="opacityVal">0.15</span>
+
+        <div class="section-label">${t.wmpdf_color || 'Color'}</div>
+        <div class="swatches" id="wmpdf_swatches">
+          <div class="swatch active" data-color="gray" style="background:#808080;" title="Gray"></div>
+          <div class="swatch" data-color="red" style="background:#CC0000;" title="Red"></div>
+          <div class="swatch" data-color="blue" style="background:#0000CC;" title="Blue"></div>
+          <div class="swatch" data-color="black" style="background:#000000;" title="Black"></div>
+          <div class="swatch" data-color="white" style="background:#FFFFFF;" title="White"></div>
         </div>
-        <div class="opt-row">
-          <span class="opt-label">${t.wmpdf_color || 'Color'}</span>
-          <select class="opt-select" id="colorSelect">
-            ${Object.entries(colorLabels).map(([k, v]) => `<option value="${k}"${k === 'gray' ? ' selected' : ''}>${v}</option>`).join('')}
-          </select>
+
+        <div class="section-label">${t.wmpdf_position || 'Position'}</div>
+        <div class="pos-grid" id="wmpdf_posGrid"></div>
+
+        <label class="diag-row"><input type="checkbox" id="wmpdf_diagonal" checked /> ${t.wmpdf_diagonal || 'Diagonal'}</label>
+
+        <div class="section-label">${t.wmpdf_rotation || 'Rotation'}</div>
+        <div class="range-row">
+          <input type="range" id="wmpdf_rotation" min="-90" max="90" step="1" value="-45" />
+          <span class="range-val" id="wmpdf_rotationVal">-45&deg;</span>
         </div>
-        <div class="opt-row">
-          <span class="opt-label">${t.wmpdf_style || 'Style'}</span>
-          <select class="opt-select" id="styleSelect">
-            ${Object.entries(styleLabels).map(([k, v]) => `<option value="${k}"${k === 'diagonal' ? ' selected' : ''}>${v}</option>`).join('')}
-          </select>
+
+        <div class="divider"></div>
+        <button class="action-btn" id="wmpdf_applyBtn" disabled>${applyLbl}</button>
+        <div id="wmpdf_zipWrap" style="display:none;">
+          <a id="wmpdf_zipBtn" class="action-btn dark" style="display:block;text-align:center;text-decoration:none;">\u2B07 ${dlZipBtn}</a>
+          <p id="wmpdf_zipNote" style="font-size:11px;color:var(--text-muted);text-align:center;margin:4px 0 0;font-family:'DM Sans',sans-serif;"></p>
         </div>
+        <div class="status-text" id="wmpdf_status"></div>
       </div>
     </div>
-    <div id="actionRow" style="display:none;margin-bottom:14px;gap:10px;flex-wrap:wrap;">
-      <button class="action-btn" id="applyBtn">${applyLbl}</button>
-      <button class="action-btn dark" id="applyAllBtn" style="display:none;">${applyAllLbl}</button>
-    </div>
-    <div class="status-text" id="statusText"></div>
-    <div id="nextSteps" style="display:none;margin-top:20px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${t.whats_next || "What's Next?"}</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
+    <div id="wmpdf_nextSteps" style="display:none;" class="next-steps">
+      <div class="next-steps-label">${t.whats_next || "What's Next?"}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="wmpdf_nextButtons"></div>
     </div>
   </div>
 `
 
 injectHeader()
 
-/* -- DOM refs ---------------------------------------------------------------- */
-const fileInput        = document.getElementById('fileInput')
-const dropZone         = document.getElementById('dropZone')
-const uploadArea       = document.getElementById('uploadArea')
-const fileTabs         = document.getElementById('fileTabs')
-const fileInfoRow      = document.getElementById('fileInfoRow')
-const fileInfoName     = document.getElementById('fileInfoName')
-const fileInfoMeta     = document.getElementById('fileInfoMeta')
-const clearBtn         = document.getElementById('clearBtn')
-const optionsPanel     = document.getElementById('optionsPanel')
-const watermarkTextInput = document.getElementById('watermarkTextInput')
-const fontSizeInput    = document.getElementById('fontSizeInput')
-const opacityRange     = document.getElementById('opacityRange')
-const opacityVal       = document.getElementById('opacityVal')
-const colorSelect      = document.getElementById('colorSelect')
-const styleSelect      = document.getElementById('styleSelect')
-const actionRow        = document.getElementById('actionRow')
-const applyBtn         = document.getElementById('applyBtn')
-const applyAllBtn      = document.getElementById('applyAllBtn')
-const statusText       = document.getElementById('statusText')
+/* ── State ───────────────────────────────────────────────────────────── */
+let pdfFiles = []        // { name, bytes, pageCount, thumbCanvases[] }
+let activeIdx = 0
+let lastResults = []
 
-/* -- Opacity slider live value ----------------------------------------------- */
-opacityRange.addEventListener('input', () => {
-  opacityVal.textContent = parseFloat(opacityRange.value).toFixed(2)
-})
-
-/* -- State ------------------------------------------------------------------- */
-let files = []          // { name, bytes, pageCount }
-let activeFileIndex = 0
-
-/* -- Color map --------------------------------------------------------------- */
-const COLOR_MAP = {
-  gray:  { r: 0x80 / 255, g: 0x80 / 255, b: 0x80 / 255 },
-  red:   { r: 0xCC / 255, g: 0x00 / 255, b: 0x00 / 255 },
-  blue:  { r: 0x00 / 255, g: 0x00 / 255, b: 0xCC / 255 },
-  black: { r: 0x00 / 255, g: 0x00 / 255, b: 0x00 / 255 },
+const opts = {
+  text: 'CONFIDENTIAL',
+  fontSize: 48,
+  opacity: 15,       // 5-50 => actual 0.05-0.50
+  color: 'gray',     // gray|red|blue|black|white
+  position: 'center', // top-left|top-center|top-right|center-left|center|center-right|bottom-left|bottom-center|bottom-right
+  diagonal: true,
+  rotation: -45,
 }
 
-/* -- UI update --------------------------------------------------------------- */
-function updateUI() {
-  const count = files.length
+/* ── Color map ─────────────────────────────────────────────────────── */
+const COLOR_MAP = {
+  gray:  { r: 0x80/255, g: 0x80/255, b: 0x80/255 },
+  red:   { r: 0xCC/255, g: 0x00/255, b: 0x00/255 },
+  blue:  { r: 0x00/255, g: 0x00/255, b: 0xCC/255 },
+  black: { r: 0x00/255, g: 0x00/255, b: 0x00/255 },
+  white: { r: 1, g: 1, b: 1 },
+}
 
-  if (count === 0) {
-    uploadArea.style.display = ''
-    dropZone.style.display = 'flex'
-    fileTabs.style.display = 'none'
-    fileInfoRow.style.display = 'none'
-    optionsPanel.style.display = 'none'
-    actionRow.style.display = 'none'
-    statusText.textContent = ''
-    document.getElementById('nextSteps').style.display = 'none'
+const CSS_COLORS = { gray: '#808080', red: '#CC0000', blue: '#0000CC', black: '#000000', white: '#FFFFFF' }
+
+/* ── DOM refs ────────────────────────────────────────────────────────── */
+const fileInput    = document.getElementById('wmpdf_fileInput')
+const dropZone     = document.getElementById('wmpdf_dropZone')
+const toolLayout   = document.getElementById('wmpdf_toolLayout')
+const imageCol     = document.getElementById('wmpdf_imageCol')
+const fileChips    = document.getElementById('wmpdf_fileChips')
+const thumbGrid    = document.getElementById('wmpdf_thumbGrid')
+const textInput    = document.getElementById('wmpdf_text')
+const fontSizeInput = document.getElementById('wmpdf_fontSize')
+const opacitySlider = document.getElementById('wmpdf_opacity')
+const opacityVal   = document.getElementById('wmpdf_opacityVal')
+const swatchesEl   = document.getElementById('wmpdf_swatches')
+const posGrid      = document.getElementById('wmpdf_posGrid')
+const diagCheck    = document.getElementById('wmpdf_diagonal')
+const rotSlider    = document.getElementById('wmpdf_rotation')
+const rotVal       = document.getElementById('wmpdf_rotationVal')
+const applyBtn     = document.getElementById('wmpdf_applyBtn')
+const zipWrap      = document.getElementById('wmpdf_zipWrap')
+const zipBtn       = document.getElementById('wmpdf_zipBtn')
+const zipNote      = document.getElementById('wmpdf_zipNote')
+const statusText   = document.getElementById('wmpdf_status')
+const nextStepsDiv = document.getElementById('wmpdf_nextSteps')
+const nextButtons  = document.getElementById('wmpdf_nextButtons')
+
+/* ── Position grid ───────────────────────────────────────────────────── */
+const POSITIONS = [
+  'top-left','top-center','top-right',
+  'center-left','center','center-right',
+  'bottom-left','bottom-center','bottom-right'
+]
+
+function buildPosGrid() {
+  posGrid.innerHTML = ''
+  POSITIONS.forEach(pos => {
+    const cell = document.createElement('div')
+    cell.className = 'pos-cell' + (pos === opts.position ? ' active' : '')
+    cell.dataset.pos = pos
+    cell.innerHTML = '<div class="pos-dot"></div>'
+    cell.addEventListener('click', () => {
+      opts.position = pos
+      posGrid.querySelectorAll('.pos-cell').forEach(c => c.classList.toggle('active', c.dataset.pos === pos))
+      updateOverlays()
+    })
+    posGrid.appendChild(cell)
+  })
+}
+buildPosGrid()
+
+/* ── Control bindings ────────────────────────────────────────────────── */
+textInput.addEventListener('input', () => { opts.text = textInput.value.trim() || 'CONFIDENTIAL'; updateOverlays() })
+
+fontSizeInput.addEventListener('input', () => {
+  let v = parseInt(fontSizeInput.value) || 48
+  v = Math.max(20, Math.min(120, v))
+  opts.fontSize = v
+  updateOverlays()
+})
+
+opacitySlider.addEventListener('input', () => {
+  opts.opacity = parseInt(opacitySlider.value)
+  opacityVal.textContent = opts.opacity + '%'
+  updateOverlays()
+})
+
+swatchesEl.addEventListener('click', e => {
+  const sw = e.target.closest('.swatch')
+  if (!sw) return
+  opts.color = sw.dataset.color
+  swatchesEl.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.color === opts.color))
+  updateOverlays()
+})
+
+diagCheck.addEventListener('change', () => {
+  opts.diagonal = diagCheck.checked
+  if (opts.diagonal) {
+    opts.rotation = -45
+    rotSlider.value = -45
+    rotVal.innerHTML = '-45&deg;'
+  } else {
+    opts.rotation = 0
+    rotSlider.value = 0
+    rotVal.innerHTML = '0&deg;'
+  }
+  updateOverlays()
+})
+
+rotSlider.addEventListener('input', () => {
+  opts.rotation = parseInt(rotSlider.value)
+  rotVal.innerHTML = opts.rotation + '&deg;'
+  // Sync diagonal checkbox
+  diagCheck.checked = (opts.rotation === -45)
+  opts.diagonal = diagCheck.checked
+  updateOverlays()
+})
+
+/* ── Overlay positioning helper ──────────────────────────────────────── */
+function getOverlayStyles() {
+  const color = CSS_COLORS[opts.color] || '#808080'
+  const opac = opts.opacity / 100
+  const rot = opts.rotation
+
+  // Position -> CSS alignment
+  let alignItems = 'center', justifyContent = 'center'
+  const p = opts.position
+  if (p.startsWith('top')) alignItems = 'flex-start'
+  else if (p.startsWith('bottom')) alignItems = 'flex-end'
+  if (p.endsWith('left')) justifyContent = 'flex-start'
+  else if (p.endsWith('right')) justifyContent = 'flex-end'
+
+  // Padding offsets for edge positions
+  let padTop = '0', padBottom = '0', padLeft = '0', padRight = '0'
+  if (p.startsWith('top')) padTop = '8%'
+  if (p.startsWith('bottom')) padBottom = '8%'
+  if (p.endsWith('left')) padLeft = '6%'
+  if (p.endsWith('right')) padRight = '6%'
+
+  return { color, opac, rot, alignItems, justifyContent, padTop, padBottom, padLeft, padRight }
+}
+
+function updateOverlays() {
+  const overlays = thumbGrid.querySelectorAll('.thumb-overlay')
+  const s = getOverlayStyles()
+  overlays.forEach(ov => {
+    ov.style.alignItems = s.alignItems
+    ov.style.justifyContent = s.justifyContent
+    ov.style.paddingTop = s.padTop
+    ov.style.paddingBottom = s.padBottom
+    ov.style.paddingLeft = s.padLeft
+    ov.style.paddingRight = s.padRight
+    const txt = ov.querySelector('.thumb-overlay-text')
+    if (txt) {
+      txt.textContent = opts.text || 'CONFIDENTIAL'
+      txt.style.color = s.color
+      txt.style.opacity = s.opac
+      txt.style.transform = `rotate(${s.rot}deg)`
+      // Scale font size relative to thumbnail
+      const wrapW = ov.parentElement.offsetWidth || 120
+      const scaledFS = Math.max(6, Math.round(opts.fontSize * (wrapW / 600)))
+      txt.style.fontSize = scaledFS + 'px'
+      txt.style.fontWeight = 'bold'
+    }
+  })
+}
+
+/* ── File chips ──────────────────────────────────────────────────────── */
+function renderFileChips() {
+  fileChips.innerHTML = ''
+  if (pdfFiles.length <= 1) return
+  pdfFiles.forEach((entry, idx) => {
+    const chip = document.createElement('div')
+    chip.className = 'file-chip' + (idx === activeIdx ? ' active' : '')
+    const shortName = entry.name.replace(/\.[^.]+$/, '').slice(0, 14)
+    chip.innerHTML = `<span>${shortName}</span><button data-idx="${idx}">\u2715</button>`
+    chip.querySelector('span').addEventListener('click', () => {
+      activeIdx = idx
+      renderFileChips()
+      renderThumbnails()
+    })
+    chip.querySelector('button').addEventListener('click', e => {
+      e.stopPropagation()
+      pdfFiles.splice(idx, 1)
+      if (activeIdx >= pdfFiles.length) activeIdx = Math.max(0, pdfFiles.length - 1)
+      if (pdfFiles.length === 0) {
+        toolLayout.style.display = 'none'
+        dropZone.style.display = 'flex'
+        applyBtn.disabled = true
+      }
+      renderFileChips()
+      renderThumbnails()
+    })
+    fileChips.appendChild(chip)
+  })
+}
+
+/* ── Thumbnail rendering via PDF.js ──────────────────────────────────── */
+async function renderThumbnails() {
+  thumbGrid.innerHTML = ''
+  const entry = pdfFiles[activeIdx]
+  if (!entry) return
+
+  // If we already have cached canvases, reuse them
+  if (entry.thumbCanvases && entry.thumbCanvases.length) {
+    entry.thumbCanvases.forEach((cvs, i) => {
+      const wrap = createThumbWrap(cvs, i + 1)
+      thumbGrid.appendChild(wrap)
+    })
+    updateOverlays()
     return
   }
 
-  /* Hide drop zone after files loaded */
-  dropZone.style.display = 'none'
+  try {
+    const lib = await getPdfJs()
+    const loadTask = lib.getDocument({ data: entry.bytes.slice(0) })
+    const pdf = await loadTask.promise
+    entry.thumbCanvases = []
 
-  /* File tabs: show only when multiple files */
-  if (count > 1) {
-    fileTabs.style.display = 'flex'
-    renderTabs()
-  } else {
-    fileTabs.style.display = 'none'
-  }
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const vp = page.getViewport({ scale: 0.5 })
+      const cvs = document.createElement('canvas')
+      cvs.width = vp.width
+      cvs.height = vp.height
+      const ctx = cvs.getContext('2d')
+      await page.render({ canvasContext: ctx, viewport: vp }).promise
+      entry.thumbCanvases.push(cvs)
 
-  /* File info for active file */
-  if (activeFileIndex >= count) activeFileIndex = count - 1
-  const active = files[activeFileIndex]
-  fileInfoRow.style.display = 'flex'
-  fileInfoName.textContent = active.name
-  fileInfoMeta.textContent = ` \u2014 ${active.pageCount} ${pagesLabel}`
-
-  /* Options & action */
-  optionsPanel.style.display = 'block'
-  actionRow.style.display = 'flex'
-
-  /* Show/hide buttons based on file count */
-  applyBtn.textContent = applyLbl
-  applyAllBtn.style.display = count > 1 ? '' : 'none'
-}
-
-function renderTabs() {
-  fileTabs.innerHTML = ''
-  files.forEach((f, i) => {
-    const btn = document.createElement('button')
-    btn.className = 'file-tab' + (i === activeFileIndex ? ' active' : '')
-    btn.textContent = f.name.length > 22 ? f.name.slice(0, 20) + '\u2026' : f.name
-    btn.title = f.name
-    btn.addEventListener('click', () => {
-      activeFileIndex = i
-      updateUI()
-    })
-    fileTabs.appendChild(btn)
-  })
-  /* Add more tab */
-  if (files.length < MAX_FILES) {
-    const addBtn = document.createElement('button')
-    addBtn.className = 'file-tab-add'
-    addBtn.textContent = addMoreLbl
-    addBtn.addEventListener('click', () => fileInput.click())
-    fileTabs.appendChild(addBtn)
+      const wrap = createThumbWrap(cvs, i)
+      thumbGrid.appendChild(wrap)
+    }
+    updateOverlays()
+  } catch (err) {
+    console.error('[watermark-pdf] thumbnail render failed:', err)
+    thumbGrid.innerHTML = `<p style="font-size:12px;color:var(--text-muted);padding:20px;">Preview not available. Watermark will still be applied.</p>`
   }
 }
 
-/* -- Clear ------------------------------------------------------------------- */
-function clearAll() {
-  files = []
-  activeFileIndex = 0
-  fileInput.value = ''
-  updateUI()
+function createThumbWrap(canvas, pageNum) {
+  const wrap = document.createElement('div')
+  wrap.className = 'thumb-wrap'
+  wrap.appendChild(canvas)
+
+  const overlay = document.createElement('div')
+  overlay.className = 'thumb-overlay'
+  const txt = document.createElement('span')
+  txt.className = 'thumb-overlay-text'
+  overlay.appendChild(txt)
+  wrap.appendChild(overlay)
+
+  const label = document.createElement('span')
+  label.className = 'thumb-label'
+  label.textContent = pageNum
+  wrap.appendChild(label)
+
+  return wrap
 }
 
-clearBtn.addEventListener('click', clearAll)
-
-/* -- Load PDF files ---------------------------------------------------------- */
+/* ── Load PDF files ──────────────────────────────────────────────────── */
 async function loadPdfFiles(rawFiles) {
   const toLoad = Array.from(rawFiles).filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))
   if (!toLoad.length) {
@@ -292,10 +490,10 @@ async function loadPdfFiles(rawFiles) {
     return
   }
 
-  /* Clear previous results */
-  document.getElementById('nextSteps').style.display = 'none'
+  nextStepsDiv.style.display = 'none'
+  zipWrap.style.display = 'none'
 
-  const remaining = MAX_FILES - files.length
+  const remaining = MAX_FILES - pdfFiles.length
   if (remaining <= 0) {
     statusText.textContent = (t.wmpdf_max_files || 'Maximum') + ` ${MAX_FILES} files.`
     return
@@ -315,10 +513,11 @@ async function loadPdfFiles(rawFiles) {
     try {
       const buf = await file.arrayBuffer()
       const doc = await PDFDocument.load(buf)
-      files.push({
+      pdfFiles.push({
         name: file.name,
         bytes: new Uint8Array(buf.slice(0)),
         pageCount: doc.getPageCount(),
+        thumbCanvases: null,
       })
     } catch (err) {
       console.error('[watermark-pdf] load failed:', file.name, err)
@@ -326,14 +525,18 @@ async function loadPdfFiles(rawFiles) {
     }
   }
 
-  if (files.length) {
-    activeFileIndex = files.length === 1 ? 0 : activeFileIndex
+  if (pdfFiles.length) {
+    toolLayout.style.display = 'grid'
+    document.getElementById('wmpdf_main').style.maxWidth = '900px'
+    dropZone.style.display = 'none'
+    applyBtn.disabled = false
     statusText.textContent = ''
+    renderFileChips()
+    await renderThumbnails()
   }
-  updateUI()
 }
 
-/* -- File input & drag-drop -------------------------------------------------- */
+/* ── File input & drag-drop ──────────────────────────────────────────── */
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length) loadPdfFiles(fileInput.files)
   fileInput.value = ''
@@ -346,74 +549,68 @@ document.addEventListener('drop', e => {
 dropZone.addEventListener('dragenter', () => dropZone.classList.add('over'))
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'))
 
-/* -- Get current options ----------------------------------------------------- */
-function getOpts() {
-  return {
-    text: watermarkTextInput.value.trim() || 'CONFIDENTIAL',
-    fontSize: Math.max(20, Math.min(120, parseInt(fontSizeInput.value) || 48)),
-    opacity: Math.max(0.05, Math.min(0.5, parseFloat(opacityRange.value) || 0.15)),
-    color: colorSelect.value,
-    style: styleSelect.value,
-  }
+/* ── Position -> (x, y) calculation for pdf-lib ─────────────────────── */
+function calcPosition(pos, pageW, pageH, textWidth, fontSize) {
+  const margin = fontSize * 0.8
+  let x, y
+  // Horizontal
+  if (pos.endsWith('left')) x = margin
+  else if (pos.endsWith('right')) x = pageW - textWidth - margin
+  else x = pageW / 2 - textWidth / 2 // center
+  // Vertical
+  if (pos.startsWith('top')) y = pageH - fontSize - margin
+  else if (pos.startsWith('bottom')) y = margin
+  else y = pageH / 2 - fontSize / 2 // center
+
+  return { x, y }
 }
 
-/* -- Process a single PDF ---------------------------------------------------- */
-async function processOnePdf(entry, opts, onPageProgress) {
+/* ── Process one PDF ─────────────────────────────────────────────────── */
+async function processOnePdf(entry, onPageProgress) {
   const doc = await PDFDocument.load(entry.bytes)
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const totalPages = doc.getPageCount()
   const c = COLOR_MAP[opts.color] || COLOR_MAP.gray
   const textColor = rgb(c.r, c.g, c.b)
+  const actualOpacity = opts.opacity / 100
+  const text = opts.text || 'CONFIDENTIAL'
+  const fontSize = opts.fontSize
+  const rotation = opts.rotation
 
   for (let i = 0; i < totalPages; i++) {
     if (onPageProgress) onPageProgress(i + 1, totalPages)
 
     const page = doc.getPage(i)
     const { width, height } = page.getSize()
-    const textWidth = font.widthOfTextAtSize(opts.text, opts.fontSize)
+    const textWidth = font.widthOfTextAtSize(text, fontSize)
 
-    let x, y, rotate
+    let x, y
 
-    switch (opts.style) {
-      case 'diagonal': {
-        x = width / 2 - textWidth / 2 * Math.cos(Math.PI / 4)
-        y = height / 2 - textWidth / 2 * Math.sin(Math.PI / 4)
-        rotate = degrees(-45)
-        break
-      }
-      case 'center': {
-        x = width / 2 - textWidth / 2
-        y = height / 2
-        rotate = degrees(0)
-        break
-      }
-      case 'top': {
-        x = width / 2 - textWidth / 2
-        y = height - 60
-        rotate = degrees(0)
-        break
-      }
-      case 'bottom': {
-        x = width / 2 - textWidth / 2
-        y = 40
-        rotate = degrees(0)
-        break
-      }
-      default: {
-        x = width / 2 - textWidth / 2
-        y = height / 2
-        rotate = degrees(0)
-      }
+    if (opts.diagonal || Math.abs(rotation) > 5) {
+      // For rotated text, center it at the computed position then rotate
+      const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
+      // Adjust for rotation: when rotated, we position the starting point
+      // For diagonal across page from center, shift to account for rotation
+      const rad = (Math.abs(rotation) * Math.PI) / 180
+      const cosR = Math.cos(rad)
+      const sinR = Math.sin(rad)
+      // Approximate centering when rotated
+      x = pos.x + (textWidth / 2) * (1 - cosR)
+      y = pos.y + (textWidth / 2) * sinR * (rotation < 0 ? -1 : 1)
+    } else {
+      const pos = calcPosition(opts.position, width, height, textWidth, fontSize)
+      x = pos.x
+      y = pos.y
     }
 
-    page.drawText(opts.text, {
+    page.drawText(text, {
       x,
       y,
-      size: opts.fontSize,
+      size: fontSize,
       font,
       color: textColor,
-      opacity: opts.opacity,
-      rotate,
+      opacity: actualOpacity,
+      rotate: degrees(rotation),
     })
   }
 
@@ -421,10 +618,10 @@ async function processOnePdf(entry, opts, onPageProgress) {
   const blob = new Blob([watermarkedBytes], { type: 'application/pdf' })
   const baseName = entry.name.replace(/\.[^.]+$/, '')
   const filename = `${baseName}-watermarked.pdf`
-  return { name: entry.name, blob, filename, totalPages }
+  return { blob, filename, totalPages }
 }
 
-/* -- Trigger download -------------------------------------------------------- */
+/* ── Trigger download ────────────────────────────────────────────────── */
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -434,26 +631,74 @@ function triggerDownload(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
 
-/* -- Apply to current file --------------------------------------------------- */
+function makeUnique(usedNames, name) {
+  if (!usedNames.has(name)) { usedNames.add(name); return name }
+  const dot = name.lastIndexOf('.')
+  const base = dot !== -1 ? name.slice(0, dot) : name
+  const ext  = dot !== -1 ? name.slice(dot) : ''
+  let i = 1
+  while (usedNames.has(`${base}-${i}${ext}`)) i++
+  const unique = `${base}-${i}${ext}`
+  usedNames.add(unique)
+  return unique
+}
+
+/* ── Apply watermark ─────────────────────────────────────────────────── */
 applyBtn.addEventListener('click', async () => {
-  if (!files.length) return
+  if (!pdfFiles.length) return
   applyBtn.disabled = true
   applyBtn.textContent = applyingLbl
-  statusText.textContent = applyingLbl
-  document.getElementById('nextSteps').style.display = 'none'
-
-  const opts = getOpts()
+  statusText.textContent = ''
+  zipWrap.style.display = 'none'
+  nextStepsDiv.style.display = 'none'
+  lastResults = []
 
   try {
-    const result = await processOnePdf(files[activeFileIndex], opts, (page, total) => {
-      statusText.textContent = `${applyingLbl.replace('\u2026', '')} \u2014 ${files[activeFileIndex].name} (page ${page}/${total})`
-    })
-    triggerDownload(result.blob, result.filename)
-    lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
-    statusText.textContent = t.wmpdf_done_single || `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
-    if (window.showReviewPrompt) window.showReviewPrompt()
-    window.rcShowSaveButton?.(actionRow, result.blob, result.filename, 'watermark-pdf')
-    buildNextSteps()
+    if (pdfFiles.length === 1) {
+      const entry = pdfFiles[0]
+      const result = await processOnePdf(entry, (page, total) => {
+        statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
+      })
+      triggerDownload(result.blob, result.filename)
+      lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
+      statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
+      if (window.showReviewPrompt) window.showReviewPrompt()
+      window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf')
+      buildNextSteps()
+    } else {
+      // Multiple files -> ZIP
+      const results = []
+      for (let i = 0; i < pdfFiles.length; i++) {
+        const entry = pdfFiles[i]
+        const result = await processOnePdf(entry, (page, total) => {
+          statusText.textContent = `Adding watermark \u2014 ${entry.name} (page ${page}/${total})`
+        })
+        results.push(result)
+      }
+
+      statusText.textContent = t.wmpdf_zipping || 'Creating ZIP\u2026'
+      const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
+      const zip = new JSZip()
+      const usedNames = new Set()
+      for (const r of results) {
+        const safeName = makeUnique(usedNames, r.filename)
+        zip.file(safeName, r.blob)
+      }
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
+      const zipUrl = URL.createObjectURL(zipBlob)
+      zipBtn.href = zipUrl
+      zipBtn.download = 'watermarked-pdfs.zip'
+      zipBtn.onclick = () => setTimeout(() => URL.revokeObjectURL(zipUrl), 10000)
+      const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
+      zipNote.textContent = `${pdfFiles.length} files, ${totalPgs} pages \u2014 ${Math.round(zipBlob.size / 1024)} KB`
+      zipWrap.style.display = 'block'
+
+      lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
+      statusText.textContent = `Done! Watermark added to ${totalPgs} pages across ${results.length} files.`
+      if (window.showReviewPrompt) window.showReviewPrompt()
+      window.rcShowSaveButton?.(applyBtn.parentElement, zipBlob, 'watermarked-pdfs.zip', 'watermark-pdf')
+      buildNextSteps()
+    }
   } catch (err) {
     console.error('[watermark-pdf] failed:', err)
     statusText.textContent = (t.wmpdf_error || 'Error: ') + (err?.message || err)
@@ -463,73 +708,7 @@ applyBtn.addEventListener('click', async () => {
   applyBtn.textContent = applyLbl
 })
 
-/* -- Apply to all files & ZIP ------------------------------------------------ */
-applyAllBtn.addEventListener('click', async () => {
-  if (files.length < 2) return
-  applyAllBtn.disabled = true
-  applyBtn.disabled = true
-  applyAllBtn.textContent = applyingLbl
-  statusText.textContent = ''
-  document.getElementById('nextSteps').style.display = 'none'
-
-  const opts = getOpts()
-
-  try {
-    const results = []
-    for (let i = 0; i < files.length; i++) {
-      const result = await processOnePdf(files[i], opts, (page, total) => {
-        statusText.textContent = `${applyingLbl.replace('\u2026', '')} \u2014 ${files[i].name} (page ${page}/${total})`
-      })
-      results.push(result)
-    }
-
-    /* Single file fallback (shouldn't happen but safe) */
-    if (results.length === 1) {
-      triggerDownload(results[0].blob, results[0].filename)
-      lastResults = [{ blob: results[0].blob, name: results[0].filename, type: 'application/pdf' }]
-      statusText.textContent = t.wmpdf_done_single || `Done! Watermark added to ${results[0].totalPages} page(s).`
-      if (window.showReviewPrompt) window.showReviewPrompt()
-      buildNextSteps()
-      applyAllBtn.disabled = false
-      applyBtn.disabled = false
-      applyAllBtn.textContent = applyAllLbl
-      return
-    }
-
-    /* Individual downloads */
-    for (const r of results) {
-      triggerDownload(r.blob, r.filename)
-    }
-
-    /* ZIP download */
-    statusText.textContent = t.wmpdf_zipping || 'Creating ZIP\u2026'
-    const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')).default || window.JSZip
-    const zip = new JSZip()
-    for (const r of results) {
-      zip.file(r.filename, r.blob)
-    }
-    const zipBlob = await zip.generateAsync({ type: 'blob' })
-    triggerDownload(zipBlob, 'watermarked-pdfs.zip')
-
-    lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
-    const totalPgs = results.reduce((s, r) => s + r.totalPages, 0)
-    statusText.textContent = t.wmpdf_done || `Done! Watermark added to ${totalPgs} ${totalPgs === 1 ? 'page' : 'pages'} across ${results.length} files.`
-    if (window.showReviewPrompt) window.showReviewPrompt()
-    window.rcShowSaveButton?.(actionRow, zipBlob, 'watermarked-pdfs.zip', 'watermark-pdf')
-    buildNextSteps()
-  } catch (err) {
-    console.error('[watermark-pdf] failed:', err)
-    statusText.textContent = (t.wmpdf_error || 'Error: ') + (err?.message || err)
-  }
-
-  applyAllBtn.disabled = false
-  applyBtn.disabled = false
-  applyAllBtn.textContent = applyAllLbl
-})
-
-/* -- Next steps -------------------------------------------------------------- */
-
-// ── IndexedDB handoff ────────────────────────────────────────────────────────
+/* ── IndexedDB handoff ───────────────────────────────────────────────── */
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('relahconvert', 1)
@@ -549,7 +728,6 @@ async function saveFilesToIDB(items) {
     tx.onerror = () => reject(new Error('IDB write failed'))
   })
 }
-let lastResults = []
 
 async function loadFilesFromIDB() {
   const db = await openDB()
@@ -568,11 +746,12 @@ async function loadPendingFiles() {
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
-    const pdfFiles = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
-    loadPdfFiles(pdfFiles)
+    const files = records.map(r => new File([r.blob], r.name, { type: r.type || 'application/pdf' }))
+    loadPdfFiles(files)
   } catch (e) { console.warn('[watermark-pdf] IDB autoload failed:', e) }
 }
 
+/* ── Next steps ──────────────────────────────────────────────────────── */
 function buildNextSteps() {
   const ns = t.nav_short || {}
   const buttons = [
@@ -580,20 +759,23 @@ function buildNextSteps() {
     { label: ns['add-page-numbers'] || 'Add Page Numbers', href: localHref('add-page-numbers') },
     { label: ns['pdf-to-png'] || 'PDF to PNG', href: localHref('pdf-to-png') },
   ]
-  const nextStepsButtons = document.getElementById('nextStepsButtons')
-  nextStepsButtons.innerHTML = ''
+  nextButtons.innerHTML = ''
   buttons.forEach(b => {
     const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
-    btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
-    nextStepsButtons.appendChild(btn)
+    btn.addEventListener('click', async () => {
+      if (lastResults.length) {
+        try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {}
+      }
+      window.location.href = b.href
+    })
+    nextButtons.appendChild(btn)
   })
-  document.getElementById('nextSteps').style.display = 'block'
+  nextStepsDiv.style.display = 'block'
 }
 
-/* -- SEO section ------------------------------------------------------------- */
-
+/* ── SEO section ─────────────────────────────────────────────────────── */
 loadPendingFiles()
 
 ;(function injectSEO() {
