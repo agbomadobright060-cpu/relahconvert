@@ -9638,4 +9638,4 @@ export function injectFaqSchema(faqs) {
   script.type = 'application/ld+json'
   script.textContent = JSON.stringify(schema)
   document.head.appendChild(script)
-}
+}// cache-bust 1777335408
