@@ -106,7 +106,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.rotatepdf_page_title || (seoData ? seoData.page_title : 'Rotate PDF Pages Free Online \u2014 90\u00B0, 180\u00B0, 270\u00B0 | RelahConvert')
+document.title = t.rotatepdf_page_title || 'Rotate PDF Pages Free Online \u2014 90\u00B0, 180\u00B0, 270\u00B0 | RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.rotatepdf_meta_desc || 'Rotate individual PDF pages by 90, 180, or 270 degrees. Preview pages, rotate selectively, and download.'

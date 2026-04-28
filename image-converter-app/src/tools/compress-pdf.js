@@ -90,7 +90,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.compresspdf_page_title || (seoData ? seoData.page_title : 'Compress PDF Free | Reduce PDF Size Online \u2014 RelahConvert')
+document.title = t.compresspdf_page_title || 'Compress PDF Free | Reduce PDF Size Online \u2014 RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.compresspdf_meta_desc || 'Compress PDF free. Reduce PDF file size by optimizing images.'

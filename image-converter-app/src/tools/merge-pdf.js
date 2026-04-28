@@ -63,7 +63,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.mergepdf_page_title || (seoData ? seoData.page_title : 'Merge PDF Free Online | Combine PDFs — RelahConvert')
+document.title = t.mergepdf_page_title || 'Merge PDF Free Online | Combine PDFs — RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.mergepdf_meta_desc || 'Merge PDF files free online. Combine multiple PDFs into one document, reorder pages by dragging. Browser-only, no upload required.'

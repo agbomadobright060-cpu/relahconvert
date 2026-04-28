@@ -69,7 +69,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.reorderpdf_page_title || (seoData ? seoData.page_title : 'Reorder PDF Pages Free Online \u2014 Drag & Drop | RelahConvert')
+document.title = t.reorderpdf_page_title || 'Reorder PDF Pages Free Online \u2014 Drag & Drop | RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.reorderpdf_meta_desc || 'Reorder PDF pages free online. Drag and drop to rearrange pages in any order. Browser-only, no upload, instant download.'

@@ -67,7 +67,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.extractpdf_page_title || (seoData ? seoData.page_title : 'Extract PDF Pages Free Online | No Upload \u2014 RelahConvert')
+document.title = t.extractpdf_page_title || 'Extract PDF Pages Free Online | No Upload \u2014 RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.extractpdf_meta_desc || 'Extract specific pages from a PDF free. Select pages visually, download a new PDF with only the pages you need. Browser-only, no upload.'

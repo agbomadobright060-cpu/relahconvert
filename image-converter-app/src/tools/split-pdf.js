@@ -106,7 +106,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.splitpdf_page_title || (seoData ? seoData.page_title : 'Split PDF Online Free | Extract Pages \u2014 RelahConvert')
+document.title = t.splitpdf_page_title || 'Split PDF Online Free | Extract Pages \u2014 RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.splitpdf_meta_desc || 'Split PDF into separate pages or custom ranges free. Download individual PDFs or ZIP all.'
