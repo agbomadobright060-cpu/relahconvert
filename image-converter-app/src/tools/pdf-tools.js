@@ -120,7 +120,7 @@ document.body.insertBefore(bgFade, bgCanvas.nextSibling)
 document.querySelector('#app').innerHTML = `
   <div>
     <section class="pdf-hero">
-      <h1>${t.pdfhub_title || 'PDF Tools'}</h1>
+      <h1>Every PDF tool<br>you need, <em>free</em></h1>
       <p>${hubDesc}</p>
     </section>
     <section class="pdf-tools-section">
