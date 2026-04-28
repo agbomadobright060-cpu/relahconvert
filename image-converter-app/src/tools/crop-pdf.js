@@ -3,7 +3,7 @@ import { LIMITS, formatSize } from '../core/utils.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
-injectHreflang('crop-pdf'
+injectHreflang('crop-pdf')
 
 const t = getT()
 
@@ -32,14 +32,14 @@ document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:va
 let pdfjsLib = null
 async function loadPdfJs() {
   if (pdfjsLib) return pdfjsLib
-  const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs'
+  const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs')
   mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs'
   pdfjsLib = mod
   return mod
 }
 
 /* -- Styles ------------------------------------------------------------------ */
-const style = document.createElement('style'
+const style = document.createElement('style')
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
@@ -139,15 +139,15 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.croppdf_page_title || 'Crop PDF Pages Free Online \u2014 Adjust Margins | RelahConvert'
-const _metaDesc = document.createElement('meta'
+document.title = t.croppdf_page_title || (seoData ? seoData.page_title : 'Crop PDF Pages Free Online \u2014 Adjust Margins | RelahConvert')
+const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.croppdf_meta_desc || 'Crop PDF pages by setting custom margins. Preview the crop area, adjust top, bottom, left, and right margins, then download.'
 document.head.appendChild(_metaDesc)
 
-const _tp = toolName.split(' '
+const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
-const titlePart2 = _tp.slice(1).join(' '
+const titlePart2 = _tp.slice(1).join(' ')
 
 document.querySelector('#app').innerHTML = `
   <div id="toolWrap" style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
@@ -220,36 +220,36 @@ document.querySelector('#app').innerHTML = `
 injectHeader()
 
 /* -- DOM refs ---------------------------------------------------------------- */
-const uploadArea     = document.getElementById('uploadArea'
-const fileInput      = document.getElementById('fileInput'
-const addMoreInput   = document.getElementById('addMoreInput'
-const fileTabs       = document.getElementById('fileTabs'
-const fileHeader     = document.getElementById('fileHeader'
-const optionsPanel   = document.getElementById('optionsPanel'
-const previewCenter  = document.getElementById('previewCenter'
-const previewWrap    = document.getElementById('previewWrap'
-const previewCanvas  = document.getElementById('previewCanvas'
-const shadeTop       = document.getElementById('shadeTop'
-const shadeBottom    = document.getElementById('shadeBottom'
-const shadeLeft      = document.getElementById('shadeLeft'
-const shadeRight     = document.getElementById('shadeRight'
-const cropBoxOutline = document.getElementById('cropBoxOutline'
-const handleTop      = document.getElementById('handleTop'
-const handleBottom   = document.getElementById('handleBottom'
-const handleLeft     = document.getElementById('handleLeft'
-const handleRight    = document.getElementById('handleRight'
-const cropDims       = document.getElementById('cropDims'
-const pageNav        = document.getElementById('pageNav'
-const prevPageBtn    = document.getElementById('prevPageBtn'
-const nextPageBtn    = document.getElementById('nextPageBtn'
-const pageInfo       = document.getElementById('pageInfo'
-const statusText     = document.getElementById('statusText'
-const actionRow      = document.getElementById('actionRow'
-const marginTopEl    = document.getElementById('marginTop'
-const marginBottomEl = document.getElementById('marginBottom'
-const marginLeftEl   = document.getElementById('marginLeft'
-const marginRightEl  = document.getElementById('marginRight'
-const applyAllCheck  = document.getElementById('applyAllCheck'
+const uploadArea     = document.getElementById('uploadArea')
+const fileInput      = document.getElementById('fileInput')
+const addMoreInput   = document.getElementById('addMoreInput')
+const fileTabs       = document.getElementById('fileTabs')
+const fileHeader     = document.getElementById('fileHeader')
+const optionsPanel   = document.getElementById('optionsPanel')
+const previewCenter  = document.getElementById('previewCenter')
+const previewWrap    = document.getElementById('previewWrap')
+const previewCanvas  = document.getElementById('previewCanvas')
+const shadeTop       = document.getElementById('shadeTop')
+const shadeBottom    = document.getElementById('shadeBottom')
+const shadeLeft      = document.getElementById('shadeLeft')
+const shadeRight     = document.getElementById('shadeRight')
+const cropBoxOutline = document.getElementById('cropBoxOutline')
+const handleTop      = document.getElementById('handleTop')
+const handleBottom   = document.getElementById('handleBottom')
+const handleLeft     = document.getElementById('handleLeft')
+const handleRight    = document.getElementById('handleRight')
+const cropDims       = document.getElementById('cropDims')
+const pageNav        = document.getElementById('pageNav')
+const prevPageBtn    = document.getElementById('prevPageBtn')
+const nextPageBtn    = document.getElementById('nextPageBtn')
+const pageInfo       = document.getElementById('pageInfo')
+const statusText     = document.getElementById('statusText')
+const actionRow      = document.getElementById('actionRow')
+const marginTopEl    = document.getElementById('marginTop')
+const marginBottomEl = document.getElementById('marginBottom')
+const marginLeftEl   = document.getElementById('marginLeft')
+const marginRightEl  = document.getElementById('marginRight')
+const applyAllCheck  = document.getElementById('applyAllCheck')
 
 /* -- State ------------------------------------------------------------------- */
 let files = []          // Array of { name, bytes, pdfDocProxy, pageCount, pageMargins, currentPage }
@@ -262,9 +262,9 @@ let pagePtHeight  = 0     // current page height in PDF points
 let dragging      = null  // which edge is being dragged: 'top'|'bottom'|'left'|'right'|null
 
 /* -- Apply mode toggle ------------------------------------------------------- */
-const croppdf_applyModeToggle = document.getElementById('croppdf_applyModeToggle'
-const croppdf_modeAllBtn = document.getElementById('croppdf_modeAll'
-const croppdf_modeIndivBtn = document.getElementById('croppdf_modeIndiv'
+const croppdf_applyModeToggle = document.getElementById('croppdf_applyModeToggle')
+const croppdf_modeAllBtn = document.getElementById('croppdf_modeAll')
+const croppdf_modeIndivBtn = document.getElementById('croppdf_modeIndiv')
 let croppdf_applyMode = 'all'
 
 croppdf_modeAllBtn.addEventListener('click', () => {
@@ -454,7 +454,7 @@ async function renderPage(pageIdx) {
   pageViewport = page.getViewport({ scale: renderScale })
   previewCanvas.width  = pageViewport.width
   previewCanvas.height = pageViewport.height
-  const ctx = previewCanvas.getContext('2d'
+  const ctx = previewCanvas.getContext('2d')
   ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height)
   await page.render({ canvasContext: ctx, viewport: pageViewport, intent: 'display' }).promise
 
@@ -544,8 +544,8 @@ function updateLayout() {
 function renderFileTabs() {
   fileTabs.innerHTML = ''
   files.forEach((f, i) => {
-    const tab = document.createElement('button'
-    tab.className = 'file-tab' + (i === activeFileIndex ? ' active' : ''
+    const tab = document.createElement('button')
+    tab.className = 'file-tab' + (i === activeFileIndex ? ' active' : '')
     const shortName = f.name.length > 20 ? f.name.slice(0, 17) + '\u2026' : f.name
     tab.innerHTML = `${shortName}<span class="tab-close">\u00D7</span>`
     tab.title = f.name
@@ -559,7 +559,7 @@ function renderFileTabs() {
     fileTabs.appendChild(tab)
   })
   // Add more button
-  const addBtn = document.createElement('button'
+  const addBtn = document.createElement('button')
   addBtn.className = 'file-tab-add'
   addBtn.textContent = addMoreLbl
   addBtn.addEventListener('click', () => addMoreInput.click())
@@ -706,7 +706,7 @@ function resetState() {
   fileHeader.innerHTML        = ''
   fileTabs.style.display      = 'none'
   fileTabs.innerHTML          = ''
-  optionsPanel.classList.remove('on'
+  optionsPanel.classList.remove('on')
   previewCenter.style.display = 'none'
   pageNav.style.display       = 'none'
   actionRow.style.display     = 'none'
@@ -790,7 +790,7 @@ async function applyCropSingle(idx) {
 
   try {
     const blob = await buildCroppedPdf(f)
-    const baseName = f.name.replace(/\.[^.]+$/, ''
+    const baseName = f.name.replace(/\.[^.]+$/, '')
     const outName = `${baseName}-cropped.pdf`
     lastResults = [{ blob, name: outName, type: 'application/pdf' }]
     downloadBlob(blob, outName)
@@ -815,21 +815,21 @@ async function applyCropAllZip() {
   setButtonsDisabled(true)
 
   try {
-    const JSZipModule = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+    const JSZipModule = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
     const JSZip = JSZipModule.default || window.JSZip
     const zip = new JSZip()
 
     for (let i = 0; i < files.length; i++) {
       statusText.textContent = `${applyingLbl} (${i + 1}/${files.length})`
       const blob = await buildCroppedPdf(files[i])
-      const baseName = files[i].name.replace(/\.[^.]+$/, ''
+      const baseName = files[i].name.replace(/\.[^.]+$/, '')
       zip.file(makeUnique(usedNames, `${baseName}-cropped.pdf`), blob)
     }
 
     statusText.textContent = t.croppdf_zipping || 'Creating ZIP\u2026'
     const zipBlob = await zip.generateAsync({ type: 'blob' })
     lastResults = [{ blob: zipBlob, name: 'cropped-pdfs.zip', type: 'application/zip' }]
-    downloadBlob(zipBlob, 'cropped-pdfs.zip'
+    downloadBlob(zipBlob, 'cropped-pdfs.zip')
 
     statusText.textContent = (t.croppdf_done || 'Done!') + ` ${files.length} files cropped.`
     window.rcShowSaveButton?.()
@@ -845,7 +845,7 @@ async function applyCropAllZip() {
 /* -- Helpers ----------------------------------------------------------------- */
 function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a'
+  const a = document.createElement('a')
   a.href = url
   a.download = name
   a.click()
@@ -855,8 +855,8 @@ function downloadBlob(blob, name) {
 function setButtonsDisabled(disabled) {
   actionRow.querySelectorAll('.action-btn').forEach(btn => {
     btn.disabled = disabled
-    if (disabled) btn.classList.add('disabled'
-    else btn.classList.remove('disabled'
+    if (disabled) btn.classList.add('disabled')
+    else btn.classList.remove('disabled')
   })
 }
 
@@ -868,7 +868,7 @@ resizeObs.observe(previewWrap)
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
-  const dot = name.lastIndexOf('.'
+  const dot = name.lastIndexOf('.')
   const base = dot !== -1 ? name.slice(0, dot) : name
   const ext  = dot !== -1 ? name.slice(dot) : ''
   let i = 1
@@ -889,8 +889,8 @@ function openDB() {
 async function saveFilesToIDB(items) {
   const db = await openDB()
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('pending', 'readwrite'
-    const store = tx.objectStore('pending'
+    const tx = db.transaction('pending', 'readwrite')
+    const store = tx.objectStore('pending')
     store.clear()
     items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
     tx.oncomplete = () => resolve()
@@ -900,8 +900,8 @@ async function saveFilesToIDB(items) {
 
 async function loadFilesFromIDB() {
   const db = await openDB()
-  const tx = db.transaction('pending', 'readwrite'
-  const store = tx.objectStore('pending'
+  const tx = db.transaction('pending', 'readwrite')
+  const store = tx.objectStore('pending')
   return new Promise((resolve, reject) => {
     const req = store.getAll()
     req.onsuccess = () => { store.clear(); resolve(req.result || []) }
@@ -911,7 +911,7 @@ async function loadFilesFromIDB() {
 
 async function loadPendingFiles() {
   if (!sessionStorage.getItem('pendingFromIDB')) return
-  sessionStorage.removeItem('pendingFromIDB'
+  sessionStorage.removeItem('pendingFromIDB')
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
@@ -928,10 +928,10 @@ function buildNextSteps() {
     { label: ns['add-page-numbers'] || 'Add Page Numbers', href: localHref('add-page-numbers') },
     { label: ns['pdf-to-png'] || 'PDF to PNG', href: localHref('pdf-to-png') },
   ]
-  const nextStepsButtons = document.getElementById('nextStepsButtons'
+  const nextStepsButtons = document.getElementById('nextStepsButtons')
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {
-    const btn = document.createElement('button'
+    const btn = document.createElement('button')
     btn.className = 'next-link'
     btn.textContent = b.label
     btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
@@ -949,7 +949,7 @@ loadPendingFiles()
   if (!seo) return
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-  const div = document.createElement('div'
+  const div = document.createElement('div')
   div.className = 'seo-section'
   injectFaqSchema(seo.faqs)
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l => `<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
