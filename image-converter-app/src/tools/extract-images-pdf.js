@@ -2,13 +2,13 @@ import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 
-injectHreflang('extract-images-pdf')
+injectHreflang('extract-images-pdf'
 
 const t = getT()
 
 const toolName    = (t.nav_short && t.nav_short['extract-images-pdf']) || 'Extract Images from PDF'
 const seoData     = t.seo && t.seo['extract-images-pdf']
-const descText    = t.extimg_desc || (seoData ? seoData.h2a : 'Extract actual embedded images from any PDF — photos, logos, diagrams — at their original resolution.')
+const descText    = t.extimg_desc || (seoData ? seoData.h2a : 'Extract actual embedded images from any PDF — photos, logos, diagrams — at their original resolution.'
 const selectLbl   = t.extimg_select || t.pdfpng_select || 'Select PDFs'
 const dropHint    = t.extimg_drop_hint || t.pdfpng_drop_hint || 'or drop PDFs anywhere'
 const extractLbl  = t.extimg_extract_btn || 'Extract Images'
@@ -21,7 +21,7 @@ const loadingLbl  = t.extimg_loading || 'Loading PDF\u2026'
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
-const style = document.createElement('style')
+const style = document.createElement('style'
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
@@ -67,15 +67,15 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.extimg_page_title || (seoData ? seoData.page_title : 'Extract Images from PDF Free Online | RelahConvert')
-const _metaDesc = document.createElement('meta')
+document.title = t.extimg_page_title || 'Extract Images from PDF Free Online | RelahConvert'
+const _metaDesc = document.createElement('meta'
 _metaDesc.name = 'description'
 _metaDesc.content = t.extimg_meta_desc || 'Extract actual embedded images from any PDF at their original resolution. Download photos, logos, and diagrams individually or as a ZIP.'
 document.head.appendChild(_metaDesc)
 
-const _tp = toolName.split(' ')
+const _tp = toolName.split(' '
 const titlePart1 = _tp[0]
-const titlePart2 = _tp.slice(1).join(' ')
+const titlePart2 = _tp.slice(1).join(' '
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
@@ -114,15 +114,15 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput    = document.getElementById('fileInput')
-const imageGrid    = document.getElementById('imageGrid')
-const fileMeta     = document.getElementById('fileMeta')
-const fileMetaText = document.getElementById('fileMetaText')
-const removeBtn    = document.getElementById('removeBtn')
-const extractBtn   = document.getElementById('extractBtn')
-const zipBtn       = document.getElementById('zipBtn')
-const statusText   = document.getElementById('statusText')
-const fileTabs     = document.getElementById('fileTabs')
+const fileInput    = document.getElementById('fileInput'
+const imageGrid    = document.getElementById('imageGrid'
+const fileMeta     = document.getElementById('fileMeta'
+const fileMetaText = document.getElementById('fileMetaText'
+const removeBtn    = document.getElementById('removeBtn'
+const extractBtn   = document.getElementById('extractBtn'
+const zipBtn       = document.getElementById('zipBtn'
+const statusText   = document.getElementById('statusText'
+const fileTabs     = document.getElementById('fileTabs'
 
 /* -- Multi-file state -------------------------------------------------------- */
 let files = []          // { name, bytes, pdfDocProxy, pageCount, extractedImages }
@@ -133,9 +133,9 @@ const MAX_FILES = 25
 const MAX_SIZE  = 50 * 1024 * 1024
 
 // Apply mode toggle
-const extimgpdf_applyModeToggle = document.getElementById('extimgpdf_applyModeToggle')
-const extimgpdf_modeAllBtn = document.getElementById('extimgpdf_modeAll')
-const extimgpdf_modeIndivBtn = document.getElementById('extimgpdf_modeIndiv')
+const extimgpdf_applyModeToggle = document.getElementById('extimgpdf_applyModeToggle'
+const extimgpdf_modeAllBtn = document.getElementById('extimgpdf_modeAll'
+const extimgpdf_modeIndivBtn = document.getElementById('extimgpdf_modeIndiv'
 let extimgpdf_applyMode = 'all'
 
 extimgpdf_modeAllBtn.addEventListener('click', () => {
@@ -153,7 +153,7 @@ extimgpdf_modeIndivBtn.addEventListener('click', () => {
 let pdfjsLib = null
 async function loadPdfJs() {
   if (pdfjsLib) return pdfjsLib
-  const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs')
+  const mod = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs'
   mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs'
   pdfjsLib = mod
   return mod
@@ -163,7 +163,7 @@ async function loadPdfJs() {
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
-  const dot = name.lastIndexOf('.')
+  const dot = name.lastIndexOf('.'
   const base = dot !== -1 ? name.slice(0, dot) : name
   const ext  = dot !== -1 ? name.slice(dot) : ''
   let i = 1
@@ -184,8 +184,8 @@ function openDB() {
 async function saveFilesToIDB(items) {
   const db = await openDB()
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('pending', 'readwrite')
-    const store = tx.objectStore('pending')
+    const tx = db.transaction('pending', 'readwrite'
+    const store = tx.objectStore('pending'
     store.clear()
     items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
     tx.oncomplete = () => resolve()
@@ -195,8 +195,8 @@ async function saveFilesToIDB(items) {
 
 async function loadFilesFromIDB() {
   const db = await openDB()
-  const tx = db.transaction('pending', 'readwrite')
-  const store = tx.objectStore('pending')
+  const tx = db.transaction('pending', 'readwrite'
+  const store = tx.objectStore('pending'
   return new Promise((resolve, reject) => {
     const req = store.getAll()
     req.onsuccess = () => { store.clear(); resolve(req.result || []) }
@@ -206,7 +206,7 @@ async function loadFilesFromIDB() {
 
 async function loadPendingFiles() {
   if (!sessionStorage.getItem('pendingFromIDB')) return
-  sessionStorage.removeItem('pendingFromIDB')
+  sessionStorage.removeItem('pendingFromIDB'
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
@@ -222,10 +222,10 @@ function buildNextSteps() {
     { label: ns.resize || 'Resize Image', href: localHref('resize') },
     { label: ns['png-to-jpg'] || 'PNG to JPG', href: localHref('png-to-jpg') },
   ]
-  const nextStepsButtons = document.getElementById('nextStepsButtons')
+  const nextStepsButtons = document.getElementById('nextStepsButtons'
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {
-    const btn = document.createElement('button')
+    const btn = document.createElement('button'
     btn.className = 'next-link'
     btn.textContent = b.label
     btn.addEventListener('click', async () => {
@@ -245,7 +245,7 @@ function resetState() {
   activeFileIndex = 0
   lastResults = []
   imageGrid.innerHTML = ''
-  fileMeta.classList.remove('on')
+  fileMeta.classList.remove('on'
   fileTabs.style.display = 'none'
   fileTabs.innerHTML = ''
   if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
@@ -264,8 +264,8 @@ function renderFileTabs() {
   if (files.length <= 1) { fileTabs.style.display = 'none'; return }
   fileTabs.style.display = 'flex'
   files.forEach((f, i) => {
-    const tab = document.createElement('button')
-    tab.className = 'file-tab' + (i === activeFileIndex ? ' active' : '')
+    const tab = document.createElement('button'
+    tab.className = 'file-tab' + (i === activeFileIndex ? ' active' : ''
     const shortName = f.name.length > 22 ? f.name.slice(0, 19) + '\u2026' : f.name
     let badge = ''
     if (f.extractedImages && f.extractedImages.length > 0) badge = `<span class="tab-badge">(${f.extractedImages.length})</span>`
@@ -306,18 +306,18 @@ function renderActiveFileGrid() {
   }
 
   f.extractedImages.forEach(item => {
-    const card = document.createElement('div')
+    const card = document.createElement('div'
     card.className = 'img-card'
-    const img = document.createElement('img')
+    const img = document.createElement('img'
     img.src = item.url
     img.alt = item.label
-    const iname = document.createElement('div')
+    const iname = document.createElement('div'
     iname.className = 'iname'
     iname.textContent = item.label
-    const imeta = document.createElement('div')
+    const imeta = document.createElement('div'
     imeta.className = 'imeta'
     imeta.textContent = `${item.w} \u00D7 ${item.h} \u2014 ${formatSize(item.size)}`
-    const dlLink = document.createElement('a')
+    const dlLink = document.createElement('a'
     dlLink.className = 'dl-link'
     dlLink.href = item.url
     dlLink.download = item.name
@@ -329,7 +329,7 @@ function renderActiveFileGrid() {
 
   const count = f.extractedImages.length
   statusText.textContent = count === 1
-    ? (t.extimg_image_ready || '1 image extracted.')
+    ? (t.extimg_image_ready || '1 image extracted.'
     : `${count} ${t.extimg_images_ready || 'images extracted.'}`
 
   if (count > 1) {
@@ -388,7 +388,7 @@ async function loadPdfFiles(rawFiles) {
 
     activeFileIndex = 0
     document.getElementById('uploadArea').style.display = 'none'
-    fileMeta.classList.add('on')
+    fileMeta.classList.add('on'
     updateFileMetaText()
     renderFileTabs()
     document.getElementById('actionRow').style.display = 'flex'
@@ -421,10 +421,10 @@ function imageDataToBlob(imgData) {
       const h = imgData.height
       if (!w || !h || w < 1 || h < 1) { resolve(null); return }
 
-      const canvas = document.createElement('canvas')
+      const canvas = document.createElement('canvas'
       canvas.width = w
       canvas.height = h
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext('2d'
 
       const rawData = imgData.data
       const kind = imgData.kind
@@ -476,7 +476,7 @@ function imageDataToBlob(imgData) {
         return
       }
 
-      canvas.toBlob(blob => resolve(blob ? { blob, w, h } : null), 'image/png')
+      canvas.toBlob(blob => resolve(blob ? { blob, w, h } : null), 'image/png'
     } catch (e) {
       console.warn('[extract-images-pdf] imageDataToBlob error:', e)
       resolve(null)
@@ -487,14 +487,14 @@ function imageDataToBlob(imgData) {
 // -- Extract images from a single file entry ---------------------------------
 async function extractFromFile(fileEntry) {
   const pdfDoc = fileEntry.pdfDocProxy
-  const pdfFileName = fileEntry.name.replace(/\.[^.]+$/, '')
+  const pdfFileName = fileEntry.name.replace(/\.[^.]+$/, ''
   const pdfjs = await loadPdfJs()
   const results = []
   const seenImages = new Set()
   let imgCount = 0
 
   for (let p = 1; p <= pdfDoc.numPages; p++) {
-    statusText.textContent = `${fileEntry.name}: scanning page ${p}/${pdfDoc.numPages}` + (imgCount > 0 ? ` \u2014 found ${imgCount} image${imgCount !== 1 ? 's' : ''} so far` : '')
+    statusText.textContent = `${fileEntry.name}: scanning page ${p}/${pdfDoc.numPages}` + (imgCount > 0 ? ` \u2014 found ${imgCount} image${imgCount !== 1 ? 's' : ''} so far` : ''
 
     let page
     try { page = await pdfDoc.getPage(p) } catch (e) { continue }
@@ -550,10 +550,10 @@ async function extractFromFile(fileEntry) {
       try {
         const page = await pdfDoc.getPage(p)
         const viewport = page.getViewport({ scale: 2.0 })
-        const canvas = document.createElement('canvas')
+        const canvas = document.createElement('canvas'
         canvas.width = viewport.width
         canvas.height = viewport.height
-        const ctx = canvas.getContext('2d')
+        const ctx = canvas.getContext('2d'
         ctx.fillStyle = '#ffffff'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         await page.render({ canvasContext: ctx, viewport }).promise
@@ -622,7 +622,7 @@ extractBtn.addEventListener('click', async () => {
       statusText.textContent = `${totalImages} images extracted from ${files.length} files. Zipping\u2026`
 
       try {
-        const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+        const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
         const JSZip = mod.default || window.JSZip
         const zip = new JSZip()
 
@@ -636,7 +636,7 @@ extractBtn.addEventListener('click', async () => {
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
-        const a = document.createElement('a')
+        const a = document.createElement('a'
         a.href = URL.createObjectURL(zipBlob)
         const zipName = files.length === 1
           ? `${files[0].name.replace(/\.[^.]+$/, '')}-images.zip`
@@ -644,7 +644,7 @@ extractBtn.addEventListener('click', async () => {
         a.download = zipName
         a.click()
         setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-        window.rcShowSaveButton?.(extractBtn.parentElement, zipBlob, zipName, 'extract-images-pdf')
+        window.rcShowSaveButton?.(extractBtn.parentElement, zipBlob, zipName, 'extract-images-pdf'
 
         statusText.textContent = `${totalImages} images from ${files.length} files downloaded as ZIP.`
         if (window.showReviewPrompt) window.showReviewPrompt()
@@ -694,20 +694,20 @@ zipBtn.addEventListener('click', async () => {
   zipBtn.textContent = 'Zipping\u2026'
   zipBtn.disabled = true
   try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
     const JSZip = mod.default || window.JSZip
     const zip = new JSZip()
     for (const r of results) zip.file(r.name, await r.blob.arrayBuffer())
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
     const f = files[activeFileIndex]
     const zipName = `${f ? f.name.replace(/\.[^.]+$/, '') : 'pdf-images'}.zip`
-    const a = document.createElement('a')
+    const a = document.createElement('a'
     a.href = URL.createObjectURL(zipBlob)
     a.download = zipName
     a.click()
     if (window.showReviewPrompt) window.showReviewPrompt()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, zipName, 'extract-images-pdf')
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, zipName, 'extract-images-pdf'
   } catch (e) {
     alert('ZIP failed: ' + e.message)
   }
@@ -724,7 +724,7 @@ loadPendingFiles()
   if (!seo) return
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-  const div = document.createElement('div')
+  const div = document.createElement('div'
   div.className = 'seo-section'
   injectFaqSchema(seo.faqs)
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l => `<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`

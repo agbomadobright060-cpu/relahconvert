@@ -3,7 +3,7 @@ import { LIMITS, formatSize } from '../core/utils.js'
 import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib'
 
-injectHreflang('watermark-pdf')
+injectHreflang('watermark-pdf'
 
 const t = getT()
 
@@ -22,9 +22,9 @@ const pagesLabel  = t.wmpdf_pages || t.pdfpng_pages || 'pages'
 const MAX_FILES = LIMITS.MAX_FILES || 25
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 
-const _tp = toolName.split(' ')
+const _tp = toolName.split(' '
 const h1Main = _tp[0]
-const h1Em = _tp.slice(1).join(' ')
+const h1Em = _tp.slice(1).join(' '
 
 /* ── PDF.js CDN ─────────────────────────────────────────────────────────── */
 const PDFJS_CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build'
@@ -34,7 +34,7 @@ async function ensurePdfJs() {
   if (pdfjsLib) return pdfjsLib
   if (window.pdfjsLib) { pdfjsLib = window.pdfjsLib; return pdfjsLib }
   return new Promise((resolve, reject) => {
-    const s = document.createElement('script')
+    const s = document.createElement('script'
     s.src = `${PDFJS_CDN}/pdf.min.mjs`
     s.type = 'module'
     s.onload = () => {
@@ -51,7 +51,7 @@ async function ensurePdfJs() {
 async function loadPdfJsFallback() {
   if (pdfjsLib) return pdfjsLib
   return new Promise((resolve, reject) => {
-    const s = document.createElement('script')
+    const s = document.createElement('script'
     s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'
     s.onload = () => {
       pdfjsLib = window.pdfjsLib
@@ -70,7 +70,7 @@ async function getPdfJs() {
 /* ── Styles ──────────────────────────────────────────────────────────── */
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
-const style = document.createElement('style')
+const style = document.createElement('style'
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
@@ -139,8 +139,8 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.wmpdf_page_title || (seoData ? seoData.page_title : 'Watermark PDF Free | Add Text Watermark to PDF Online \u2014 RelahConvert')
-const _metaDesc = document.createElement('meta')
+document.title = t.wmpdf_page_title || 'Watermark PDF Free | Add Text Watermark to PDF Online \u2014 RelahConvert'
+const _metaDesc = document.createElement('meta'
 _metaDesc.name = 'description'
 _metaDesc.content = t.wmpdf_meta_desc || 'Add text watermarks to PDF files free. Choose text, font size, opacity, color, and placement style.'
 document.head.appendChild(_metaDesc)
@@ -285,17 +285,17 @@ function loadOptsFromFile() {
   if (!fo) return
   Object.assign(opts, fo)
   // Sync UI from opts
-  const ti = document.getElementById('wmpdf_textInput')
-  const fsi = document.getElementById('wmpdf_fontSize')
-  const cp = document.getElementById('wmpdf_colorPicker')
-  const ch = document.getElementById('wmpdf_colorHex')
-  const dc = document.getElementById('wmpdf_diagonal')
-  const rs = document.getElementById('wmpdf_rotation')
-  const rv = document.getElementById('wmpdf_rotationVal')
-  const os = document.getElementById('wmpdf_opacity')
-  const ov = document.getElementById('wmpdf_opacityVal')
-  const is = document.getElementById('wmpdf_imgScale')
-  const iv = document.getElementById('wmpdf_imgScaleVal')
+  const ti = document.getElementById('wmpdf_textInput'
+  const fsi = document.getElementById('wmpdf_fontSize'
+  const cp = document.getElementById('wmpdf_colorPicker'
+  const ch = document.getElementById('wmpdf_colorHex'
+  const dc = document.getElementById('wmpdf_diagonal'
+  const rs = document.getElementById('wmpdf_rotation'
+  const rv = document.getElementById('wmpdf_rotationVal'
+  const os = document.getElementById('wmpdf_opacity'
+  const ov = document.getElementById('wmpdf_opacityVal'
+  const is = document.getElementById('wmpdf_imgScale'
+  const iv = document.getElementById('wmpdf_imgScaleVal'
   if (ti) ti.value = opts.text
   if (fsi) fsi.value = opts.fontSize
   if (cp) { cp.value = opts.color; if (ch) ch.textContent = opts.color.toUpperCase() }
@@ -331,7 +331,7 @@ function loadOptsFromFile() {
 
 /* ── Color helpers ────────────────────────────────────────────────── */
 function hexToRgb01(hex) {
-  const h = hex.replace('#', '')
+  const h = hex.replace('#', ''
   return {
     r: parseInt(h.substring(0, 2), 16) / 255,
     g: parseInt(h.substring(2, 4), 16) / 255,
@@ -340,37 +340,37 @@ function hexToRgb01(hex) {
 }
 
 /* ── DOM refs ────────────────────────────────────────────────────────── */
-const fileInput    = document.getElementById('wmpdf_fileInput')
-const dropZone     = document.getElementById('wmpdf_dropZone')
-const toolLayout   = document.getElementById('wmpdf_toolLayout')
-const imageCol     = document.getElementById('wmpdf_imageCol')
-const fileChips    = document.getElementById('wmpdf_fileChips')
-const thumbGrid    = document.getElementById('wmpdf_thumbGrid')
-const textInput    = document.getElementById('wmpdf_text')
-const fontSizeInput = document.getElementById('wmpdf_fontSize')
-const opacitySlider = document.getElementById('wmpdf_opacity')
-const opacityVal   = document.getElementById('wmpdf_opacityVal')
+const fileInput    = document.getElementById('wmpdf_fileInput'
+const dropZone     = document.getElementById('wmpdf_dropZone'
+const toolLayout   = document.getElementById('wmpdf_toolLayout'
+const imageCol     = document.getElementById('wmpdf_imageCol'
+const fileChips    = document.getElementById('wmpdf_fileChips'
+const thumbGrid    = document.getElementById('wmpdf_thumbGrid'
+const textInput    = document.getElementById('wmpdf_text'
+const fontSizeInput = document.getElementById('wmpdf_fontSize'
+const opacitySlider = document.getElementById('wmpdf_opacity'
+const opacityVal   = document.getElementById('wmpdf_opacityVal'
 // color picker handled below
-const posGrid      = document.getElementById('wmpdf_posGrid')
-const diagCheck    = document.getElementById('wmpdf_diagonal')
-const rotSlider    = document.getElementById('wmpdf_rotation')
-const rotVal       = document.getElementById('wmpdf_rotationVal')
-const applyBtn     = document.getElementById('wmpdf_applyBtn')
-const modeTextBtn  = document.getElementById('wmpdf_modeText')
-const modeImageBtn = document.getElementById('wmpdf_modeImage')
-const textPanel    = document.getElementById('wmpdf_textPanel')
-const imagePanel   = document.getElementById('wmpdf_imagePanel')
-const imgInput     = document.getElementById('wmpdf_imgInput')
-const imgPreview   = document.getElementById('wmpdf_imgPreview')
-const imgPreviewImg = document.getElementById('wmpdf_imgPreviewImg')
-const imgScaleSlider = document.getElementById('wmpdf_imgScale')
-const imgScaleVal  = document.getElementById('wmpdf_imgScaleVal')
-const zipWrap      = document.getElementById('wmpdf_zipWrap')
-const zipBtn       = document.getElementById('wmpdf_zipBtn')
-const zipNote      = document.getElementById('wmpdf_zipNote')
-const statusText   = document.getElementById('wmpdf_status')
-const nextStepsDiv = document.getElementById('wmpdf_nextSteps')
-const nextButtons  = document.getElementById('wmpdf_nextButtons')
+const posGrid      = document.getElementById('wmpdf_posGrid'
+const diagCheck    = document.getElementById('wmpdf_diagonal'
+const rotSlider    = document.getElementById('wmpdf_rotation'
+const rotVal       = document.getElementById('wmpdf_rotationVal'
+const applyBtn     = document.getElementById('wmpdf_applyBtn'
+const modeTextBtn  = document.getElementById('wmpdf_modeText'
+const modeImageBtn = document.getElementById('wmpdf_modeImage'
+const textPanel    = document.getElementById('wmpdf_textPanel'
+const imagePanel   = document.getElementById('wmpdf_imagePanel'
+const imgInput     = document.getElementById('wmpdf_imgInput'
+const imgPreview   = document.getElementById('wmpdf_imgPreview'
+const imgPreviewImg = document.getElementById('wmpdf_imgPreviewImg'
+const imgScaleSlider = document.getElementById('wmpdf_imgScale'
+const imgScaleVal  = document.getElementById('wmpdf_imgScaleVal'
+const zipWrap      = document.getElementById('wmpdf_zipWrap'
+const zipBtn       = document.getElementById('wmpdf_zipBtn'
+const zipNote      = document.getElementById('wmpdf_zipNote'
+const statusText   = document.getElementById('wmpdf_status'
+const nextStepsDiv = document.getElementById('wmpdf_nextSteps'
+const nextButtons  = document.getElementById('wmpdf_nextButtons'
 
 /* ── Text/Image mode toggle ─────────────────────────────────────────── */
 function setWmMode(mode) {
@@ -397,8 +397,8 @@ const POSITIONS = [
 function buildPosGrid() {
   posGrid.innerHTML = ''
   POSITIONS.forEach(pos => {
-    const cell = document.createElement('div')
-    cell.className = 'pos-cell' + (pos === opts.position ? ' active' : '')
+    const cell = document.createElement('div'
+    cell.className = 'pos-cell' + (pos === opts.position ? ' active' : ''
     cell.dataset.pos = pos
     cell.innerHTML = '<div class="pos-dot"></div>'
     cell.addEventListener('click', () => {
@@ -427,8 +427,8 @@ opacitySlider.addEventListener('input', () => {
   updateOverlays()
 })
 
-const colorPicker = document.getElementById('wmpdf_colorPicker')
-const colorHex = document.getElementById('wmpdf_colorHex')
+const colorPicker = document.getElementById('wmpdf_colorPicker'
+const colorHex = document.getElementById('wmpdf_colorHex'
 
 colorPicker.addEventListener('input', () => {
   opts.color = colorPicker.value
@@ -524,7 +524,7 @@ function getOverlayStyles() {
 }
 
 function updateOverlays() {
-  const overlays = thumbGrid.querySelectorAll('.thumb-overlay')
+  const overlays = thumbGrid.querySelectorAll('.thumb-overlay'
   const s = getOverlayStyles()
   overlays.forEach(ov => {
     ov.style.alignItems = s.alignItems
@@ -534,8 +534,8 @@ function updateOverlays() {
     ov.style.paddingLeft = s.padLeft
     ov.style.paddingRight = s.padRight
 
-    const txt = ov.querySelector('.thumb-overlay-text')
-    let imgOv = ov.querySelector('.thumb-overlay-img')
+    const txt = ov.querySelector('.thumb-overlay-text'
+    let imgOv = ov.querySelector('.thumb-overlay-img'
 
     if (wmMode === 'text') {
       // Show text, hide image
@@ -556,7 +556,7 @@ function updateOverlays() {
       if (txt) txt.style.display = 'none'
       if (wmImageEl) {
         if (!imgOv) {
-          imgOv = document.createElement('img')
+          imgOv = document.createElement('img'
           imgOv.className = 'thumb-overlay-img'
           imgOv.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;'
           ov.appendChild(imgOv)
@@ -578,8 +578,8 @@ function renderFileChips() {
   fileChips.innerHTML = ''
   if (pdfFiles.length <= 1) return
   pdfFiles.forEach((entry, idx) => {
-    const chip = document.createElement('div')
-    chip.className = 'file-chip' + (idx === activeIdx ? ' active' : '')
+    const chip = document.createElement('div'
+    chip.className = 'file-chip' + (idx === activeIdx ? ' active' : ''
     const shortName = entry.name.replace(/\.[^.]+$/, '').slice(0, 14)
     chip.innerHTML = `<span>${shortName}</span><button data-idx="${idx}">\u2715</button>`
     chip.querySelector('span').addEventListener('click', () => {
@@ -630,10 +630,10 @@ async function renderThumbnails() {
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i)
       const vp = page.getViewport({ scale: 0.5 })
-      const cvs = document.createElement('canvas')
+      const cvs = document.createElement('canvas'
       cvs.width = vp.width
       cvs.height = vp.height
-      const ctx = cvs.getContext('2d')
+      const ctx = cvs.getContext('2d'
       await page.render({ canvasContext: ctx, viewport: vp }).promise
       entry.thumbCanvases.push(cvs)
 
@@ -648,18 +648,18 @@ async function renderThumbnails() {
 }
 
 function createThumbWrap(canvas, pageNum) {
-  const wrap = document.createElement('div')
+  const wrap = document.createElement('div'
   wrap.className = 'thumb-wrap'
   wrap.appendChild(canvas)
 
-  const overlay = document.createElement('div')
+  const overlay = document.createElement('div'
   overlay.className = 'thumb-overlay'
-  const txt = document.createElement('span')
+  const txt = document.createElement('span'
   txt.className = 'thumb-overlay-text'
   overlay.appendChild(txt)
   wrap.appendChild(overlay)
 
-  const label = document.createElement('span')
+  const label = document.createElement('span'
   label.className = 'thumb-label'
   label.textContent = pageNum
   wrap.appendChild(label)
@@ -692,7 +692,7 @@ async function loadPdfFiles(rawFiles) {
 
   for (const file of batch) {
     if (file.size > MAX_FILE_SIZE) {
-      statusText.textContent = `${file.name}: ` + (t.wmpdf_too_large || 'File too large. Maximum size is 50 MB.')
+      statusText.textContent = `${file.name}: ` + (t.wmpdf_too_large || 'File too large. Maximum size is 50 MB.'
       continue
     }
     try {
@@ -844,7 +844,7 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
 
   const watermarkedBytes = await doc.save()
   const blob = new Blob([watermarkedBytes], { type: 'application/pdf' })
-  const baseName = entry.name.replace(/\.[^.]+$/, '')
+  const baseName = entry.name.replace(/\.[^.]+$/, ''
   const filename = `${baseName}-watermarked.pdf`
   return { blob, filename, totalPages }
 }
@@ -852,7 +852,7 @@ async function processOnePdf(entry, onPageProgress, fileOpts) {
 /* ── Trigger download ────────────────────────────────────────────────── */
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
+  const a = document.createElement('a'
   a.href = url
   a.download = filename
   a.click()
@@ -861,7 +861,7 @@ function triggerDownload(blob, filename) {
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
-  const dot = name.lastIndexOf('.')
+  const dot = name.lastIndexOf('.'
   const base = dot !== -1 ? name.slice(0, dot) : name
   const ext  = dot !== -1 ? name.slice(dot) : ''
   let i = 1
@@ -872,9 +872,9 @@ function makeUnique(usedNames, name) {
 }
 
 /* ── Apply watermark ─────────────────────────────────────────────────── */
-const applyModeToggle = document.getElementById('wmpdf_applyModeToggle')
-const modeAllBtn = document.getElementById('wmpdf_modeAll')
-const modeIndivBtn = document.getElementById('wmpdf_modeIndiv')
+const applyModeToggle = document.getElementById('wmpdf_applyModeToggle'
+const modeAllBtn = document.getElementById('wmpdf_modeAll'
+const modeIndivBtn = document.getElementById('wmpdf_modeIndiv'
 let applyMode = 'all'
 
 modeAllBtn.addEventListener('click', () => {
@@ -921,7 +921,7 @@ applyBtn.addEventListener('click', async () => {
       lastResults = [{ blob: result.blob, name: result.filename, type: 'application/pdf' }]
       statusText.textContent = `Done! Watermark added to ${result.totalPages} ${result.totalPages === 1 ? 'page' : 'pages'}.`
       if (window.showReviewPrompt) window.showReviewPrompt()
-      window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf')
+      window.rcShowSaveButton?.(applyBtn.parentElement, result.blob, result.filename, 'watermark-pdf'
     } else {
       // Apply to All: process all files
       const results = []
@@ -943,7 +943,7 @@ applyBtn.addEventListener('click', async () => {
         const usedNames = new Set()
         for (const r of results) { zip.file(makeUnique(usedNames, r.filename), r.blob) }
         const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
-        triggerDownload(zipBlob, 'watermarked-pdfs.zip')
+        triggerDownload(zipBlob, 'watermarked-pdfs.zip'
         lastResults = results.map(r => ({ blob: r.blob, name: r.filename, type: 'application/pdf' }))
       }
 
@@ -974,8 +974,8 @@ function openDB() {
 async function saveFilesToIDB(items) {
   const db = await openDB()
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('pending', 'readwrite')
-    const store = tx.objectStore('pending')
+    const tx = db.transaction('pending', 'readwrite'
+    const store = tx.objectStore('pending'
     store.clear()
     items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
     tx.oncomplete = () => resolve()
@@ -985,8 +985,8 @@ async function saveFilesToIDB(items) {
 
 async function loadFilesFromIDB() {
   const db = await openDB()
-  const tx = db.transaction('pending', 'readwrite')
-  const store = tx.objectStore('pending')
+  const tx = db.transaction('pending', 'readwrite'
+  const store = tx.objectStore('pending'
   return new Promise((resolve, reject) => {
     const req = store.getAll()
     req.onsuccess = () => { store.clear(); resolve(req.result || []) }
@@ -996,7 +996,7 @@ async function loadFilesFromIDB() {
 
 async function loadPendingFiles() {
   if (!sessionStorage.getItem('pendingFromIDB')) return
-  sessionStorage.removeItem('pendingFromIDB')
+  sessionStorage.removeItem('pendingFromIDB'
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
@@ -1015,7 +1015,7 @@ function buildNextSteps() {
   ]
   nextButtons.innerHTML = ''
   buttons.forEach(b => {
-    const btn = document.createElement('button')
+    const btn = document.createElement('button'
     btn.className = 'next-link'
     btn.textContent = b.label
     btn.addEventListener('click', async () => {
@@ -1037,7 +1037,7 @@ loadPendingFiles()
   if (!seo) return
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-  const div = document.createElement('div')
+  const div = document.createElement('div'
   div.className = 'seo-section'
   injectFaqSchema(seo.faqs)
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l => `<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`

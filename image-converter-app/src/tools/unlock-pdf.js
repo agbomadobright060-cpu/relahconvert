@@ -4,7 +4,7 @@ import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.j
 import { PDFDocument } from 'pdf-lib'
 import { decryptPDF, isEncrypted } from '@pdfsmaller/pdf-decrypt-lite'
 
-injectHreflang('unlock-pdf')
+injectHreflang('unlock-pdf'
 
 const t = getT()
 
@@ -27,7 +27,7 @@ const addMoreLbl   = t.add_more || 'Add more'
 
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
-const style = document.createElement('style')
+const style = document.createElement('style'
 style.textContent = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   #app>div{animation:fadeUp 0.4s ease both}
@@ -80,15 +80,15 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.unlkpdf_page_title || (seoData ? seoData.page_title : 'Unlock PDF Free | Remove PDF Password Online \u2014 RelahConvert')
-const _metaDesc = document.createElement('meta')
+document.title = t.unlkpdf_page_title || 'Unlock PDF Free | Remove PDF Password Online \u2014 RelahConvert'
+const _metaDesc = document.createElement('meta'
 _metaDesc.name = 'description'
 _metaDesc.content = t.unlkpdf_meta_desc || 'Unlock PDF free. Remove password protection from PDF files instantly.'
 document.head.appendChild(_metaDesc)
 
-const _tp = toolName.split(' ')
+const _tp = toolName.split(' '
 const titlePart1 = _tp[0]
-const titlePart2 = _tp.slice(1).join(' ')
+const titlePart2 = _tp.slice(1).join(' '
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">
@@ -131,18 +131,18 @@ document.querySelector('#app').innerHTML = `
 
 injectHeader()
 
-const fileInput    = document.getElementById('fileInput')
-const fileList     = document.getElementById('fileList')
-const passwordRow  = document.getElementById('passwordRow')
-const pwInput      = document.getElementById('pwInput')
-const togglePwBtn  = document.getElementById('togglePwBtn')
-const fileMeta     = document.getElementById('fileMeta')
-const fileMetaText = document.getElementById('fileMetaText')
-const removeBtn    = document.getElementById('removeBtn')
-const unlockBtn    = document.getElementById('unlockBtn')
-const zipBtn       = document.getElementById('zipBtn')
-const statusText   = document.getElementById('statusText')
-const uploadArea   = document.getElementById('uploadArea')
+const fileInput    = document.getElementById('fileInput'
+const fileList     = document.getElementById('fileList'
+const passwordRow  = document.getElementById('passwordRow'
+const pwInput      = document.getElementById('pwInput'
+const togglePwBtn  = document.getElementById('togglePwBtn'
+const fileMeta     = document.getElementById('fileMeta'
+const fileMetaText = document.getElementById('fileMetaText'
+const removeBtn    = document.getElementById('removeBtn'
+const unlockBtn    = document.getElementById('unlockBtn'
+const zipBtn       = document.getElementById('zipBtn'
+const statusText   = document.getElementById('statusText'
+const uploadArea   = document.getElementById('uploadArea'
 
 // State
 let pdfEntries = [] // { file, name, originalSize, unlockedBlob?, itemEl }
@@ -150,9 +150,9 @@ let lastResults = []
 let unlockpdf_activeIndex = 0
 
 // Apply mode toggle
-const unlockpdf_applyModeToggle = document.getElementById('unlockpdf_applyModeToggle')
-const unlockpdf_modeAllBtn = document.getElementById('unlockpdf_modeAll')
-const unlockpdf_modeIndivBtn = document.getElementById('unlockpdf_modeIndiv')
+const unlockpdf_applyModeToggle = document.getElementById('unlockpdf_applyModeToggle'
+const unlockpdf_modeAllBtn = document.getElementById('unlockpdf_modeAll'
+const unlockpdf_modeIndivBtn = document.getElementById('unlockpdf_modeIndiv'
 let unlockpdf_applyMode = 'all'
 
 unlockpdf_modeAllBtn.addEventListener('click', () => {
@@ -202,7 +202,7 @@ function updateUnlockBtnState() {
 
 function makeUnique(usedNames, name) {
   if (!usedNames.has(name)) { usedNames.add(name); return name }
-  const dot = name.lastIndexOf('.')
+  const dot = name.lastIndexOf('.'
   const base = dot !== -1 ? name.slice(0, dot) : name
   const ext  = dot !== -1 ? name.slice(dot) : ''
   let i = 1
@@ -223,8 +223,8 @@ function openDB() {
 async function saveFilesToIDB(items) {
   const db = await openDB()
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('pending', 'readwrite')
-    const store = tx.objectStore('pending')
+    const tx = db.transaction('pending', 'readwrite'
+    const store = tx.objectStore('pending'
     store.clear()
     items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
     tx.oncomplete = () => resolve()
@@ -234,8 +234,8 @@ async function saveFilesToIDB(items) {
 
 async function loadFilesFromIDB() {
   const db = await openDB()
-  const tx = db.transaction('pending', 'readwrite')
-  const store = tx.objectStore('pending')
+  const tx = db.transaction('pending', 'readwrite'
+  const store = tx.objectStore('pending'
   return new Promise((resolve, reject) => {
     const req = store.getAll()
     req.onsuccess = () => { store.clear(); resolve(req.result || []) }
@@ -245,7 +245,7 @@ async function loadFilesFromIDB() {
 
 async function loadPendingFiles() {
   if (!sessionStorage.getItem('pendingFromIDB')) return
-  sessionStorage.removeItem('pendingFromIDB')
+  sessionStorage.removeItem('pendingFromIDB'
   try {
     const records = await loadFilesFromIDB()
     if (!records.length) return
@@ -261,10 +261,10 @@ function buildNextSteps() {
     { label: ns['add-page-numbers'] || 'Add Page Numbers', href: localHref('add-page-numbers') },
     { label: ns['pdf-to-png'] || 'PDF to PNG', href: localHref('pdf-to-png') },
   ]
-  const nextStepsButtons = document.getElementById('nextStepsButtons')
+  const nextStepsButtons = document.getElementById('nextStepsButtons'
   nextStepsButtons.innerHTML = ''
   buttons.forEach(b => {
-    const btn = document.createElement('button')
+    const btn = document.createElement('button'
     btn.className = 'next-link'
     btn.textContent = b.label
     btn.addEventListener('click', async () => { if (lastResults.length) { try { await saveFilesToIDB(lastResults); sessionStorage.setItem('pendingFromIDB', '1') } catch(e) {} } window.location.href = b.href })
@@ -277,8 +277,8 @@ function resetState() {
   pdfEntries = []
   lastResults = []
   fileList.innerHTML = ''
-  fileMeta.classList.remove('on')
-  passwordRow.classList.remove('on')
+  fileMeta.classList.remove('on'
+  passwordRow.classList.remove('on'
   zipBtn.style.display = 'none'
   statusText.textContent = ''
   statusText.className = 'status-text'
@@ -297,8 +297,8 @@ removeBtn.addEventListener('click', resetState)
 
 function updateUI() {
   if (pdfEntries.length === 0) {
-    fileMeta.classList.remove('on')
-    passwordRow.classList.remove('on')
+    fileMeta.classList.remove('on'
+    passwordRow.classList.remove('on'
     uploadArea.style.display = ''
     document.getElementById('actionRow').style.display = 'none'
     unlockpdf_applyModeToggle.style.display = 'none'
@@ -310,8 +310,8 @@ function updateUI() {
   unlockpdf_applyModeToggle.style.display = pdfEntries.length > 1 ? 'block' : 'none'
   const totalSize = pdfEntries.reduce((s, e) => s + e.originalSize, 0)
   fileMetaText.textContent = `${pdfEntries.length} file${pdfEntries.length > 1 ? 's' : ''} \u2014 ${formatSize(totalSize)}`
-  fileMeta.classList.add('on')
-  passwordRow.classList.add('on')
+  fileMeta.classList.add('on'
+  passwordRow.classList.add('on'
   updateUnlockBtnState()
 }
 
@@ -324,7 +324,7 @@ function removeEntry(idx) {
 function renderFileList() {
   fileList.innerHTML = ''
   pdfEntries.forEach((entry, i) => {
-    const div = document.createElement('div')
+    const div = document.createElement('div'
     div.className = 'file-item'
     div.innerHTML = `
       <span class="fname">${entry.name}</span>
@@ -350,7 +350,7 @@ function renderFileList() {
 // ── Add files ──────────────────────────────────────────────────────────────
 async function addFiles(files) {
   const validFiles = Array.from(files).filter(f =>
-    f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
+    f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'
   )
   if (!validFiles.length) {
     statusText.textContent = t.warn_wrong_fmt_short || 'Please select PDF files.'
@@ -389,7 +389,7 @@ document.addEventListener('drop', e => {
 // ── Auto-download helper ─────────────────────────────────────────────────────
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
+  const a = document.createElement('a'
   a.href = url
   a.download = filename
   a.click()
@@ -404,7 +404,7 @@ async function unlockSinglePdf(file, password) {
   // Check if encrypted
   const encInfo = await isEncrypted(pdfBytes)
   if (!encInfo.encrypted) {
-    throw new Error('NOT_ENCRYPTED')
+    throw new Error('NOT_ENCRYPTED'
   }
 
   // Decrypt
@@ -448,7 +448,7 @@ unlockBtn.addEventListener('click', async () => {
         resultEl.className = 'fresult ok'
       }
       if (dlEl) {
-        const a = document.createElement('a')
+        const a = document.createElement('a'
         a.className = 'fdl'
         a.textContent = dlBtn
         const url = URL.createObjectURL(blob)
@@ -517,19 +517,19 @@ zipBtn.addEventListener('click', async () => {
   zipBtn.textContent = 'Zipping\u2026'
   zipBtn.disabled = true
   try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js')
+    const mod = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
     const JSZip = mod.default || window.JSZip
     const zip = new JSZip()
     for (const r of results) {
       zip.file(r.name.replace(/\.pdf$/i, '') + '-unlocked.pdf', await r.unlockedBlob.arrayBuffer())
     }
     const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' })
-    const a = document.createElement('a')
+    const a = document.createElement('a'
     a.href = URL.createObjectURL(zipBlob)
     a.download = 'unlocked-pdfs.zip'
     a.click()
     setTimeout(() => URL.revokeObjectURL(a.href), 10000)
-    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'unlocked-pdfs.zip', 'unlock-pdf')
+    window.rcShowSaveButton?.(zipBtn.parentElement, zipBlob, 'unlocked-pdfs.zip', 'unlock-pdf'
   } catch (e) {
     alert('ZIP failed: ' + e.message)
   }
@@ -546,7 +546,7 @@ loadPendingFiles()
   if (!seo) return
   const faqTitle = t.seo_faq_title || 'Frequently Asked Questions'
   const alsoTry  = t.seo_also_try  || 'Also Try'
-  const div = document.createElement('div')
+  const div = document.createElement('div'
   div.className = 'seo-section'
   injectFaqSchema(seo.faqs)
   div.innerHTML = `<h2>${seo.h2a}</h2><ol>${seo.steps.map(s => `<li>${s}</li>`).join('')}</ol><h2>${seo.h2b}</h2>${seo.body}<h3>${seo.h3why}</h3><p>${seo.why}</p><h3>${faqTitle}</h3>${seo.faqs.map(f => `<div class="faq-item"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('')}<h3>${alsoTry}</h3><div class="seo-links">${seo.links.map(l => `<a class="seo-link" href="${localHref(l.href.slice(1))}">${l.label}</a>`).join('')}</div>`
