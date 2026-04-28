@@ -80,7 +80,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.unlkpdf_page_title || 'Unlock PDF Free | Remove PDF Password Online \u2014 RelahConvert'
+document.title = t.unlkpdf_page_title || (seoData && seoData.h2b ? seoData.h2b + ' | RelahConvert' : 'Unlock PDF Free | Remove PDF Password Online \u2014 RelahConvert')
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.unlkpdf_meta_desc || 'Unlock PDF free. Remove password protection from PDF files instantly.'

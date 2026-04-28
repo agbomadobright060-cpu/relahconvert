@@ -139,7 +139,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.wmpdf_page_title || 'Watermark PDF Free | Add Text Watermark to PDF Online \u2014 RelahConvert'
+document.title = t.wmpdf_page_title || (seoData && seoData.h2b ? seoData.h2b + ' | RelahConvert' : 'Watermark PDF Free | Add Text Watermark to PDF Online \u2014 RelahConvert')
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.wmpdf_meta_desc || 'Add text watermarks to PDF files free. Choose text, font size, opacity, color, and placement style.'
