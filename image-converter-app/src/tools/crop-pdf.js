@@ -139,7 +139,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.croppdf_page_title || (seoData ? seoData.page_title : 'Crop PDF Pages Free Online \u2014 Adjust Margins | RelahConvert')
+document.title = t.croppdf_page_title || 'Crop PDF Pages Free Online \u2014 Adjust Margins | RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.croppdf_meta_desc || 'Crop PDF pages by setting custom margins. Preview the crop area, adjust top, bottom, left, and right margins, then download.'

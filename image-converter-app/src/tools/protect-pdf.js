@@ -82,7 +82,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.protpdf_page_title || (seoData ? seoData.page_title : 'Protect PDF Free | Add Password to PDF Online \u2014 RelahConvert')
+document.title = t.protpdf_page_title || 'Protect PDF Free | Add Password to PDF Online \u2014 RelahConvert'
 const _metaDesc = document.createElement('meta')
 _metaDesc.name = 'description'
 _metaDesc.content = t.protpdf_meta_desc || 'Protect PDF with a password. Add encryption to your PDF files for free.'
