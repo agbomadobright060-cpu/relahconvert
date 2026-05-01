@@ -433,11 +433,15 @@ function imageDataToBlob(imgData) {
       canvas.height = h
       const ctx = canvas.getContext('2d')
 
-      const rawData = imgData.data
-      const kind = imgData.kind
+      // PDF.js v4 fast path: image arrives as an ImageBitmap, not raw pixel bytes.
+      if (typeof ImageBitmap !== 'undefined' && imgData.bitmap instanceof ImageBitmap) {
+        ctx.drawImage(imgData.bitmap, 0, 0)
+        canvas.toBlob(blob => resolve(blob ? { blob, w, h } : null), 'image/png')
+        return
+      }
 
-      // kind 1 = GRAYSCALE_1BPP, kind 2 = RGB_24BPP, kind 3 = RGBA_32BPP
-      // If it's already RGBA (Uint8ClampedArray with 4 bytes per pixel), use directly
+      const rawData = imgData.data
+
       if (rawData instanceof Uint8ClampedArray && rawData.length === w * h * 4) {
         const id = new ImageData(new Uint8ClampedArray(rawData), w, h)
         ctx.putImageData(id, 0, 0)
@@ -448,11 +452,9 @@ function imageDataToBlob(imgData) {
         const expected1 = w * h
 
         if (pixels === expected4) {
-          // RGBA data
           const id = new ImageData(new Uint8ClampedArray(rawData), w, h)
           ctx.putImageData(id, 0, 0)
         } else if (pixels === expected3) {
-          // RGB data — expand to RGBA
           const rgba = new Uint8ClampedArray(expected4)
           for (let i = 0, j = 0; i < pixels; i += 3, j += 4) {
             rgba[j]     = rawData[i]
@@ -463,7 +465,6 @@ function imageDataToBlob(imgData) {
           const id = new ImageData(rgba, w, h)
           ctx.putImageData(id, 0, 0)
         } else if (pixels === expected1) {
-          // Grayscale data — expand to RGBA
           const rgba = new Uint8ClampedArray(expected4)
           for (let i = 0; i < pixels; i++) {
             const off = i * 4
@@ -473,12 +474,12 @@ function imageDataToBlob(imgData) {
           const id = new ImageData(rgba, w, h)
           ctx.putImageData(id, 0, 0)
         } else {
-          // Unknown format — skip
+          console.warn('[extract-images-pdf] unknown raw size', { w, h, len: pixels, expected4, expected3, expected1 })
           resolve(null)
           return
         }
       } else {
-        // Not a typed array — skip
+        console.warn('[extract-images-pdf] unhandled imgData shape:', Object.keys(imgData), 'has bitmap=', !!imgData.bitmap, 'has data=', !!imgData.data)
         resolve(null)
         return
       }
