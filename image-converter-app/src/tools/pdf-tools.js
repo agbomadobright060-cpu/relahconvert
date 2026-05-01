@@ -48,21 +48,22 @@ style.textContent = `
   .pdf-hero p{font-size:15px;color:var(--text-tertiary);line-height:1.6;}
 
   /* Tools grid */
-  .pdf-tools-section{max-width:1180px;margin:0 auto;padding:0 24px 60px;width:100%;position:relative;z-index:2;}
-  .pdf-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-  .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:16px;padding:28px 26px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.2s;display:block;}
-  .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(200,75,49,0.12);transform:translateY(-2px);}
-  .pdf-tool-card .icon{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-  .pdf-tool-card .icon svg{width:34px;height:34px;display:block;}
-  .pdf-tool-card h2{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;letter-spacing:-0.01em;}
-  .pdf-tool-card p{font-size:13px;color:var(--text-tertiary);line-height:1.55;}
+  .pdf-tools-section{max-width:1280px;margin:0 auto;padding:0 24px 60px;width:100%;position:relative;z-index:2;}
+  .pdf-tools-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:12px;padding:20px 18px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 3px rgba(0,0,0,0.05);transition:all 0.2s;display:block;}
+  .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(200,75,49,0.12);transform:translateY(-2px);}
+  .pdf-tool-card .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;overflow:hidden;flex-shrink:0;}
+  .pdf-tool-card .icon svg{width:32px;height:32px;display:block;}
+  .pdf-tool-card h2{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:5px;letter-spacing:-0.01em;}
+  .pdf-tool-card p{font-size:12px;color:var(--text-tertiary);line-height:1.5;}
+  @media(max-width:1100px){.pdf-tools-grid{grid-template-columns:repeat(4,1fr);}}
   @media(max-width:900px){.pdf-tools-grid{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:768px){
-    .pdf-tools-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-    .pdf-tool-card{padding:18px 16px;border-radius:14px;}
-    .pdf-tool-card .icon{width:44px;height:44px;border-radius:10px;margin-bottom:10px;}
-    .pdf-tool-card .icon svg{width:34px;height:34px;}
-    .pdf-tool-card h2{font-size:14px;}
+    .pdf-tools-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .pdf-tool-card{padding:16px 14px;border-radius:10px;}
+    .pdf-tool-card .icon{width:40px;height:40px;border-radius:9px;margin-bottom:9px;}
+    .pdf-tool-card .icon svg{width:26px;height:26px;}
+    .pdf-tool-card h2{font-size:13px;}
     .pdf-tool-card p{display:none;}
     .pdf-hero{padding:36px 16px 28px;}
     .pdf-block{opacity:0.5;}
@@ -70,20 +71,21 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
+// iLovePDF-style: bold colored shapes on subtle pastel-tinted card backgrounds
 const svgIcons = {
-  'merge-pdf':        { bg: '#2563EB', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="6" y="8" width="12" height="16" rx="2" fill="#fff" opacity="0.6"/><rect x="22" y="16" width="12" height="16" rx="2" fill="#fff" opacity="0.9"/><path d="M16 20l6-4v8z" fill="#fff"/></svg>` },
-  'split-pdf':        { bg: '#D97706', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 8v24" stroke="#fff" stroke-width="2.5" stroke-dasharray="3 2"/><path d="M16 20l-4 3v-6z" fill="#fff"/><path d="M24 20l4 3v-6z" fill="#fff"/></svg>` },
-  'rotate-pdf':       { bg: '#16A34A', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="24" rx="2" fill="#fff" opacity="0.3"/><path d="M26 16a8 8 0 11-12 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M26 12v5h-5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
-  'compress-pdf':     { bg: '#DC2626', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 14v8M20 22l-3 3M20 22l3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 28h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>` },
-  'reorder-pdf':      { bg: '#7C3AED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="8" width="20" height="6" rx="1.5" fill="#fff" opacity="0.5"/><rect x="10" y="17" width="20" height="6" rx="1.5" fill="#fff"/><rect x="10" y="26" width="20" height="6" rx="1.5" fill="#fff" opacity="0.5"/></svg>` },
-  'extract-pdf':      { bg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M20 16v10M17 19l3-3 3 3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
-  'remove-pdf':       { bg: '#E11D48', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M15 19l10 8M25 19l-10 8" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></svg>` },
-  'add-page-numbers': { bg: '#EA580C', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><text x="20" y="25" font-family="Arial" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">1</text></svg>` },
-  'watermark-pdf':     { bg: '#6366F1', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="28" rx="2" fill="#fff" opacity="0.3"/><text x="20" y="24" font-family="Arial" font-size="7" font-weight="800" fill="#fff" text-anchor="middle" opacity="0.7" transform="rotate(-30 20 20)">DRAFT</text></svg>` },
-  'crop-pdf':          { bg: '#0D9488', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><path d="M14 12v16h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M10 16h16v16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>` },
-  'protect-pdf':       { bg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><rect x="15" y="17" width="10" height="9" rx="1.5" fill="#fff"/><path d="M17 17v-3a3 3 0 016 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>` },
-  'unlock-pdf':        { bg: '#DC2626', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><rect x="15" y="17" width="10" height="9" rx="1.5" fill="#fff"/><path d="M17 17v-3a3 3 0 016 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>` },
-  'extract-images-pdf':{ bg: '#8B5CF6', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="10" y="6" width="20" height="28" rx="2" fill="#fff" opacity="0.3"/><rect x="14" y="14" width="12" height="10" rx="1.5" fill="#fff" opacity="0.8"/><circle cx="17" cy="17" r="1.5" fill="#8B5CF6"/><path d="M14 22l4-4 3 3 2-2 3 3" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'merge-pdf':        { bg: '#FFE5DD', fg: '#E94B2C', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M11 14V9a2 2 0 012-2h6m10 7V9a2 2 0 00-2-2h-6M11 26v5a2 2 0 002 2h6m10-7v5a2 2 0 01-2 2h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 18l6 2 6-2M14 22l6-2 6 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'split-pdf':        { bg: '#FFE5DD', fg: '#E94B2C', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M11 14V9a2 2 0 012-2h6m10 7V9a2 2 0 00-2-2h-6M11 26v5a2 2 0 002 2h6m10-7v5a2 2 0 01-2 2h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 13v14M16 17l4-4 4 4M16 23l4 4 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'rotate-pdf':       { bg: '#DCFCE7', fg: '#16A34A', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M28 14a10 10 0 11-3.5-7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M28 7v7h-7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'compress-pdf':     { bg: '#DBEAFE', fg: '#2563EB', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M11 14V9a2 2 0 012-2h6m10 7V9a2 2 0 00-2-2h-6M11 26v5a2 2 0 002 2h6m10-7v5a2 2 0 01-2 2h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16l4 4 4-4M16 24l4-4 4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  'reorder-pdf':      { bg: '#EDE9FE', fg: '#7C3AED', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="9" y="9" width="22" height="6" rx="1.5" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="17" width="22" height="6" rx="1.5" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="25" width="22" height="6" rx="1.5" stroke="currentColor" stroke-width="2.4"/><path d="M14 12h-2M14 20h-2M14 28h-2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>` },
+  'extract-pdf':      { bg: '#D1FAE5', fg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="9" y="11" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2.4"/><path d="M15 7h16v18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>` },
+  'remove-pdf':       { bg: '#FFE4E6', fg: '#E11D48', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="11" y="9" width="18" height="22" rx="2" stroke="currentColor" stroke-width="2.4"/><path d="M16 17l8 8M24 17l-8 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>` },
+  'add-page-numbers': { bg: '#FFEDD5', fg: '#EA580C', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="11" y="7" width="18" height="22" rx="2" stroke="currentColor" stroke-width="2.4"/><circle cx="29" cy="31" r="5.5" fill="currentColor"/><text x="29" y="34" font-family="Arial,sans-serif" font-size="8" font-weight="800" fill="#fff" text-anchor="middle">1</text></svg>` },
+  'watermark-pdf':    { bg: '#E0E7FF', fg: '#6366F1', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="9" y="7" width="22" height="26" rx="2" stroke="currentColor" stroke-width="2.4"/><text x="20" y="24" font-family="Arial,sans-serif" font-size="7.5" font-weight="800" fill="currentColor" text-anchor="middle" transform="rotate(-28 20 22)">DRAFT</text></svg>` },
+  'crop-pdf':         { bg: '#CCFBF1', fg: '#0D9488', svg: `<svg viewBox="0 0 40 40" fill="none"><path d="M13 7v22a2 2 0 002 2h18M7 13h22a2 2 0 012 2v18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>` },
+  'protect-pdf':      { bg: '#D1FAE5', fg: '#059669', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="11" y="18" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2.4"/><path d="M14 18v-4a6 6 0 0112 0v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="25" r="1.8" fill="currentColor"/></svg>` },
+  'unlock-pdf':       { bg: '#FEE2E2', fg: '#DC2626', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="11" y="18" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2.4"/><path d="M14 18v-4a6 6 0 0111-3.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="25" r="1.8" fill="currentColor"/></svg>` },
+  'extract-images-pdf':{ bg: '#F3E8FF', fg: '#9333EA', svg: `<svg viewBox="0 0 40 40" fill="none"><rect x="9" y="11" width="22" height="18" rx="2" stroke="currentColor" stroke-width="2.4"/><circle cx="15" cy="17" r="2" fill="currentColor"/><path d="M11 25l5-5 4 4 3-3 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
 }
 
 const ns = t.nav_short || {}
@@ -128,7 +130,7 @@ document.querySelector('#app').innerHTML = `
         ${pdfToolSlugs.map(slug => {
           const ic = svgIcons[slug]
           return `<a href="${localHref(slug)}" class="pdf-tool-card">
-            <div class="icon" style="background:${ic.bg}">${ic.svg}</div>
+            <div class="icon" style="background:${ic.bg};color:${ic.fg}">${ic.svg}</div>
             <h2>${ns[slug] || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</h2>
             <p>${cardDescs[slug]}</p>
           </a>`
