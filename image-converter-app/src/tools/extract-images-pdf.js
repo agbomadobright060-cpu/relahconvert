@@ -500,6 +500,16 @@ async function extractFromFile(fileEntry) {
   const seenImages = new Set()
   let imgCount = 0
 
+  // Build a reverse-lookup of OPS codes once for diagnostic logging
+  const opsByCode = {}
+  for (const k of Object.keys(pdfjs.OPS)) opsByCode[pdfjs.OPS[k]] = k
+  console.log('[extract-images-pdf] image OPS values:', {
+    paintImageXObject: pdfjs.OPS.paintImageXObject,
+    paintInlineImageXObject: pdfjs.OPS.paintInlineImageXObject,
+    paintInlineImageXObjectGroup: pdfjs.OPS.paintInlineImageXObjectGroup,
+    paintImageXObjectRepeat: pdfjs.OPS.paintImageXObjectRepeat,
+  })
+
   for (let p = 1; p <= pdfDoc.numPages; p++) {
     statusText.textContent = `${fileEntry.name}: scanning page ${p}/${pdfDoc.numPages}` + (imgCount > 0 ? ` \u2014 found ${imgCount} image${imgCount !== 1 ? 's' : ''} so far` : '')
 
@@ -508,6 +518,19 @@ async function extractFromFile(fileEntry) {
 
     let ops
     try { ops = await page.getOperatorList() } catch (e) { continue }
+
+    // Diagnostic: log distribution of op codes so we can see what's actually emitted
+    const opCounts = {}
+    for (const fn of ops.fnArray) {
+      const name = opsByCode[fn] || ('op_' + fn)
+      opCounts[name] = (opCounts[name] || 0) + 1
+    }
+    const imageRelated = Object.keys(opCounts).filter(k => /[Ii]mage|XObject/.test(k))
+    if (imageRelated.length) {
+      console.log(`[extract-images-pdf] page ${p} image-related ops:`, imageRelated.map(k => `${k}=${opCounts[k]}`).join(', '))
+    } else {
+      console.log(`[extract-images-pdf] page ${p}: ${ops.fnArray.length} ops, none image-related. Sample:`, Object.keys(opCounts).slice(0, 10).join(', '))
+    }
 
     for (let i = 0; i < ops.fnArray.length; i++) {
       const fn = ops.fnArray[i]
