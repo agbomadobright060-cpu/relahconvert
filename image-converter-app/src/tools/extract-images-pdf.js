@@ -8,7 +8,7 @@ const t = getT()
 
 const toolName    = (t.nav_short && t.nav_short['extract-images-pdf']) || 'Extract Images from PDF'
 const seoData     = t.seo && t.seo['extract-images-pdf']
-const descText    = t.extimg_desc || (seoData ? seoData.h2a : 'Extract actual embedded images from any PDF — photos, logos, diagrams — at their original resolution.')
+const descText    = t.extimg_desc || 'Pulls embedded image objects (photos, logos, figures) out of a PDF at original resolution. Not page screenshots — for that, use PDF to PNG.'
 const selectLbl   = t.extimg_select || t.pdfpng_select || 'Select PDFs'
 const dropHint    = t.extimg_drop_hint || t.pdfpng_drop_hint || 'or drop PDFs anywhere'
 const extractLbl  = t.extimg_extract_btn || 'Extract Images'
@@ -297,7 +297,14 @@ function renderActiveFileGrid() {
   const f = files[activeFileIndex]
   if (!f || !f.extractedImages || f.extractedImages.length === 0) {
     if (f && f.extractedImages) {
-      statusText.textContent = t.extimg_no_images || 'No embedded images found in this PDF.'
+      statusText.textContent = ''
+      const empty = document.createElement('div')
+      empty.style.cssText = 'padding:32px 20px;text-align:center;background:var(--bg-card);border:1.5px solid var(--border-light);border-radius:12px;'
+      const heading = t.extimg_no_images || 'No embedded images found in this PDF.'
+      const sub = t.extimg_no_images_sub || 'This PDF has no photos, logos, or figures embedded as image objects. If you wanted to convert each page to an image, use:'
+      const linkLabel = (t.nav_short && t.nav_short['pdf-to-png']) || 'PDF to PNG'
+      empty.innerHTML = `<div style="font-size:14px;font-weight:600;color:var(--text-primary);font-family:'Fraunces',serif;margin-bottom:6px;">${heading}</div><div style="font-size:13px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;margin-bottom:14px;">${sub}</div><a href="${localHref('pdf-to-png')}" class="next-link" style="display:inline-block;">${linkLabel} &rarr;</a>`
+      imageGrid.appendChild(empty)
     } else {
       statusText.textContent = ''
     }
@@ -504,7 +511,18 @@ async function extractFromFile(fileEntry) {
 
     for (let i = 0; i < ops.fnArray.length; i++) {
       const fn = ops.fnArray[i]
-      if (fn !== pdfjs.OPS.paintImageXObject && fn !== pdfjs.OPS.paintJpegXObject) continue
+      const isXObject = fn === pdfjs.OPS.paintImageXObject ||
+                        fn === pdfjs.OPS.paintJpegXObject ||
+                        fn === pdfjs.OPS.paintImageXObjectRepeat
+      const isInline = fn === pdfjs.OPS.paintInlineImageXObject ||
+                       fn === pdfjs.OPS.paintInlineImageXObjectGroup
+      if (!isXObject && !isInline) continue
+
+      if (isInline) {
+        const inlineData = ops.argsArray[i][0]
+        await pushImage(inlineData)
+        continue
+      }
 
       const imgName = ops.argsArray[i][0]
       if (!imgName || seenImages.has(imgName)) continue
@@ -517,57 +535,33 @@ async function extractFromFile(fileEntry) {
           page.objs.get(imgName, (data) => { clearTimeout(timeout); resolve(data) })
         })
       } catch (e) { continue }
-      if (!imgData || !imgData.width || !imgData.height) continue
-
-      // Skip tiny images (likely artifacts, spacing pixels, or decorative dots)
-      if (imgData.width < 8 || imgData.height < 8) continue
-
-      let result
-      try { result = await imageDataToBlob(imgData) } catch (e) { continue }
-      if (!result) continue
-
-      imgCount++
-      const safeName = `${pdfFileName || 'image'}-img-${String(imgCount).padStart(3, '0')}.png`
-      const url = URL.createObjectURL(result.blob)
-
-      results.push({
-        name: safeName,
-        label: `Image ${imgCount}`,
-        blob: result.blob,
-        url,
-        w: result.w,
-        h: result.h,
-        size: result.blob.size
-      })
-    }
-  }
-
-  // Fallback: if no embedded images found, render pages as PNG
-  if (results.length === 0) {
-    statusText.textContent = `${fileEntry.name}: no embedded images found. Rendering pages as images...`
-    for (let p = 1; p <= pdfDoc.numPages; p++) {
-      statusText.textContent = `${fileEntry.name}: rendering page ${p}/${pdfDoc.numPages} as image`
-      try {
-        const page = await pdfDoc.getPage(p)
-        const viewport = page.getViewport({ scale: 2.0 })
-        const canvas = document.createElement('canvas')
-        canvas.width = viewport.width
-        canvas.height = viewport.height
-        const ctx = canvas.getContext('2d')
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-        await page.render({ canvasContext: ctx, viewport }).promise
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'))
-        if (!blob) continue
-        const safeName = `${pdfFileName || 'page'}-page-${String(p).padStart(3, '0')}.png`
-        const url = URL.createObjectURL(blob)
-        results.push({ name: safeName, label: `Page ${p}`, blob, url, w: viewport.width, h: viewport.height, size: blob.size })
-      } catch (e) { continue }
+      await pushImage(imgData)
     }
   }
 
   fileEntry.extractedImages = results
   return results
+
+  async function pushImage(imgData) {
+    if (!imgData || !imgData.width || !imgData.height) return
+    // Skip masks and very small decorative artifacts
+    if (imgData.width < 32 || imgData.height < 32) return
+    let result
+    try { result = await imageDataToBlob(imgData) } catch (e) { return }
+    if (!result) return
+    imgCount++
+    const safeName = `${pdfFileName || 'image'}-img-${String(imgCount).padStart(3, '0')}.png`
+    const url = URL.createObjectURL(result.blob)
+    results.push({
+      name: safeName,
+      label: `Image ${imgCount}`,
+      blob: result.blob,
+      url,
+      w: result.w,
+      h: result.h,
+      size: result.blob.size
+    })
+  }
 }
 
 // -- Extract — branches based on toggle --------------------------------------
