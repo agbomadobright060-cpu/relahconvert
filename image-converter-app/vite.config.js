@@ -80,6 +80,53 @@ function langCopyPlugin() {
         if (descM) homeDescByLang[lang] = descM[1]
       }
 
+      // Extract per-language SEO h2b and body for PDF tools (used for translated <title> and <meta description>)
+      const pdfToolsForSeo = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf']
+      const seoByLangByTool = {}
+      for (const lang of allLangsForMeta) {
+        const langKey = lang.includes('-') ? `'${lang}'` : lang
+        let startIdx = i18nSrc.indexOf('\n  ' + langKey + ':{')
+        if (startIdx === -1) startIdx = i18nSrc.indexOf('\n  ' + langKey + ': {')
+        if (startIdx === -1) continue
+        let endIdx = i18nSrc.length
+        for (const other of allLangsForMeta) {
+          if (other === lang) continue
+          const otherKey = other.includes('-') ? `'${other}'` : other
+          let otherIdx = i18nSrc.indexOf('\n  ' + otherKey + ':{', startIdx + 1)
+          if (otherIdx === -1) otherIdx = i18nSrc.indexOf('\n  ' + otherKey + ': {', startIdx + 1)
+          if (otherIdx > startIdx && otherIdx < endIdx) endIdx = otherIdx
+        }
+        const block = i18nSrc.substring(startIdx, endIdx)
+        seoByLangByTool[lang] = {}
+        for (const tool of pdfToolsForSeo) {
+          const toolStart = block.indexOf("'" + tool + "':{")
+          if (toolStart === -1) continue
+          // Take a window that's large enough to contain the tool's seo entry but not bleed into siblings
+          const windowEnd = block.indexOf("\n      '", toolStart + 1)
+          const window = block.substring(toolStart, windowEnd === -1 ? toolStart + 8000 : windowEnd)
+          const h2bM = window.match(/h2b:'((?:\\.|[^'\\])*)'/)
+          const bodyM = window.match(/body:'((?:\\.|[^'\\])*)'/)
+          seoByLangByTool[lang][tool] = {
+            h2b: h2bM ? h2bM[1].replace(/\\'/g, "'") : null,
+            body: bodyM ? bodyM[1].replace(/\\'/g, "'").replace(/<[^>]+>/g, '').trim() : null,
+          }
+        }
+      }
+
+      function buildMetaDesc(body) {
+        if (!body) return null
+        if (body.length <= 160) return body
+        const slice = body.substring(0, 160)
+        const lastDot = slice.lastIndexOf('. ')
+        if (lastDot > 80) return slice.substring(0, lastDot + 1).trim()
+        const lastSpace = slice.lastIndexOf(' ')
+        return slice.substring(0, lastSpace > 0 ? lastSpace : 160).trim()
+      }
+
+      function escAttr(s) {
+        return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+
       const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
@@ -208,7 +255,23 @@ function langCopyPlugin() {
         const slugMap = slugMapByLang[lang] || {}
         for (const [enKey, localSlug] of Object.entries(slugMap)) {
           const toolCanonical = `    <link rel="canonical" href="${base}/${lang}/${localSlug}/" />\n`
-          const toolHtml = langHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
+          let toolHtml = langHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
+
+          // For PDF tools, inject translated <title> and <meta description> from seoData
+          if (seoByLangByTool[lang] && seoByLangByTool[lang][enKey]) {
+            const seo = seoByLangByTool[lang][enKey]
+            if (seo.h2b) {
+              const newTitle = `${seo.h2b} | RelahConvert`
+              toolHtml = toolHtml.replace(/<title>[^<]*<\/title>/, `<title>${escAttr(newTitle)}</title>`)
+            }
+            const meta = buildMetaDesc(seo.body)
+            if (meta) {
+              toolHtml = toolHtml.replace(/    <meta name="description"[^>]*\/>\n?/g, '')
+              const metaTag = `    <meta name="description" content="${escAttr(meta)}" />\n`
+              toolHtml = toolHtml.replace('</head>', metaTag + '  </head>')
+            }
+          }
+
           const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
           writeFileSync(resolve(slugDir, 'index.html'), toolHtml)
