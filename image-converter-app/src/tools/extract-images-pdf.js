@@ -528,19 +528,46 @@ async function extractFromFile(fileEntry) {
       if (!imgName || seenImages.has(imgName)) continue
       seenImages.add(imgName)
 
-      let imgData
-      try {
-        imgData = await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('timeout')), 3000)
-          page.objs.get(imgName, (data) => { clearTimeout(timeout); resolve(data) })
-        })
-      } catch (e) { continue }
+      const imgData = await resolveImage(page, imgName)
+      if (!imgData) {
+        console.warn('[extract-images-pdf] could not resolve image:', imgName, 'on page', p)
+        continue
+      }
       await pushImage(imgData)
     }
   }
 
   fileEntry.extractedImages = results
   return results
+
+  function resolveImage(page, imgName) {
+    // PDF.js stores images in either page.objs (page-specific) or page.commonObjs (shared across pages).
+    // Try sync access first (already-resolved objects), then fall back to async callback for either store.
+    function trySync(store) {
+      try {
+        if (store && typeof store.has === 'function' && store.has(imgName)) {
+          return store.get(imgName)
+        }
+      } catch (e) {}
+      try {
+        if (store && typeof store.getRaw === 'function') {
+          const r = store.getRaw(imgName)
+          if (r) return r
+        }
+      } catch (e) {}
+      return null
+    }
+    const sync = trySync(page.objs) || trySync(page.commonObjs)
+    if (sync) return Promise.resolve(sync)
+
+    return new Promise(resolve => {
+      let done = false
+      const finish = (v) => { if (!done) { done = true; resolve(v) } }
+      const timer = setTimeout(() => finish(null), 10000)
+      try { page.objs.get(imgName, (d) => { clearTimeout(timer); finish(d) }) } catch (e) {}
+      try { page.commonObjs.get(imgName, (d) => { clearTimeout(timer); finish(d) }) } catch (e) {}
+    })
+  }
 
   async function pushImage(imgData) {
     if (!imgData || !imgData.width || !imgData.height) return
