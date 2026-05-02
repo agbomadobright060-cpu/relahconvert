@@ -120,18 +120,17 @@
       .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
       .filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--text-on-accent); }
       .tool-card[style*="display:none"] { display: none !important; }
-      .tools-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
-      .tool-card { position: relative; background: var(--bg-card); border-radius: 12px; padding: 20px 18px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; display: block; }
-      .tool-card:hover { border-color: var(--accent); box-shadow: 0 4px 14px rgba(200,75,49,0.12); transform: translateY(-2px); }
-      .tool-card .new-badge { position: absolute; top: 12px; right: 12px; background: #E0EAFB; color: #1E3A8A; font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.02em; line-height: 1.4; }
-      [dir="rtl"] .tool-card .new-badge { right: auto; left: 12px; }
-      .tool-card .icon { width: 54px; height: 54px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-      .tool-card .icon svg { width: 34px; height: 34px; display: block; }
-      .tool-card h2 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; letter-spacing: -0.01em; }
-      .tool-card p { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
-      @media(max-width:1100px){.tools-grid{grid-template-columns:repeat(4,1fr);}}
+      .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      .tool-card { position: relative; background: var(--bg-card); border-radius: 16px; padding: 28px 26px; text-decoration: none; border: 1.5px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; display: block; }
+      .tool-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(200,75,49,0.12); transform: translateY(-2px); }
+      .tool-card .new-badge { position: absolute; top: 14px; right: 14px; background: #E0EAFB; color: #1E3A8A; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.02em; line-height: 1.4; }
+      [dir="rtl"] .tool-card .new-badge { right: auto; left: 14px; }
+      .tool-card .icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+      .tool-card .icon svg { width: 36px; height: 36px; display: block; }
+      .tool-card h2 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.01em; }
+      .tool-card p { font-size: 13px; color: var(--text-tertiary); line-height: 1.55; }
       @media(max-width:900px){.tools-grid{grid-template-columns:repeat(3,1fr);}}
-      @media(max-width:768px){.tools-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.tool-card{padding:16px 14px;border-radius:10px;}.tool-card .icon{width:40px;height:40px;border-radius:9px;margin-bottom:9px;}.tool-card .icon svg{width:26px;height:26px;}.tool-card h2{font-size:13px;}.tool-card p{display:none;}}
+      @media(max-width:768px){.tools-grid{grid-template-columns:repeat(2,1fr);gap:12px;}.tool-card{padding:18px 16px;border-radius:14px;}.tool-card .icon{width:44px;height:44px;border-radius:10px;margin-bottom:10px;}.tool-card .icon svg{width:30px;height:30px;}.tool-card h2{font-size:14px;}.tool-card p{display:none;}}
       #site-footer { background: #2C1810; color: #C8B8A8; font-family: 'DM Sans', sans-serif; margin-top: auto; position: relative; z-index: 2; }
       .footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px 32px; }
       .footer-top { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08); }
