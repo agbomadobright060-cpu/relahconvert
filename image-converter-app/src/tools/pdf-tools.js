@@ -52,8 +52,8 @@ style.textContent = `
   .pdf-tools-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
   .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:12px;padding:20px 18px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 3px rgba(0,0,0,0.05);transition:all 0.2s;display:block;}
   .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(200,75,49,0.12);transform:translateY(-2px);}
-  .pdf-tool-card .icon{width:42px;height:42px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;flex-shrink:0;}
-  .pdf-tool-card .icon svg{width:42px;height:42px;display:block;}
+  .pdf-tool-card .icon{width:50px;height:50px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;flex-shrink:0;}
+  .pdf-tool-card .icon svg{width:50px;height:50px;display:block;}
   .pdf-tool-card h2{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:5px;letter-spacing:-0.01em;}
   .pdf-tool-card p{font-size:12px;color:var(--text-tertiary);line-height:1.5;}
   @media(max-width:1100px){.pdf-tools-grid{grid-template-columns:repeat(4,1fr);}}
