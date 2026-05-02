@@ -1,41 +1,71 @@
 # RelahConvert
 
-> Free browser-based image tools. No upload, no server, no account needed. All processing happens locally in your browser.
+> Free online image and PDF tools. 50+ tools to compress, convert, edit, merge, and split files in bulk. Available in 25 languages.
 
 ## What is RelahConvert?
 
-RelahConvert is a free online image converter and editor. Every tool runs entirely in the browser — files never leave your device. No signup, no ads, no limits.
+RelahConvert is a free online toolkit for working with images and PDFs. Compress, resize, convert, crop, watermark, merge, split, protect, and edit files in bulk. Every tool is free to use, with sign-in optional for cloud save.
 
-## Tools Available
+## Image Tools
 
-- Compress Image — reduce JPG, PNG, WebP file size without quality loss
+- Compress Image — reduce JPG, PNG, and WebP file size while keeping quality
 - Resize Image — change image dimensions in pixels or percentage
-- Crop Image — crop any image to custom dimensions
-- Convert JPG to PNG — lossless format conversion
-- Convert PNG to JPG — compress PNG to smaller JPG
-- Convert JPG to WebP — modern format for faster websites
-- Convert WebP to JPG — convert WebP back to universal JPG
-- Remove Background — AI-powered background removal in browser
-- Blur Background — blur image background instantly
-- Add Watermark — add text or logo watermark to images
-- Rotate Image — rotate or flip images
-- Convert to PDF — turn images into PDF documents
+- Resize in KB — resize images to a target file size in KB
+- Crop Image — crop any image to exact pixel dimensions
+- Rotate Image — rotate images by any angle, batch process
+- Flip Image — flip images horizontally or vertically
+- Black & White — convert images to grayscale
+- Watermark Image — add text or image watermarks
+- Round Image Corners — add rounded corners to images
+- Pixelate Image — pixelate faces, license plates, or any area
+- Blur Face — automatically blur faces in photos
+- Remove Background — AI-powered background removal
 - Passport Photo Maker — create passport photos for 160+ countries
 - Image Splitter — split images into grid pieces
-- Sharpen Image — enhance image sharpness
-- Pixelate Image — pixelate faces or areas
-- Add Text to Image — overlay text on images
-- Enlarge Image — upscale images with AI
-- And 20+ more free tools
+- Merge Images — combine multiple images into one
+- Meme Generator — create memes with custom text and 100+ templates
+- HTML to Image — convert HTML markup to PNG/JPG
+- Image to ICO — create favicons from any image
+
+## Image Format Converters
+
+- JPG to PNG, PNG to JPG
+- JPG to WebP, WebP to JPG
+- PNG to WebP, WebP to PNG
+- JPG to PDF, PNG to PDF, PDF to PNG
+- GIF to JPG, GIF to PNG
+- BMP to JPG, BMP to PNG
+- TIFF to JPG
+- JPG to GIF, PNG to GIF
+- HEIC to JPG
+- JPG to SVG
+- SVG to PNG, SVG to JPG
+
+## PDF Tools
+
+- Merge PDF — combine multiple PDFs into one document
+- Split PDF — split a PDF into pages or custom ranges
+- Compress PDF — reduce PDF file size
+- Rotate PDF — rotate PDF pages by 90, 180, or 270 degrees
+- Reorder Pages — drag and drop to rearrange PDF pages
+- Extract Pages — extract specific pages as a new PDF
+- Remove Pages — delete unwanted pages from a PDF
+- Add Page Numbers — add page numbers with custom position and font size
+- Watermark PDF — add text or image watermarks to PDF pages
+- Crop PDF — adjust margins to trim PDF pages
+- Protect PDF — add password protection with AES-256 encryption
+- Unlock PDF — remove password protection from a PDF
+- Extract Images from PDF — pull embedded images out at original resolution
 
 ## Supported Languages
 
-English, French, Spanish, Portuguese, German, Arabic, Italian, Dutch, Russian, Japanese, Chinese, Korean, Hindi, Turkish, Polish, Ukrainian, Vietnamese, Thai, Indonesian, Malay, Romanian, Czech, Swedish, Norwegian, Danish
+English, French, Spanish, Portuguese, German, Arabic, Italian, Japanese, Russian, Korean, Chinese (Simplified), Chinese (Traditional), Bulgarian, Catalan, Dutch, Greek, Hindi, Indonesian, Malay, Polish, Swedish, Thai, Turkish, Ukrainian, Vietnamese
 
 ## Key Facts
 
-- 100% free, no account required
-- Browser-only processing — complete privacy
-- Supports JPG, PNG, WebP, GIF, SVG, ICO formats
+- 50+ free tools across image and PDF categories
+- Bulk processing — apply the same operation to many files at once
+- Sign-in optional for cloud save
+- Supports JPG, PNG, WebP, GIF, SVG, ICO, BMP, TIFF, HEIC, PDF
 - Works on desktop and mobile
 - Available at https://relahconvert.com
