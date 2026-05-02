@@ -50,9 +50,9 @@ style.textContent = `
   /* Tools grid */
   .pdf-tools-section{max-width:1180px;margin:0 auto;padding:0 24px 60px;width:100%;position:relative;z-index:2;}
   .pdf-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-  .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:16px;padding:28px 26px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.2s;display:block;}
+  .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:16px;padding:22px 26px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.2s;display:block;}
   .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(200,75,49,0.12);transform:translateY(-2px);}
-  .pdf-tool-card .icon{width:50px;height:50px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;flex-shrink:0;}
+  .pdf-tool-card .icon{width:50px;height:50px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;flex-shrink:0;}
   .pdf-tool-card .icon svg{width:50px;height:50px;display:block;}
   .pdf-tool-card h2{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;letter-spacing:-0.01em;}
   .pdf-tool-card p{font-size:13px;color:var(--text-tertiary);line-height:1.55;}
