@@ -127,6 +127,179 @@ function langCopyPlugin() {
         return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       }
 
+      // ── Schema.org JSON-LD helpers ──────────────────────────────────────
+      const PDF_TOOL_SET = new Set([
+        'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
+        'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
+        'protect-pdf','unlock-pdf','extract-images-pdf'
+      ])
+      // English display name per slug for WebApplication schema name field
+      const TOOL_NAME_EN = {
+        'compress':'Compress Image','resize':'Resize Image','crop':'Crop Image',
+        'rotate':'Rotate Image','flip':'Flip Image','grayscale':'Black & White',
+        'watermark':'Watermark Image','round-corners':'Round Image Corners',
+        'meme-generator':'Meme Generator','blur-face':'Blur Face',
+        'remove-background':'Remove Background','heic-to-jpg':'HEIC to JPG',
+        'image-to-ico':'Image to ICO','jpg-to-svg':'JPG to SVG',
+        'html-to-image':'HTML to Image','merge-images':'Merge Images',
+        'passport-photo':'Passport Photo','image-splitter':'Image Splitter',
+        'resize-in-kb':'Resize in KB','pixelate-image':'Pixelate Image',
+        'svg-to-png':'SVG to PNG','svg-to-jpg':'SVG to JPG',
+        'jpg-to-png':'JPG to PNG','png-to-jpg':'PNG to JPG',
+        'jpg-to-webp':'JPG to WebP','webp-to-jpg':'WebP to JPG',
+        'png-to-webp':'PNG to WebP','webp-to-png':'WebP to PNG',
+        'jpg-to-pdf':'JPG to PDF','png-to-pdf':'PNG to PDF','pdf-to-png':'PDF to PNG',
+        'gif-to-jpg':'GIF to JPG','gif-to-png':'GIF to PNG',
+        'bmp-to-jpg':'BMP to JPG','bmp-to-png':'BMP to PNG','tiff-to-jpg':'TIFF to JPG',
+        'jpg-to-gif':'JPG to GIF','png-to-gif':'PNG to GIF',
+        'pdf-tools':'PDF Tools','merge-pdf':'Merge PDF','split-pdf':'Split PDF',
+        'rotate-pdf':'Rotate PDF','compress-pdf':'Compress PDF',
+        'reorder-pdf':'Reorder PDF Pages','extract-pdf':'Extract PDF Pages',
+        'remove-pdf':'Remove PDF Pages','add-page-numbers':'Add Page Numbers to PDF',
+        'watermark-pdf':'Watermark PDF','crop-pdf':'Crop PDF',
+        'protect-pdf':'Protect PDF','unlock-pdf':'Unlock PDF',
+        'extract-images-pdf':'Extract Images from PDF',
+      }
+      function appCategoryFor(slug) {
+        return PDF_TOOL_SET.has(slug) ? 'BusinessApplication' : 'MultimediaApplication'
+      }
+      function orgSchema(homeUrl) {
+        return {
+          '@context':'https://schema.org','@type':'Organization',
+          name:'RelahConvert',url:homeUrl,
+          logo:'https://relahconvert.com/pwa-512x512.png'
+        }
+      }
+      function siteSchema(homeUrl) {
+        return {
+          '@context':'https://schema.org','@type':'WebSite',
+          name:'RelahConvert',url:homeUrl
+        }
+      }
+      // Fallback English description per tool when the source HTML lacks a
+      // <meta name="description"> (some image tools inject it at runtime in JS)
+      const TOOL_DESC_EN = {
+        'compress':'Compress JPG, PNG, and WebP images to reduce file size while keeping quality. Bulk processing.',
+        'resize':'Resize JPG and PNG images by pixels or percentage. Bulk image resizer.',
+        'crop':'Crop images to exact pixel dimensions. Free image cropper with bulk processing.',
+        'rotate':'Rotate images by any angle. Batch rotate multiple files at once.',
+        'flip':'Flip images horizontally or vertically. Bulk processing for multiple files.',
+        'grayscale':'Convert images to black and white. Bulk grayscale converter for multiple files.',
+        'watermark':'Add text or image watermarks to your photos. Bulk watermark tool.',
+        'round-corners':'Add rounded corners to images. Bulk processing for multiple files.',
+        'meme-generator':'Create memes with custom text and 100+ templates.',
+        'blur-face':'Automatically blur faces in photos. Privacy-focused face blurring.',
+        'remove-background':'AI-powered background removal for photos. Bulk processing.',
+        'heic-to-jpg':'Convert HEIC images from iPhone to JPG format. Bulk converter.',
+        'image-to-ico':'Create favicon ICO files from any image. Multiple sizes supported.',
+        'jpg-to-svg':'Convert JPG raster images to SVG vector format.',
+        'html-to-image':'Convert HTML markup to PNG or JPG images.',
+        'merge-images':'Combine multiple images into one. Horizontal or vertical merge.',
+        'passport-photo':'Create passport photos for 160+ countries with correct sizing.',
+        'image-splitter':'Split images into grid pieces for Instagram or other layouts.',
+        'resize-in-kb':'Resize images to a target file size in KB. Precise size control.',
+        'pixelate-image':'Pixelate faces, license plates, or any area in photos.',
+        'svg-to-png':'Convert SVG vector files to PNG raster images.',
+        'svg-to-jpg':'Convert SVG vector files to JPG raster images.',
+        'jpg-to-png':'Convert JPG images to PNG format with transparency support.',
+        'png-to-jpg':'Convert PNG images to JPG format. Reduce file size.',
+        'jpg-to-webp':'Convert JPG to WebP for smaller, modern web images.',
+        'webp-to-jpg':'Convert WebP images back to universal JPG format.',
+        'png-to-webp':'Convert PNG to WebP for smaller, modern web images.',
+        'webp-to-png':'Convert WebP images to PNG format with transparency.',
+        'jpg-to-pdf':'Convert JPG images to PDF documents. Bulk processing.',
+        'png-to-pdf':'Convert PNG images to PDF documents. Bulk processing.',
+        'pdf-to-png':'Convert PDF pages to PNG images. Extract pages as PNG.',
+        'gif-to-jpg':'Convert GIF images to JPG format. Bulk converter.',
+        'gif-to-png':'Convert GIF images to PNG format. Bulk converter.',
+        'bmp-to-jpg':'Convert BMP bitmap images to JPG format.',
+        'bmp-to-png':'Convert BMP bitmap images to PNG format.',
+        'tiff-to-jpg':'Convert TIFF images to JPG format. Bulk converter.',
+        'jpg-to-gif':'Convert JPG images to animated GIF.',
+        'png-to-gif':'Convert PNG images to animated GIF.',
+        'pdf-tools':'Free PDF toolkit — merge, split, compress, rotate, watermark, protect, unlock, and edit PDF files.',
+        'merge-pdf':'Merge multiple PDF files into one document. Drag to reorder, bulk process.',
+        'split-pdf':'Split a PDF into separate pages or custom page ranges.',
+        'rotate-pdf':'Rotate PDF pages by 90, 180, or 270 degrees. Per-page or all pages.',
+        'compress-pdf':'Reduce PDF file size by optimizing images and removing unnecessary data.',
+        'reorder-pdf':'Drag and drop to rearrange PDF pages in any order.',
+        'extract-pdf':'Extract specific pages from a PDF and save them as a new document.',
+        'remove-pdf':'Delete unwanted pages from a PDF document.',
+        'add-page-numbers':'Add page numbers to PDF with custom position, font size, and starting number.',
+        'watermark-pdf':'Add text or image watermarks to PDF pages. Customize opacity and position.',
+        'crop-pdf':'Crop PDF pages by adjusting margins. Trim whitespace or resize.',
+        'protect-pdf':'Add password protection to PDF documents with AES-256 encryption.',
+        'unlock-pdf':'Remove password protection from a PDF. Preserves original content.',
+        'extract-images-pdf':'Pull embedded images out of any PDF at original resolution.',
+      }
+      // Strip forbidden privacy/processing-location phrasing from descriptions.
+      // Strategy: locate the first forbidden phrase, walk back to the previous
+      // clause boundary (period, em-dash, comma, semicolon) and truncate there.
+      const FORBIDDEN_PHRASES = [
+        // English
+        'no file upload','no upload','no uploads','no install','no server','no signup','no sign-up','no sign up',
+        'browser-only','browser only','entirely in your browser','in your browser','in the browser',
+        'files never leave','files don\'t leave','files stay on','processed locally','runs locally',
+        // French
+        'dans votre navigateur','aucun envoi','aucun téléversement','aucun téléchargement','sans serveur','sans installation','sans inscription',
+        // Spanish
+        'en tu navegador','en su navegador','sin subir','sin servidor','sin instalación','sin registro',
+        // Portuguese
+        'no seu navegador','no navegador','sem enviar','sem upload','sem servidor','sem instalar','sem cadastro',
+        // German
+        'in ihrem browser','im browser','ohne upload','ohne server','ohne installation','ohne anmeldung',
+        // Italian
+        'nel tuo browser','nel browser','senza lasciare','senza caricamento','senza server','senza installazione','senza registrazione','direttamente nel','tuo browser',
+        // Dutch
+        'in je browser','in uw browser','geen upload','geen server','geen installatie',
+        // Russian
+        'в вашем браузере','в браузере','без загрузки','без сервера','без установки',
+        // Polish
+        'w przeglądarce','bez przesyłania','bez serwera','bez instalacji',
+        // Other locale terms commonly seen in our translations
+        '브라우저에서','브라우저 전용','업로드 없이',
+        '在浏览器中','在瀏覽器中','无需上传','無需上傳',
+        'ในเบราว์เซอร์','ไม่ต้องอัปโหลด',
+        'tarayıcınızda','tarayıcıda','yüklemeden',
+        'ในเบราว์เซอร์','คุณ',
+      ]
+      function sanitizeDesc(s) {
+        if (!s) return s
+        const lower = s.toLowerCase()
+        let cutAt = -1
+        for (const p of FORBIDDEN_PHRASES) {
+          const idx = lower.indexOf(p.toLowerCase())
+          if (idx !== -1 && (cutAt === -1 || idx < cutAt)) cutAt = idx
+        }
+        if (cutAt === -1) return s.trim()
+        // Walk backward to the nearest clause boundary
+        let end = cutAt
+        for (let i = cutAt - 1; i >= 0; i--) {
+          const ch = s[i]
+          if (ch === '.' || ch === '!' || ch === '?' || ch === ';') { end = i + 1; break }
+          if (ch === '—' || ch === '–' || ch === ',') { end = i; break }
+        }
+        return s.substring(0, end).trim().replace(/[,.\s—–\-]+$/, '').trim()
+      }
+      function appSchema(opts) {
+        return {
+          '@context':'https://schema.org','@type':'WebApplication',
+          name:opts.name,description:sanitizeDesc(opts.description),url:opts.url,
+          applicationCategory:opts.category,operatingSystem:'Any',
+          browserRequirements:'Requires JavaScript. Requires HTML5.',
+          offers:{'@type':'Offer',price:'0',priceCurrency:'USD'}
+        }
+      }
+      function injectSchemas(html, schemas) {
+        const cleaned = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '')
+        const scripts = schemas.map(s => `    <script type="application/ld+json">${JSON.stringify(s)}</script>\n`).join('')
+        return cleaned.replace('</head>', scripts + '  </head>')
+      }
+      function extractMetaDesc(html) {
+        const m = html.match(/<meta name="description" content="([^"]*)"/)
+        return m ? m[1] : ''
+      }
+
       const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
@@ -191,11 +364,13 @@ function langCopyPlugin() {
         return tags
       }
 
-      // Inject meta description and hreflang into root index.html (English homepage)
+      // Inject meta description, hreflang, and JSON-LD into root index.html (English homepage)
       const enDescTag = homeDescByLang['en']
         ? `    <meta name="description" content="${homeDescByLang['en']}" />\n`
         : ''
-      const enHomeHtml = baseHtml.replace('</head>', enDescTag + hreflangTags(null) + '  </head>')
+      const enHomeUrl = base + '/'
+      let enHomeHtml = injectSchemas(baseHtml, [orgSchema(enHomeUrl), siteSchema(enHomeUrl)])
+      enHomeHtml = enHomeHtml.replace('</head>', enDescTag + hreflangTags(null) + '  </head>')
       writeFileSync(src, enHomeHtml)
 
       // Inject hreflang into English tool HTML files (e.g. dist/jpg-to-pdf.html)
@@ -212,9 +387,20 @@ function langCopyPlugin() {
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
         if (existsSync(toolFile)) {
-          const toolHtml = readFileSync(toolFile, 'utf-8')
-          const updated = toolHtml.replace('</head>', hreflangTags(slug) + '  </head>')
-          writeFileSync(toolFile, updated)
+          let toolHtml = readFileSync(toolFile, 'utf-8')
+          // Inject WebApplication JSON-LD; prefer the existing meta description,
+          // fall back to the curated English description when the source HTML
+          // doesn't carry a static <meta name="description"> (some image tools inject
+          // it at runtime in JS, which the build-time scrape can't see).
+          const metaDesc = extractMetaDesc(toolHtml)
+          const toolDesc = metaDesc || TOOL_DESC_EN[slug] || ''
+          const toolName = TOOL_NAME_EN[slug] || slug
+          const toolUrl = base + '/' + slug
+          toolHtml = injectSchemas(toolHtml, [appSchema({
+            name: toolName, description: toolDesc, url: toolUrl, category: appCategoryFor(slug)
+          })])
+          toolHtml = toolHtml.replace('</head>', hreflangTags(slug) + '  </head>')
+          writeFileSync(toolFile, toolHtml)
         }
       }
 
@@ -242,6 +428,9 @@ function langCopyPlugin() {
         const descTag = homeDescByLang[lang]
           ? `    <meta name="description" content="${homeDescByLang[lang]}" />\n`
           : ''
+        // Inject Organization + WebSite JSON-LD with the language-prefixed home URL
+        const langHomeUrl = base + '/' + lang + '/'
+        homeHtml = injectSchemas(homeHtml, [orgSchema(langHomeUrl), siteSchema(langHomeUrl)])
         // Inject canonical, hreflang tags and meta description into <head>
         const homeCanonical = `    <link rel="canonical" href="${base}/${lang}/" />\n`
         homeHtml = homeHtml.replace('</head>', homeCanonical + descTag + hreflangTags(null) + '  </head>')
@@ -264,13 +453,23 @@ function langCopyPlugin() {
               const newTitle = `${seo.h2b} | RelahConvert`
               toolHtml = toolHtml.replace(/<title>[^<]*<\/title>/, `<title>${escAttr(newTitle)}</title>`)
             }
-            const meta = buildMetaDesc(seo.body)
+            const meta = sanitizeDesc(buildMetaDesc(seo.body))
             if (meta) {
               toolHtml = toolHtml.replace(/    <meta name="description"[^>]*\/>\n?/g, '')
               const metaTag = `    <meta name="description" content="${escAttr(meta)}" />\n`
               toolHtml = toolHtml.replace('</head>', metaTag + '  </head>')
             }
           }
+
+          // Inject WebApplication JSON-LD; prefer the page's final meta description,
+          // fall back to the curated English description if neither HTML nor i18n
+          // produced one for this tool.
+          const finalDesc = extractMetaDesc(toolHtml) || TOOL_DESC_EN[enKey] || ''
+          const toolUrl = base + '/' + lang + '/' + localSlug + '/'
+          const toolName = TOOL_NAME_EN[enKey] || enKey
+          toolHtml = injectSchemas(toolHtml, [appSchema({
+            name: toolName, description: finalDesc, url: toolUrl, category: appCategoryFor(enKey)
+          })])
 
           const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
