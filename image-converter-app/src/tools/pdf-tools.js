@@ -49,6 +49,11 @@ style.textContent = `
 
   /* Tools grid */
   .pdf-tools-section{max-width:1180px;margin:0 auto;padding:0 24px 60px;width:100%;position:relative;z-index:2;}
+  .pdf-filter-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:0 auto 28px;max-width:760px;}
+  .pdf-filter-btn{padding:8px 20px;border-radius:24px;border:1.5px solid var(--border-light);background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text-secondary);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
+  .pdf-filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .pdf-filter-btn.active{background:var(--accent);border-color:var(--accent);color:var(--text-on-accent);}
+  @media(max-width:768px){.pdf-filter-btn{padding:7px 14px;font-size:12px;}.pdf-filter-bar{gap:8px;margin-bottom:20px;}}
   .pdf-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
   .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:16px;padding:22px 26px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.2s;display:block;}
   .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(200,75,49,0.12);transform:translateY(-2px);}
@@ -107,6 +112,30 @@ const cardDescs = {
 
 const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf']
 
+// Category buckets (Option A): organize / optimize / edit / secure
+const pdfCategoryMap = {
+  'merge-pdf':         'organize',
+  'split-pdf':         'organize',
+  'reorder-pdf':       'organize',
+  'extract-pdf':       'organize',
+  'remove-pdf':        'organize',
+  'compress-pdf':      'optimize',
+  'crop-pdf':          'optimize',
+  'rotate-pdf':        'edit',
+  'add-page-numbers':  'edit',
+  'watermark-pdf':     'edit',
+  'extract-images-pdf':'edit',
+  'protect-pdf':       'secure',
+  'unlock-pdf':        'secure',
+}
+const pdfFilterChips = [
+  { key: 'all',      label: t.f_all      || 'All' },
+  { key: 'organize', label: t.f_organize || 'Organize' },
+  { key: 'optimize', label: t.f_optimize || 'Optimize' },
+  { key: 'edit',     label: t.f_edit     || 'Edit' },
+  { key: 'secure',   label: t.f_secure   || 'Secure' },
+]
+
 // Decorative PDF icon for background blocks
 const bgIcon = `<svg viewBox="0 0 60 40" fill="none"><path d="M15 5h18l8 8v22a2 2 0 01-2 2H15a2 2 0 01-2-2V7a2 2 0 012-2z" fill="rgba(255,255,255,0.7)"/><path d="M33 5v9h9" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><text x="22" y="28" font-family="Arial" font-size="8" font-weight="800" fill="rgba(255,255,255,0.6)">PDF</text></svg>`
 
@@ -126,10 +155,14 @@ document.querySelector('#app').innerHTML = `
       <p>${hubDesc}</p>
     </section>
     <section class="pdf-tools-section">
-      <div class="pdf-tools-grid">
+      <div class="pdf-filter-bar" id="pdfFilterBar">
+        ${pdfFilterChips.map((c, i) => `<button class="pdf-filter-btn${i === 0 ? ' active' : ''}" data-filter="${c.key}">${c.label}</button>`).join('')}
+      </div>
+      <div class="pdf-tools-grid" id="pdfToolsGrid">
         ${pdfToolSlugs.map(slug => {
           const ic = svgIcons[slug]
-          return `<a href="${localHref(slug)}" class="pdf-tool-card">
+          const cat = pdfCategoryMap[slug] || 'edit'
+          return `<a href="${localHref(slug)}" class="pdf-tool-card" data-cat="${cat}">
             <div class="icon">${ic.svg}</div>
             <h2>${ns[slug] || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</h2>
             <p>${cardDescs[slug]}</p>
@@ -141,3 +174,15 @@ document.querySelector('#app').innerHTML = `
 `
 
 injectHeader()
+
+// Filter bar interaction
+document.getElementById('pdfFilterBar').addEventListener('click', e => {
+  const btn = e.target.closest('.pdf-filter-btn')
+  if (!btn) return
+  document.querySelectorAll('.pdf-filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  const filter = btn.dataset.filter
+  document.querySelectorAll('.pdf-tool-card').forEach(card => {
+    card.style.display = (filter === 'all' || card.dataset.cat === filter) ? '' : 'none'
+  })
+})
