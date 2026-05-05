@@ -1,1 +1,31 @@
-/* /index.html 200
+# Drop legacy duplicated-lang-prefix URLs from Google's index.
+# These paths (e.g. /th/th/watermark-pdf) were never produced by the current
+# build but appeared in old crawls. Redirect to the language homepage so
+# Google deindexes the bad URLs.
+/fr/fr/*    /fr/    301
+/es/es/*    /es/    301
+/pt/pt/*    /pt/    301
+/de/de/*    /de/    301
+/ar/ar/*    /ar/    301
+/it/it/*    /it/    301
+/ja/ja/*    /ja/    301
+/ru/ru/*    /ru/    301
+/ko/ko/*    /ko/    301
+/zh/zh/*    /zh/    301
+/zh-TW/zh-TW/*  /zh-TW/  301
+/bg/bg/*    /bg/    301
+/ca/ca/*    /ca/    301
+/nl/nl/*    /nl/    301
+/el/el/*    /el/    301
+/hi/hi/*    /hi/    301
+/id/id/*    /id/    301
+/ms/ms/*    /ms/    301
+/pl/pl/*    /pl/    301
+/sv/sv/*    /sv/    301
+/th/th/*    /th/    301
+/tr/tr/*    /tr/    301
+/uk/uk/*    /uk/    301
+/vi/vi/*    /vi/    301
+
+# SPA fallback - serve index.html for any unmatched path
+/*  /index.html  200
