@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('heic-to-jpg')
 
 const t = getT()
@@ -54,7 +54,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Converter Free | Bulk & Private — RelahConvert`
+setToolMeta('heic-to-jpg')
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">

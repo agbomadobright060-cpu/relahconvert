@@ -161,7 +161,11 @@
     var ICONS = {'jpg-to-png':'🖼️','png-to-jpg':'🖼️','jpg-to-webp':'🔄','webp-to-jpg':'🔄','png-to-webp':'🔄','webp-to-png':'🔄','compress':'📦','resize':'↔️','jpg-to-pdf':'📄','png-to-pdf':'📄'};
     var MAIN = ['compress','resize','jpg-to-png','jpg-to-pdf'];
 
-    var lang = localStorage.getItem('rc_lang') || 'en';
+    var _LCODES_ = ['en','fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi'];
+    var _segs_ = window.location.pathname.replace(/^\/|\/$/g, '').split('/');
+    var _urlLang_ = _segs_[0] ? _LCODES_.find(function(c){ return c.toLowerCase() === _segs_[0].toLowerCase() }) : null;
+    if (_urlLang_) localStorage.setItem('rc_lang', _urlLang_);
+    var lang = _urlLang_ || localStorage.getItem('rc_lang') || 'en';
     var t = T[lang] || T['en'];
 
     document.getElementById('heroH1').innerHTML = t.hero_h1;
@@ -175,6 +179,9 @@
     document.getElementById('featureList').innerHTML = t.features.map(function(f){ return '<li>'+f+'</li>'; }).join('');
     document.getElementById('footerCopy').textContent = t.footer_copy;
     document.title = t.hero_h1.replace(/<[^>]+>/g,'') + ' | RelahConvert';
+    var _md_ = document.querySelector('meta[name="description"]');
+    if (!_md_) { _md_ = document.createElement('meta'); _md_.setAttribute('name','description'); document.head.appendChild(_md_); }
+    if (t.hero_p) _md_.setAttribute('content', t.hero_p);
 
     document.getElementById('desktopNav').innerHTML = MAIN.map(function(s){ return '<a href="/'+s+'" class="nav-link">'+t.nav[s]+'</a>'; }).join('') + '<button class="more-btn" id="moreBtn">'+t.nav_more+' <span class="arrow">▼</span></button>';
     document.querySelector('.logo').href = lang === 'en' ? '/' : '/' + lang + '/';

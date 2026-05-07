@@ -1,7 +1,7 @@
 import { injectHeader } from '../core/header.js'
 
 // JSZip loaded dynamically
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('round-corners')
 
 const t = getT()
@@ -71,7 +71,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | Bulk & Private — RelahConvert`
+setToolMeta('round-corners')
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">

@@ -2,7 +2,7 @@ import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool, isStandaloneRoute } from './app/router.js'
 import { injectHeader } from './core/header.js'
-import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang, injectFaqSchema, setToolMeta} from './core/i18n.js'
 
 // If a standalone tool was loaded via dynamic import (translated URL), stop here.
 // The dynamically imported module will render its own UI into #app.
@@ -74,14 +74,7 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-
-  if (t.seo && t.seo[slug]) {
-    const metaDesc = document.createElement('meta')
-    metaDesc.name = 'description'
-    const enSeo = { 'jpg-to-png':'Convert JPG to PNG free without uploading to a server. Browser-based JPG to PNG converter — your files never leave your device.','png-to-jpg':'Convert PNG to JPG free without uploading to a server. Browser-based PNG to JPG converter — your files never leave your device.','jpg-to-webp':'Convert JPG to WebP free without uploading to a server. Browser-based JPG to WebP converter — your files never leave your device.','webp-to-jpg':'Convert WebP to JPG free without uploading to a server. Browser-based WebP to JPG converter — your files never leave your device.','png-to-webp':'Convert PNG to WebP free without uploading to a server. Browser-based PNG to WebP converter — your files never leave your device.','webp-to-png':'Convert WebP to PNG free without uploading to a server. Browser-based WebP to PNG converter — your files never leave your device.' }
-    metaDesc.content = enSeo[slug] || ''
-    document.head.appendChild(metaDesc)
-  }
+  setToolMeta(slug)
 }
 
 function buildTitleHTML() {
@@ -166,7 +159,7 @@ document.querySelector('#app').innerHTML = `
   ${buildSeoSection()}
 `
 
-if (currentTool) document.title = (t.tool_title && t.tool_title[slug] ? t.tool_title[slug] : currentTool.title) + ' | Free, Bulk & Private'
+// title is set by setToolMeta(slug) above — no need to re-set here
 injectHeader()
 
 const fileInput = document.getElementById('fileInput')

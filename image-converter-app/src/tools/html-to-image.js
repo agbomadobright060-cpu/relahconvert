@@ -1,5 +1,5 @@
 import { injectHeader } from '../core/header.js'
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('html-to-image')
 
 const t = getT()
@@ -8,7 +8,7 @@ const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')
 
-document.title = `${toolName} Free | RelahConvert`
+setToolMeta('html-to-image')
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);'
 
 const style = document.createElement('style')

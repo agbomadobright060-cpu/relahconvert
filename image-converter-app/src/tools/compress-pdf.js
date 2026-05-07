@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
 injectHreflang('compress-pdf')
@@ -90,12 +90,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.compresspdf_page_title || 'Compress PDF Free | Reduce PDF Size Online \u2014 RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.compresspdf_meta_desc || 'Compress PDF free. Reduce PDF file size by optimizing images.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('compress-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

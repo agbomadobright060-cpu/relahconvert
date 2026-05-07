@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('watermark')
 
 const t = getT()
@@ -89,7 +89,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | Bulk & Private — RelahConvert`
+setToolMeta('watermark')
 document.querySelector('#app').innerHTML = `
   <div id="mainContainer" style="max-width:700px; margin:32px auto; padding:0 16px 60px; font-family:'DM Sans',sans-serif;">
     <div style="margin-bottom:20px;">

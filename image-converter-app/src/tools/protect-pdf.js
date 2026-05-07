@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 import { encryptPDF } from '@pdfsmaller/pdf-encrypt-lite'
 
@@ -82,12 +82,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.protpdf_page_title || (seoData && seoData.h2b ? seoData.h2b + ' | RelahConvert' : 'Protect PDF Free | Add Password to PDF Online \u2014 RelahConvert')
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.protpdf_meta_desc || 'Protect PDF with a password. Add encryption to your PDF files for free.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('protect-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

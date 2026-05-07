@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('jpg-to-svg')
 
 const t = getT()
@@ -58,7 +58,7 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = `${toolName} Converter Free | Bulk & Private — RelahConvert`
+setToolMeta('jpg-to-svg')
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">

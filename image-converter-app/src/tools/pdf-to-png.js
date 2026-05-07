@@ -1,5 +1,5 @@
 import { injectHeader } from '../core/header.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 
 injectHreflang('pdf-to-png')
 
@@ -67,12 +67,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.pdfpng_page_title || (seoData ? seoData.page_title : 'PDF to PNG Converter Free | No Upload — RelahConvert')
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.pdfpng_meta_desc || 'Convert PDF to PNG free. Extract every page of a PDF as a high-quality PNG image. Browser-only, no upload, batch download as ZIP.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('pdf-to-png')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 
 injectHreflang('add-page-numbers')
@@ -95,12 +95,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.addpgnum_page_title || 'Add Page Numbers to PDF Free \u2014 Number PDF Pages Online | RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.addpgnum_meta_desc || 'Add page numbers to PDF documents free. Choose position, font size, format, and starting number.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('add-page-numbers')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

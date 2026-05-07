@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
 injectHreflang('remove-pdf')
@@ -66,12 +66,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.removepdf_page_title || 'Remove PDF Pages Free Online | No Upload \u2014 RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.removepdf_meta_desc || 'Remove pages from a PDF free. Click to select unwanted pages and download the cleaned PDF. Browser-only, no upload needed.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('remove-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

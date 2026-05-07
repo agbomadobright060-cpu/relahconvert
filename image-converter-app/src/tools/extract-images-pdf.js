@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 
 injectHreflang('extract-images-pdf')
 
@@ -67,12 +67,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.extimg_page_title || (seoData && seoData.h2b ? seoData.h2b + ' | RelahConvert' : 'Extract Images from PDF Free Online | RelahConvert')
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.extimg_meta_desc || 'Extract actual embedded images from any PDF at their original resolution. Download photos, logos, and diagrams individually or as a ZIP.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('extract-images-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

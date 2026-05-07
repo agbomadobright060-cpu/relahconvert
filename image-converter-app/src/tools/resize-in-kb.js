@@ -1,7 +1,7 @@
 import { injectHeader } from '../core/header.js'
 import { formatSize, totalBytes } from '../core/utils.js'
 import JSZip from 'jszip'
-import { getT, getLang, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('resize-in-kb')
 
 const t = getT()
@@ -71,11 +71,7 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = t.rik_page_title || 'Resize Image in KB \u2014 Batch Resize to Specific KB Size Free & Private | RelahConvert'
-  const metaDesc = document.createElement('meta')
-  metaDesc.name = 'description'
-  metaDesc.content = t.rik_meta_desc || 'Resize image in KB \u2014 batch compress or adjust multiple images to a specific file size in kilobytes. Process up to 25 files at once with individual or global KB targets. Free, private, browser-only.'
-  document.head.appendChild(metaDesc)
+  setToolMeta('resize-in-kb')
 }
 
 // ── SEO data ────────────────────────────────────────────────────────────────

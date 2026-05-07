@@ -1,5 +1,5 @@
 import { injectHeader } from '../core/header.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('image-splitter')
 
 const t = getT()
@@ -52,7 +52,7 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = toolName + ' Free | Free & Private — RelahConvert'
+setToolMeta('image-splitter')
 
 const PRESETS = [
   { label: '2×2', rows: 2, cols: 2 },

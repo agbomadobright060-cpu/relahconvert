@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib'
 
 injectHreflang('watermark-pdf')
@@ -139,12 +139,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.wmpdf_page_title || (seoData && seoData.h2b ? seoData.h2b + ' | RelahConvert' : 'Watermark PDF Free | Add Text Watermark to PDF Online \u2014 RelahConvert')
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.wmpdf_meta_desc || 'Add text watermarks to PDF files free. Choose text, font size, opacity, color, and placement style.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('watermark-pdf')
 /* ── HTML ───────────────────────────────────────────────────────────── */
 document.querySelector('#app').innerHTML = `
   <div id="wmpdf_main" style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">

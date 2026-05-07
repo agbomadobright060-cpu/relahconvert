@@ -1,6 +1,6 @@
 import { injectHeader } from './core/header.js'
 import { formatSize, totalBytes, sanitizeBaseName, LIMITS} from './core/utils.js'
-import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { getT , getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
 export function initImageToPdf({ slug: _slug } = {}) {
@@ -61,15 +61,7 @@ export function initImageToPdf({ slug: _slug } = {}) {
       .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
     `
     document.head.appendChild(style)
-    document.title = isPng
-      ? 'Convert Screenshots & Graphics to PDF — PNG to PDF Converter Free'
-      : 'Convert Photos to PDF — JPG to PDF Converter Free'
-    const metaDesc = document.createElement('meta')
-    metaDesc.name = 'description'
-    metaDesc.content = isPng
-      ? 'Convert screenshots, logos, graphics, and transparent PNG images to PDF. Free PNG to PDF converter — no upload, works entirely in your browser.'
-      : 'Turn your photos, camera images, and social media pictures into PDF documents. Free JPG to PDF converter — no upload, works entirely in your browser.'
-    document.head.appendChild(metaDesc)
+    setToolMeta(slug)
   }
 
   const pageSettings = { orientation: 'portrait', size: 'fit', margin: 'none' }

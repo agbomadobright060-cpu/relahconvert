@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
 injectHreflang('crop-pdf')
@@ -139,12 +139,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.croppdf_page_title || (seoData && seoData.h2b ? seoData.h2b + ' | RelahConvert' : 'Crop PDF Pages Free Online \u2014 Adjust Margins | RelahConvert')
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.croppdf_meta_desc || 'Crop PDF pages by setting custom margins. Preview the crop area, adjust top, bottom, left, and right margins, then download.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('crop-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
 injectHreflang('merge-pdf')
@@ -63,12 +63,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.mergepdf_page_title || 'Merge PDF Free Online | Combine PDFs — RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.mergepdf_meta_desc || 'Merge PDF files free online. Combine multiple PDFs into one document, reorder pages by dragging. Browser-only, no upload required.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('merge-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

@@ -1,7 +1,8 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT , getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('meme-generator')
+setToolMeta('meme-generator')
 
 const t = getT()
 

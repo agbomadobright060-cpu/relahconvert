@@ -1,7 +1,7 @@
 import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
 import { injectHeader } from './core/header.js'
-import { getT , getLang, localHref, injectHreflang, injectFaqSchema} from './core/i18n.js'
+import { getT , getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from './core/i18n.js'
 injectHreflang('resize')
 
 const bg = '#F2F2F2'
@@ -53,11 +53,7 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = 'Image Resizer — Resize JPG and PNG Free | Bulk & Private'
-  const metaDesc = document.createElement('meta')
-  metaDesc.name = 'description'
-  metaDesc.content = 'Resize images by pixels or percentage free without uploading to a server. Browser-based image resizer — your files never leave your device. Instant, private, no account needed.'
-  document.head.appendChild(metaDesc)
+  setToolMeta('resize')
 }
 
 const seoResize = {

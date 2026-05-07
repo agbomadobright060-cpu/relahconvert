@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('crop')
 
 const t = getT()
@@ -69,7 +69,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Free | Private — RelahConvert`
+setToolMeta('crop')
 const parts = toolName.split(' ')
 const h1Main = parts[0]
 const h1Em   = parts.slice(1).join(' ')

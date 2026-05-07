@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('image-to-ico')
 
 const t = getT()
@@ -59,7 +59,7 @@ if (document.head) {
   document.head.appendChild(style)
 }
 
-document.title = `${toolName} Converter Free | Bulk & Private — RelahConvert`
+setToolMeta('image-to-ico')
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 const SIZES = [16, 32, 48, 64, 128, 256]
 let mode = 'all' // 'all' or 'individual'

@@ -1,5 +1,5 @@
 import { injectHeader } from '../core/header.js'
-import { getT, localHref, injectHreflang } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, setToolMeta} from '../core/i18n.js'
 
 injectHreflang('pdf-tools')
 
@@ -7,12 +7,7 @@ const t = getT()
 
 const hubDesc = t.pdfhub_desc || 'Edit, organize, and optimize your PDF documents instantly.'
 
-document.title = t.pdfhub_page_title || 'PDF Tools — Edit, Organize and Optimize PDFs Free | RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.pdfhub_meta_desc || hubDesc
-document.head.appendChild(_metaDesc)
-
+setToolMeta('pdf-tools')
 document.body.style.cssText = 'margin:0;padding:0;min-height:100vh;background:var(--bg-page);font-family:"DM Sans",sans-serif;display:flex;flex-direction:column;'
 
 const style = document.createElement('style')

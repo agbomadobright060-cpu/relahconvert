@@ -1,5 +1,5 @@
 import { injectHeader } from '../core/header.js'
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('remove-background')
 
 const t = getT()
@@ -104,7 +104,7 @@ style.textContent = `
     .seo-section .faq-item p { margin:0; }
 `
 document.head.appendChild(style)
-document.title = t.rb_page_title || `${toolName} Free — AI Background Remover | RelahConvert`
+setToolMeta('remove-background')
 
 document.querySelector('#app').innerHTML = `
   <div style="max-width:700px;margin:32px auto;padding:0 16px 24px;font-family:'DM Sans',sans-serif;">

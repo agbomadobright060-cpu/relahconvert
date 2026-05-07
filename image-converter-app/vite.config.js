@@ -300,6 +300,234 @@ function langCopyPlugin() {
         return m ? m[1] : ''
       }
 
+      // ── Pre-render helpers (Phase 3 hybrid SSG) ─────────────────────────
+      // Extract per-language SEO data (h2a, steps, h2b, body, h3why, why, faqs)
+      // for ALL 51 tools, plus nav_short per lang per slug, plus hero/pdfhub keys.
+      const ALL_TOOL_SLUGS = [
+        'jpg-to-png','png-to-jpg','jpg-to-webp','webp-to-jpg','png-to-webp','webp-to-png',
+        'compress','resize','jpg-to-pdf','png-to-pdf','pdf-to-png',
+        'gif-to-jpg','gif-to-png','bmp-to-jpg','bmp-to-png','tiff-to-jpg',
+        'jpg-to-gif','png-to-gif','crop','rotate','flip','grayscale','watermark',
+        'round-corners','meme-generator','blur-face','remove-background',
+        'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images',
+        'passport-photo','image-splitter','resize-in-kb','pixelate-image',
+        'svg-to-png','svg-to-jpg',
+        'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
+        'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
+        'protect-pdf','unlock-pdf','extract-images-pdf'
+      ]
+
+      function unescJs(s) { return s.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\\\/g, '\\') }
+      function parseStringArray(str) {
+        const items = []
+        const re = /'((?:\\.|[^'\\])*)'/g
+        let m
+        while ((m = re.exec(str)) !== null) items.push(unescJs(m[1]))
+        return items
+      }
+      function parseFaqs(str) {
+        const faqs = []
+        const re = /\{q:'((?:\\.|[^'\\])*)',a:'((?:\\.|[^'\\])*)'\}/g
+        let m
+        while ((m = re.exec(str)) !== null) faqs.push({ q: unescJs(m[1]), a: unescJs(m[2]) })
+        return faqs
+      }
+      function extractToolSeo(block, tool) {
+        const toolStart = block.indexOf("'" + tool + "':{")
+        if (toolStart === -1) return null
+        const windowEnd = block.indexOf("\n      '", toolStart + 1)
+        const w = block.substring(toolStart, windowEnd === -1 ? toolStart + 12000 : windowEnd)
+        const h2a = w.match(/h2a:'((?:\\.|[^'\\])*)'/)
+        const stepsM = w.match(/steps:\[((?:\\.|[^\]\\])*)\]/)
+        const h2b = w.match(/h2b:'((?:\\.|[^'\\])*)'/)
+        const body = w.match(/body:'((?:\\.|[^'\\])*)'/)
+        const h3why = w.match(/h3why:'((?:\\.|[^'\\])*)'/)
+        const why = w.match(/why:'((?:\\.|[^'\\])*)'/)
+        const faqsM = w.match(/faqs:\[([\s\S]*?)\](?:,|\s*\n)/)
+        if (!h2a) return null
+        return {
+          h2a: unescJs(h2a[1]),
+          steps: stepsM ? parseStringArray(stepsM[1]) : [],
+          h2b: h2b ? unescJs(h2b[1]) : '',
+          body: body ? unescJs(body[1]) : '',
+          h3why: h3why ? unescJs(h3why[1]) : '',
+          why: why ? unescJs(why[1]) : '',
+          faqs: faqsM ? parseFaqs(faqsM[1]) : [],
+        }
+      }
+      // Build full SEO map: { lang: { slug: {...} } }
+      const allSeoByLang = {}
+      const navShortByLang = {}
+      const heroByLang = {}     // { lang: { title1, title2, em, desc } }
+      const pdfHubByLang = {}   // { lang: { hero1, hero2, em, desc } }
+      for (const lang of allLangsForMeta) {
+        const langKey = lang.includes('-') ? `'${lang}'` : lang
+        let s = i18nSrc.indexOf('\n  ' + langKey + ':{')
+        if (s === -1) s = i18nSrc.indexOf('\n  ' + langKey + ': {')
+        if (s === -1) continue
+        let e = i18nSrc.length
+        for (const o of allLangsForMeta) {
+          if (o === lang) continue
+          const ok = o.includes('-') ? `'${o}'` : o
+          let oi = i18nSrc.indexOf('\n  ' + ok + ':{', s + 1)
+          if (oi === -1) oi = i18nSrc.indexOf('\n  ' + ok + ': {', s + 1)
+          if (oi !== -1 && oi < e) e = oi
+        }
+        const block = i18nSrc.substring(s, e)
+        // SEO per tool
+        allSeoByLang[lang] = {}
+        for (const tool of ALL_TOOL_SLUGS) {
+          const data = extractToolSeo(block, tool)
+          if (data) allSeoByLang[lang][tool] = data
+        }
+        // nav_short
+        navShortByLang[lang] = {}
+        const navIdx = block.indexOf('nav_short')
+        if (navIdx !== -1) {
+          const navEnd = block.indexOf('\n    }', navIdx)
+          const navBlock = block.substring(navIdx, navEnd === -1 ? navIdx + 4000 : navEnd)
+          const re = /'([a-z][a-z0-9-]*)':'((?:\\.|[^'\\])*)'/g
+          let m
+          while ((m = re.exec(navBlock)) !== null) navShortByLang[lang][m[1]] = unescJs(m[2])
+        }
+        // hero keys
+        const ht1 = block.match(/hero_title_1:'((?:\\.|[^'\\])*)'/)
+        const ht2 = block.match(/hero_title_2:'((?:\\.|[^'\\])*)'/)
+        const htEm = block.match(/hero_title_em:'((?:\\.|[^'\\])*)'/)
+        const hDesc = block.match(/hero_desc:'((?:\\.|[^'\\])*)'/)
+        heroByLang[lang] = {
+          title1: ht1 ? unescJs(ht1[1]) : '',
+          title2: ht2 ? unescJs(ht2[1]) : '',
+          em: htEm ? unescJs(htEm[1]) : '',
+          desc: hDesc ? unescJs(hDesc[1]) : '',
+        }
+        // pdfhub keys
+        const ph1 = block.match(/pdfhub_hero_1:'((?:\\.|[^'\\])*)'/)
+        const ph2 = block.match(/pdfhub_hero_2:'((?:\\.|[^'\\])*)'/)
+        const phEm = block.match(/pdfhub_hero_em:'((?:\\.|[^'\\])*)'/)
+        const phDesc = block.match(/pdfhub_desc:'((?:\\.|[^'\\])*)'/)
+        pdfHubByLang[lang] = {
+          hero1: ph1 ? unescJs(ph1[1]) : '',
+          hero2: ph2 ? unescJs(ph2[1]) : '',
+          em: phEm ? unescJs(phEm[1]) : '',
+          desc: phDesc ? unescJs(phDesc[1]) : '',
+        }
+      }
+
+      // Static page H1 per language (hero_h1 doesn't exist in i18n.js yet)
+      const STATIC_H1 = {
+        en:    { about:'About RelahConvert',  contact:'Contact Us',  cookies:'Cookie Policy',  'privacy-policy':'Privacy Policy',  'terms-and-conditions':'Terms and Conditions' },
+        fr:    { about:'À propos de RelahConvert', contact:'Contactez-nous', cookies:'Politique des cookies', 'privacy-policy':'Politique de confidentialité', 'terms-and-conditions':'Conditions générales' },
+        es:    { about:'Acerca de RelahConvert',   contact:'Contáctenos',     cookies:'Política de cookies',  'privacy-policy':'Política de privacidad',     'terms-and-conditions':'Términos y condiciones' },
+        pt:    { about:'Sobre o RelahConvert',     contact:'Contate-nos',     cookies:'Política de cookies',  'privacy-policy':'Política de privacidade',    'terms-and-conditions':'Termos e condições' },
+        de:    { about:'Über RelahConvert',        contact:'Kontakt',         cookies:'Cookie-Richtlinie',    'privacy-policy':'Datenschutzrichtlinie',      'terms-and-conditions':'Allgemeine Geschäftsbedingungen' },
+        ar:    { about:'حول RelahConvert',         contact:'اتصل بنا',         cookies:'سياسة ملفات تعريف الارتباط', 'privacy-policy':'سياسة الخصوصية',         'terms-and-conditions':'الشروط والأحكام' },
+        it:    { about:'Chi siamo',                contact:'Contattaci',      cookies:'Politica sui cookie',  'privacy-policy':'Informativa sulla privacy',  'terms-and-conditions':'Termini e condizioni' },
+        ja:    { about:'RelahConvertについて',     contact:'お問い合わせ',     cookies:'クッキーポリシー',     'privacy-policy':'プライバシーポリシー',       'terms-and-conditions':'利用規約' },
+        ru:    { about:'О RelahConvert',           contact:'Контакты',        cookies:'Политика cookie',      'privacy-policy':'Политика конфиденциальности','terms-and-conditions':'Условия использования' },
+        ko:    { about:'RelahConvert 소개',        contact:'문의하기',         cookies:'쿠키 정책',            'privacy-policy':'개인정보 처리방침',          'terms-and-conditions':'이용약관' },
+        zh:    { about:'关于 RelahConvert',        contact:'联系我们',         cookies:'Cookie 政策',          'privacy-policy':'隐私政策',                   'terms-and-conditions':'服务条款' },
+        'zh-TW':{ about:'關於 RelahConvert',       contact:'聯絡我們',         cookies:'Cookie 政策',          'privacy-policy':'隱私政策',                   'terms-and-conditions':'服務條款' },
+        bg:    { about:'За RelahConvert',          contact:'Свържете се с нас', cookies:'Политика за бисквитки', 'privacy-policy':'Политика за поверителност', 'terms-and-conditions':'Общи условия' },
+        ca:    { about:'Sobre RelahConvert',       contact:'Contacta\'ns',    cookies:'Política de cookies',  'privacy-policy':'Política de privacitat',     'terms-and-conditions':'Termes i condicions' },
+        nl:    { about:'Over RelahConvert',        contact:'Contact',         cookies:'Cookiebeleid',         'privacy-policy':'Privacybeleid',              'terms-and-conditions':'Algemene voorwaarden' },
+        el:    { about:'Σχετικά με το RelahConvert', contact:'Επικοινωνία',  cookies:'Πολιτική cookies',     'privacy-policy':'Πολιτική απορρήτου',         'terms-and-conditions':'Όροι χρήσης' },
+        hi:    { about:'RelahConvert के बारे में', contact:'संपर्क करें',     cookies:'कुकी नीति',           'privacy-policy':'गोपनीयता नीति',              'terms-and-conditions':'नियम और शर्तें' },
+        id:    { about:'Tentang RelahConvert',     contact:'Kontak',          cookies:'Kebijakan Cookie',     'privacy-policy':'Kebijakan Privasi',          'terms-and-conditions':'Syarat dan Ketentuan' },
+        ms:    { about:'Tentang RelahConvert',     contact:'Hubungi Kami',    cookies:'Dasar Kuki',           'privacy-policy':'Dasar Privasi',              'terms-and-conditions':'Terma dan Syarat' },
+        pl:    { about:'O RelahConvert',           contact:'Kontakt',         cookies:'Polityka cookies',     'privacy-policy':'Polityka prywatności',       'terms-and-conditions':'Regulamin' },
+        sv:    { about:'Om RelahConvert',          contact:'Kontakt',         cookies:'Cookiepolicy',         'privacy-policy':'Integritetspolicy',          'terms-and-conditions':'Villkor' },
+        th:    { about:'เกี่ยวกับ RelahConvert',    contact:'ติดต่อเรา',         cookies:'นโยบายคุกกี้',          'privacy-policy':'นโยบายความเป็นส่วนตัว',       'terms-and-conditions':'ข้อกำหนดและเงื่อนไข' },
+        tr:    { about:'RelahConvert Hakkında',    contact:'İletişim',        cookies:'Çerez Politikası',     'privacy-policy':'Gizlilik Politikası',        'terms-and-conditions':'Kullanım Koşulları' },
+        uk:    { about:'Про RelahConvert',         contact:'Контакти',        cookies:'Політика cookie',      'privacy-policy':'Політика конфіденційності',  'terms-and-conditions':'Умови використання' },
+        vi:    { about:'Về RelahConvert',          contact:'Liên hệ',         cookies:'Chính sách cookie',    'privacy-policy':'Chính sách bảo mật',         'terms-and-conditions':'Điều khoản và điều kiện' },
+      }
+
+      function escTextHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+      }
+      // body and steps already contain HTML (e.g. <p>, <strong>) — pass through
+      function buildToolPrerender(slug, lang) {
+        const seo = (allSeoByLang[lang] && allSeoByLang[lang][slug]) ||
+                    (allSeoByLang['en'] && allSeoByLang['en'][slug])
+        const navName = (navShortByLang[lang] && navShortByLang[lang][slug]) ||
+                        (navShortByLang['en'] && navShortByLang['en'][slug]) ||
+                        TOOL_NAME_EN[slug] || slug
+        if (!seo) {
+          // Fall back to just H1 + curated English description
+          const desc = TOOL_DESC_EN[slug] || ''
+          return `<section class="rc-prerender" hidden><h1>${escTextHtml(navName)}</h1><p>${escTextHtml(desc)}</p></section>`
+        }
+        const stepsHtml = (seo.steps || []).map(s => `<li>${s}</li>`).join('')
+        const faqsHtml = (seo.faqs || []).map(f => `<div class="rc-faq"><h4>${escTextHtml(f.q)}</h4><p>${escTextHtml(f.a)}</p></div>`).join('')
+        // Use h2b (the value-prop heading) for H1 — strongest SEO signal per page.
+        // Tool name (navName) goes into a sub-line for users/crawlers reading top to bottom.
+        const intro = (seo.body || '').replace(/<[^>]+>/g, '').slice(0, 240)
+        return `<section class="rc-prerender" hidden>
+  <h1>${escTextHtml(navName)}</h1>
+  <p class="rc-intro">${escTextHtml(intro)}</p>
+  <h2>${escTextHtml(seo.h2a)}</h2>
+  <ol>${stepsHtml}</ol>
+  <h2>${escTextHtml(seo.h2b)}</h2>
+  ${seo.body || ''}
+  <h3>${escTextHtml(seo.h3why)}</h3>
+  <p>${escTextHtml(seo.why)}</p>
+  ${faqsHtml}
+</section>`
+      }
+      function buildHomePrerender(lang) {
+        const h = heroByLang[lang] || heroByLang['en'] || {}
+        const t1 = h.title1 || 'Every image tool'
+        const t2 = h.title2 || 'you need,'
+        const em = h.em || 'free'
+        const desc = h.desc || ''
+        return { t1, t2, em, desc }
+      }
+      function buildPdfHubPrerender(lang) {
+        const p = pdfHubByLang[lang] || pdfHubByLang['en'] || {}
+        const h1 = p.hero1 || 'Every PDF tool'
+        const h2 = p.hero2 || 'you need,'
+        const em = p.em || 'free'
+        const desc = p.desc || 'Edit, organize, and optimize your PDF documents instantly.'
+        return { h1, h2, em, desc }
+      }
+
+      // Inject pre-rendered content into a tool/hub HTML by replacing the empty
+      // <div id="app"></div> with <div id="app">${prerender}</div>. JS will
+      // overwrite this on load with the interactive UI.
+      function injectAppPrerender(html, prerenderHtml) {
+        return html.replace(/<div id="app"><\/div>/, `<div id="app">${prerenderHtml}</div>`)
+      }
+      // For homepage: fill the empty hero H1 + description elements
+      function injectHomePrerender(html, lang) {
+        const { t1, t2, em, desc } = buildHomePrerender(lang)
+        let out = html.replace(
+          /<h1 id="heroTitle"><\/h1>/,
+          `<h1 id="heroTitle">${escTextHtml(t1)}<br>${escTextHtml(t2)} <em>${escTextHtml(em)}</em></h1>`
+        )
+        out = out.replace(
+          /<p[^>]*id="heroDesc"[^>]*><\/p>/,
+          (match) => match.replace(/><\/p>/, `>${escTextHtml(desc)}</p>`)
+        )
+        return out
+      }
+      // For PDF hub: build a prerender block matching its hub structure and inject into #app
+      function buildPdfHubBlock(lang) {
+        const { h1, h2, em, desc } = buildPdfHubPrerender(lang)
+        return `<section class="rc-prerender" hidden>
+  <h1>${escTextHtml(h1)}<br>${escTextHtml(h2)} <em>${escTextHtml(em)}</em></h1>
+  <p>${escTextHtml(desc)}</p>
+</section>`
+      }
+      // For static pages (about, contact, etc.): fill the hero H1. Matches
+      // empty AND already-filled <h1 id="heroH1"> so per-language injection
+      // can replace the English value left by the earlier English pass.
+      function injectStaticH1(html, page, lang) {
+        const map = STATIC_H1[lang] || STATIC_H1['en']
+        const h1 = (map && map[page]) || (STATIC_H1['en'][page]) || page
+        return html.replace(/<h1 id="heroH1">[^<]*<\/h1>/, `<h1 id="heroH1">${escTextHtml(h1)}</h1>`)
+      }
+
       const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
@@ -371,6 +599,8 @@ function langCopyPlugin() {
       const enHomeUrl = base + '/'
       let enHomeHtml = injectSchemas(baseHtml, [orgSchema(enHomeUrl), siteSchema(enHomeUrl)])
       enHomeHtml = enHomeHtml.replace('</head>', enDescTag + hreflangTags(null) + '  </head>')
+      // Pre-render: fill empty hero H1 and description with English hero values
+      enHomeHtml = injectHomePrerender(enHomeHtml, 'en')
       writeFileSync(src, enHomeHtml)
 
       // Inject hreflang into English tool HTML files (e.g. dist/jpg-to-pdf.html)
@@ -388,10 +618,6 @@ function langCopyPlugin() {
         const toolFile = resolve(distDir, slug + '.html')
         if (existsSync(toolFile)) {
           let toolHtml = readFileSync(toolFile, 'utf-8')
-          // Inject WebApplication JSON-LD; prefer the existing meta description,
-          // fall back to the curated English description when the source HTML
-          // doesn't carry a static <meta name="description"> (some image tools inject
-          // it at runtime in JS, which the build-time scrape can't see).
           const metaDesc = extractMetaDesc(toolHtml)
           const toolDesc = metaDesc || TOOL_DESC_EN[slug] || ''
           const toolName = TOOL_NAME_EN[slug] || slug
@@ -400,18 +626,24 @@ function langCopyPlugin() {
             name: toolName, description: toolDesc, url: toolUrl, category: appCategoryFor(slug)
           })])
           toolHtml = toolHtml.replace('</head>', hreflangTags(slug) + '  </head>')
+          // Pre-render: inject H1 + SEO content into the empty <div id="app">
+          const prerender = slug === 'pdf-tools'
+            ? buildPdfHubBlock('en')
+            : buildToolPrerender(slug, 'en')
+          toolHtml = injectAppPrerender(toolHtml, prerender)
           writeFileSync(toolFile, toolHtml)
         }
       }
 
-      // Inject hreflang into English static pages
+      // Inject hreflang and pre-rendered H1 into English static pages
       const enStaticPages = ['about', 'contact', 'cookies', 'privacy-policy', 'terms-and-conditions']
       for (const page of enStaticPages) {
         const staticFile = resolve(distDir, page + '.html')
         if (existsSync(staticFile)) {
-          const html = readFileSync(staticFile, 'utf-8')
-          const updated = html.replace('</head>', staticHreflangTags(page) + '  </head>')
-          writeFileSync(staticFile, updated)
+          let html = readFileSync(staticFile, 'utf-8')
+          html = html.replace('</head>', staticHreflangTags(page) + '  </head>')
+          html = injectStaticH1(html, page, 'en')
+          writeFileSync(staticFile, html)
         }
       }
 
@@ -434,17 +666,36 @@ function langCopyPlugin() {
         // Inject canonical, hreflang tags and meta description into <head>
         const homeCanonical = `    <link rel="canonical" href="${base}/${lang}/" />\n`
         homeHtml = homeHtml.replace('</head>', homeCanonical + descTag + hreflangTags(null) + '  </head>')
+        // Pre-render: fill empty hero H1 and description with the lang's hero values
+        homeHtml = injectHomePrerender(homeHtml, lang)
 
         // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
         mkdirSync(langDir, { recursive: true })
         writeFileSync(resolve(langDir, 'index.html'), homeHtml)
 
-        // Create {lang}/{slug}/index.html for each tool page
+        // Create {lang}/{slug}/index.html for each tool page.
+        // Use the English tool's compiled HTML as the base (NOT the homepage)
+        // so per-language tool pages have the same simple <div id="app"></div>
+        // structure — no homepage shell, no body-wipe FOUC, prerender survives
+        // until the tool module replaces #app.
         const slugMap = slugMapByLang[lang] || {}
         for (const [enKey, localSlug] of Object.entries(slugMap)) {
+          const enToolFile = resolve(distDir, enKey + '.html')
+          if (!existsSync(enToolFile)) continue
+
+          // Read the freshly-built English tool HTML (Vite has already
+          // resolved its script/style tags to /assets/* hashed filenames).
+          // We cleanse it of English-specific head tags before re-injecting
+          // language-specific ones below.
+          let toolHtml = readFileSync(enToolFile, 'utf-8')
+          toolHtml = toolHtml.replace('lang="en"', `lang="${lang}"${lang === 'ar' ? ' dir="rtl"' : ''}`)
+          toolHtml = toolHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
+          toolHtml = toolHtml.replace(/<link rel="alternate" hreflang="[^"]*"[^>]*\/>\n?/g, '')
+          toolHtml = toolHtml.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '')
+
           const toolCanonical = `    <link rel="canonical" href="${base}/${lang}/${localSlug}/" />\n`
-          let toolHtml = langHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
+          toolHtml = toolHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
 
           // For PDF tools, inject translated <title> and <meta description> from seoData
           if (seoByLangByTool[lang] && seoByLangByTool[lang][enKey]) {
@@ -471,6 +722,15 @@ function langCopyPlugin() {
             name: toolName, description: finalDesc, url: toolUrl, category: appCategoryFor(enKey)
           })])
 
+          // Pre-render: tool HTML has <div id="app"></div> — inject the
+          // language-specific H1 + SEO block inside it. The tool module will
+          // replace #app at runtime, but the static HTML response carries
+          // the prerender for non-JS crawlers and Google's first wave.
+          const langPrerender = enKey === 'pdf-tools'
+            ? buildPdfHubBlock(lang)
+            : buildToolPrerender(enKey, lang)
+          toolHtml = injectAppPrerender(toolHtml, langPrerender)
+
           const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
           writeFileSync(resolve(slugDir, 'index.html'), toolHtml)
@@ -488,6 +748,8 @@ function langCopyPlugin() {
           const translatedSlug = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
           const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlug}/" />\n`
           staticHtml = staticHtml.replace('</head>', staticCanonical + staticHreflangTags(page) + '  </head>')
+          // Pre-render: fill empty static page H1 with translated title
+          staticHtml = injectStaticH1(staticHtml, page, lang)
           const staticDir = resolve(distDir, lang, translatedSlug)
           mkdirSync(staticDir, { recursive: true })
           writeFileSync(resolve(staticDir, 'index.html'), staticHtml)

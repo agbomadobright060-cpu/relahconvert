@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
 
 injectHreflang('split-pdf')
@@ -106,12 +106,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.splitpdf_page_title || 'Split PDF Online Free | Extract Pages \u2014 RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.splitpdf_meta_desc || 'Split PDF into separate pages or custom ranges free. Download individual PDFs or ZIP all.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('split-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')

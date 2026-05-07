@@ -1,7 +1,7 @@
 import { injectHeader } from '../core/header.js'
 import { formatSize } from '../core/utils.js'
 import JSZip from 'jszip'
-import { getT, getLang, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('pixelate-image')
 
 const t = getT()
@@ -84,11 +84,7 @@ if (document.head) {
     .seo-divider { border:none; border-top:1px solid var(--border); margin:0 auto 40px; max-width:700px; }
   `
   document.head.appendChild(style)
-  document.title = t.pix_page_title || 'Pixelate Image Online \u2014 Pixelate Face or Full Image Free | RelahConvert'
-  const metaDesc = document.createElement('meta')
-  metaDesc.name = 'description'
-  metaDesc.content = t.pix_meta_desc || 'Pixelate image free \u2014 pixelate a face, region, or entire image with adjustable intensity. Batch process up to 25 files. Browser-only, no upload, completely private.'
-  document.head.appendChild(metaDesc)
+  setToolMeta('pixelate-image')
 }
 
 // ── SEO data ────────────────────────────────────────────────────────────────

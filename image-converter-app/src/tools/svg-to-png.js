@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema} from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 injectHreflang('svg-to-png')
 
 const t = getT()
@@ -59,10 +59,7 @@ style.textContent = `
   .next-link:hover{border-color:var(--accent);color:var(--accent);}
 `
 document.head.appendChild(style)
-document.title = t.svgpng_page_title || (seoData ? seoData.page_title : 'SVG to PNG Converter Free | Bulk & Private \u2014 RelahConvert')
-const _metaDesc = document.createElement('meta'); _metaDesc.name = 'description'
-_metaDesc.content = t.svgpng_meta_desc || 'Convert SVG to PNG free. Set custom width, batch convert up to 25 files. Browser-only, no upload required.'
-document.head.appendChild(_metaDesc)
+setToolMeta('svg-to-png')
 const _tp = toolName.split(' '); const titlePart1 = _tp[0]; const titlePart2 = _tp.slice(1).join(' ')
 document.querySelector('#app').innerHTML = `
   <div style="max-width:900px;margin:32px auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;">

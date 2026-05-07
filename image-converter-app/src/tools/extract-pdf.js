@@ -1,6 +1,6 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema } from '../core/i18n.js'
+import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 
 injectHreflang('extract-pdf')
 
@@ -67,12 +67,7 @@ style.textContent = `
 `
 document.head.appendChild(style)
 
-document.title = t.extractpdf_page_title || 'Extract PDF Pages Free Online | No Upload \u2014 RelahConvert'
-const _metaDesc = document.createElement('meta')
-_metaDesc.name = 'description'
-_metaDesc.content = t.extractpdf_meta_desc || 'Extract specific pages from a PDF free. Select pages visually, download a new PDF with only the pages you need. Browser-only, no upload.'
-document.head.appendChild(_metaDesc)
-
+setToolMeta('extract-pdf')
 const _tp = toolName.split(' ')
 const titlePart1 = _tp[0]
 const titlePart2 = _tp.slice(1).join(' ')
