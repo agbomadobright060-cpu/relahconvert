@@ -1,9 +1,7 @@
 import { injectHeader } from '../core/header.js'
 
 // JSZip loaded dynamically
-import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
-injectHreflang('round-corners')
-
+import { getT, localHref, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['round-corners']) || t.round_corners_title_1 + ' ' + t.round_corners_title_em

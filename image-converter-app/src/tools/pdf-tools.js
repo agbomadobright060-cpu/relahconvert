@@ -1,7 +1,5 @@
 import { injectHeader } from '../core/header.js'
-import { getT, localHref, injectHreflang, setToolMeta} from '../core/i18n.js'
-
-injectHreflang('pdf-tools')
+import { getT, localHref, setToolMeta} from '../core/i18n.js'
 
 const t = getT()
 

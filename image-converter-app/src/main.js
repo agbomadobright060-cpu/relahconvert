@@ -2,7 +2,7 @@ import { convertFile, convertFilesToZip } from './core/converter.js'
 import { LIMITS, formatSize, fileKey, totalBytes } from './core/utils.js'
 import { getCurrentTool, isStandaloneRoute } from './app/router.js'
 import { injectHeader } from './core/header.js'
-import { getT, getLang, translatedSlug as getTranslatedSlug, injectHreflang, injectFaqSchema, setToolMeta} from './core/i18n.js'
+import { getT, getLang, translatedSlug as getTranslatedSlug, injectFaqSchema, setToolMeta} from './core/i18n.js'
 
 // If a standalone tool was loaded via dynamic import (translated URL), stop here.
 // The dynamically imported module will render its own UI into #app.
@@ -21,8 +21,6 @@ if (!currentTool) {
 const t = getT()
 const currentLang = getLang()
 const slug = currentTool.slug
-injectHreflang(slug)
-
 function localHref(englishSlug) {
   if (currentLang === 'en') return '/' + englishSlug
   return '/' + currentLang + '/' + getTranslatedSlug(currentLang, englishSlug)

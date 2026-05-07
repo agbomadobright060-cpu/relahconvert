@@ -1,9 +1,7 @@
 import { injectHeader } from '../core/header.js'
 import { formatSize } from '../core/utils.js'
 import JSZip from 'jszip'
-import { getT, getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
-injectHreflang('pixelate-image')
-
+import { getT, getLang, localHref, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 const t = getT()
 const bg = '#F2F2F2'
 

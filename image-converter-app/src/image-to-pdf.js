@@ -1,6 +1,6 @@
 import { injectHeader } from './core/header.js'
 import { formatSize, totalBytes, sanitizeBaseName, LIMITS} from './core/utils.js'
-import { getT , getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from './core/i18n.js'
+import { getT, getLang, localHref, injectFaqSchema, setToolMeta} from './core/i18n.js'
 import { jsPDF } from 'jspdf'
 import exifr from 'exifr'
 export function initImageToPdf({ slug: _slug } = {}) {
@@ -8,7 +8,6 @@ export function initImageToPdf({ slug: _slug } = {}) {
   const t = getT()
 
   const isPng = (_slug || window.location.pathname).includes('png')
-  injectHreflang(isPng ? 'png-to-pdf' : 'jpg-to-pdf')
   const inputMime = isPng ? 'image/png' : 'image/jpeg'
   const inputLabel = isPng ? 'PNG' : 'JPG'
   const slug = isPng ? 'png-to-pdf' : 'jpg-to-pdf'

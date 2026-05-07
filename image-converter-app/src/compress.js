@@ -1,9 +1,7 @@
 import { injectHeader } from './core/header.js'
 import JSZip from 'jszip'
 import { formatSize, totalBytes, sanitizeBaseName, uniqueName, LIMITS} from './core/utils.js'
-import { getT , getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from './core/i18n.js'
-injectHreflang('compress')
-
+import { getT, getLang, localHref, injectFaqSchema, setToolMeta} from './core/i18n.js'
 const bg = '#F2F2F2'
 const t = getT()
 

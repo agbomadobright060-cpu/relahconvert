@@ -1,8 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
-injectHreflang('rotate')
-
+import { getT, localHref, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 const t = getT()
 
 const toolName  = (t.nav_short && t.nav_short['rotate']) || 'Rotate Image'

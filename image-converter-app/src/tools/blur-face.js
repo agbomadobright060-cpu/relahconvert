@@ -1,7 +1,6 @@
 import { injectHeader } from '../core/header.js'
 
-import { getT , getLang, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
-injectHreflang('blur-face')
+import { getT, getLang, localHref, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 setToolMeta('blur-face')
 
 const t = getT()

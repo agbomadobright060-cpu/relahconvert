@@ -1,9 +1,7 @@
 import { injectHeader } from '../core/header.js'
 import { LIMITS, formatSize } from '../core/utils.js'
-import { getT, localHref, injectHreflang, injectFaqSchema, setToolMeta} from '../core/i18n.js'
+import { getT, localHref, injectFaqSchema, setToolMeta} from '../core/i18n.js'
 import { PDFDocument } from 'pdf-lib'
-
-injectHreflang('reorder-pdf')
 
 const t = getT()
 
