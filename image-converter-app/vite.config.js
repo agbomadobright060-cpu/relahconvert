@@ -80,49 +80,6 @@ function langCopyPlugin() {
         if (descM) homeDescByLang[lang] = descM[1]
       }
 
-      // Extract per-language SEO h2b and body for PDF tools (used for translated <title> and <meta description>)
-      const pdfToolsForSeo = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf']
-      const seoByLangByTool = {}
-      for (const lang of allLangsForMeta) {
-        const langKey = lang.includes('-') ? `'${lang}'` : lang
-        let startIdx = i18nSrc.indexOf('\n  ' + langKey + ':{')
-        if (startIdx === -1) startIdx = i18nSrc.indexOf('\n  ' + langKey + ': {')
-        if (startIdx === -1) continue
-        let endIdx = i18nSrc.length
-        for (const other of allLangsForMeta) {
-          if (other === lang) continue
-          const otherKey = other.includes('-') ? `'${other}'` : other
-          let otherIdx = i18nSrc.indexOf('\n  ' + otherKey + ':{', startIdx + 1)
-          if (otherIdx === -1) otherIdx = i18nSrc.indexOf('\n  ' + otherKey + ': {', startIdx + 1)
-          if (otherIdx > startIdx && otherIdx < endIdx) endIdx = otherIdx
-        }
-        const block = i18nSrc.substring(startIdx, endIdx)
-        seoByLangByTool[lang] = {}
-        for (const tool of pdfToolsForSeo) {
-          const toolStart = block.indexOf("'" + tool + "':{")
-          if (toolStart === -1) continue
-          // Take a window that's large enough to contain the tool's seo entry but not bleed into siblings
-          const windowEnd = block.indexOf("\n      '", toolStart + 1)
-          const window = block.substring(toolStart, windowEnd === -1 ? toolStart + 8000 : windowEnd)
-          const h2bM = window.match(/h2b:'((?:\\.|[^'\\])*)'/)
-          const bodyM = window.match(/body:'((?:\\.|[^'\\])*)'/)
-          seoByLangByTool[lang][tool] = {
-            h2b: h2bM ? h2bM[1].replace(/\\'/g, "'") : null,
-            body: bodyM ? bodyM[1].replace(/\\'/g, "'").replace(/<[^>]+>/g, '').trim() : null,
-          }
-        }
-      }
-
-      function buildMetaDesc(body) {
-        if (!body) return null
-        if (body.length <= 160) return body
-        const slice = body.substring(0, 160)
-        const lastDot = slice.lastIndexOf('. ')
-        if (lastDot > 80) return slice.substring(0, lastDot + 1).trim()
-        const lastSpace = slice.lastIndexOf(' ')
-        return slice.substring(0, lastSpace > 0 ? lastSpace : 160).trim()
-      }
-
       function escAttr(s) {
         return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       }
@@ -295,11 +252,6 @@ function langCopyPlugin() {
         const scripts = schemas.map(s => `    <script type="application/ld+json">${JSON.stringify(s)}</script>\n`).join('')
         return cleaned.replace('</head>', scripts + '  </head>')
       }
-      function extractMetaDesc(html) {
-        const m = html.match(/<meta name="description" content="([^"]*)"/)
-        return m ? m[1] : ''
-      }
-
       // ── Pre-render helpers (Phase 3 hybrid SSG) ─────────────────────────
       // Extract per-language SEO data (h2a, steps, h2b, body, h3why, why, faqs)
       // for ALL 51 tools, plus nav_short per lang per slug, plus hero/pdfhub keys.
@@ -528,6 +480,186 @@ function langCopyPlugin() {
         return html.replace(/<h1 id="heroH1">[^<]*<\/h1>/, `<h1 id="heroH1">${escTextHtml(h1)}</h1>`)
       }
 
+      // ── OG / Twitter card helpers ───────────────────────────────────────
+      // og:locale per language. Underscored POSIX-style as required by spec.
+      const LOCALE_MAP = {
+        en: 'en_US', fr: 'fr_FR', es: 'es_ES', pt: 'pt_PT', de: 'de_DE',
+        ar: 'ar_AR', it: 'it_IT', ja: 'ja_JP', ru: 'ru_RU', ko: 'ko_KR',
+        zh: 'zh_CN', 'zh-TW': 'zh_TW', bg: 'bg_BG', ca: 'ca_ES', nl: 'nl_NL',
+        el: 'el_GR', hi: 'hi_IN', id: 'id_ID', ms: 'ms_MY', pl: 'pl_PL',
+        sv: 'sv_SE', th: 'th_TH', tr: 'tr_TR', uk: 'uk_UA', vi: 'vi_VN',
+      }
+      // Square 512×512 stopgap; swap to a 1200×630 og-image.png later and
+      // change TWITTER_CARD to 'summary_large_image' at the same time.
+      const OG_IMAGE_URL = 'https://relahconvert.com/pwa-512x512.png'
+      const TWITTER_CARD = 'summary'
+
+      // Mirror runtime _TOOL_KEY_OVERRIDES from src/core/i18n.js so build-time
+      // title/meta resolution matches setToolMeta() exactly.
+      const TOOL_KEY_OVERRIDES = {
+        'compress':           { title: 'compress_page_title',     desc: 'compress_meta_desc' },
+        'resize':             { title: 'resize_page_title',       desc: 'resize_meta_desc' },
+        'jpg-to-pdf':         { title: 'jpgpdf_page_title',       desc: 'jpgpdf_meta_desc' },
+        'png-to-pdf':         { title: 'pngpdf_page_title',       desc: 'pngpdf_meta_desc' },
+        'passport-photo':     { title: 'pp_page_title',           desc: 'pp_meta_desc' },
+        'pixelate-image':     { title: 'pix_page_title',          desc: 'pix_meta_desc' },
+        'resize-in-kb':       { title: 'rik_page_title',          desc: 'rik_meta_desc' },
+        'svg-to-png':         { title: 'svgpng_page_title',       desc: 'svgpng_meta_desc' },
+        'svg-to-jpg':         { title: 'svgjpg_page_title',       desc: 'svgjpg_meta_desc' },
+        'remove-background':  { title: 'rb_page_title',           desc: 'rb_meta_desc' },
+        'pdf-tools':          { title: 'pdftools_page_title',     desc: 'pdftools_meta_desc' },
+        'merge-pdf':          { title: 'mergepdf_page_title',     desc: 'mergepdf_meta_desc' },
+        'split-pdf':          { title: 'splitpdf_page_title',     desc: 'splitpdf_meta_desc' },
+        'rotate-pdf':         { title: 'rotpdf_page_title',       desc: 'rotpdf_meta_desc' },
+        'compress-pdf':       { title: 'compresspdf_page_title',  desc: 'compresspdf_meta_desc' },
+        'reorder-pdf':        { title: 'reorderpdf_page_title',   desc: 'reorderpdf_meta_desc' },
+        'extract-pdf':        { title: 'extractpdf_page_title',   desc: 'extractpdf_meta_desc' },
+        'remove-pdf':         { title: 'removepdf_page_title',    desc: 'removepdf_meta_desc' },
+        'add-page-numbers':   { title: 'addpgnum_page_title',     desc: 'addpgnum_meta_desc' },
+        'watermark-pdf':      { title: 'wmpdf_page_title',        desc: 'wmpdf_meta_desc' },
+        'crop-pdf':           { title: 'croppdf_page_title',      desc: 'croppdf_meta_desc' },
+        'protect-pdf':        { title: 'protpdf_page_title',      desc: 'protpdf_meta_desc' },
+        'unlock-pdf':         { title: 'unlkpdf_page_title',      desc: 'unlkpdf_meta_desc' },
+        'extract-images-pdf': { title: 'extimg_page_title',       desc: 'extimg_meta_desc' },
+      }
+      // Static page key in vite.config (URL slug) → key inside the i18n.js lang block
+      const STATIC_PAGE_I18N_KEY = {
+        'about': 'about',
+        'contact': 'contact',
+        'privacy-policy': 'privacy',
+        'terms-and-conditions': 'terms',
+        'cookies': 'cookies',
+      }
+
+      // Extract per-lang flat keys (compresspdf_page_title etc.) and static
+      // page sub-objects (about.title, about.hero_p, …) from i18n.js so we
+      // can resolve translated title/desc at build time.
+      // i18n.js uses BOTH single and double quotes for string values
+      // (double-quoted when the value contains an apostrophe, e.g. fr's
+      // hero_p:"Des outils d'image gratuits..."). Helpers handle both.
+      function _matchKeyValue(text, key) {
+        const re = new RegExp(`(?:^|[^a-zA-Z0-9_])${key}:(?:'((?:\\\\.|[^'\\\\])*)'|"((?:\\\\.|[^"\\\\])*)")`)
+        const m = text.match(re)
+        if (!m) return null
+        return unescJs(m[1] !== undefined ? m[1] : m[2])
+      }
+      const flatKeysByLang = {}
+      const staticPageByLang = {}
+      const FLAT_KEY_NAMES = [...new Set(
+        Object.values(TOOL_KEY_OVERRIDES).flatMap(v => [v.title, v.desc])
+      )]
+      for (const lang of allLangsForMeta) {
+        const langKey2 = lang.includes('-') ? `'${lang}'` : lang
+        let s = i18nSrc.indexOf('\n  ' + langKey2 + ':{')
+        if (s === -1) s = i18nSrc.indexOf('\n  ' + langKey2 + ': {')
+        if (s === -1) continue
+        let e = i18nSrc.length
+        for (const o of allLangsForMeta) {
+          if (o === lang) continue
+          const ok = o.includes('-') ? `'${o}'` : o
+          let oi = i18nSrc.indexOf('\n  ' + ok + ':{', s + 1)
+          if (oi === -1) oi = i18nSrc.indexOf('\n  ' + ok + ': {', s + 1)
+          if (oi !== -1 && oi < e) e = oi
+        }
+        const block = i18nSrc.substring(s, e)
+        flatKeysByLang[lang] = {}
+        for (const k of FLAT_KEY_NAMES) {
+          const v = _matchKeyValue(block, k)
+          if (v !== null) flatKeysByLang[lang][k] = v
+        }
+        staticPageByLang[lang] = {}
+        for (const pageKey of ['about', 'contact', 'privacy', 'terms', 'cookies']) {
+          const re = new RegExp(`(?:^|[^a-zA-Z0-9_])${pageKey}:\\{([^{}]*)\\}`)
+          const m = block.match(re)
+          if (!m) continue
+          const inner = m[1]
+          staticPageByLang[lang][pageKey] = {
+            title: _matchKeyValue(inner, 'title') || '',
+            hero_p: _matchKeyValue(inner, 'hero_p') || '',
+          }
+        }
+      }
+
+      // Mirror runtime sanitize/strip/truncate helpers (already have sanitizeDesc above)
+      function _stripHtmlForMeta(s) { return String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() }
+      function _truncateForMeta(s, max) {
+        if (!s) return ''
+        if (s.length <= max) return s
+        const slice = s.substring(0, max)
+        const lastDot = slice.lastIndexOf('. ')
+        if (lastDot > 80) return slice.substring(0, lastDot + 1).trim()
+        const lastSpace = slice.lastIndexOf(' ')
+        return (lastSpace > 0 ? slice.substring(0, lastSpace) : slice).trim()
+      }
+      // Mirrors src/core/i18n.js getToolTitle()
+      function buildToolTitle(slug, lang) {
+        const flat = flatKeysByLang[lang] || {}
+        const ovKey = TOOL_KEY_OVERRIDES[slug] && TOOL_KEY_OVERRIDES[slug].title
+        if (ovKey && flat[ovKey]) return sanitizeDesc(flat[ovKey])
+        const seo = allSeoByLang[lang] && allSeoByLang[lang][slug]
+        if (seo && seo.h2b) return sanitizeDesc(seo.h2b) + ' | RelahConvert'
+        const enSeo = allSeoByLang['en'] && allSeoByLang['en'][slug]
+        if (enSeo && enSeo.h2b) return sanitizeDesc(enSeo.h2b) + ' | RelahConvert'
+        return 'RelahConvert'
+      }
+      // Mirrors src/core/i18n.js getToolMetaDesc()
+      function buildToolMetaDesc(slug, lang) {
+        const flat = flatKeysByLang[lang] || {}
+        const ovKey = TOOL_KEY_OVERRIDES[slug] && TOOL_KEY_OVERRIDES[slug].desc
+        if (ovKey && flat[ovKey]) return sanitizeDesc(flat[ovKey])
+        const seo = allSeoByLang[lang] && allSeoByLang[lang][slug]
+        if (seo && seo.body) return sanitizeDesc(_truncateForMeta(_stripHtmlForMeta(seo.body), 160))
+        return TOOL_DESC_EN[slug] || ''
+      }
+
+      // Replace or insert <title> and <meta name="description"> at build time
+      // so per-lang static HTML response matches the post-JS DOM. Strip ALL
+      // existing description tags first (regardless of indent or self-closing
+      // style) so static-HTML hardcoded ones don't survive.
+      function setTitleAndDesc(html, title, description) {
+        let out = html
+        if (title) {
+          if (/<title>[^<]*<\/title>/.test(out)) {
+            out = out.replace(/<title>[^<]*<\/title>/, `<title>${escAttr(title)}</title>`)
+          } else {
+            out = out.replace('</head>', `    <title>${escAttr(title)}</title>\n  </head>`)
+          }
+        }
+        if (description) {
+          out = out.replace(/[ \t]*<meta\s+name=["']description["'][^>]*\/?>[ \t]*\n?/gi, '')
+          out = out.replace('</head>', `    <meta name="description" content="${escAttr(description)}" />\n  </head>`)
+        }
+        return out
+      }
+
+      // Inject OG + Twitter card tags. Idempotent — strips any existing OG /
+      // twitter:* tags first so a re-run produces clean output.
+      function injectOgTwitter(html, opts) {
+        const t = escAttr(opts.title || 'RelahConvert')
+        const d = escAttr(opts.description || '')
+        const u = escAttr(opts.url || '')
+        const l = escAttr(opts.locale || 'en_US')
+        const type = escAttr(opts.type || 'website')
+        const tags = [
+          `    <meta property="og:title" content="${t}" />`,
+          `    <meta property="og:description" content="${d}" />`,
+          `    <meta property="og:image" content="${OG_IMAGE_URL}" />`,
+          `    <meta property="og:url" content="${u}" />`,
+          `    <meta property="og:type" content="${type}" />`,
+          `    <meta property="og:site_name" content="RelahConvert" />`,
+          `    <meta property="og:locale" content="${l}" />`,
+          `    <meta name="twitter:card" content="${TWITTER_CARD}" />`,
+          `    <meta name="twitter:title" content="${t}" />`,
+          `    <meta name="twitter:description" content="${d}" />`,
+          `    <meta name="twitter:image" content="${OG_IMAGE_URL}" />`,
+          '',
+        ].join('\n')
+        const cleaned = html
+          .replace(/    <meta property="og:[^>]*\/>\n?/g, '')
+          .replace(/    <meta name="twitter:[^>]*\/>\n?/g, '')
+        return cleaned.replace('</head>', tags + '  </head>')
+      }
+
       const base = 'https://relahconvert.com'
       const baseHtml = readFileSync(src, 'utf-8')
 
@@ -601,6 +733,14 @@ function langCopyPlugin() {
       enHomeHtml = enHomeHtml.replace('</head>', enDescTag + hreflangTags(null) + '  </head>')
       // Pre-render: fill empty hero H1 and description with English hero values
       enHomeHtml = injectHomePrerender(enHomeHtml, 'en')
+      // OG / Twitter cards
+      enHomeHtml = injectOgTwitter(enHomeHtml, {
+        title: homeTitleByLang['en'] || 'RelahConvert — File Converter & Editor',
+        description: homeDescByLang['en'] || '',
+        url: enHomeUrl,
+        locale: LOCALE_MAP.en,
+        type: 'website',
+      })
       writeFileSync(src, enHomeHtml)
 
       // Inject hreflang into English tool HTML files (e.g. dist/jpg-to-pdf.html)
@@ -618,12 +758,17 @@ function langCopyPlugin() {
         const toolFile = resolve(distDir, slug + '.html')
         if (existsSync(toolFile)) {
           let toolHtml = readFileSync(toolFile, 'utf-8')
-          const metaDesc = extractMetaDesc(toolHtml)
-          const toolDesc = metaDesc || TOOL_DESC_EN[slug] || ''
+          // Build-time-resolve translated title/desc using same logic as runtime
+          // setToolMeta(). Source HTML titles are stale (e.g. compress.html ships
+          // "Compress Image Free - RelahConvert") — we override with the seo-derived
+          // value so static HTML matches what setToolMeta would produce post-JS.
+          const enToolTitle = buildToolTitle(slug, 'en')
+          const enToolDesc = buildToolMetaDesc(slug, 'en')
+          toolHtml = setTitleAndDesc(toolHtml, enToolTitle, enToolDesc)
           const toolName = TOOL_NAME_EN[slug] || slug
           const toolUrl = base + '/' + slug
           toolHtml = injectSchemas(toolHtml, [appSchema({
-            name: toolName, description: toolDesc, url: toolUrl, category: appCategoryFor(slug)
+            name: toolName, description: enToolDesc, url: toolUrl, category: appCategoryFor(slug)
           })])
           toolHtml = toolHtml.replace('</head>', hreflangTags(slug) + '  </head>')
           // Pre-render: inject H1 + SEO content into the empty <div id="app">
@@ -631,6 +776,14 @@ function langCopyPlugin() {
             ? buildPdfHubBlock('en')
             : buildToolPrerender(slug, 'en')
           toolHtml = injectAppPrerender(toolHtml, prerender)
+          // OG / Twitter cards
+          toolHtml = injectOgTwitter(toolHtml, {
+            title: enToolTitle,
+            description: enToolDesc,
+            url: toolUrl,
+            locale: LOCALE_MAP.en,
+            type: 'website',
+          })
           writeFileSync(toolFile, toolHtml)
         }
       }
@@ -643,6 +796,19 @@ function langCopyPlugin() {
           let html = readFileSync(staticFile, 'utf-8')
           html = html.replace('</head>', staticHreflangTags(page) + '  </head>')
           html = injectStaticH1(html, page, 'en')
+          // Translated title/desc + OG/Twitter cards from i18n.js static page entries
+          const i18nKey = STATIC_PAGE_I18N_KEY[page]
+          const sp = (staticPageByLang.en && staticPageByLang.en[i18nKey]) || {}
+          const staticTitle = sp.title || (STATIC_H1.en[page] + ' | RelahConvert')
+          const staticDesc = sp.hero_p || ''
+          html = setTitleAndDesc(html, staticTitle, staticDesc)
+          html = injectOgTwitter(html, {
+            title: staticTitle,
+            description: staticDesc,
+            url: base + '/' + page,
+            locale: LOCALE_MAP.en,
+            type: 'website',
+          })
           writeFileSync(staticFile, html)
         }
       }
@@ -668,6 +834,14 @@ function langCopyPlugin() {
         homeHtml = homeHtml.replace('</head>', homeCanonical + descTag + hreflangTags(null) + '  </head>')
         // Pre-render: fill empty hero H1 and description with the lang's hero values
         homeHtml = injectHomePrerender(homeHtml, lang)
+        // OG / Twitter cards
+        homeHtml = injectOgTwitter(homeHtml, {
+          title: homeTitleByLang[lang] || homeTitleByLang['en'] || 'RelahConvert',
+          description: homeDescByLang[lang] || homeDescByLang['en'] || '',
+          url: langHomeUrl,
+          locale: LOCALE_MAP[lang] || LOCALE_MAP.en,
+          type: 'website',
+        })
 
         // Create {lang}/index.html for homepage
         const langDir = resolve(distDir, lang)
@@ -697,29 +871,17 @@ function langCopyPlugin() {
           const toolCanonical = `    <link rel="canonical" href="${base}/${lang}/${localSlug}/" />\n`
           toolHtml = toolHtml.replace('</head>', toolCanonical + hreflangTags(enKey) + '  </head>')
 
-          // For PDF tools, inject translated <title> and <meta description> from seoData
-          if (seoByLangByTool[lang] && seoByLangByTool[lang][enKey]) {
-            const seo = seoByLangByTool[lang][enKey]
-            if (seo.h2b) {
-              const newTitle = `${seo.h2b} | RelahConvert`
-              toolHtml = toolHtml.replace(/<title>[^<]*<\/title>/, `<title>${escAttr(newTitle)}</title>`)
-            }
-            const meta = sanitizeDesc(buildMetaDesc(seo.body))
-            if (meta) {
-              toolHtml = toolHtml.replace(/    <meta name="description"[^>]*\/>\n?/g, '')
-              const metaTag = `    <meta name="description" content="${escAttr(meta)}" />\n`
-              toolHtml = toolHtml.replace('</head>', metaTag + '  </head>')
-            }
-          }
+          // Universal build-time title/desc translation (replaces the old
+          // PDF-only override). Uses the same getToolTitle/getToolMetaDesc
+          // logic as runtime setToolMeta() so static HTML matches post-JS DOM.
+          const langToolTitle = buildToolTitle(enKey, lang)
+          const langToolDesc = buildToolMetaDesc(enKey, lang)
+          toolHtml = setTitleAndDesc(toolHtml, langToolTitle, langToolDesc)
 
-          // Inject WebApplication JSON-LD; prefer the page's final meta description,
-          // fall back to the curated English description if neither HTML nor i18n
-          // produced one for this tool.
-          const finalDesc = extractMetaDesc(toolHtml) || TOOL_DESC_EN[enKey] || ''
           const toolUrl = base + '/' + lang + '/' + localSlug + '/'
           const toolName = TOOL_NAME_EN[enKey] || enKey
           toolHtml = injectSchemas(toolHtml, [appSchema({
-            name: toolName, description: finalDesc, url: toolUrl, category: appCategoryFor(enKey)
+            name: toolName, description: langToolDesc, url: toolUrl, category: appCategoryFor(enKey)
           })])
 
           // Pre-render: tool HTML has <div id="app"></div> — inject the
@@ -730,6 +892,15 @@ function langCopyPlugin() {
             ? buildPdfHubBlock(lang)
             : buildToolPrerender(enKey, lang)
           toolHtml = injectAppPrerender(toolHtml, langPrerender)
+
+          // OG / Twitter cards
+          toolHtml = injectOgTwitter(toolHtml, {
+            title: langToolTitle,
+            description: langToolDesc,
+            url: toolUrl,
+            locale: LOCALE_MAP[lang] || LOCALE_MAP.en,
+            type: 'website',
+          })
 
           const slugDir = resolve(distDir, lang, localSlug)
           mkdirSync(slugDir, { recursive: true })
@@ -745,12 +916,30 @@ function langCopyPlugin() {
           staticHtml = staticHtml.replace('lang="en"', `lang="${lang}"${lang === 'ar' ? ' dir="rtl"' : ''}`)
           staticHtml = staticHtml.replace(/<link rel="canonical"[^>]*\/>\n?/g, '')
           staticHtml = staticHtml.replace(/<link rel="alternate" hreflang="[^"]*"[^>]*\/>\n?/g, '')
-          const translatedSlug = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
-          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlug}/" />\n`
+          const translatedSlugLocal = (staticSlugMap[lang] && staticSlugMap[lang][page]) || page
+          const staticCanonical = `    <link rel="canonical" href="${base}/${lang}/${translatedSlugLocal}/" />\n`
           staticHtml = staticHtml.replace('</head>', staticCanonical + staticHreflangTags(page) + '  </head>')
           // Pre-render: fill empty static page H1 with translated title
           staticHtml = injectStaticH1(staticHtml, page, lang)
-          const staticDir = resolve(distDir, lang, translatedSlug)
+          // Translated title/desc from i18n.js + OG/Twitter cards. Falls back
+          // to STATIC_H1 + " | RelahConvert" if i18n.js doesn't have a title
+          // for this lang/page combination.
+          const i18nKey = STATIC_PAGE_I18N_KEY[page]
+          const sp = (staticPageByLang[lang] && staticPageByLang[lang][i18nKey]) || {}
+          const enSp = (staticPageByLang.en && staticPageByLang.en[i18nKey]) || {}
+          const fallbackH1 = (STATIC_H1[lang] && STATIC_H1[lang][page]) || (STATIC_H1.en && STATIC_H1.en[page]) || page
+          const staticTitle = sp.title || enSp.title || (fallbackH1 + ' | RelahConvert')
+          const staticDesc = sp.hero_p || enSp.hero_p || ''
+          staticHtml = setTitleAndDesc(staticHtml, staticTitle, staticDesc)
+          const staticUrl = base + '/' + lang + '/' + translatedSlugLocal + '/'
+          staticHtml = injectOgTwitter(staticHtml, {
+            title: staticTitle,
+            description: staticDesc,
+            url: staticUrl,
+            locale: LOCALE_MAP[lang] || LOCALE_MAP.en,
+            type: 'website',
+          })
+          const staticDir = resolve(distDir, lang, translatedSlugLocal)
           mkdirSync(staticDir, { recursive: true })
           writeFileSync(resolve(staticDir, 'index.html'), staticHtml)
         }
