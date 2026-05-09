@@ -667,16 +667,33 @@ function langCopyPlugin() {
         const lastSpace = slice.lastIndexOf(' ')
         return (lastSpace > 0 ? slice.substring(0, lastSpace) : slice).trim()
       }
-      // Cap a title at 60 chars at a word boundary. If trimming would leave
-      // less than 30 chars (i.e. word boundary too far back) returns the hard
-      // 60-char slice anyway — better than a near-empty title.
+      // Title cap: optimize for human readability over Ahrefs's 60-char rule.
+      //   ≤65 chars → use as-is.
+      //   >65 chars → only truncate if a CLAUSE boundary (period, em-dash,
+      //               colon, " | ", or " — ") falls in [40, 65). Truncate
+      //               there. Otherwise, return as-is — longer-but-natural
+      //               beats awkward mid-phrase cuts.
       function _capTitle(s) {
-        if (!s) return ''
-        if (s.length <= 60) return s
-        const slice = s.substring(0, 60)
-        const lastSpace = slice.lastIndexOf(' ')
-        if (lastSpace > 30) return slice.substring(0, lastSpace).replace(/[\s—–-]+$/, '')
-        return slice
+        if (!s) return s
+        if (s.length <= 65) return s
+        // Try strong clause boundaries first (in order of preference)
+        const candidates = []
+        const probes = [
+          { sep: '. ',  adj: 1 },  // end of sentence — keep the period
+          { sep: ' — ', adj: 0 },  // em-dash separator — drop both
+          { sep: ' – ', adj: 0 },  // en-dash separator
+          { sep: ' | ', adj: 0 },  // pipe separator
+          { sep: ': ',  adj: 1 },  // colon — keep
+        ]
+        for (const { sep, adj } of probes) {
+          const idx = s.lastIndexOf(sep, 65)
+          if (idx >= 40) candidates.push(s.substring(0, idx + adj).trim())
+        }
+        // Pick the longest candidate that fits within 65 — fewer omissions = closer to author intent
+        const best = candidates
+          .filter(c => c.length <= 65)
+          .sort((a, b) => b.length - a.length)[0]
+        return best || s
       }
       // Tool title resolution. Drops the " | RelahConvert" suffix when seo.h2b
       // is already ≥45 chars — at that length the suffix tips most titles past
