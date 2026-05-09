@@ -284,27 +284,48 @@ function langCopyPlugin() {
         while ((m = re.exec(str)) !== null) faqs.push({ q: unescJs(m[1]), a: unescJs(m[2]) })
         return faqs
       }
+      // Match a single OR double-quoted string value for a given key. i18n.js
+      // uses double quotes when the value contains an apostrophe (e.g. h2b
+      // for jpg-to-png is "...That Doesn't Upload..."). Returns the matched
+      // string or '' if not found.
+      function _matchValue(text, key) {
+        const re = new RegExp(`${key}:(?:'((?:\\\\.|[^'\\\\])*)'|"((?:\\\\.|[^"\\\\])*)")`)
+        const m = text.match(re)
+        if (!m) return ''
+        return unescJs(m[1] !== undefined ? m[1] : m[2])
+      }
+      // Parse a links:[{href:'X',label:'Y'},...] array, accepting both quote styles.
+      function _parseLinks(arrInner) {
+        const items = []
+        // Match each {href:..., label:...} pair (single OR double quotes for each)
+        const re = /\{href:(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")\s*,\s*label:(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")\}/g
+        let m
+        while ((m = re.exec(arrInner)) !== null) {
+          const href = unescJs(m[1] !== undefined ? m[1] : m[2])
+          const label = unescJs(m[3] !== undefined ? m[3] : m[4])
+          items.push({ href, label })
+        }
+        return items
+      }
       function extractToolSeo(block, tool) {
         const toolStart = block.indexOf("'" + tool + "':{")
         if (toolStart === -1) return null
         const windowEnd = block.indexOf("\n      '", toolStart + 1)
         const w = block.substring(toolStart, windowEnd === -1 ? toolStart + 12000 : windowEnd)
-        const h2a = w.match(/h2a:'((?:\\.|[^'\\])*)'/)
         const stepsM = w.match(/steps:\[((?:\\.|[^\]\\])*)\]/)
-        const h2b = w.match(/h2b:'((?:\\.|[^'\\])*)'/)
-        const body = w.match(/body:'((?:\\.|[^'\\])*)'/)
-        const h3why = w.match(/h3why:'((?:\\.|[^'\\])*)'/)
-        const why = w.match(/why:'((?:\\.|[^'\\])*)'/)
         const faqsM = w.match(/faqs:\[([\s\S]*?)\](?:,|\s*\n)/)
+        const linksM = w.match(/links:\[((?:\{[^}]*\},?\s*)+)\]/)
+        const h2a = _matchValue(w, 'h2a')
         if (!h2a) return null
         return {
-          h2a: unescJs(h2a[1]),
+          h2a,
           steps: stepsM ? parseStringArray(stepsM[1]) : [],
-          h2b: h2b ? unescJs(h2b[1]) : '',
-          body: body ? unescJs(body[1]) : '',
-          h3why: h3why ? unescJs(h3why[1]) : '',
-          why: why ? unescJs(why[1]) : '',
+          h2b: _matchValue(w, 'h2b'),
+          body: _matchValue(w, 'body'),
+          h3why: _matchValue(w, 'h3why'),
+          why: _matchValue(w, 'why'),
           faqs: faqsM ? parseFaqs(faqsM[1]) : [],
+          links: linksM ? _parseLinks(linksM[1]) : [],
         }
       }
       // Build full SEO map: { lang: { slug: {...} } }
@@ -398,6 +419,23 @@ function langCopyPlugin() {
       function escTextHtml(s) {
         return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
       }
+      // Build a localized href for an English tool slug or static-page slug.
+      // 'home' returns the lang-specific homepage. Tool slugs translate via
+      // slugMapByLang; static slugs translate via staticSlugMap. EN paths
+      // use no trailing slash (matches our canonical convention); non-EN use
+      // a trailing slash.
+      function langHref(targetSlug, lang) {
+        if (targetSlug === 'home' || targetSlug === '' || targetSlug === '/') {
+          return lang === 'en' ? '/' : '/' + lang + '/'
+        }
+        const clean = targetSlug.replace(/^\//, '').replace(/\/$/, '')
+        if (lang === 'en') return '/' + clean
+        const toolSlug = slugMapByLang[lang] && slugMapByLang[lang][clean]
+        if (toolSlug) return '/' + lang + '/' + toolSlug + '/'
+        const staticSlug = staticSlugMap[lang] && staticSlugMap[lang][clean]
+        if (staticSlug) return '/' + lang + '/' + staticSlug + '/'
+        return '/' + lang + '/' + clean + '/'
+      }
       // body and steps already contain HTML (e.g. <p>, <strong>) — pass through
       function buildToolPrerender(slug, lang) {
         const seo = (allSeoByLang[lang] && allSeoByLang[lang][slug]) ||
@@ -405,17 +443,35 @@ function langCopyPlugin() {
         const navName = (navShortByLang[lang] && navShortByLang[lang][slug]) ||
                         (navShortByLang['en'] && navShortByLang['en'][slug]) ||
                         TOOL_NAME_EN[slug] || slug
+        // Header (logo home link), related tools, and footer links — gives the
+        // prerender body real outgoing internal links so Ahrefs's "Page has no
+        // outgoing links" doesn't fire on every tool page. Same set across all
+        // tool pages, lang-aware hrefs.
+        const homeHref = langHref('home', lang)
+        const aboutHref = langHref('about', lang)
+        const privHref = langHref('privacy-policy', lang)
+        const termsHref = langHref('terms-and-conditions', lang)
+        const sH1 = (STATIC_H1[lang] && STATIC_H1[lang]) || STATIC_H1.en
+        const headerNav = `<nav class="rc-pr-header"><a href="${homeHref}">RelahConvert</a></nav>`
+        const footerNav = `<nav class="rc-pr-footer"><a href="${aboutHref}">${escTextHtml(sH1.about || 'About')}</a> · <a href="${privHref}">${escTextHtml(sH1['privacy-policy'] || 'Privacy')}</a> · <a href="${termsHref}">${escTextHtml(sH1['terms-and-conditions'] || 'Terms')}</a></nav>`
         if (!seo) {
-          // Fall back to just H1 + curated English description
           const desc = TOOL_DESC_EN[slug] || ''
-          return `<section class="rc-prerender" hidden><h1>${escTextHtml(navName)}</h1><p>${escTextHtml(desc)}</p></section>`
+          return `<section class="rc-prerender" hidden>${headerNav}<h1>${escTextHtml(navName)}</h1><p>${escTextHtml(desc)}</p>${footerNav}</section>`
         }
         const stepsHtml = (seo.steps || []).map(s => `<li>${s}</li>`).join('')
         const faqsHtml = (seo.faqs || []).map(f => `<div class="rc-faq"><h4>${escTextHtml(f.q)}</h4><p>${escTextHtml(f.a)}</p></div>`).join('')
-        // Use h2b (the value-prop heading) for H1 — strongest SEO signal per page.
-        // Tool name (navName) goes into a sub-line for users/crawlers reading top to bottom.
+        // Related tools from seo.links — the same 4 internal-tool links the
+        // runtime SEO section renders. href values in i18n.js are English
+        // slugs (e.g. '/resize'); langHref translates per language.
+        const linksList = (seo.links && seo.links.length)
+          ? seo.links
+          : ((allSeoByLang.en && allSeoByLang.en[slug] && allSeoByLang.en[slug].links) || [])
+        const relatedHtml = linksList.length
+          ? `<nav class="rc-pr-related">${linksList.slice(0, 4).map(l => `<a href="${langHref(l.href, lang)}">${escTextHtml(l.label)}</a>`).join(' · ')}</nav>`
+          : ''
         const intro = (seo.body || '').replace(/<[^>]+>/g, '').slice(0, 240)
         return `<section class="rc-prerender" hidden>
+  ${headerNav}
   <h1>${escTextHtml(navName)}</h1>
   <p class="rc-intro">${escTextHtml(intro)}</p>
   <h2>${escTextHtml(seo.h2a)}</h2>
@@ -424,7 +480,9 @@ function langCopyPlugin() {
   ${seo.body || ''}
   <h3>${escTextHtml(seo.h3why)}</h3>
   <p>${escTextHtml(seo.why)}</p>
+  ${relatedHtml}
   ${faqsHtml}
+  ${footerNav}
 </section>`
       }
       function buildHomePrerender(lang) {
@@ -463,12 +521,29 @@ function langCopyPlugin() {
         )
         return out
       }
-      // For PDF hub: build a prerender block matching its hub structure and inject into #app
+      // For PDF hub: build a prerender block matching its hub structure and
+      // inject into #app. Includes header logo, links to all 13 PDF tools,
+      // and footer links so Ahrefs sees outgoing-link structure.
       function buildPdfHubBlock(lang) {
         const { h1, h2, em, desc } = buildPdfHubPrerender(lang)
+        const homeHref = langHref('home', lang)
+        const aboutHref = langHref('about', lang)
+        const privHref = langHref('privacy-policy', lang)
+        const termsHref = langHref('terms-and-conditions', lang)
+        const sH1 = (STATIC_H1[lang] && STATIC_H1[lang]) || STATIC_H1.en
+        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf']
+        const toolLinks = PDF_SLUGS.map(s => {
+          const label = (navShortByLang[lang] && navShortByLang[lang][s]) ||
+                        (navShortByLang.en && navShortByLang.en[s]) ||
+                        TOOL_NAME_EN[s] || s
+          return `<a href="${langHref(s, lang)}">${escTextHtml(label)}</a>`
+        }).join(' · ')
         return `<section class="rc-prerender" hidden>
+  <nav class="rc-pr-header"><a href="${homeHref}">RelahConvert</a></nav>
   <h1>${escTextHtml(h1)}<br>${escTextHtml(h2)} <em>${escTextHtml(em)}</em></h1>
   <p>${escTextHtml(desc)}</p>
+  <nav class="rc-pr-tools">${toolLinks}</nav>
+  <nav class="rc-pr-footer"><a href="${aboutHref}">${escTextHtml(sH1.about || 'About')}</a> · <a href="${privHref}">${escTextHtml(sH1['privacy-policy'] || 'Privacy')}</a> · <a href="${termsHref}">${escTextHtml(sH1['terms-and-conditions'] || 'Terms')}</a></nav>
 </section>`
       }
       // For static pages (about, contact, etc.): fill the hero H1. Matches
@@ -580,8 +655,9 @@ function langCopyPlugin() {
         }
       }
 
-      // Mirror runtime sanitize/strip/truncate helpers (already have sanitizeDesc above)
       function _stripHtmlForMeta(s) { return String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() }
+      // Truncate at last word boundary at or before `max` chars. Never cuts
+      // mid-word. If the string fits, returns as-is.
       function _truncateForMeta(s, max) {
         if (!s) return ''
         if (s.length <= max) return s
@@ -591,24 +667,46 @@ function langCopyPlugin() {
         const lastSpace = slice.lastIndexOf(' ')
         return (lastSpace > 0 ? slice.substring(0, lastSpace) : slice).trim()
       }
-      // Mirrors src/core/i18n.js getToolTitle()
+      // Cap a title at 60 chars at a word boundary. If trimming would leave
+      // less than 30 chars (i.e. word boundary too far back) returns the hard
+      // 60-char slice anyway — better than a near-empty title.
+      function _capTitle(s) {
+        if (!s) return ''
+        if (s.length <= 60) return s
+        const slice = s.substring(0, 60)
+        const lastSpace = slice.lastIndexOf(' ')
+        if (lastSpace > 30) return slice.substring(0, lastSpace).replace(/[\s—–-]+$/, '')
+        return slice
+      }
+      // Tool title resolution. Drops the " | RelahConvert" suffix when seo.h2b
+      // is already ≥45 chars — at that length the suffix tips most titles past
+      // the 60-char Ahrefs threshold without adding signal. Caps at 60 chars
+      // at a word boundary in all branches.
       function buildToolTitle(slug, lang) {
         const flat = flatKeysByLang[lang] || {}
         const ovKey = TOOL_KEY_OVERRIDES[slug] && TOOL_KEY_OVERRIDES[slug].title
-        if (ovKey && flat[ovKey]) return sanitizeDesc(flat[ovKey])
+        if (ovKey && flat[ovKey]) return _capTitle(sanitizeDesc(flat[ovKey]))
         const seo = allSeoByLang[lang] && allSeoByLang[lang][slug]
-        if (seo && seo.h2b) return sanitizeDesc(seo.h2b) + ' | RelahConvert'
+        if (seo && seo.h2b) {
+          const h = sanitizeDesc(seo.h2b)
+          return _capTitle(h.length >= 45 ? h : h + ' | RelahConvert')
+        }
         const enSeo = allSeoByLang['en'] && allSeoByLang['en'][slug]
-        if (enSeo && enSeo.h2b) return sanitizeDesc(enSeo.h2b) + ' | RelahConvert'
+        if (enSeo && enSeo.h2b) {
+          const h = sanitizeDesc(enSeo.h2b)
+          return _capTitle(h.length >= 45 ? h : h + ' | RelahConvert')
+        }
         return 'RelahConvert'
       }
-      // Mirrors src/core/i18n.js getToolMetaDesc()
+      // Meta description resolution. Caps at 155 chars (Ahrefs flags >160).
+      // Applies the cap to flat-key overrides too — many *_meta_desc values
+      // in i18n.js exceed 160 chars and were previously bypassing truncation.
       function buildToolMetaDesc(slug, lang) {
         const flat = flatKeysByLang[lang] || {}
         const ovKey = TOOL_KEY_OVERRIDES[slug] && TOOL_KEY_OVERRIDES[slug].desc
-        if (ovKey && flat[ovKey]) return sanitizeDesc(flat[ovKey])
+        if (ovKey && flat[ovKey]) return sanitizeDesc(_truncateForMeta(_stripHtmlForMeta(flat[ovKey]), 155))
         const seo = allSeoByLang[lang] && allSeoByLang[lang][slug]
-        if (seo && seo.body) return sanitizeDesc(_truncateForMeta(_stripHtmlForMeta(seo.body), 160))
+        if (seo && seo.body) return sanitizeDesc(_truncateForMeta(_stripHtmlForMeta(seo.body), 155))
         return TOOL_DESC_EN[slug] || ''
       }
 
