@@ -123,7 +123,7 @@ document.querySelector('#app').innerHTML = `
       <label for="fileInput" class="drop-zone" id="dropZone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">${dropHint}</span></label>
     </div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none;" />
-    <div id="fileTabs"></div>
+    <div id="fileTabs" style="display:none;"></div>
     <div id="fileHeader"><span class="fh-name" id="fhName"></span><span class="fh-meta" id="fhMeta"></span><button class="fh-clear" id="fhClear">${clearLbl}</button></div>
     <div id="modeRow">
       <button class="mode-btn active" id="modeAllBtn">${modeAllLbl}</button>
