@@ -140,7 +140,7 @@ document.querySelector('#app').innerHTML = `
         <button id="splitpdf_modeIndiv" style="flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--bg-card);color:var(--text-secondary);transition:all 0.15s;">Individual</button>
       </div>
     </div>
-    <div id="actionRow">
+    <div id="actionRow" style="display:none;">
       <button class="action-btn disabled" id="splitBtn" disabled>${splitBtnLbl}</button>
     </div>
     <div id="resultArea">
@@ -392,11 +392,13 @@ function renderActiveFile() {
     pageGrid.innerHTML = ''
     disableBtn(splitBtn)
     splitpdf_applyModeToggle.style.display = 'none'
+    document.getElementById('actionRow').style.display = 'none'
     dropZone.classList.remove('hidden')
     return
   }
 
   dropZone.classList.add('hidden')
+  document.getElementById('actionRow').style.display = ''
 
   const f = files[activeFileIndex]
 

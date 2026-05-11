@@ -88,7 +88,7 @@ document.querySelector('#app').innerHTML = `
     <div id="removalCount"></div>
     <div id="warnMsg" class="warn-text" style="display:none;"></div>
     <div class="status-text" id="statusText"></div>
-    <div style="margin-bottom:14px;">
+    <div id="actionRow" style="display:none;margin-bottom:14px;">
       <button class="action-btn disabled" id="removeBtn" disabled>${removeLbl}</button>
     </div>
     <div id="nextSteps" style="display:none;margin-top:20px;">
@@ -161,6 +161,8 @@ function resetState() {
   markedForRemoval.clear()
   pageGrid.innerHTML = ''
   fileMeta.classList.remove('on')
+  const _ar = document.getElementById('actionRow')
+  if (_ar) _ar.style.display = 'none'
   if (document.getElementById('uploadArea')) document.getElementById('uploadArea').style.display = ''
   removalCount.textContent = ''
   warnMsg.style.display = 'none'
@@ -193,6 +195,7 @@ async function loadPdfFile(file) {
     fileMetaText.textContent = `${file.name} \u2014 ${totalPages} ${pagesLabel}`
     document.getElementById('uploadArea').style.display = 'none'
     fileMeta.classList.add('on')
+    document.getElementById('actionRow').style.display = 'block'
 
     for (let i = 1; i <= totalPages; i++) {
       statusText.textContent = `Loading page ${i}/${totalPages}`
