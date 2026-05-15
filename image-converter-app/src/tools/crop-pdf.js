@@ -738,9 +738,15 @@ async function buildCroppedPdf(fileEntry) {
   const pages  = pdfDoc.getPages()
   const applyAll = applyAllCheck.checked
 
+  // In Apply-to-All mode: crop every page. In Individual mode: crop every
+  // page whose pageMargins[i] has any non-zero value, NOT just the page the
+  // user happens to be viewing when they hit download. Otherwise crops set
+  // on earlier pages get silently dropped after navigating to a later page.
   const pagesToCrop = applyAll
     ? pages.map((_, i) => i)
-    : [fileEntry.currentPage]
+    : fileEntry.pageMargins
+        .map((pm, i) => (pm && (pm.top > 0 || pm.bottom > 0 || pm.left > 0 || pm.right > 0)) ? i : -1)
+        .filter(i => i >= 0)
 
   for (const i of pagesToCrop) {
     const page = pages[i]
