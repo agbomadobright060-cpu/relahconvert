@@ -42938,4 +42938,12 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://relahconvert.com/extract-images-pdf"/>
   </url>
 
+  <url>
+    <loc>https://relahconvert.com/word-to-pdf</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://relahconvert.com/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://relahconvert.com/word-to-pdf"/>
+  </url>
+
 </urlset>
