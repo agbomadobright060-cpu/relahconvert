@@ -12,7 +12,9 @@ initBulkPdfTool({
   acceptAttr: '.pdf,application/pdf',
   outputExt: 'docx',
   outputMime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  nextStepsSlugs: ['pdf-to-excel', 'pdf-to-powerpoint', 'compress-pdf'],
+  // The .docx output isn't accepted by any tool on the site, so we hide the
+  // "What's Next?" section rather than suggest irrelevant PDF-input tools.
+  nextStepsSlugs: [],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple PDF files to editable Word documents.',

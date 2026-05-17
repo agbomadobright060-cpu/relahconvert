@@ -12,7 +12,9 @@ initBulkPdfTool({
   acceptAttr: '.pdf,application/pdf',
   outputExt: 'pptx',
   outputMime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  nextStepsSlugs: ['pdf-to-word', 'pdf-to-excel', 'compress-pdf'],
+  // The .pptx output isn't accepted by any tool on the site, so we hide the
+  // "What's Next?" section rather than suggest irrelevant PDF-input tools.
+  nextStepsSlugs: [],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple PDF files to editable PowerPoint presentations.',

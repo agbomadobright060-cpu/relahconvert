@@ -12,7 +12,9 @@ initBulkPdfTool({
   acceptAttr: '.pdf,application/pdf',
   outputExt: 'xlsx',
   outputMime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  nextStepsSlugs: ['pdf-to-word', 'pdf-to-powerpoint', 'compress-pdf'],
+  // The .xlsx output isn't accepted by any tool on the site, so we hide the
+  // "What's Next?" section rather than suggest irrelevant PDF-input tools.
+  nextStepsSlugs: [],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple PDF files to editable Excel spreadsheets.',

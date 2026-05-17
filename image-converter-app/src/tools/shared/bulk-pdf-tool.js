@@ -231,6 +231,7 @@ export function initBulkPdfTool(config) {
         <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'DM Sans',sans-serif;">${escapeHtml(t.whats_next || "What's Next?")}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;" id="nextStepsButtons"></div>
       </div>
+      <div id="cloudSavePanel"></div>
     </div>
     ${buildSeoSection()}
   `
@@ -547,6 +548,7 @@ export function initBulkPdfTool(config) {
   function buildNextSteps() {
     const container = document.getElementById('nextStepsButtons')
     const parent = document.getElementById('nextSteps')
+    const cloudPanel = document.getElementById('cloudSavePanel')
     if (!container || !parent) return
     const done = entries.filter(e => e.status === 'done' && e.pdfBlob)
     if (done.length === 0) return
@@ -562,25 +564,34 @@ export function initBulkPdfTool(config) {
       slug: s,
       label: (t.nav_short && t.nav_short[s]) || s,
     }))
-    container.innerHTML = ''
-    for (const l of links) {
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.textContent = l.label
-      btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:"DM Sans",sans-serif;'
-      btn.addEventListener('click', async () => {
-        try {
-          await saveFilesToIDB(handoff)
-          sessionStorage.setItem('pendingFromIDB', '1')
-        } catch (_) { /* fall through — target tool will just show empty picker */ }
-        window.location.href = localHref(l.slug)
-      })
-      container.appendChild(btn)
+    // No relevant next-step tools (e.g. PDF→Office outputs that nothing
+    // else on the site accepts) → hide the entire What's Next? section.
+    // Auto-save still renders independently in its own panel for signed-in
+    // users, so the result page isn't empty when the user has an account.
+    if (links.length === 0) {
+      parent.style.display = 'none'
+    } else {
+      container.innerHTML = ''
+      for (const l of links) {
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.textContent = l.label
+        btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:"DM Sans",sans-serif;'
+        btn.addEventListener('click', async () => {
+          try {
+            await saveFilesToIDB(handoff)
+            sessionStorage.setItem('pendingFromIDB', '1')
+          } catch (_) { /* fall through — target tool will just show empty picker */ }
+          window.location.href = localHref(l.slug)
+        })
+        container.appendChild(btn)
+      }
+      parent.style.display = 'block'
     }
-    parent.style.display = 'block'
     // Auto-save panel: noop for signed-out users, otherwise lists each
-    // completed PDF and uploads it to the user's account.
-    maybeAutoSaveBatch(parent, handoff, slug)
+    // completed file and uploads it to the user's account. Renders in its
+    // own container so it can appear even when What's Next? is hidden.
+    if (cloudPanel) maybeAutoSaveBatch(cloudPanel, handoff, slug)
   }
 
   // Mirror of saveFilesToIDB() in compress-pdf.js et al. — writes records to
