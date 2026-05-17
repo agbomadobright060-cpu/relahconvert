@@ -25,6 +25,8 @@ function injectStyles() {
   const style = document.createElement('style')
   style.textContent = `
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes rcSpin{to{transform:rotate(360deg)}}
+    .fr-spin{display:inline-block;vertical-align:-2px;width:11px;height:11px;margin-right:5px;animation:rcSpin 0.8s linear infinite;}
     #app>div{animation:fadeUp 0.4s ease both}
     .upload-label{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--text-on-accent);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
     .upload-label:hover{background:var(--accent-hover);}
@@ -293,11 +295,16 @@ export function initBulkPdfTool(config) {
       const removeBtn = isBatchRunning && (status === 'uploading' || status === 'converting')
         ? ''
         : `<button class="fr-remove" data-action="remove" data-id="${e.id}" aria-label="${escapeHtml(removeLbl)}">×</button>`
+      // Spinner shown only for the two active in-flight states so users don't
+      // think the row has frozen on a slow conversion.
+      const spinner = (status === 'uploading' || status === 'converting')
+        ? '<svg class="fr-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="14 36"/></svg>'
+        : ''
       return `
         <div class="file-row" data-id="${e.id}">
           <span class="fr-name">${escapeHtml(e.name)}</span>
           <span class="fr-size">${formatSize(e.size)}</span>
-          <span class="fr-status ${status}">${escapeHtml(statusLabel)}</span>
+          <span class="fr-status ${status}">${spinner}${escapeHtml(statusLabel)}</span>
           ${action}
           ${removeBtn}
         </div>
