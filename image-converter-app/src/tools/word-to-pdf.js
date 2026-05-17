@@ -100,7 +100,6 @@ document.querySelector('#app').innerHTML = `
       <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${escapeHtml(titlePart1)} <em style="font-style:italic;color:var(--accent);">${escapeHtml(titlePart2)}</em></h1>
       <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${escapeHtml(descText)}</p>
     </div>
-    <div class="processing-note">${escapeHtml(procNote)} <a href="${localHref('privacy-policy')}">${escapeHtml(privacyLink)}</a></div>
     <div id="uploadArea" style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
         <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${escapeHtml(selectLbl)}</label>
