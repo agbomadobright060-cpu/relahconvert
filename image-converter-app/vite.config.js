@@ -506,11 +506,13 @@ function langCopyPlugin() {
         return { h1, h2, em, desc }
       }
 
-      // Inject pre-rendered content into a tool/hub HTML by replacing the empty
-      // <div id="app"></div> with <div id="app">${prerender}</div>. JS will
+      // Inject pre-rendered content into a tool/hub HTML by replacing the
+      // <div id="app">...</div> with <div id="app">${prerender}</div>. JS will
       // overwrite this on load with the interactive UI.
+      // Matches both the empty form and a previously-filled form so the
+      // per-language loop can overwrite the English prerender written earlier.
       function injectAppPrerender(html, prerenderHtml) {
-        return html.replace(/<div id="app"><\/div>/, `<div id="app">${prerenderHtml}</div>`)
+        return html.replace(/<div id="app">[\s\S]*?<\/div>(\s*<\/body>)/, `<div id="app">${prerenderHtml}</div>$1`)
       }
       // For homepage: fill the empty hero H1 + description elements
       function injectHomePrerender(html, lang) {
