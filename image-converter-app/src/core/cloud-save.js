@@ -139,7 +139,7 @@ export async function maybeAutoSaveBatch(containerEl, files, toolSlug) {
   panel.appendChild(footer)
 
   // Build a row per file so we can mutate its status independently
-  const rows = files.map((f, i) => {
+  const rows = files.map((f) => {
     const row = document.createElement('div')
     row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;'
     const name = document.createElement('span')
@@ -186,15 +186,19 @@ export async function maybeAutoSaveBatch(containerEl, files, toolSlug) {
       if (!blob) throw new Error('no_blob')
       const timestamp = Date.now()
       const storagePath = `${user.id}/${timestamp}_${r.file.name}`
+      // Prefer the caller-supplied type (bulk-pdf-tool passes outputMime so
+      // the .docx/.xlsx/.pptx outputs from PDF→Office tools get tagged
+      // correctly even when CloudConvert's blob has an empty Content-Type).
+      const mime = r.file.type || blob.type || 'application/pdf'
       const { error: uploadErr } = await supabase.storage
         .from('user-files')
-        .upload(storagePath, blob, { contentType: blob.type })
+        .upload(storagePath, blob, { contentType: mime })
       if (uploadErr) throw uploadErr
       const { error: dbErr } = await supabase.from('saved_files').insert({
         user_id: user.id,
         file_name: r.file.name,
         file_size: blob.size,
-        mime_type: blob.type || 'application/pdf',
+        mime_type: mime,
         storage_path: storagePath,
         tool_used: toolSlug || null,
       })
