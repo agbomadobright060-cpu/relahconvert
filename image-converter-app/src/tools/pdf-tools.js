@@ -85,6 +85,7 @@ const svgIcons = {
   'unlock-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="6" y="6" width="30" height="30" rx="3" fill="#DC2626"/><rect x="13" y="20" width="16" height="12" rx="1.8" fill="#fff"/><path d="M16 20v-3a5 5 0 019-3" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="21" cy="26" r="1.8" fill="#DC2626"/></svg>` },
   'extract-images-pdf':{ svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="5" y="14" width="18" height="18" rx="3" fill="#B568EE"/><path d="M9 19h10M9 23h7M9 27h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><rect x="19" y="6" width="18" height="18" rx="3" fill="#9333EA"/><circle cx="25" cy="12" r="1.6" fill="#fff"/><path d="M21 19l3-3 2.5 2.5L29 16l4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>` },
   'word-to-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="4" y="8" width="16" height="26" rx="2" fill="#2563EB"/><text x="12" y="25" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#fff" text-anchor="middle">DOC</text><path d="M22 21h6m-2.5-2.5L28 21l-2.5 2.5" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="22" y="8" width="16" height="26" rx="2" fill="#DC2626"/><text x="30" y="25" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#fff" text-anchor="middle">PDF</text></svg>` },
+  'excel-to-pdf':      { svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="4" y="8" width="16" height="26" rx="2" fill="#16A34A"/><text x="12" y="25" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#fff" text-anchor="middle">XLS</text><path d="M22 21h6m-2.5-2.5L28 21l-2.5 2.5" stroke="#15803D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="22" y="8" width="16" height="26" rx="2" fill="#DC2626"/><text x="30" y="25" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#fff" text-anchor="middle">PDF</text></svg>` },
 }
 
 const ns = t.nav_short || {}
@@ -103,9 +104,10 @@ const cardDescs = {
   'unlock-pdf':       t.card_unlock_pdf_desc || 'Remove password from a protected PDF. Preserves original content.',
   'extract-images-pdf': t.card_extract_images_pdf_desc || 'Extract all images from a PDF document. Download as PNG.',
   'word-to-pdf':        t.card_word_to_pdf_desc || 'Convert Word (.docx) documents to polished PDF files.',
+  'excel-to-pdf':       t.card_excel_to_pdf_desc || 'Convert one or multiple Excel files (.xlsx, .xls) to PDF. Bulk batch up to 10 files.',
 }
 
-const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf']
+const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf']
 
 // Category buckets (Option A): organize / optimize / edit / secure
 const pdfCategoryMap = {
@@ -121,6 +123,7 @@ const pdfCategoryMap = {
   'watermark-pdf':     'edit',
   'extract-images-pdf':'edit',
   'word-to-pdf':       'organize',
+  'excel-to-pdf':      'organize',
   'protect-pdf':       'secure',
   'unlock-pdf':        'secure',
 }

@@ -44,6 +44,7 @@ const standaloneModules = {
   'unlock-pdf':        () => import('../tools/unlock-pdf.js'),
   'extract-images-pdf':() => import('../tools/extract-images-pdf.js'),
   'word-to-pdf':       () => import('../tools/word-to-pdf.js'),
+  'excel-to-pdf':      () => import('../tools/excel-to-pdf.js'),
 }
 
 // Parse URL

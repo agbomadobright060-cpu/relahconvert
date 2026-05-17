@@ -1,21 +1,21 @@
 // Cloudflare Pages Function — creates a CloudConvert job and returns the
 // upload form data for the browser to POST directly to CloudConvert.
-// Path param: [tool] — e.g. 'word-to-pdf'
+// Path param: [tool] — e.g. 'word-to-pdf', 'excel-to-pdf'
 // Body: { filename: string, size: number }
 // Returns: { jobId, uploadUrl, uploadFields }
 // Errors: 4xx/5xx with { error: code, ... }
 
-const MAX_BYTES = 50 * 1024 * 1024 // 50 MB cap, enforced both client and server side
-
-// Map each Phase 3 tool slug to its CloudConvert convert-task input/output formats.
-// Only formats explicitly listed here are accepted; unknown slugs return 404.
+// Per-tool config: which input extensions to accept, output format, and the
+// max file size that we allow through to CloudConvert. inputs[] supports
+// multiple legitimate extensions for a single tool (e.g. .xlsx + .xls for
+// Excel→PDF). The extension is detected per-file and passed as input_format.
 const TOOL_CONFIG = {
-  'word-to-pdf':       { input: 'docx', output: 'pdf'  },
-  'excel-to-pdf':      { input: 'xlsx', output: 'pdf'  },
-  'powerpoint-to-pdf': { input: 'pptx', output: 'pdf'  },
-  'pdf-to-word':       { input: 'pdf',  output: 'docx' },
-  'pdf-to-excel':      { input: 'pdf',  output: 'xlsx' },
-  'pdf-to-powerpoint': { input: 'pdf',  output: 'pptx' },
+  'word-to-pdf':       { inputs: ['docx'],         output: 'pdf',  maxBytes: 50 * 1024 * 1024 },
+  'excel-to-pdf':      { inputs: ['xlsx', 'xls'],  output: 'pdf',  maxBytes: 25 * 1024 * 1024 },
+  'powerpoint-to-pdf': { inputs: ['pptx', 'ppt'],  output: 'pdf',  maxBytes: 50 * 1024 * 1024 },
+  'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 50 * 1024 * 1024 },
+  'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 50 * 1024 * 1024 },
+  'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 50 * 1024 * 1024 },
 }
 
 export async function onRequestPost(context) {
@@ -31,10 +31,16 @@ export async function onRequestPost(context) {
   if (typeof filename !== 'string' || typeof size !== 'number' || size <= 0) {
     return json({ error: 'invalid_request' }, 400)
   }
-  if (size > MAX_BYTES) return json({ error: 'file_too_large', maxBytes: MAX_BYTES }, 413)
-  const expectedExt = '.' + config.input
-  if (!filename.toLowerCase().endsWith(expectedExt)) {
-    return json({ error: 'invalid_format', expected: config.input }, 400)
+  if (size > config.maxBytes) {
+    return json({ error: 'file_too_large', maxBytes: config.maxBytes }, 413)
+  }
+
+  // Detect extension from the filename and check it's in the allowed list.
+  const lower = filename.toLowerCase()
+  const dot = lower.lastIndexOf('.')
+  const ext = dot >= 0 ? lower.substring(dot + 1) : ''
+  if (!config.inputs.includes(ext)) {
+    return json({ error: 'invalid_format', expected: config.inputs.join(',') }, 400)
   }
 
   const jobSpec = {
@@ -43,7 +49,7 @@ export async function onRequestPost(context) {
       'convert-1': {
         operation: 'convert',
         input: 'import-1',
-        input_format: config.input,
+        input_format: ext,
         output_format: config.output,
       },
       'export-1':  { operation: 'export/url', input: 'convert-1' },

@@ -88,7 +88,7 @@ function langCopyPlugin() {
       const PDF_TOOL_SET = new Set([
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
         'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
-        'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf'
+        'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf'
       ])
       // English display name per slug for WebApplication schema name field
       const TOOL_NAME_EN = {
@@ -117,6 +117,7 @@ function langCopyPlugin() {
         'protect-pdf':'Protect PDF','unlock-pdf':'Unlock PDF',
         'extract-images-pdf':'Extract Images from PDF',
         'word-to-pdf':'Word to PDF',
+        'excel-to-pdf':'Excel to PDF',
       }
       function appCategoryFor(slug) {
         return PDF_TOOL_SET.has(slug) ? 'BusinessApplication' : 'MultimediaApplication'
@@ -190,6 +191,7 @@ function langCopyPlugin() {
         'unlock-pdf':'Remove password protection from a PDF. Preserves original content.',
         'extract-images-pdf':'Pull embedded images out of any PDF at original resolution.',
         'word-to-pdf':'Convert Word (.docx) documents to PDF online. Free Word to PDF converter.',
+        'excel-to-pdf':'Convert one or multiple Excel files (.xlsx, .xls) to PDF online. Free bulk Excel to PDF converter.',
       }
       // Strip forbidden privacy/processing-location phrasing from descriptions.
       // Strategy: locate the first forbidden phrase, walk back to the previous
@@ -268,7 +270,7 @@ function langCopyPlugin() {
         'svg-to-png','svg-to-jpg',
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
         'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
-        'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf'
+        'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf'
       ]
 
       function unescJs(s) { return s.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\\\/g, '\\') }
@@ -533,7 +535,7 @@ function langCopyPlugin() {
         const privHref = langHref('privacy-policy', lang)
         const termsHref = langHref('terms-and-conditions', lang)
         const sH1 = (STATIC_H1[lang] && STATIC_H1[lang]) || STATIC_H1.en
-        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf']
+        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf']
         const toolLinks = PDF_SLUGS.map(s => {
           const label = (navShortByLang[lang] && navShortByLang[lang][s]) ||
                         (navShortByLang.en && navShortByLang.en[s]) ||
@@ -599,6 +601,7 @@ function langCopyPlugin() {
         'unlock-pdf':         { title: 'unlkpdf_page_title',      desc: 'unlkpdf_meta_desc' },
         'extract-images-pdf': { title: 'extimg_page_title',       desc: 'extimg_meta_desc' },
         'word-to-pdf':        { title: 'wordpdf_page_title',      desc: 'wordpdf_meta_desc' },
+        'excel-to-pdf':       { title: 'excelpdf_page_title',     desc: 'excelpdf_meta_desc' },
       }
       // Static page key in vite.config (URL slug) → key inside the i18n.js lang block
       const STATIC_PAGE_I18N_KEY = {
@@ -870,7 +873,7 @@ function langCopyPlugin() {
         'round-corners','meme-generator','blur-face','remove-background',
         'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image','svg-to-png','svg-to-jpg',
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers',
-        'watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf'
+        'watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
@@ -1169,6 +1172,7 @@ export default defineConfig({
         'unlock-pdf':        resolve(__dirname, 'unlock-pdf.html'),
         'extract-images-pdf':resolve(__dirname, 'extract-images-pdf.html'),
         'word-to-pdf':       resolve(__dirname, 'word-to-pdf.html'),
+        'excel-to-pdf':      resolve(__dirname, 'excel-to-pdf.html'),
         'account':           resolve(__dirname, 'account.html'),
       }
     }
