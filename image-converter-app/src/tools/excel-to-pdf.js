@@ -199,7 +199,13 @@ function refreshBatchSummary() {
   batchSummary.classList.toggle('on', entries.length > 0)
   fileListEl.classList.toggle('on', entries.length > 0)
   actionRow.classList.toggle('on', entries.length > 0)
-  // Hide drop zone visually if at the limit
+  // Once a file is added, hide the big empty drop-zone preview — the small
+  // "+ Select Excel files" button stays so the user can add more. Document-
+  // level drag-drop still works regardless.
+  const dz = document.getElementById('dropZone')
+  if (dz) dz.style.display = entries.length > 0 ? 'none' : ''
+  // Fully hide the entire upload area when at the 10-file cap (nothing more
+  // can be added until the user removes one).
   uploadArea.style.display = entries.length >= MAX_FILES ? 'none' : ''
 }
 
