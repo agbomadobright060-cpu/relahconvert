@@ -352,6 +352,9 @@
               'word-to-pdf':()=>import('/src/tools/word-to-pdf.js'),
               'excel-to-pdf':()=>import('/src/tools/excel-to-pdf.js'),
               'powerpoint-to-pdf':()=>import('/src/tools/powerpoint-to-pdf.js'),
+              'pdf-to-word':()=>import('/src/tools/pdf-to-word.js'),
+              'pdf-to-excel':()=>import('/src/tools/pdf-to-excel.js'),
+              'pdf-to-powerpoint':()=>import('/src/tools/pdf-to-powerpoint.js'),
             }
             // Clear the homepage HTML and set up a clean page for the tool
             document.body.innerHTML = '<div id="app"></div>'
@@ -557,6 +560,9 @@
         'word-to-pdf':       { bg: '#1E40AF', svg: _conv('DOC', 'PDF', '#1E40AF') },
         'excel-to-pdf':      { bg: '#16A34A', svg: _conv('XLS', 'PDF', '#16A34A') },
         'powerpoint-to-pdf': { bg: '#EA580C', svg: _conv('PPT', 'PDF', '#EA580C') },
+        'pdf-to-word':       { bg: '#DC2626', svg: _conv('PDF', 'DOC', '#DC2626') },
+        'pdf-to-excel':      { bg: '#DC2626', svg: _conv('PDF', 'XLS', '#DC2626') },
+        'pdf-to-powerpoint': { bg: '#DC2626', svg: _conv('PDF', 'PPT', '#DC2626') },
       }
 
       const toolCategories = [
@@ -566,7 +572,7 @@
         { name: t.cat_create||'Create', slugs: ['meme-generator','merge-images','image-splitter','watermark','jpg-to-gif','png-to-gif'] },
         { name: t.cat_export||'Export', slugs: ['jpg-to-pdf','png-to-pdf','pdf-to-png','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
         { name: t.cat_photo||'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
-        { name: t.cat_pdf||'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf'] },
+        { name: t.cat_pdf||'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint'] },
       ]
       function toolLink(slug) {
         const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }

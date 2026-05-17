@@ -38,7 +38,8 @@ function pathsForTool(slug) {
   const base = ['image-converter-app/src/core/i18n.js']
   const entry = `image-converter-app/src/tools/${slug}.js`
   const html  = `image-converter-app/${slug}.html`
-  const extras = (slug === 'word-to-pdf' || slug === 'excel-to-pdf' || slug === 'powerpoint-to-pdf')
+  const extras = (slug === 'word-to-pdf' || slug === 'excel-to-pdf' || slug === 'powerpoint-to-pdf' ||
+                  slug === 'pdf-to-word' || slug === 'pdf-to-excel' || slug === 'pdf-to-powerpoint')
     ? ['image-converter-app/src/tools/shared/bulk-pdf-tool.js']
     : []
   return [...base, entry, html, ...extras]
@@ -132,7 +133,7 @@ function langCopyPlugin() {
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
         'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
         'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf',
-        'powerpoint-to-pdf'
+        'powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint'
       ])
       // English display name per slug for WebApplication schema name field
       const TOOL_NAME_EN = {
@@ -163,6 +164,9 @@ function langCopyPlugin() {
         'word-to-pdf':'Word to PDF',
         'excel-to-pdf':'Excel to PDF',
         'powerpoint-to-pdf':'PowerPoint to PDF',
+        'pdf-to-word':'PDF to Word',
+        'pdf-to-excel':'PDF to Excel',
+        'pdf-to-powerpoint':'PDF to PowerPoint',
       }
       function appCategoryFor(slug) {
         return PDF_TOOL_SET.has(slug) ? 'BusinessApplication' : 'MultimediaApplication'
@@ -238,6 +242,9 @@ function langCopyPlugin() {
         'word-to-pdf':'Convert Word (.docx) documents to PDF online. Free Word to PDF converter.',
         'excel-to-pdf':'Convert one or multiple Excel files (.xlsx, .xls) to PDF online. Free bulk Excel to PDF converter.',
         'powerpoint-to-pdf':'Convert one or multiple PowerPoint files (.pptx, .ppt) to PDF online. Free bulk PowerPoint to PDF converter.',
+        'pdf-to-word':'Convert one or multiple PDF files to editable Word (.docx) documents online. Free bulk PDF to Word converter.',
+        'pdf-to-excel':'Convert one or multiple PDF files to editable Excel (.xlsx) spreadsheets online. Free bulk PDF to Excel converter.',
+        'pdf-to-powerpoint':'Convert one or multiple PDF files to editable PowerPoint (.pptx) presentations online. Free bulk PDF to PowerPoint converter.',
       }
       // Strip forbidden privacy/processing-location phrasing from descriptions.
       // Strategy: locate the first forbidden phrase, walk back to the previous
@@ -321,7 +328,7 @@ function langCopyPlugin() {
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
         'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
         'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf',
-        'powerpoint-to-pdf'
+        'powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint'
       ]
 
       function unescJs(s) { return s.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\\\/g, '\\') }
@@ -595,7 +602,7 @@ function langCopyPlugin() {
         const privHref = langHref('privacy-policy', lang)
         const termsHref = langHref('terms-and-conditions', lang)
         const sH1 = (STATIC_H1[lang] && STATIC_H1[lang]) || STATIC_H1.en
-        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf']
+        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint']
         const toolLinks = PDF_SLUGS.map(s => {
           const label = (navShortByLang[lang] && navShortByLang[lang][s]) ||
                         (navShortByLang.en && navShortByLang.en[s]) ||
@@ -663,6 +670,9 @@ function langCopyPlugin() {
         'word-to-pdf':        { title: 'wordpdf_page_title',      desc: 'wordpdf_meta_desc' },
         'excel-to-pdf':       { title: 'excelpdf_page_title',     desc: 'excelpdf_meta_desc' },
         'powerpoint-to-pdf':  { title: 'pptpdf_page_title',       desc: 'pptpdf_meta_desc' },
+        'pdf-to-word':        { title: 'pdfword_page_title',      desc: 'pdfword_meta_desc' },
+        'pdf-to-excel':       { title: 'pdfexcel_page_title',     desc: 'pdfexcel_meta_desc' },
+        'pdf-to-powerpoint':  { title: 'pdfppt_page_title',       desc: 'pdfppt_meta_desc' },
       }
       // Static page key in vite.config (URL slug) → key inside the i18n.js lang block
       const STATIC_PAGE_I18N_KEY = {
@@ -934,7 +944,8 @@ function langCopyPlugin() {
         'round-corners','meme-generator','blur-face','remove-background',
         'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image','svg-to-png','svg-to-jpg',
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers',
-        'watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf'
+        'watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf',
+        'pdf-to-word','pdf-to-excel','pdf-to-powerpoint'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
@@ -1289,6 +1300,9 @@ export default defineConfig({
         'word-to-pdf':       resolve(__dirname, 'word-to-pdf.html'),
         'excel-to-pdf':      resolve(__dirname, 'excel-to-pdf.html'),
         'powerpoint-to-pdf': resolve(__dirname, 'powerpoint-to-pdf.html'),
+        'pdf-to-word':       resolve(__dirname, 'pdf-to-word.html'),
+        'pdf-to-excel':      resolve(__dirname, 'pdf-to-excel.html'),
+        'pdf-to-powerpoint': resolve(__dirname, 'pdf-to-powerpoint.html'),
         'account':           resolve(__dirname, 'account.html'),
       }
     }

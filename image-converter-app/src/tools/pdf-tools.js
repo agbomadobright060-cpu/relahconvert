@@ -87,6 +87,9 @@ const svgIcons = {
   'word-to-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="5" y="5" width="18" height="18" rx="3" fill="#2563EB"/><text x="14" y="19" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">W</text><rect x="19" y="19" width="18" height="18" rx="3" fill="#DC2626"/><text x="28" y="33" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
   'excel-to-pdf':      { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="5" y="5" width="18" height="18" rx="3" fill="#16A34A"/><text x="14" y="19" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">X</text><rect x="19" y="19" width="18" height="18" rx="3" fill="#DC2626"/><text x="28" y="33" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
   'powerpoint-to-pdf': { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="5" y="5" width="18" height="18" rx="3" fill="#EA580C"/><text x="14" y="19" font-family="Arial,sans-serif" font-size="10" font-weight="900" fill="#fff" text-anchor="middle">PP</text><rect x="19" y="19" width="18" height="18" rx="3" fill="#DC2626"/><text x="28" y="33" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
+  'pdf-to-word':       { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="5" y="5" width="18" height="18" rx="3" fill="#DC2626"/><text x="14" y="19" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">P</text><rect x="19" y="19" width="18" height="18" rx="3" fill="#2563EB"/><text x="28" y="33" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">W</text></svg>` },
+  'pdf-to-excel':      { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="5" y="5" width="18" height="18" rx="3" fill="#DC2626"/><text x="14" y="19" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">P</text><rect x="19" y="19" width="18" height="18" rx="3" fill="#16A34A"/><text x="28" y="33" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">X</text></svg>` },
+  'pdf-to-powerpoint': { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="5" y="5" width="18" height="18" rx="3" fill="#DC2626"/><text x="14" y="19" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">P</text><rect x="19" y="19" width="18" height="18" rx="3" fill="#EA580C"/><text x="28" y="33" font-family="Arial,sans-serif" font-size="10" font-weight="900" fill="#fff" text-anchor="middle">PP</text></svg>` },
 }
 
 const ns = t.nav_short || {}
@@ -107,9 +110,12 @@ const cardDescs = {
   'word-to-pdf':        t.card_word_to_pdf_desc || 'Convert Word (.docx) documents to polished PDF files.',
   'excel-to-pdf':       t.card_excel_to_pdf_desc || 'Convert one or multiple Excel files (.xlsx, .xls) to PDF. Bulk batch up to 10 files.',
   'powerpoint-to-pdf':  t.card_powerpoint_to_pdf_desc || 'Convert one or multiple PowerPoint files (.pptx, .ppt) to polished PDF documents.',
+  'pdf-to-word':        t.card_pdf_to_word_desc || 'Convert one or multiple PDF files to editable Word (.docx) documents.',
+  'pdf-to-excel':       t.card_pdf_to_excel_desc || 'Convert one or multiple PDF files to editable Excel (.xlsx) spreadsheets.',
+  'pdf-to-powerpoint':  t.card_pdf_to_powerpoint_desc || 'Convert one or multiple PDF files to editable PowerPoint (.pptx) presentations.',
 }
 
-const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf']
+const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint']
 
 // Category buckets (Option A): organize / optimize / edit / secure
 const pdfCategoryMap = {
@@ -127,6 +133,9 @@ const pdfCategoryMap = {
   'word-to-pdf':       'organize',
   'excel-to-pdf':      'organize',
   'powerpoint-to-pdf': 'organize',
+  'pdf-to-word':       'organize',
+  'pdf-to-excel':      'organize',
+  'pdf-to-powerpoint': 'organize',
   'protect-pdf':       'secure',
   'unlock-pdf':        'secure',
 }

@@ -141,6 +141,12 @@ export function initBulkPdfTool(config) {
 
   const { slug, acceptExts, acceptAttr, nextStepsSlugs, t, keyPrefix } = config
   const labels = config.labels || {}
+  // Output extension and MIME for the converted blob. Defaults to PDF so the
+  // existing Office→PDF tools keep working unchanged; PDF→Office tools pass
+  // 'docx'/'xlsx'/'pptx' here so download filenames and handoff metadata get
+  // the right extension and content-type.
+  const outputExt  = (config.outputExt  || 'pdf').toLowerCase()
+  const outputMime = config.outputMime || 'application/pdf'
   const API_BASE = '/api/convert/' + slug
 
   // Pull per-tool label, falling back to the English default in config.labels.
@@ -478,7 +484,7 @@ export function initBulkPdfTool(config) {
     const url = entry.downloadUrl || URL.createObjectURL(entry.pdfBlob)
     const a = document.createElement('a')
     a.href = url
-    a.download = baseName + '.pdf'
+    a.download = baseName + '.' + outputExt
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -491,7 +497,7 @@ export function initBulkPdfTool(config) {
     const zip = new JSZip()
     for (const e of succ) {
       const baseName = (e.name || fileBaseFallback).replace(/\.[^.]+$/, '')
-      zip.file(baseName + '.pdf', e.pdfBlob)
+      zip.file(baseName + '.' + outputExt, e.pdfBlob)
     }
     const blob = await zip.generateAsync({ type: 'blob' })
     const url = URL.createObjectURL(blob)
@@ -542,8 +548,8 @@ export function initBulkPdfTool(config) {
     // loadPendingFiles().
     const handoff = done.map(e => ({
       blob: e.pdfBlob,
-      name: (e.name || fileBaseFallback).replace(/\.[^.]+$/, '') + '.pdf',
-      type: 'application/pdf',
+      name: (e.name || fileBaseFallback).replace(/\.[^.]+$/, '') + '.' + outputExt,
+      type: outputMime,
     }))
     const links = (nextStepsSlugs || []).map(s => ({
       slug: s,

@@ -13,9 +13,9 @@ const TOOL_CONFIG = {
   'word-to-pdf':       { inputs: ['docx', 'doc'],  output: 'pdf',  maxBytes: 25 * 1024 * 1024 },
   'excel-to-pdf':      { inputs: ['xlsx', 'xls'],  output: 'pdf',  maxBytes: 25 * 1024 * 1024 },
   'powerpoint-to-pdf': { inputs: ['pptx', 'ppt'],  output: 'pdf',  maxBytes: 25 * 1024 * 1024 },
-  'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 50 * 1024 * 1024 },
-  'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 50 * 1024 * 1024 },
-  'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 50 * 1024 * 1024 },
+  'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 25 * 1024 * 1024 },
+  'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 25 * 1024 * 1024 },
+  'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 25 * 1024 * 1024 },
 }
 
 export async function onRequestPost(context) {
