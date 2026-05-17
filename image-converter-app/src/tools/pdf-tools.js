@@ -86,6 +86,7 @@ const svgIcons = {
   'extract-images-pdf':{ svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="5" y="14" width="18" height="18" rx="3" fill="#B568EE"/><path d="M9 19h10M9 23h7M9 27h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><rect x="19" y="6" width="18" height="18" rx="3" fill="#9333EA"/><circle cx="25" cy="12" r="1.6" fill="#fff"/><path d="M21 19l3-3 2.5 2.5L29 16l4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>` },
   'word-to-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="2" y="2" width="24" height="24" rx="3" fill="#2563EB"/><text x="14" y="20" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">W</text><rect x="16" y="16" width="24" height="24" rx="3" fill="#DC2626"/><text x="28" y="34" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
   'excel-to-pdf':      { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="2" y="2" width="24" height="24" rx="3" fill="#16A34A"/><text x="14" y="20" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">X</text><rect x="16" y="16" width="24" height="24" rx="3" fill="#DC2626"/><text x="28" y="34" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
+  'powerpoint-to-pdf': { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="2" y="2" width="24" height="24" rx="3" fill="#EA580C"/><text x="14" y="20" font-family="Arial,sans-serif" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">PP</text><rect x="16" y="16" width="24" height="24" rx="3" fill="#DC2626"/><text x="28" y="34" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
 }
 
 const ns = t.nav_short || {}
@@ -105,9 +106,10 @@ const cardDescs = {
   'extract-images-pdf': t.card_extract_images_pdf_desc || 'Extract all images from a PDF document. Download as PNG.',
   'word-to-pdf':        t.card_word_to_pdf_desc || 'Convert Word (.docx) documents to polished PDF files.',
   'excel-to-pdf':       t.card_excel_to_pdf_desc || 'Convert one or multiple Excel files (.xlsx, .xls) to PDF. Bulk batch up to 10 files.',
+  'powerpoint-to-pdf':  t.card_powerpoint_to_pdf_desc || 'Convert one or multiple PowerPoint files (.pptx, .ppt) to polished PDF documents.',
 }
 
-const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf']
+const pdfToolSlugs = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf']
 
 // Category buckets (Option A): organize / optimize / edit / secure
 const pdfCategoryMap = {
@@ -124,6 +126,7 @@ const pdfCategoryMap = {
   'extract-images-pdf':'edit',
   'word-to-pdf':       'organize',
   'excel-to-pdf':      'organize',
+  'powerpoint-to-pdf': 'organize',
   'protect-pdf':       'secure',
   'unlock-pdf':        'secure',
 }
