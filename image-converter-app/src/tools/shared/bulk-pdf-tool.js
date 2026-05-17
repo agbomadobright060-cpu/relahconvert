@@ -463,7 +463,12 @@ export function initBulkPdfTool(config) {
   }
 
   async function pollUntilDone(jobId) {
-    const MAX_POLLS = 60 // 60 × 2s = 120s
+    // Backoff schedule: tight first 5 polls catch fast conversions (small
+    // .docx → PDF often finishes in 1-2 s) without burning API calls on
+    // long jobs that need 30 s+. Total budget ≈ 116 s, similar to old 60 × 2 s.
+    const POLL_DELAYS = [500, 750, 1000, 1500, 2000]
+    const STEADY_DELAY = 2000
+    const MAX_POLLS = 60
     for (let i = 0; i < MAX_POLLS; i++) {
       let res
       try { res = await fetch(API_BASE + '/status?jobId=' + encodeURIComponent(jobId)) }
@@ -474,7 +479,7 @@ export function initBulkPdfTool(config) {
       }
       const data = await res.json()
       if (data.status === 'processing') {
-        await sleep(2000)
+        await sleep(POLL_DELAYS[i] !== undefined ? POLL_DELAYS[i] : STEADY_DELAY)
         continue
       }
       if (data.status === 'error') return { ok: false, code: data.code || 'conversion_failed' }
