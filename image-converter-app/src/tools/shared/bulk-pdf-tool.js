@@ -11,7 +11,7 @@
 //   • 100 MB total per batch
 import { injectHeader } from '../../core/header.js'
 import { getT, localHref, injectFaqSchema, setToolMeta } from '../../core/i18n.js'
-import { maybeAutoSaveBatch } from '../../core/cloud-save.js'
+import { maybeShowSaveBatchButton } from '../../core/cloud-save.js'
 import JSZip from 'jszip'
 
 export const MAX_FILES = 10
@@ -588,10 +588,11 @@ export function initBulkPdfTool(config) {
       }
       parent.style.display = 'block'
     }
-    // Auto-save panel: noop for signed-out users, otherwise lists each
-    // completed file and uploads it to the user's account. Renders in its
-    // own container so it can appear even when What's Next? is hidden.
-    if (cloudPanel) maybeAutoSaveBatch(cloudPanel, handoff, slug)
+    // Cloud save: noop for signed-out users; for signed-in users renders a
+    // "Save all to Account" button (user-initiated, never auto-uploads —
+    // matches the image-tool UX). Lives in its own container so it can
+    // appear even when What's Next? is hidden.
+    if (cloudPanel) maybeShowSaveBatchButton(cloudPanel, handoff, slug)
   }
 
   // Mirror of saveFilesToIDB() in compress-pdf.js et al. — writes records to

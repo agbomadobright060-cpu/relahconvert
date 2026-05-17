@@ -101,6 +101,44 @@ export async function maybeShowSaveButton(containerEl, getBlob, getFilename, too
 }
 
 /**
+ * Show a single "Save all to Account" button after a bulk batch completes.
+ * Click → expands into the same progress panel that maybeAutoSaveBatch
+ * renders. Matches the image-tool UX (user-initiated, never auto-uploads).
+ *
+ * Does nothing for signed-out users.
+ *
+ * files: [{ name: string, blob: Blob, type?: string }]
+ */
+export async function maybeShowSaveBatchButton(containerEl, files, toolSlug) {
+  const existing = containerEl.querySelector('.rc-cloud-save, .rc-cloud-batch')
+  if (existing) existing.remove()
+
+  if (!Array.isArray(files) || files.length === 0) return
+  const user = await getUser()
+  if (!user || !supabase) return
+
+  const wrapper = document.createElement('div')
+  wrapper.className = 'rc-cloud-save'
+  wrapper.style.cssText = 'margin-top:14px;'
+
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.style.cssText = 'width:100%;padding:11px;border:none;border-radius:10px;background:#0073aa;color:#fff;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;'
+  const label = files.length === 1 ? 'Save to Account' : `Save all ${files.length} to Account`
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3H7a2 2 0 00-2 2v14l7-5 7 5V5a2 2 0 00-2-2z"/></svg>${label}`
+  btn.addEventListener('mouseenter', () => { if (!btn.disabled) btn.style.background = '#005a87' })
+  btn.addEventListener('mouseleave', () => { if (!btn.disabled) btn.style.background = '#0073aa' })
+  btn.addEventListener('click', () => {
+    // Swap button out for the live progress panel and kick off the upload.
+    wrapper.remove()
+    maybeAutoSaveBatch(containerEl, files, toolSlug)
+  })
+
+  wrapper.appendChild(btn)
+  containerEl.appendChild(wrapper)
+}
+
+/**
  * Auto-save a batch of completed files to the signed-in user's account.
  * Renders a "Pending uploads" panel inside containerEl listing each file with
  * a live status indicator (Pending → Saving → ✓ Saved / ✗ <reason>).
