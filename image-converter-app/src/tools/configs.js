@@ -377,4 +377,32 @@ export const tools = {
     outputFormat: 'application/pdf',
     slug: 'excel-to-pdf'
   },
+  'powerpoint-to-pdf': {
+    title: 'PowerPoint to PDF',
+    description: 'Convert one or multiple PowerPoint files to PDF.',
+    inputFormats: ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint'],
+    outputFormat: 'application/pdf',
+    slug: 'powerpoint-to-pdf'
+  },
+  'pdf-to-word': {
+    title: 'PDF to Word',
+    description: 'Convert one or multiple PDF files to editable Word (.docx) documents.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    slug: 'pdf-to-word'
+  },
+  'pdf-to-excel': {
+    title: 'PDF to Excel',
+    description: 'Convert one or multiple PDF files to editable Excel (.xlsx) spreadsheets.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    slug: 'pdf-to-excel'
+  },
+  'pdf-to-powerpoint': {
+    title: 'PDF to PowerPoint',
+    description: 'Convert one or multiple PDF files to editable PowerPoint (.pptx) presentations.',
+    inputFormats: ['application/pdf'],
+    outputFormat: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    slug: 'pdf-to-powerpoint'
+  },
 }
