@@ -11,6 +11,7 @@
 //   • 100 MB total per batch
 import { injectHeader } from '../../core/header.js'
 import { getT, localHref, injectFaqSchema, setToolMeta } from '../../core/i18n.js'
+import { maybeAutoSaveBatch } from '../../core/cloud-save.js'
 import JSZip from 'jszip'
 
 export const MAX_FILES = 10
@@ -534,13 +535,21 @@ export function initBulkPdfTool(config) {
     const container = document.getElementById('nextStepsButtons')
     const parent = document.getElementById('nextSteps')
     if (!container || !parent) return
-    if (!entries.some(e => e.status === 'done')) return
+    const done = entries.filter(e => e.status === 'done' && e.pdfBlob)
+    if (done.length === 0) return
     const links = (nextStepsSlugs || []).map(s => ({
       slug: s,
       label: (t.nav_short && t.nav_short[s]) || s,
     }))
     container.innerHTML = links.map(l => `<a href="${localHref(l.slug)}" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);">${escapeHtml(l.label)}</a>`).join('')
     parent.style.display = 'block'
+    // Auto-save panel: noop for signed-out users, otherwise lists each
+    // completed PDF and uploads it to the user's account.
+    const files = done.map(e => ({
+      name: (e.name || fileBaseFallback).replace(/\.[^.]+$/, '') + '.pdf',
+      blob: e.pdfBlob,
+    }))
+    maybeAutoSaveBatch(parent, files, slug)
   }
 
   function buildSeoSection() {
