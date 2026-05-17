@@ -363,4 +363,18 @@ export const tools = {
     outputFormat: 'image/png',
     slug: 'extract-images-pdf'
   },
+  'word-to-pdf': {
+    title: 'Word to PDF',
+    description: 'Convert Word documents to PDF online. Free Word to PDF converter.',
+    inputFormats: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    outputFormat: 'application/pdf',
+    slug: 'word-to-pdf'
+  },
+  'excel-to-pdf': {
+    title: 'Excel to PDF',
+    description: 'Convert one or multiple Excel files to PDF. Bulk batch up to 10 files at once.',
+    inputFormats: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
+    outputFormat: 'application/pdf',
+    slug: 'excel-to-pdf'
+  },
 }
