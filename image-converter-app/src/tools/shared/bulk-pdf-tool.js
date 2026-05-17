@@ -60,10 +60,6 @@ function injectStyles() {
     #actionRow.on{display:flex;}
     .status-text{font-size:13px;color:var(--text-tertiary);font-family:'DM Sans',sans-serif;margin-bottom:10px;min-height:18px;}
     .status-text.error{color:var(--accent-hover,#c00);}
-    .limit-banner{display:none;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-secondary);align-items:center;gap:10px;flex-wrap:wrap;}
-    .limit-banner.on{display:flex;}
-    .limit-banner .lb-text{flex:1;}
-    .limit-banner .lb-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border-light);background:var(--bg-card);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:not-allowed;opacity:0.6;}
     .seo-section{max-width:700px;margin:0 auto;padding:0 16px 60px;font-family:'DM Sans',sans-serif;}
     .seo-section h2{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--text-primary);margin:32px 0 10px;}
     .seo-section h3{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text-primary);margin:24px 0 8px;}
@@ -126,7 +122,6 @@ function mapStatusError(code, http) {
  *   nextStepsSlugs: ['excel-to-pdf', 'merge-pdf', 'compress-pdf'],
  *   labels: {       // English fallbacks; per-lang values come from i18n.js
  *     desc, select, dropHint, convertBtn, downloadAll, retry, remove,
- *     limitBanner, upgradeBtn,
  *     statusPending, statusUploading, statusConverting, statusDone, statusError,
  *     progressFmt, summaryFmt,
  *     errTooLarge, errTotalTooLarge, errTooMany, errInvalidFormat,
@@ -163,8 +158,6 @@ export function initBulkPdfTool(config) {
   const downloadAllLbl = get('download_all', labels.downloadAll || 'Download all as ZIP')
   const retryLbl  = get('retry', labels.retry || 'Retry')
   const removeLbl = t.remove || labels.remove || 'Remove'
-  const limitBannerLbl = get('limit_banner', labels.limitBanner || 'Free limit: 10 files per session. Upgrade for more.')
-  const upgradeBtnLbl  = get('upgrade', labels.upgradeBtn || 'Upgrade')
 
   const STATUS_LABELS = {
     pending:    get('status_pending',    labels.statusPending    || 'Ready'),
@@ -209,10 +202,6 @@ export function initBulkPdfTool(config) {
         <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:400;color:var(--text-primary);margin:0 0 6px;line-height:1;letter-spacing:-0.02em;">${escapeHtml(titlePart1)} <em style="font-style:italic;color:var(--accent);">${escapeHtml(titlePart2)}</em></h1>
         <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 14px;">${escapeHtml(descText)}</p>
       </div>
-      <div class="limit-banner" id="limitBanner">
-        <span class="lb-text" id="lbText">${escapeHtml(limitBannerLbl)}</span>
-        <button class="lb-btn" id="upgradeBtn" disabled>${escapeHtml(upgradeBtnLbl)}</button>
-      </div>
       <div id="uploadArea" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
           <label class="upload-label" for="fileInput"><span style="font-size:18px;">+</span> ${escapeHtml(selectLbl)}</label>
@@ -252,7 +241,6 @@ export function initBulkPdfTool(config) {
   const actionRow      = document.getElementById('actionRow')
   const convertBtn     = document.getElementById('convertBtn')
   const downloadAllBtn = document.getElementById('downloadAllBtn')
-  const limitBanner    = document.getElementById('limitBanner')
 
   // state[i] = { id, file, name, size, status, jobId?, downloadUrl?, pdfBlob?, errCode? }
   let entries = []
@@ -333,7 +321,6 @@ export function initBulkPdfTool(config) {
 
     if (limitHit) {
       setStatus(ERR.too_many, true)
-      limitBanner.classList.add('on')
     } else if (totalOverflow) {
       setStatus(ERR.total_too_large, true)
     } else if (invalidCount && !entries.length) {
@@ -522,7 +509,6 @@ export function initBulkPdfTool(config) {
     if (idx < 0) return
     if (entries[idx].downloadUrl) URL.revokeObjectURL(entries[idx].downloadUrl)
     entries.splice(idx, 1)
-    if (entries.length < MAX_FILES) limitBanner.classList.remove('on')
     refreshBatchSummary()
     renderFileList()
     updateConvertButton()

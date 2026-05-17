@@ -20,8 +20,6 @@ initBulkPdfTool({
     downloadAll: 'Download all as ZIP',
     retry: 'Retry',
     remove: 'Remove',
-    limitBanner: 'Free limit: 10 files per session. Upgrade for more.',
-    upgradeBtn: 'Upgrade',
     statusPending: 'Ready',
     statusUploading: 'Uploading…',
     statusConverting: 'Converting…',
