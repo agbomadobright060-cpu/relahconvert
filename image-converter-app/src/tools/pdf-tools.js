@@ -50,16 +50,16 @@ style.textContent = `
   .pdf-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
   .pdf-tool-card{position:relative;background:var(--bg-card);border-radius:16px;padding:22px 26px;text-decoration:none;border:1.5px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.2s;display:block;}
   .pdf-tool-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(200,75,49,0.12);transform:translateY(-2px);}
-  .pdf-tool-card .icon{width:50px;height:50px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;flex-shrink:0;}
-  .pdf-tool-card .icon svg{width:50px;height:50px;display:block;}
+  .pdf-tool-card .icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;flex-shrink:0;}
+  .pdf-tool-card .icon svg{width:56px;height:56px;display:block;image-rendering:crisp-edges;}
   .pdf-tool-card h2{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;letter-spacing:-0.01em;}
   .pdf-tool-card p{font-size:13px;color:var(--text-tertiary);line-height:1.55;}
   @media(max-width:900px){.pdf-tools-grid{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:768px){
     .pdf-tools-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
     .pdf-tool-card{padding:18px 16px;border-radius:14px;}
-    .pdf-tool-card .icon{width:44px;height:44px;margin-bottom:10px;}
-    .pdf-tool-card .icon svg{width:44px;height:44px;}
+    .pdf-tool-card .icon{width:48px;height:48px;margin-bottom:10px;}
+    .pdf-tool-card .icon svg{width:48px;height:48px;}
     .pdf-tool-card h2{font-size:14px;}
     .pdf-tool-card p{display:none;}
     .pdf-hero{padding:36px 16px 28px;}
@@ -84,8 +84,8 @@ const svgIcons = {
   'protect-pdf':      { svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="6" y="6" width="30" height="30" rx="3" fill="#059669"/><rect x="13" y="20" width="16" height="12" rx="1.8" fill="#fff"/><path d="M16 20v-3a5 5 0 0110 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="21" cy="26" r="1.8" fill="#059669"/></svg>` },
   'unlock-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="6" y="6" width="30" height="30" rx="3" fill="#DC2626"/><rect x="13" y="20" width="16" height="12" rx="1.8" fill="#fff"/><path d="M16 20v-3a5 5 0 019-3" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="21" cy="26" r="1.8" fill="#DC2626"/></svg>` },
   'extract-images-pdf':{ svg: `<svg viewBox="0 0 42 42" fill="none"><rect x="5" y="14" width="18" height="18" rx="3" fill="#B568EE"/><path d="M9 19h10M9 23h7M9 27h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><rect x="19" y="6" width="18" height="18" rx="3" fill="#9333EA"/><circle cx="25" cy="12" r="1.6" fill="#fff"/><path d="M21 19l3-3 2.5 2.5L29 16l4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>` },
-  'word-to-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="3" y="3" width="26" height="26" rx="4" fill="#2563EB"/><text x="16" y="23" font-family="Arial,sans-serif" font-size="15" font-weight="900" fill="#fff" text-anchor="middle">W</text><rect x="18" y="18" width="21" height="21" rx="4" fill="#DC2626" stroke="#fff" stroke-width="2"/><text x="28.5" y="34" font-family="Arial,sans-serif" font-size="13" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
-  'excel-to-pdf':      { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="3" y="3" width="26" height="26" rx="4" fill="#16A34A"/><text x="16" y="23" font-family="Arial,sans-serif" font-size="15" font-weight="900" fill="#fff" text-anchor="middle">X</text><rect x="18" y="18" width="21" height="21" rx="4" fill="#DC2626" stroke="#fff" stroke-width="2"/><text x="28.5" y="34" font-family="Arial,sans-serif" font-size="13" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
+  'word-to-pdf':       { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="2" y="2" width="24" height="24" rx="3" fill="#2563EB"/><text x="14" y="20" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">W</text><rect x="16" y="16" width="24" height="24" rx="3" fill="#DC2626"/><text x="28" y="34" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
+  'excel-to-pdf':      { svg: `<svg viewBox="0 0 42 42" fill="none" shape-rendering="geometricPrecision"><rect x="2" y="2" width="24" height="24" rx="3" fill="#16A34A"/><text x="14" y="20" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">X</text><rect x="16" y="16" width="24" height="24" rx="3" fill="#DC2626"/><text x="28" y="34" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">P</text></svg>` },
 }
 
 const ns = t.nav_short || {}
