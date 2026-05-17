@@ -10,7 +10,7 @@ initBulkPdfTool({
   keyPrefix: 'pptpdf',
   acceptExts: ['.pptx', '.ppt'],
   acceptAttr: '.pptx,.ppt,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint',
-  nextStepsSlugs: ['word-to-pdf', 'excel-to-pdf', 'merge-pdf'],
+  nextStepsSlugs: ['compress-pdf', 'watermark-pdf', 'protect-pdf'],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple PowerPoint files to PDF.',

@@ -537,19 +537,57 @@ export function initBulkPdfTool(config) {
     if (!container || !parent) return
     const done = entries.filter(e => e.status === 'done' && e.pdfBlob)
     if (done.length === 0) return
+    // Files to hand off to the next tool (IndexedDB) — one record per
+    // completed PDF, shape matches what compress-pdf et al. expect from
+    // loadPendingFiles().
+    const handoff = done.map(e => ({
+      blob: e.pdfBlob,
+      name: (e.name || fileBaseFallback).replace(/\.[^.]+$/, '') + '.pdf',
+      type: 'application/pdf',
+    }))
     const links = (nextStepsSlugs || []).map(s => ({
       slug: s,
       label: (t.nav_short && t.nav_short[s]) || s,
     }))
-    container.innerHTML = links.map(l => `<a href="${localHref(l.slug)}" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);">${escapeHtml(l.label)}</a>`).join('')
+    container.innerHTML = ''
+    for (const l of links) {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.textContent = l.label
+      btn.style.cssText = 'padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-light);font-size:13px;font-weight:500;color:var(--text-primary);text-decoration:none;background:var(--bg-card);cursor:pointer;font-family:"DM Sans",sans-serif;'
+      btn.addEventListener('click', async () => {
+        try {
+          await saveFilesToIDB(handoff)
+          sessionStorage.setItem('pendingFromIDB', '1')
+        } catch (_) { /* fall through — target tool will just show empty picker */ }
+        window.location.href = localHref(l.slug)
+      })
+      container.appendChild(btn)
+    }
     parent.style.display = 'block'
     // Auto-save panel: noop for signed-out users, otherwise lists each
     // completed PDF and uploads it to the user's account.
-    const files = done.map(e => ({
-      name: (e.name || fileBaseFallback).replace(/\.[^.]+$/, '') + '.pdf',
-      blob: e.pdfBlob,
-    }))
-    maybeAutoSaveBatch(parent, files, slug)
+    maybeAutoSaveBatch(parent, handoff, slug)
+  }
+
+  // Mirror of saveFilesToIDB() in compress-pdf.js et al. — writes records to
+  // the shared `relahconvert` IndexedDB so a target tool can auto-load them
+  // via its own loadPendingFiles() / loadFilesFromIDB() helpers.
+  function saveFilesToIDB(items) {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('relahconvert', 1)
+      req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+      req.onerror = () => reject(new Error('IndexedDB open failed'))
+      req.onsuccess = e => {
+        const db = e.target.result
+        const tx = db.transaction('pending', 'readwrite')
+        const store = tx.objectStore('pending')
+        store.clear()
+        items.forEach((f, i) => store.put({ id: i, blob: f.blob, name: f.name, type: f.type }))
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => reject(new Error('IDB write failed'))
+      }
+    })
   }
 
   function buildSeoSection() {

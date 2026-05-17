@@ -10,7 +10,7 @@ initBulkPdfTool({
   keyPrefix: 'wordpdf',
   acceptExts: ['.docx', '.doc'],
   acceptAttr: '.docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword',
-  nextStepsSlugs: ['excel-to-pdf', 'merge-pdf', 'compress-pdf'],
+  nextStepsSlugs: ['compress-pdf', 'protect-pdf', 'merge-pdf'],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple Word files to PDF.',

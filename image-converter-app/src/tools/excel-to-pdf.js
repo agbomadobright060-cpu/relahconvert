@@ -10,7 +10,7 @@ initBulkPdfTool({
   keyPrefix: 'excelpdf',
   acceptExts: ['.xlsx', '.xls'],
   acceptAttr: '.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel',
-  nextStepsSlugs: ['word-to-pdf', 'merge-pdf', 'compress-pdf'],
+  nextStepsSlugs: ['compress-pdf', 'protect-pdf', 'merge-pdf'],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple Excel files to PDF.',
