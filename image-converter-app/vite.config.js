@@ -1,9 +1,52 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { mkdirSync, copyFileSync, writeFileSync, existsSync, readFileSync } from 'fs'
+import { execSync } from 'child_process'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const supportedLangs = ['fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi']
+
+// ── Freshness signals (sitemap <lastmod>, JSON-LD dateModified, visible
+// "Last updated" footer) — sourced from git so each tool's date reflects
+// the latest commit that actually touched its content/code, not the
+// build/deploy time. Cached so per-build cost stays one git invocation
+// per unique path even when we look up the same tool across many URLs.
+const __gitDateCache = new Map()
+function gitDateFor(paths) {
+  // paths: array of repo-relative file paths. Returns the most recent
+  // commit date (YYYY-MM-DD) across them. Falls back to today if git isn't
+  // available (e.g. shallow clone, build env without history) so callers
+  // can use the result unconditionally.
+  const key = Array.isArray(paths) ? paths.slice().sort().join('|') : String(paths)
+  if (__gitDateCache.has(key)) return __gitDateCache.get(key)
+  const list = Array.isArray(paths) ? paths : [paths]
+  let best = ''
+  for (const p of list) {
+    try {
+      const out = execSync(`git log -1 --format=%cs -- "${p}"`, { cwd: __dirname, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+      if (out && out > best) best = out
+    } catch (_) { /* file may not exist or git unavailable — fall through */ }
+  }
+  if (!best) best = new Date().toISOString().slice(0, 10)
+  __gitDateCache.set(key, best)
+  return best
+}
+// Per-tool source-of-truth files. Changes to ANY of these bump that
+// tool's lastmod. The shared bulk-pdf engine is included for Word/Excel
+// so an engine bug fix also refreshes both tool pages.
+function pathsForTool(slug) {
+  const base = ['image-converter-app/src/core/i18n.js']
+  const entry = `image-converter-app/src/tools/${slug}.js`
+  const html  = `image-converter-app/${slug}.html`
+  const extras = (slug === 'word-to-pdf' || slug === 'excel-to-pdf')
+    ? ['image-converter-app/src/tools/shared/bulk-pdf-tool.js']
+    : []
+  return [...base, entry, html, ...extras]
+}
+function lastModFor(slug) {
+  if (!slug) return gitDateFor(['image-converter-app/src/core/i18n.js'])
+  return gitDateFor(pathsForTool(slug))
+}
 
 function langRedirectPlugin() {
   return {
@@ -243,13 +286,17 @@ function langCopyPlugin() {
         return s.substring(0, end).trim().replace(/[,.\s—–\-]+$/, '').trim()
       }
       function appSchema(opts) {
-        return {
+        const schema = {
           '@context':'https://schema.org','@type':'WebApplication',
           name:opts.name,description:sanitizeDesc(opts.description),url:opts.url,
           applicationCategory:opts.category,operatingSystem:'Any',
           browserRequirements:'Requires JavaScript. Requires HTML5.',
           offers:{'@type':'Offer',price:'0',priceCurrency:'USD'}
         }
+        // Per-tool dateModified so Google has a structured freshness signal
+        // alongside sitemap <lastmod> and the visible prerender footer.
+        if (opts.slug) schema.dateModified = lastModFor(opts.slug)
+        return schema
       }
       function injectSchemas(html, schemas) {
         const cleaned = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '')
@@ -458,9 +505,15 @@ function langCopyPlugin() {
         const sH1 = (STATIC_H1[lang] && STATIC_H1[lang]) || STATIC_H1.en
         const headerNav = `<nav class="rc-pr-header"><a href="${homeHref}">RelahConvert</a></nav>`
         const footerNav = `<nav class="rc-pr-footer"><a href="${aboutHref}">${escTextHtml(sH1.about || 'About')}</a> · <a href="${privHref}">${escTextHtml(sH1['privacy-policy'] || 'Privacy')}</a> · <a href="${termsHref}">${escTextHtml(sH1['terms-and-conditions'] || 'Terms')}</a></nav>`
+        // Visible freshness signal in the prerender (and a machine-readable
+        // <time datetime>). The .rc-prerender wrapper is hidden, so this is
+        // here for non-JS crawlers and Google's HTML parser; rendered users
+        // don't see it.
+        const lastModDate = lastModFor(slug)
+        const lastUpdated = `<p class="rc-last-updated">Last updated: <time datetime="${lastModDate}">${lastModDate}</time></p>`
         if (!seo) {
           const desc = TOOL_DESC_EN[slug] || ''
-          return `<section class="rc-prerender" hidden>${headerNav}<h1>${escTextHtml(navName)}</h1><p>${escTextHtml(desc)}</p>${footerNav}</section>`
+          return `<section class="rc-prerender" hidden>${headerNav}<h1>${escTextHtml(navName)}</h1><p>${escTextHtml(desc)}</p>${lastUpdated}${footerNav}</section>`
         }
         const stepsHtml = (seo.steps || []).map(s => `<li>${s}</li>`).join('')
         const faqsHtml = (seo.faqs || []).map(f => `<div class="rc-faq"><h4>${escTextHtml(f.q)}</h4><p>${escTextHtml(f.a)}</p></div>`).join('')
@@ -486,6 +539,7 @@ function langCopyPlugin() {
   <p>${escTextHtml(seo.why)}</p>
   ${relatedHtml}
   ${faqsHtml}
+  ${lastUpdated}
   ${footerNav}
 </section>`
       }
@@ -891,7 +945,7 @@ function langCopyPlugin() {
           const toolName = TOOL_NAME_EN[slug] || slug
           const toolUrl = base + '/' + slug
           toolHtml = injectSchemas(toolHtml, [appSchema({
-            name: toolName, description: enToolDesc, url: toolUrl, category: appCategoryFor(slug)
+            name: toolName, description: enToolDesc, url: toolUrl, category: appCategoryFor(slug), slug
           })])
           toolHtml = toolHtml.replace('</head>', hreflangTags(slug) + '  </head>')
           // Pre-render: inject H1 + SEO content into the empty <div id="app">
@@ -1004,7 +1058,7 @@ function langCopyPlugin() {
           const toolUrl = base + '/' + lang + '/' + localSlug + '/'
           const toolName = TOOL_NAME_EN[enKey] || enKey
           toolHtml = injectSchemas(toolHtml, [appSchema({
-            name: toolName, description: langToolDesc, url: toolUrl, category: appCategoryFor(enKey)
+            name: toolName, description: langToolDesc, url: toolUrl, category: appCategoryFor(enKey), slug: enKey
           })])
 
           // Pre-render: tool HTML has <div id="app"></div> — inject the
@@ -1066,6 +1120,60 @@ function langCopyPlugin() {
           mkdirSync(staticDir, { recursive: true })
           writeFileSync(resolve(staticDir, 'index.html'), staticHtml)
         }
+      }
+
+      // ── Sitemap freshness: patch <lastmod> in dist/sitemap.xml per URL ──
+      // We don't regenerate the sitemap (it's hand-maintained at 43k lines);
+      // we just walk each <url> block, work out which tool/page the <loc>
+      // points at, and replace its <lastmod> with the latest git commit date
+      // for that tool's relevant files. Source public/sitemap.xml is
+      // untouched — only dist/sitemap.xml is rewritten, so re-running the
+      // build with no source changes is a no-op.
+      try {
+        const sitemapPath = resolve(distDir, 'sitemap.xml')
+        if (existsSync(sitemapPath)) {
+          let xml = readFileSync(sitemapPath, 'utf-8')
+          // Reverse slugMapByLang → look up English key from a translated slug
+          const slugToEn = {}
+          for (const lang of supportedLangs) {
+            const m = slugMapByLang[lang] || {}
+            for (const [enKey, locSlug] of Object.entries(m)) {
+              slugToEn[`${lang}/${locSlug}`] = enKey
+            }
+          }
+          const homepageDate = lastModFor('') // i18n.js root signal
+          // Map a URL path to its English tool slug (or '' for non-tool pages).
+          function slugFromPath(pathOnly) {
+            const clean = pathOnly.replace(/^\/|\/$/g, '')
+            if (clean === '') return ''                                 // homepage
+            const segs = clean.split('/')
+            if (segs.length === 1) {
+              // EN URL like /word-to-pdf — direct
+              return segs[0]
+            }
+            // Lang-prefixed: /fr/word-vers-pdf → look up via reverse map
+            const key = `${segs[0]}/${segs[1]}`
+            return slugToEn[key] || segs[1]
+          }
+          xml = xml.replace(/<url>([\s\S]*?)<\/url>/g, (block) => {
+            const locM = block.match(/<loc>([^<]+)<\/loc>/)
+            if (!locM) return block
+            let pathOnly
+            try { pathOnly = new URL(locM[1]).pathname } catch (_) { return block }
+            const slug = slugFromPath(pathOnly)
+            const date = slug ? lastModFor(slug) : homepageDate
+            if (/<lastmod>[^<]*<\/lastmod>/.test(block)) {
+              return block.replace(/<lastmod>[^<]*<\/lastmod>/, `<lastmod>${date}</lastmod>`)
+            }
+            // No <lastmod> in this entry — insert one right after <loc> so
+            // the resulting order is loc → lastmod → changefreq → priority
+            // (the convention the rest of the sitemap already uses).
+            return block.replace(/(<loc>[^<]+<\/loc>)(\s*)/, `$1$2<lastmod>${date}</lastmod>$2`)
+          })
+          writeFileSync(sitemapPath, xml)
+        }
+      } catch (e) {
+        console.warn('[sitemap-lastmod] patch skipped:', e && e.message || e)
       }
     }
   }
