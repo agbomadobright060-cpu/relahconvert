@@ -670,4 +670,40 @@ export function initBulkPdfTool(config) {
       addFiles(Array.from(e.dataTransfer.files))
     }
   })
+
+  // Auto-load handoff from the previous tool (set via saveFilesToIDB +
+  // sessionStorage.pendingFromIDB by the "What's Next?" click in another
+  // bulk tool, or by any other tool that uses the shared `relahconvert`
+  // IDB). Mirrors loadPendingFiles() in compress-pdf.js et al. but lives
+  // here so every tool using initBulkPdfTool picks up handoffs without
+  // duplicating the boilerplate.
+  ;(async function loadPendingFromIDB() {
+    if (!sessionStorage.getItem('pendingFromIDB')) return
+    sessionStorage.removeItem('pendingFromIDB')
+    try {
+      const records = await new Promise((resolve, reject) => {
+        const req = indexedDB.open('relahconvert', 1)
+        req.onupgradeneeded = e => e.target.result.createObjectStore('pending', { keyPath: 'id' })
+        req.onerror = () => reject(new Error('IDB open failed'))
+        req.onsuccess = e => {
+          const db = e.target.result
+          const tx = db.transaction('pending', 'readwrite')
+          const store = tx.objectStore('pending')
+          const getReq = store.getAll()
+          getReq.onsuccess = () => { store.clear(); resolve(getReq.result || []) }
+          getReq.onerror = () => reject(new Error('IDB read failed'))
+        }
+      })
+      if (!records.length) return
+      // Reconstruct File objects from the persisted blob + metadata, then
+      // feed them through addFiles() so the engine's normal validation
+      // (extension check, size limits) still runs. A file with the wrong
+      // extension for this tool will surface as an invalid_format error
+      // just like a manually-picked one.
+      const files = records.map(r => new File([r.blob], r.name, { type: r.type || '' }))
+      addFiles(files)
+    } catch (e) {
+      console.warn('[bulk-pdf-tool] IDB autoload failed:', e)
+    }
+  })()
 }
