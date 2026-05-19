@@ -9,6 +9,9 @@
 // max file size that we allow through to CloudConvert. inputs[] supports
 // multiple legitimate extensions for a single tool (e.g. .xlsx + .xls for
 // Excel→PDF). The extension is detected per-file and passed as input_format.
+// `via` is an optional intermediate format. CloudConvert doesn't have a direct
+// converter for some Office↔Office combinations (e.g. xlsx→docx), so we chain
+// two convert tasks through PDF: xlsx → pdf → docx.
 const TOOL_CONFIG = {
   'word-to-pdf':       { inputs: ['docx', 'doc'],  output: 'pdf',  maxBytes: 25 * 1024 * 1024 },
   'excel-to-pdf':      { inputs: ['xlsx', 'xls'],  output: 'pdf',  maxBytes: 25 * 1024 * 1024 },
@@ -16,7 +19,7 @@ const TOOL_CONFIG = {
   'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 25 * 1024 * 1024 },
-  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024 },
+  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
 }
 
 export async function onRequestPost(context) {
@@ -44,8 +47,28 @@ export async function onRequestPost(context) {
     return json({ error: 'invalid_format', expected: config.inputs.join(',') }, 400)
   }
 
-  const jobSpec = {
-    tasks: {
+  // Build the job spec. Single-step for direct conversions; two convert tasks
+  // chained through `via` (e.g. xlsx → pdf → docx) for tools that need it.
+  let tasks
+  if (config.via) {
+    tasks = {
+      'import-1':  { operation: 'import/upload' },
+      'convert-1': {
+        operation: 'convert',
+        input: 'import-1',
+        input_format: ext,
+        output_format: config.via,
+      },
+      'convert-2': {
+        operation: 'convert',
+        input: 'convert-1',
+        input_format: config.via,
+        output_format: config.output,
+      },
+      'export-1':  { operation: 'export/url', input: 'convert-2' },
+    }
+  } else {
+    tasks = {
       'import-1':  { operation: 'import/upload' },
       'convert-1': {
         operation: 'convert',
@@ -54,9 +77,9 @@ export async function onRequestPost(context) {
         output_format: config.output,
       },
       'export-1':  { operation: 'export/url', input: 'convert-1' },
-    },
-    tag: 'relahconvert-' + tool,
+    }
   }
+  const jobSpec = { tasks, tag: 'relahconvert-' + tool }
 
   let ccRes
   try {
