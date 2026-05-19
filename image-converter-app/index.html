@@ -355,6 +355,7 @@
               'pdf-to-word':()=>import('/src/tools/pdf-to-word.js'),
               'pdf-to-excel':()=>import('/src/tools/pdf-to-excel.js'),
               'pdf-to-powerpoint':()=>import('/src/tools/pdf-to-powerpoint.js'),
+              'excel-to-word':()=>import('/src/tools/excel-to-word.js'),
             }
             // Clear the homepage HTML and set up a clean page for the tool
             document.body.innerHTML = '<div id="app"></div>'
@@ -428,7 +429,7 @@
       }
 
       // ── Filter bar ────────────────────────────────────────────────────────
-      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create', privacy: 'Privacy' }
+      const f = t.filter || { all: 'All', optimize: 'Optimize', edit: 'Edit', convert: 'Convert', create: 'Create', privacy: 'Privacy', office: 'Office' }
       document.getElementById('filterBar').innerHTML = [
         { key: 'all',      label: f.all      },
         { key: 'optimize', label: f.optimize },
@@ -436,6 +437,7 @@
         { key: 'create',   label: f.create || 'Create' },
         { key: 'convert',  label: f.convert  },
         { key: 'privacy',  label: f.privacy || 'Privacy' },
+        { key: 'office',   label: f.office || 'Office' },
       ].map(({key, label}) =>
         `<button class="filter-btn${key === 'all' ? ' active' : ''}" data-filter="${key}">${label}</button>`
       ).join('')
@@ -490,6 +492,15 @@
         'pixelate-image': 'privacy',
         'svg-to-png':     'convert',
         'svg-to-jpg':     'convert',
+        // Office category — surfaces Office↔PDF + Office↔Office tools on the homepage.
+        // PDF hub stays canonical for these too; this category is a discovery shortcut.
+        'word-to-pdf':       'office',
+        'excel-to-pdf':      'office',
+        'powerpoint-to-pdf': 'office',
+        'pdf-to-word':       'office',
+        'pdf-to-excel':      'office',
+        'pdf-to-powerpoint': 'office',
+        'excel-to-word':     'office',
       }
 
       document.querySelector('.logo').href = currentLang === 'en' ? '/' : '/' + currentLang
@@ -563,6 +574,7 @@
         'pdf-to-word':       { bg: '#DC2626', svg: _conv('PDF', 'DOC', '#DC2626') },
         'pdf-to-excel':      { bg: '#DC2626', svg: _conv('PDF', 'XLS', '#DC2626') },
         'pdf-to-powerpoint': { bg: '#DC2626', svg: _conv('PDF', 'PPT', '#DC2626') },
+        'excel-to-word':     { bg: '#16A34A', svg: _conv('XLS', 'DOC', '#16A34A') },
       }
 
       const toolCategories = [
@@ -573,6 +585,7 @@
         { name: t.cat_export||'Export', slugs: ['jpg-to-pdf','png-to-pdf','pdf-to-png','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
         { name: t.cat_photo||'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
         { name: t.cat_pdf||'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint'] },
+        { name: t.cat_office||'Office Tools', slugs: ['word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word'] },
       ]
       function toolLink(slug) {
         const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
@@ -637,6 +650,15 @@
         { slug: 'pixelate-image',   title: t.nav_short?.['pixelate-image'] || 'Pixelate Image',     desc: cardDesc('pixelate_image',    'Pixelate an entire image or just a face/region.'), cat: 'privacy', isNew: true },
         { slug: 'svg-to-png',       title: t.nav_short?.['svg-to-png']    || 'SVG to PNG',          desc: cardDesc('svg_to_png',        'Convert SVG to PNG free. Set custom width.'), cat: 'convert' },
         { slug: 'svg-to-jpg',       title: t.nav_short?.['svg-to-jpg']    || 'SVG to JPG',          desc: cardDesc('svg_to_jpg',        'Convert SVG to JPG free. White background.'), cat: 'convert' },
+        // Office category — Office↔PDF + Office↔Office. PDF hub stays the canonical
+        // home for the six Office↔PDF tools; this surfaces all 7 (later 9) on the homepage too.
+        { slug: 'word-to-pdf',       title: t.nav_short?.['word-to-pdf']       || 'Word to PDF',          desc: cardDesc('word_to_pdf',        'Convert Word documents to PDF.'),                cat: 'office' },
+        { slug: 'excel-to-pdf',      title: t.nav_short?.['excel-to-pdf']      || 'Excel to PDF',         desc: cardDesc('excel_to_pdf',       'Convert Excel spreadsheets to PDF.'),            cat: 'office' },
+        { slug: 'powerpoint-to-pdf', title: t.nav_short?.['powerpoint-to-pdf'] || 'PowerPoint to PDF',    desc: cardDesc('powerpoint_to_pdf',  'Convert PowerPoint presentations to PDF.'),      cat: 'office' },
+        { slug: 'pdf-to-word',       title: t.nav_short?.['pdf-to-word']       || 'PDF to Word',          desc: cardDesc('pdf_to_word',        'Convert PDF to editable Word (.docx).'),         cat: 'office' },
+        { slug: 'pdf-to-excel',      title: t.nav_short?.['pdf-to-excel']      || 'PDF to Excel',         desc: cardDesc('pdf_to_excel',       'Convert PDF to editable Excel (.xlsx).'),        cat: 'office' },
+        { slug: 'pdf-to-powerpoint', title: t.nav_short?.['pdf-to-powerpoint'] || 'PDF to PowerPoint',    desc: cardDesc('pdf_to_powerpoint',  'Convert PDF to editable PowerPoint (.pptx).'),   cat: 'office' },
+        { slug: 'excel-to-word',     title: t.nav_short?.['excel-to-word']     || 'Excel to Word',        desc: cardDesc('excel_to_word',      'Convert Excel spreadsheets to editable Word (.docx).'), cat: 'office', isNew: true },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {

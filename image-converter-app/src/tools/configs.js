@@ -405,4 +405,11 @@ export const tools = {
     outputFormat: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     slug: 'pdf-to-powerpoint'
   },
+  'excel-to-word': {
+    title: 'Excel to Word',
+    description: 'Convert one or multiple Excel files to editable Word (.docx) documents.',
+    inputFormats: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
+    outputFormat: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    slug: 'excel-to-word'
+  },
 }
