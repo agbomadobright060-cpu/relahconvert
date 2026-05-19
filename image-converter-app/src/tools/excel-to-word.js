@@ -12,7 +12,10 @@ initBulkPdfTool({
   acceptAttr: '.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel',
   outputExt: 'docx',
   outputMime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  nextStepsSlugs: [],
+  // Output is .docx — Word→PDF accepts that as input, so the handoff
+  // (saveFilesToIDB) flows cleanly into the next tool. word-to-excel /
+  // word-to-powerpoint will join this list when those branches ship.
+  nextStepsSlugs: ['word-to-pdf'],
   t: getT(),
   labels: {
     desc: 'Convert one or multiple Excel files to editable Word documents.',
