@@ -19,7 +19,9 @@ const TOOL_CONFIG = {
   'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 25 * 1024 * 1024 },
-  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
+  // Try direct xlsx → docx first (single LibreOffice run, faster). Fall back
+  // to via: 'pdf' chain only if CC rejects the direct conversion.
+  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024 },
 }
 
 export async function onRequestPost(context) {
