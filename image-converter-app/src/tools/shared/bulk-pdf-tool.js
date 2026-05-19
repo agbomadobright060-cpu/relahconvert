@@ -678,7 +678,9 @@ export function initBulkPdfTool(config) {
   // here so every tool using initBulkPdfTool picks up handoffs without
   // duplicating the boilerplate.
   ;(async function loadPendingFromIDB() {
-    if (!sessionStorage.getItem('pendingFromIDB')) return
+    const flag = sessionStorage.getItem('pendingFromIDB')
+    console.log('[bulk-pdf-tool/' + slug + '] handoff check, pendingFromIDB=', flag)
+    if (!flag) return
     sessionStorage.removeItem('pendingFromIDB')
     try {
       const records = await new Promise((resolve, reject) => {
@@ -694,6 +696,8 @@ export function initBulkPdfTool(config) {
           getReq.onerror = () => reject(new Error('IDB read failed'))
         }
       })
+      console.log('[bulk-pdf-tool/' + slug + '] IDB returned', records.length, 'record(s):',
+        records.map(r => ({ name: r.name, type: r.type, size: r.blob && r.blob.size })))
       if (!records.length) return
       // Reconstruct File objects from the persisted blob + metadata, then
       // feed them through addFiles() so the engine's normal validation
@@ -702,8 +706,9 @@ export function initBulkPdfTool(config) {
       // just like a manually-picked one.
       const files = records.map(r => new File([r.blob], r.name, { type: r.type || '' }))
       addFiles(files)
+      console.log('[bulk-pdf-tool/' + slug + '] addFiles called with', files.length, 'file(s); entries now =', entries.length)
     } catch (e) {
-      console.warn('[bulk-pdf-tool] IDB autoload failed:', e)
+      console.warn('[bulk-pdf-tool/' + slug + '] IDB autoload failed:', e)
     }
   })()
 }
