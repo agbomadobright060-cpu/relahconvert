@@ -19,9 +19,12 @@ const TOOL_CONFIG = {
   'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 25 * 1024 * 1024 },
-  // Try direct xlsx → docx first (single LibreOffice run, faster). Fall back
-  // to via: 'pdf' chain only if CC rejects the direct conversion.
-  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024 },
+  // CloudConvert has no direct xlsx → docx path — confirmed by preview test
+  // 2026-05-18. Must chain through an intermediate. PDF works but is slow
+  // (~10-15s). HTML intermediate is faster — LibreOffice Calc → HTML is
+  // quick, and LibreOffice Writer imports HTML cleanly with the tables
+  // intact. Try HTML first; if quality is poor or it fails, fall back to PDF.
+  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
 }
 
 export async function onRequestPost(context) {
