@@ -25,14 +25,10 @@ const TOOL_CONFIG = {
   // quick, and LibreOffice Writer imports HTML cleanly with the tables
   // intact. Try HTML first; if quality is poor or it fails, fall back to PDF.
   'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
-  // Office↔Office (Word → Excel). Same chained pattern as excel-to-word:
-  // docx → pdf → xlsx through LibreOffice. No direct path in CC.
-  // Pin the pdf → xlsx leg to LibreOffice. CloudConvert's default pdf→xlsx
-  // engine is a table extractor that errors with "no tables found" on
-  // text-only PDFs. LibreOffice dumps all content into cells (one paragraph
-  // per row), so the tool works on every Word doc — tables stay as rows/cols,
-  // prose lands in column A. Worse output for prose, but always succeeds.
-  'word-to-excel':     { inputs: ['docx', 'doc'],  output: 'xlsx', maxBytes: 25 * 1024 * 1024, via: 'pdf', engine2: 'libreoffice' },
+  // word-to-excel intentionally not routed through CloudConvert.
+  // The docx→pdf→xlsx chain is unreliable (default pdf→xlsx engine errors
+  // on text-only docs; libreoffice can't do pdf→xlsx). Tool runs fully
+  // browser-side via mammoth + sheetjs — see src/tools/word-to-excel.js.
 }
 
 export async function onRequestPost(context) {

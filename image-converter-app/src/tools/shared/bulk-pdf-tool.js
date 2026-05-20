@@ -392,6 +392,23 @@ export function initBulkPdfTool(config) {
   }
 
   async function processOne(entry) {
+    // Browser-side tools (e.g. word-to-excel via mammoth+sheetjs) skip the
+    // CloudConvert chain entirely. The override is responsible for setting
+    // entry.status to 'done' or 'error' and populating pdfBlob/downloadUrl
+    // (success) or errCode (failure).
+    if (typeof config.processOneOverride === 'function') {
+      entry.status = 'converting'
+      entry.errCode = undefined
+      renderFileList()
+      try {
+        await config.processOneOverride(entry)
+      } catch (e) {
+        entry.status = 'error'
+        entry.errCode = (e && e.errCode) || 'conversion_failed'
+      }
+      return
+    }
+
     entry.status = 'uploading'
     entry.errCode = undefined
     renderFileList()
