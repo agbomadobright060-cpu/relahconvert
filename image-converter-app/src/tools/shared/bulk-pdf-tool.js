@@ -17,6 +17,10 @@ import JSZip from 'jszip'
 export const MAX_FILES = 10
 export const MAX_BYTES_PER_FILE = 25 * 1024 * 1024
 export const MAX_BYTES_TOTAL = 100 * 1024 * 1024
+// Browser-side tools (mammoth/sheetjs/docx) have no upload cost, so they
+// run a wider session: 25 files, 250 MB batch. Per-file cap stays at 25 MB.
+export const MAX_FILES_BROWSER = 25
+export const MAX_BYTES_TOTAL_BROWSER = 250 * 1024 * 1024
 
 let stylesInjected = false
 function injectStyles() {
@@ -142,6 +146,12 @@ export function initBulkPdfTool(config) {
   injectStyles()
 
   const { slug, acceptExts, acceptAttr, nextStepsSlugs, t, keyPrefix } = config
+  // Per-tool limits: browser-side tools (processOneOverride) get the higher
+  // browser caps unless the tool explicitly sets its own values.
+  const isBrowserTool = typeof config.processOneOverride === 'function'
+  const MAX_FILES_TOOL = config.maxFiles || (isBrowserTool ? MAX_FILES_BROWSER : MAX_FILES)
+  const MAX_BYTES_TOTAL_TOOL = config.maxBytesTotal || (isBrowserTool ? MAX_BYTES_TOTAL_BROWSER : MAX_BYTES_TOTAL)
+  const MAX_BYTES_TOTAL_LABEL = `${Math.floor(MAX_BYTES_TOTAL_TOOL / 1024 / 1024)} MB`
   const labels = config.labels || {}
   // Output extension and MIME for the converted blob. Defaults to PDF so the
   // existing Office→PDF tools keep working unchanged; PDF→Office tools pass
@@ -219,7 +229,7 @@ export function initBulkPdfTool(config) {
         <label for="fileInput" class="drop-zone" id="dropZone"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:13px;color:var(--text-secondary);margin-top:8px;font-weight:600;">${escapeHtml(dropHint)}</span></label>
       </div>
       <input type="file" id="fileInput" accept="${escapeHtml(acceptAttr)}" multiple style="display:none;" />
-      <div id="batchSummary"><span class="batch-stat" id="bsCount">0 / ${MAX_FILES}</span><span>·</span><span class="batch-stat" id="bsSize">0 MB / 100 MB</span></div>
+      <div id="batchSummary"><span class="batch-stat" id="bsCount">0 / ${MAX_FILES_TOOL}</span><span>·</span><span class="batch-stat" id="bsSize">0 MB / ${MAX_BYTES_TOTAL_LABEL}</span></div>
       <div class="file-list" id="fileList"></div>
       <div class="progress-bar" id="progBar"><div class="progress-bar-fill" id="progFill"></div></div>
       <div class="status-text" id="statusText"></div>
@@ -269,8 +279,8 @@ export function initBulkPdfTool(config) {
 
   function refreshBatchSummary() {
     const totalMb = (totalBytes() / (1024 * 1024)).toFixed(1)
-    bsCount.textContent = `${entries.length} / ${MAX_FILES}`
-    bsSize.textContent  = `${totalMb} MB / 100 MB`
+    bsCount.textContent = `${entries.length} / ${MAX_FILES_TOOL}`
+    bsSize.textContent  = `${totalMb} MB / ${MAX_BYTES_TOTAL_LABEL}`
     batchSummary.classList.toggle('on', entries.length > 0)
     fileListEl.classList.toggle('on', entries.length > 0)
     actionRow.classList.toggle('on', entries.length > 0)
@@ -280,7 +290,7 @@ export function initBulkPdfTool(config) {
     const dz = document.getElementById('dropZone')
     if (dz) dz.style.display = entries.length > 0 ? 'none' : ''
     // Fully hide the upload area when at the 10-file cap.
-    uploadArea.style.display = entries.length >= MAX_FILES ? 'none' : ''
+    uploadArea.style.display = entries.length >= MAX_FILES_TOOL ? 'none' : ''
   }
 
   function renderFileList() {
@@ -323,8 +333,8 @@ export function initBulkPdfTool(config) {
     for (const f of files) {
       if (!isAcceptedExt(f.name)) { invalidCount++; continue }
       if (f.size > MAX_BYTES_PER_FILE) { oversizedCount++; continue }
-      if (entries.length >= MAX_FILES) { limitHit = true; break }
-      if (totalBytes() + f.size > MAX_BYTES_TOTAL) { totalOverflow = true; break }
+      if (entries.length >= MAX_FILES_TOOL) { limitHit = true; break }
+      if (totalBytes() + f.size > MAX_BYTES_TOTAL_TOOL) { totalOverflow = true; break }
       entries.push({
         id: nextId++,
         file: f,
