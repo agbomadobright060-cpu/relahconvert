@@ -357,6 +357,7 @@
               'pdf-to-powerpoint':()=>import('/src/tools/pdf-to-powerpoint.js'),
               'excel-to-word':()=>import('/src/tools/excel-to-word.js'),
               'word-to-excel':()=>import('/src/tools/word-to-excel.js'),
+              'powerpoint-to-word':()=>import('/src/tools/powerpoint-to-word.js'),
             }
             // Clear the homepage HTML and set up a clean page for the tool
             document.body.innerHTML = '<div id="app"></div>'
@@ -503,6 +504,7 @@
         'pdf-to-powerpoint': 'office',
         'excel-to-word':     'office',
         'word-to-excel':     'office',
+        'powerpoint-to-word':'office',
       }
 
       document.querySelector('.logo').href = currentLang === 'en' ? '/' : '/' + currentLang
@@ -578,6 +580,7 @@
         'pdf-to-powerpoint': { bg: '#DC2626', svg: _conv('PDF', 'PPT', '#DC2626') },
         'excel-to-word':     { bg: '#16A34A', svg: _conv('XLS', 'DOC', '#16A34A') },
         'word-to-excel':     { bg: '#2563EB', svg: _conv('DOC', 'XLS', '#2563EB') },
+        'powerpoint-to-word':{ bg: '#D04A02', svg: _conv('PPT', 'DOC', '#D04A02') },
       }
 
       const toolCategories = [
@@ -588,7 +591,7 @@
         { name: t.cat_export||'Export', slugs: ['jpg-to-pdf','png-to-pdf','pdf-to-png','image-to-ico','jpg-to-svg','svg-to-png','svg-to-jpg','html-to-image'] },
         { name: t.cat_photo||'Photo', slugs: ['passport-photo','remove-background','blur-face'] },
         { name: t.cat_pdf||'PDF Tools', slugs: ['pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint'] },
-        { name: t.cat_office||'Office Tools', slugs: ['word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word','word-to-excel'] },
+        { name: t.cat_office||'Office Tools', slugs: ['word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word','word-to-excel','powerpoint-to-word'] },
       ]
       function toolLink(slug) {
         const ic = svgIcons[slug] || { bg: '#F5F5F5', svg: '<svg viewBox="0 0 40 40"></svg>' }
@@ -662,7 +665,8 @@
         { slug: 'pdf-to-excel',      title: t.nav_short?.['pdf-to-excel']      || 'PDF to Excel',         desc: cardDesc('pdf_to_excel',       'Convert PDF to editable Excel (.xlsx).'),        cat: 'office' },
         { slug: 'pdf-to-powerpoint', title: t.nav_short?.['pdf-to-powerpoint'] || 'PDF to PowerPoint',    desc: cardDesc('pdf_to_powerpoint',  'Convert PDF to editable PowerPoint (.pptx).'),   cat: 'office' },
         { slug: 'excel-to-word',     title: t.nav_short?.['excel-to-word']     || 'Excel to Word',        desc: cardDesc('excel_to_word',      'Convert Excel spreadsheets to editable Word (.docx).'), cat: 'office' },
-        { slug: 'word-to-excel',     title: t.nav_short?.['word-to-excel']     || 'Word to Excel',        desc: cardDesc('word_to_excel',      'Convert Word documents to editable Excel (.xlsx).'),    cat: 'office', isNew: true },
+        { slug: 'word-to-excel',     title: t.nav_short?.['word-to-excel']     || 'Word to Excel',        desc: cardDesc('word_to_excel',      'Convert Word documents to editable Excel (.xlsx).'),    cat: 'office' },
+        { slug: 'powerpoint-to-word',title: t.nav_short?.['powerpoint-to-word']|| 'PowerPoint to Word',   desc: cardDesc('powerpoint_to_word', 'Convert PowerPoint slide text and tables to editable Word (.docx).'), cat: 'office', isNew: true },
       ]
 
       document.getElementById('toolsGrid').innerHTML = cardData.map(c => {
