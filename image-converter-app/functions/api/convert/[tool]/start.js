@@ -27,7 +27,12 @@ const TOOL_CONFIG = {
   'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
   // Office↔Office (Word → Excel). Same chained pattern as excel-to-word:
   // docx → pdf → xlsx through LibreOffice. No direct path in CC.
-  'word-to-excel':     { inputs: ['docx', 'doc'],  output: 'xlsx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
+  // Pin the pdf → xlsx leg to LibreOffice. CloudConvert's default pdf→xlsx
+  // engine is a table extractor that errors with "no tables found" on
+  // text-only PDFs. LibreOffice dumps all content into cells (one paragraph
+  // per row), so the tool works on every Word doc — tables stay as rows/cols,
+  // prose lands in column A. Worse output for prose, but always succeeds.
+  'word-to-excel':     { inputs: ['docx', 'doc'],  output: 'xlsx', maxBytes: 25 * 1024 * 1024, via: 'pdf', engine2: 'libreoffice' },
 }
 
 export async function onRequestPost(context) {
@@ -72,6 +77,7 @@ export async function onRequestPost(context) {
         input: 'convert-1',
         input_format: config.via,
         output_format: config.output,
+        ...(config.engine2 ? { engine: config.engine2 } : {}),
       },
       'export-1':  { operation: 'export/url', input: 'convert-2' },
     }
