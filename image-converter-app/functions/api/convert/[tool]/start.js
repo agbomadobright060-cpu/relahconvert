@@ -19,12 +19,10 @@ const TOOL_CONFIG = {
   'pdf-to-word':       { inputs: ['pdf'],          output: 'docx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-excel':      { inputs: ['pdf'],          output: 'xlsx', maxBytes: 25 * 1024 * 1024 },
   'pdf-to-powerpoint': { inputs: ['pdf'],          output: 'pptx', maxBytes: 25 * 1024 * 1024 },
-  // CloudConvert has no direct xlsx → docx path — confirmed by preview test
-  // 2026-05-18. Must chain through an intermediate. PDF works but is slow
-  // (~10-15s). HTML intermediate is faster — LibreOffice Calc → HTML is
-  // quick, and LibreOffice Writer imports HTML cleanly with the tables
-  // intact. Try HTML first; if quality is poor or it fails, fall back to PDF.
-  'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
+  // excel-to-word and word-to-excel intentionally not routed through CC.
+  // The docx→pdf→xlsx chain is unreliable (default pdf→xlsx engine errors
+  // on text-only docs; libreoffice can't do pdf→xlsx). Tool runs fully
+  // browser-side via mammoth + sheetjs — see src/tools/word-to-excel.js.
 }
 
 export async function onRequestPost(context) {
@@ -69,6 +67,7 @@ export async function onRequestPost(context) {
         input: 'convert-1',
         input_format: config.via,
         output_format: config.output,
+        ...(config.engine2 ? { engine: config.engine2 } : {}),
       },
       'export-1':  { operation: 'export/url', input: 'convert-2' },
     }
