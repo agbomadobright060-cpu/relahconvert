@@ -419,4 +419,11 @@ export const tools = {
     outputFormat: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     slug: 'word-to-excel'
   },
+  'powerpoint-to-word': {
+    title: 'PowerPoint to Word',
+    description: 'Convert one or multiple PowerPoint files to editable Word (.docx) documents.',
+    inputFormats: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+    outputFormat: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    slug: 'powerpoint-to-word'
+  },
 }
