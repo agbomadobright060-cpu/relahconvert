@@ -508,9 +508,17 @@ export function initBulkPdfTool(config) {
     if (succ.length === 0) return
     downloadAllBtn.disabled = true
     const zip = new JSZip()
+    // Track used names so duplicate uploads ("report.pptx" twice) don't
+    // overwrite each other in the ZIP. First instance keeps the bare name;
+    // subsequent ones get -1, -2, … suffixes.
+    const usedNames = new Map()
     for (const e of succ) {
       const baseName = (e.name || fileBaseFallback).replace(/\.[^.]+$/, '')
-      zip.file(baseName + '.' + outputExt, e.pdfBlob)
+      let candidate = baseName
+      const count = usedNames.get(baseName) || 0
+      if (count > 0) candidate = `${baseName}-${count}`
+      usedNames.set(baseName, count + 1)
+      zip.file(candidate + '.' + outputExt, e.pdfBlob)
     }
     const blob = await zip.generateAsync({ type: 'blob' })
     const url = URL.createObjectURL(blob)
