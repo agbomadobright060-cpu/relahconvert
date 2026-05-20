@@ -25,6 +25,9 @@ const TOOL_CONFIG = {
   // quick, and LibreOffice Writer imports HTML cleanly with the tables
   // intact. Try HTML first; if quality is poor or it fails, fall back to PDF.
   'excel-to-word':     { inputs: ['xlsx', 'xls'],  output: 'docx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
+  // Office↔Office (Word → Excel). Same chained pattern as excel-to-word:
+  // docx → pdf → xlsx through LibreOffice. No direct path in CC.
+  'word-to-excel':     { inputs: ['docx', 'doc'],  output: 'xlsx', maxBytes: 25 * 1024 * 1024, via: 'pdf' },
 }
 
 export async function onRequestPost(context) {

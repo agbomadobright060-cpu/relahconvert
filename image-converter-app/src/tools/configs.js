@@ -412,4 +412,11 @@ export const tools = {
     outputFormat: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     slug: 'excel-to-word'
   },
+  'word-to-excel': {
+    title: 'Word to Excel',
+    description: 'Convert one or multiple Word files to editable Excel (.xlsx) spreadsheets.',
+    inputFormats: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'],
+    outputFormat: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    slug: 'word-to-excel'
+  },
 }

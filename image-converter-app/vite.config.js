@@ -40,7 +40,7 @@ function pathsForTool(slug) {
   const html  = `image-converter-app/${slug}.html`
   const extras = (slug === 'word-to-pdf' || slug === 'excel-to-pdf' || slug === 'powerpoint-to-pdf' ||
                   slug === 'pdf-to-word' || slug === 'pdf-to-excel' || slug === 'pdf-to-powerpoint' ||
-                  slug === 'excel-to-word')
+                  slug === 'excel-to-word' || slug === 'word-to-excel')
     ? ['image-converter-app/src/tools/shared/bulk-pdf-tool.js']
     : []
   return [...base, entry, html, ...extras]
@@ -134,7 +134,7 @@ function langCopyPlugin() {
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
         'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
         'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf',
-        'powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word'
+        'powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word','word-to-excel'
       ])
       // English display name per slug for WebApplication schema name field
       const TOOL_NAME_EN = {
@@ -169,6 +169,7 @@ function langCopyPlugin() {
         'pdf-to-excel':'PDF to Excel',
         'pdf-to-powerpoint':'PDF to PowerPoint',
         'excel-to-word':'Excel to Word',
+        'word-to-excel':'Word to Excel',
       }
       function appCategoryFor(slug) {
         return PDF_TOOL_SET.has(slug) ? 'BusinessApplication' : 'MultimediaApplication'
@@ -248,6 +249,7 @@ function langCopyPlugin() {
         'pdf-to-excel':'Convert one or multiple PDF files to editable Excel (.xlsx) spreadsheets online. Free bulk PDF to Excel converter.',
         'pdf-to-powerpoint':'Convert one or multiple PDF files to editable PowerPoint (.pptx) presentations online. Free bulk PDF to PowerPoint converter.',
         'excel-to-word':'Convert one or multiple Excel files (.xlsx, .xls) to editable Word (.docx) documents online. Free bulk Excel to Word converter.',
+        'word-to-excel':'Convert one or multiple Word files (.docx, .doc) to editable Excel (.xlsx) spreadsheets online. Free bulk Word to Excel converter.',
       }
       // Strip forbidden privacy/processing-location phrasing from descriptions.
       // Strategy: locate the first forbidden phrase, walk back to the previous
@@ -331,7 +333,7 @@ function langCopyPlugin() {
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf',
         'extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf',
         'protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf',
-        'powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word'
+        'powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word','word-to-excel'
       ]
 
       function unescJs(s) { return s.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\\\/g, '\\') }
@@ -605,7 +607,7 @@ function langCopyPlugin() {
         const privHref = langHref('privacy-policy', lang)
         const termsHref = langHref('terms-and-conditions', lang)
         const sH1 = (STATIC_H1[lang] && STATIC_H1[lang]) || STATIC_H1.en
-        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word']
+        const PDF_SLUGS = ['merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers','watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word','word-to-excel']
         const toolLinks = PDF_SLUGS.map(s => {
           const label = (navShortByLang[lang] && navShortByLang[lang][s]) ||
                         (navShortByLang.en && navShortByLang.en[s]) ||
@@ -677,6 +679,7 @@ function langCopyPlugin() {
         'pdf-to-excel':       { title: 'pdfexcel_page_title',     desc: 'pdfexcel_meta_desc' },
         'pdf-to-powerpoint':  { title: 'pdfppt_page_title',       desc: 'pdfppt_meta_desc' },
         'excel-to-word':      { title: 'excelword_page_title',    desc: 'excelword_meta_desc' },
+        'word-to-excel':      { title: 'wordexcel_page_title',    desc: 'wordexcel_meta_desc' },
       }
       // Static page key in vite.config (URL slug) → key inside the i18n.js lang block
       const STATIC_PAGE_I18N_KEY = {
@@ -949,7 +952,7 @@ function langCopyPlugin() {
         'heic-to-jpg','image-to-ico','jpg-to-svg','html-to-image','merge-images','passport-photo','image-splitter','resize-in-kb','pixelate-image','svg-to-png','svg-to-jpg',
         'pdf-tools','merge-pdf','split-pdf','rotate-pdf','compress-pdf','reorder-pdf','extract-pdf','remove-pdf','add-page-numbers',
         'watermark-pdf','crop-pdf','protect-pdf','unlock-pdf','extract-images-pdf','word-to-pdf','excel-to-pdf','powerpoint-to-pdf',
-        'pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word'
+        'pdf-to-word','pdf-to-excel','pdf-to-powerpoint','excel-to-word','word-to-excel'
       ]
       for (const slug of enToolSlugs) {
         const toolFile = resolve(distDir, slug + '.html')
@@ -1308,6 +1311,7 @@ export default defineConfig({
         'pdf-to-excel':      resolve(__dirname, 'pdf-to-excel.html'),
         'pdf-to-powerpoint': resolve(__dirname, 'pdf-to-powerpoint.html'),
         'excel-to-word':     resolve(__dirname, 'excel-to-word.html'),
+        'word-to-excel':     resolve(__dirname, 'word-to-excel.html'),
         'account':           resolve(__dirname, 'account.html'),
       }
     }
