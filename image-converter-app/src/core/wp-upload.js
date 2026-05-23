@@ -57,34 +57,61 @@ function getWpParams() {
   return null
 }
 
+// Module-level singletons so multiple callers (or duplicate IIFE
+// invocations if the bundler ends up importing wp-upload.js from more
+// than one chunk) share the same handoff result instead of each firing
+// their own POST. The handoff token is SINGLE-USE on the server side —
+// the first POST consumes it; a duplicate POST would get 401 invalid_token.
+let _handoffResult = null
+let _handoffPromise = null
+
 /**
- * Exchange the handoff token for user credentials. Single-shot, runs once
- * on page load if the new flow's params are present.
+ * Exchange the handoff token for user credentials. The result is cached
+ * at module scope; concurrent callers share the in-flight promise.
  */
 async function fetchHandoffCreds(wp) {
-  if (!wp || wp.flow !== 'app-password' || wp.creds) return wp
-  try {
-    const endpoint = wp.site.replace(/\/+$/, '') + '/wp-json/relahconvert-pdf/v1/handoff'
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: wp.handoff }),
-    })
-    if (!res.ok) {
-      console.warn('[rc-wp] handoff failed:', res.status)
-      return null
-    }
-    const data = await res.json()
-    if (!data || !data.user_login || !data.app_password) {
-      console.warn('[rc-wp] handoff response missing credentials')
-      return null
-    }
-    wp.creds = data
+  if (!wp || wp.flow !== 'app-password') return wp
+  if (wp.creds) return wp
+
+  // Already-completed fetch from a prior caller.
+  if (_handoffResult) {
+    wp.creds = _handoffResult
     return wp
-  } catch (e) {
-    console.warn('[rc-wp] handoff error:', e && e.message)
-    return null
   }
+
+  // First caller wins — kicks off the fetch; everyone else awaits it.
+  if (!_handoffPromise) {
+    _handoffPromise = (async () => {
+      try {
+        const endpoint = wp.site.replace(/\/+$/, '') + '/wp-json/relahconvert-pdf/v1/handoff'
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: wp.handoff }),
+        })
+        if (!res.ok) {
+          console.warn('[rc-wp] handoff failed:', res.status)
+          return null
+        }
+        const data = await res.json()
+        if (!data || !data.user_login || !data.app_password) {
+          console.warn('[rc-wp] handoff response missing credentials')
+          return null
+        }
+        return data
+      } catch (e) {
+        console.warn('[rc-wp] handoff error:', e && e.message)
+        return null
+      }
+    })()
+  }
+
+  const data = await _handoffPromise
+  if (data) {
+    _handoffResult = data
+    wp.creds = data
+  }
+  return wp
 }
 
 /**
