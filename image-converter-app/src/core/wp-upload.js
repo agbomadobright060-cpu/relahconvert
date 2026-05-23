@@ -188,11 +188,18 @@ function buildWpButton(wp, getBlob, getFilename) {
 
   btn.addEventListener('click', async (e) => {
     e.preventDefault()
-    const blob = typeof getBlob === 'function' ? getBlob() : getBlob
-    if (!blob) return
+    // Guard against rapid double-clicks.
+    if (btn.disabled) return
+    btn.disabled = true
+
+    // getBlob may be sync (returns Blob) OR async (returns Promise<Blob>).
+    // Await the Promise case so we always pass a real Blob into uploadToWp.
+    let blob = typeof getBlob === 'function' ? getBlob() : getBlob
+    if (blob && typeof blob.then === 'function') blob = await blob
+    if (!blob) { btn.disabled = false; return }
+
     const filename = typeof getFilename === 'function' ? getFilename() : getFilename
 
-    btn.disabled = true
     btn.textContent = 'Uploading...'
     btn.style.background = '#999'
     btn.style.cursor = 'not-allowed'
@@ -331,6 +338,10 @@ function pickFileInput(url) {
 
       processed.add(a)
 
+      // buildWpButton's own click handler now awaits async getBlob, so we
+      // don't add a second handler here — adding one caused a double-fire
+      // (500 then 201) on the WP REST upload because both handlers ran on
+      // a single click.
       const wpBtn = buildWpButton(wp,
         () => {
           const h = a.href || ''
@@ -341,46 +352,6 @@ function pickFileInput(url) {
         },
         () => a.download || 'file'
       )
-
-      // Make the getBlob async-compatible
-      const realBtn = wpBtn.querySelector('button')
-      const realStatus = wpBtn.querySelector('div')
-      realBtn.addEventListener('click', async (e) => {
-        e.preventDefault()
-        const h = a.href || ''
-        if (!h.startsWith('blob:') && !h.startsWith('data:')) return
-
-        realBtn.disabled = true
-        realBtn.textContent = 'Uploading...'
-        realBtn.style.background = '#999'
-        realBtn.style.cursor = 'not-allowed'
-        realStatus.style.display = 'block'
-        realStatus.style.color = '#666'
-        realStatus.textContent = 'Sending to WordPress...'
-
-        try {
-          const blob = await fetch(h).then(r => r.blob())
-          const filename = a.download || 'file'
-          const data = await uploadToWp(wp, blob, filename)
-          if (data && data.success) {
-            realBtn.textContent = 'Sent to WordPress!'
-            realBtn.style.background = '#46b450'
-            realStatus.style.color = '#46b450'
-            realStatus.textContent = 'Added to your Media Library.'
-            const adminUrl = getAdminUploadUrl(wp)
-            if (adminUrl) window.open(adminUrl, '_blank')
-          } else {
-            throw new Error('Upload failed')
-          }
-        } catch (err) {
-          realBtn.textContent = 'Send to WordPress'
-          realBtn.style.background = '#0073aa'
-          realBtn.style.cursor = 'pointer'
-          realBtn.disabled = false
-          realStatus.style.color = '#dc3232'
-          realStatus.textContent = 'Failed: ' + (err && err.message ? err.message : 'Could not upload.')
-        }
-      }, true)
 
       if (a.parentNode) {
         a.parentNode.insertBefore(wpBtn, a.nextSibling)
