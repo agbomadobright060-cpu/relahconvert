@@ -1,17 +1,28 @@
 /**
  * WordPress upload integration.
- * Auto-initializes on every page. When ?wpsite and ?token are present:
- * 1. Auto-loads image from ?url= into the tool's file input
- * 2. Watches for download links and adds "Send to WordPress" button next to them
+ *
+ * Supports TWO authentication flows side-by-side:
+ *
+ *   1. New Application Passwords flow (PDF/Office Tools plugin v1.0.1+):
+ *      URL params: ?handoff=<token>&site=<wp-site>
+ *      On page load we exchange the single-use 60-second handoff token
+ *      for the user's stored app password via the plugin's /handoff REST
+ *      endpoint. Credentials live in JS memory only. Uploads go to the
+ *      standard /wp-json/wp/v2/media endpoint via HTTP Basic Auth — no
+ *      custom plugin auth code involved.
+ *
+ *   2. Legacy custom-endpoint flow (Image Tools plugin v1.0.x):
+ *      URL params: ?wpsite=<custom-endpoint>&token=<token>
+ *      Direct POST to the plugin's own REST endpoint with the token. This
+ *      path is preserved for backward compatibility while the Image Tools
+ *      plugin still uses the older auth pattern.
+ *
+ * Both flows do the same things:
+ *   - Auto-load file from ?url= into the tool's file input
+ *   - Inject "Send to WordPress" inline button next to <a download> elements
+ *   - Intercept programmatic a.click() to show a floating prompt
+ *   - Suppress prompts for .zip downloads
  */
-
-function getWpParams() {
-  const params = new URLSearchParams(window.location.search)
-  const wpsite = params.get('wpsite')
-  const token = params.get('token')
-  if (!wpsite || !token) return null
-  return { wpsite, token }
-}
 
 // Suppress the "Send to WordPress?" prompt for .zip downloads.
 // WordPress rejects .zip uploads from non-admins, and a .zip in the Media
@@ -20,6 +31,115 @@ function getWpParams() {
 // requests, so we don't offer the prompt for ZIPs at all.
 function isZipDownload(filename) {
   return /\.zip$/i.test(filename || '')
+}
+
+/**
+ * Parse the WordPress integration params from the URL.
+ * Returns null if neither flow's params are present.
+ */
+function getWpParams() {
+  const params = new URLSearchParams(window.location.search)
+
+  // New flow: Application Passwords handoff
+  const handoff = params.get('handoff')
+  const site = params.get('site')
+  if (handoff && site) {
+    return { flow: 'app-password', handoff, site, creds: null }
+  }
+
+  // Legacy flow: custom endpoint + token (Image Tools plugin)
+  const wpsite = params.get('wpsite')
+  const token = params.get('token')
+  if (wpsite && token) {
+    return { flow: 'legacy-token', wpsite, token }
+  }
+
+  return null
+}
+
+/**
+ * Exchange the handoff token for user credentials. Single-shot, runs once
+ * on page load if the new flow's params are present.
+ */
+async function fetchHandoffCreds(wp) {
+  if (!wp || wp.flow !== 'app-password' || wp.creds) return wp
+  try {
+    const endpoint = wp.site.replace(/\/+$/, '') + '/wp-json/relahconvert-pdf/v1/handoff'
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: wp.handoff }),
+    })
+    if (!res.ok) {
+      console.warn('[rc-wp] handoff failed:', res.status)
+      return null
+    }
+    const data = await res.json()
+    if (!data || !data.user_login || !data.app_password) {
+      console.warn('[rc-wp] handoff response missing credentials')
+      return null
+    }
+    wp.creds = data
+    return wp
+  } catch (e) {
+    console.warn('[rc-wp] handoff error:', e && e.message)
+    return null
+  }
+}
+
+/**
+ * Upload a blob to the user's WordPress Media Library using the
+ * appropriate auth flow.
+ */
+async function uploadToWp(wp, blob, filename) {
+  if (wp.flow === 'app-password') {
+    if (!wp.creds) throw new Error('Not connected')
+    const creds = wp.creds
+    const auth = btoa(`${creds.user_login}:${creds.app_password}`)
+    const url = creds.site_url.replace(/\/+$/, '') + '/wp-json/wp/v2/media'
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(filename || 'file')}"`,
+        'Content-Type': blob.type || 'application/octet-stream',
+      },
+      body: blob,
+    })
+    if (!res.ok) {
+      let msg = 'Upload failed (' + res.status + ')'
+      try { const j = await res.json(); if (j && j.message) msg = j.message } catch (_) {}
+      throw new Error(msg)
+    }
+    const data = await res.json()
+    return { success: true, attachment_id: data.id, url: data.source_url }
+  }
+
+  // Legacy flow
+  const formData = new FormData()
+  formData.append('file', blob, filename || 'file')
+  formData.append('token', wp.token)
+  const res = await fetch(wp.wpsite + '?token=' + encodeURIComponent(wp.token), {
+    method: 'POST',
+    body: formData,
+  })
+  const data = await res.json()
+  if (!data.success) throw new Error(data.message || 'Upload failed')
+  return data
+}
+
+/**
+ * Get the user's wp-admin/upload.php URL for the "open Media Library" step
+ * after a successful send.
+ */
+function getAdminUploadUrl(wp) {
+  if (wp.flow === 'app-password' && wp.creds) {
+    return wp.creds.site_url.replace(/\/+$/, '') + '/wp-admin/upload.php'
+  }
+  if (wp.flow === 'legacy-token') {
+    try { return new URL(wp.wpsite).origin + '/wp-admin/upload.php' } catch (_) { return '' }
+  }
+  return ''
 }
 
 export { getWpParams, createWpUploadButton }
@@ -51,36 +171,27 @@ function buildWpButton(wp, getBlob, getFilename) {
     btn.style.cursor = 'not-allowed'
     status.style.display = 'block'
     status.style.color = '#666'
-    status.textContent = 'Sending image to WordPress...'
+    status.textContent = 'Sending to WordPress...'
 
     try {
-      const formData = new FormData()
-      formData.append('file', blob, filename || 'relahconvert-image.jpg')
-      formData.append('token', wp.token)
-
-      const res = await fetch(wp.wpsite + '?token=' + encodeURIComponent(wp.token), {
-        method: 'POST',
-        body: formData,
-      })
-      const data = await res.json()
-
-      if (data.success) {
+      const data = await uploadToWp(wp, blob, filename || 'file')
+      if (data && data.success) {
         btn.textContent = 'Sent to WordPress!'
         btn.style.background = '#46b450'
         status.style.color = '#46b450'
-        status.textContent = 'Image added to your Media Library.'
-        const siteUrl = new URL(wp.wpsite).origin
-        window.open(siteUrl + '/wp-admin/upload.php', '_blank')
+        status.textContent = 'Added to your Media Library.'
+        const adminUrl = getAdminUploadUrl(wp)
+        if (adminUrl) window.open(adminUrl, '_blank')
       } else {
-        throw new Error(data.message || 'Upload failed')
+        throw new Error('Upload failed')
       }
-    } catch (e) {
+    } catch (err) {
       btn.textContent = 'Send to WordPress'
       btn.style.background = '#0073aa'
       btn.style.cursor = 'pointer'
       btn.disabled = false
       status.style.color = '#dc3232'
-      status.textContent = 'Failed: ' + (e.message || 'Could not upload.')
+      status.textContent = 'Failed: ' + (err && err.message ? err.message : 'Could not upload.')
     }
   })
 
@@ -91,20 +202,13 @@ function buildWpButton(wp, getBlob, getFilename) {
   return wrapper
 }
 
-// ── Global auto-load file from ?url= into any tool ─────────────────────
-//
-// Picks the best file input for the URL's extension. Tools with multiple
-// file inputs (e.g., watermark-pdf has both a PDF input and an image
-// watermark input) used to pick the wrong one because the old selector
-// preferred `[accept*="image"]` unconditionally — PDF URL would land in
-// the image input. Now we sniff the URL extension and pick accordingly.
+// ── Smart file-input selector — picks the input matching the URL's extension ──
 function pickFileInput(url) {
   const inputs = Array.from(document.querySelectorAll('input[type="file"]'))
   if (inputs.length === 0) return null
   if (inputs.length === 1) return inputs[0]
 
   const ext = (url.split('?')[0].split('#')[0].split('.').pop() || '').toLowerCase()
-  // Map of extensions → accept-token substrings that input.accept should contain.
   const tokens = {
     pdf:  ['pdf'],
     docx: ['wordprocessingml', '.docx', 'msword'],
@@ -124,10 +228,10 @@ function pickFileInput(url) {
     const hit = inputs.find(inp => (inp.accept || '').toLowerCase().includes(tok))
     if (hit) return hit
   }
-  // Fallback to the first input.
   return inputs[0]
 }
 
+// ── Global auto-load file from ?url= into any tool ─────────────────────
 ;(function autoLoadFromUrl() {
   const params = new URLSearchParams(window.location.search)
   const imgUrl = params.get('url')
@@ -172,20 +276,26 @@ function pickFileInput(url) {
 })()
 
 // ── Watch for download links and add "Send to WordPress" button ──────────
-;(function watchForDownloads() {
-  const wp = getWpParams()
+;(async function watchForDownloads() {
+  let wp = getWpParams()
   if (!wp) return
 
-  // Track which elements we've already added a WP button to
+  // For the new flow, exchange handoff token for credentials before any
+  // upload button can be useful. If this fails, fall back to no button.
+  if (wp.flow === 'app-password') {
+    wp = await fetchHandoffCreds(wp)
+    if (!wp || !wp.creds) {
+      console.warn('[rc-wp] no credentials, Send-to-WordPress disabled')
+      return
+    }
+  }
+
   const processed = new WeakSet()
 
   function findAndAttach() {
-    // Find all visible download links (a[download] or a with download-like text)
     const anchors = document.querySelectorAll('a[download], a[id*="download"], a[class*="download"]')
     anchors.forEach(a => {
       if (processed.has(a)) return
-      // Only care about blob/data URLs or visible download buttons
-      const href = a.href || ''
       const isDownload = a.hasAttribute('download') || a.id.includes('download') || a.className.includes('download')
       const isVisible = a.offsetParent !== null && a.style.display !== 'none'
       if (!isDownload || !isVisible) return
@@ -202,13 +312,12 @@ function pickFileInput(url) {
           }
           return null
         },
-        () => a.download || 'image.jpg'
+        () => a.download || 'file'
       )
 
       // Make the getBlob async-compatible
       const realBtn = wpBtn.querySelector('button')
       const realStatus = wpBtn.querySelector('div')
-      realBtn.removeEventListener('click', realBtn._handler)
       realBtn.addEventListener('click', async (e) => {
         e.preventDefault()
         const h = a.href || ''
@@ -220,30 +329,21 @@ function pickFileInput(url) {
         realBtn.style.cursor = 'not-allowed'
         realStatus.style.display = 'block'
         realStatus.style.color = '#666'
-        realStatus.textContent = 'Sending image to WordPress...'
+        realStatus.textContent = 'Sending to WordPress...'
 
         try {
           const blob = await fetch(h).then(r => r.blob())
-          const filename = a.download || 'image.jpg'
-          const formData = new FormData()
-          formData.append('file', blob, filename)
-          formData.append('token', wp.token)
-
-          const res = await fetch(wp.wpsite + '?token=' + encodeURIComponent(wp.token), {
-            method: 'POST',
-            body: formData,
-          })
-          const data = await res.json()
-
-          if (data.success) {
+          const filename = a.download || 'file'
+          const data = await uploadToWp(wp, blob, filename)
+          if (data && data.success) {
             realBtn.textContent = 'Sent to WordPress!'
             realBtn.style.background = '#46b450'
             realStatus.style.color = '#46b450'
-            realStatus.textContent = 'Image added to your Media Library.'
-            const siteUrl = new URL(wp.wpsite).origin
-            window.open(siteUrl + '/wp-admin/upload.php', '_blank')
+            realStatus.textContent = 'Added to your Media Library.'
+            const adminUrl = getAdminUploadUrl(wp)
+            if (adminUrl) window.open(adminUrl, '_blank')
           } else {
-            throw new Error(data.message || 'Upload failed')
+            throw new Error('Upload failed')
           }
         } catch (err) {
           realBtn.textContent = 'Send to WordPress'
@@ -251,37 +351,24 @@ function pickFileInput(url) {
           realBtn.style.cursor = 'pointer'
           realBtn.disabled = false
           realStatus.style.color = '#dc3232'
-          realStatus.textContent = 'Failed: ' + (err.message || 'Could not upload.')
+          realStatus.textContent = 'Failed: ' + (err && err.message ? err.message : 'Could not upload.')
         }
-      })
+      }, true)
 
-      // Insert after the download link
       if (a.parentNode) {
         a.parentNode.insertBefore(wpBtn, a.nextSibling)
       }
     })
-
-    // Also find button-style download elements
-    const buttons = document.querySelectorAll('button[id*="download"], button[class*="download"], .download-btn')
-    buttons.forEach(b => {
-      if (processed.has(b)) return
-      if (b.offsetParent === null || b.style.display === 'none') return
-      processed.add(b)
-      // These are click-to-download buttons — we can't easily get the blob
-      // but we can show the button after they click
-    })
   }
 
-  // Run periodically to catch dynamically added download links
   setInterval(findAndAttach, 1000)
 
-  // Also use MutationObserver for faster detection
   const observer = new MutationObserver(() => findAndAttach())
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'display', 'href'] })
 
   // ── Intercept programmatic a.click() for tools that don't use persistent links ──
   let lastDownloadBlob = null
-  let lastDownloadFilename = 'image.jpg'
+  let lastDownloadFilename = 'file'
   let floatingWpBtn = null
 
   const origClick = HTMLAnchorElement.prototype.click
@@ -289,14 +376,11 @@ function pickFileInput(url) {
     if (this.download || this.hasAttribute('download')) {
       const href = this.href || this.getAttribute('href') || ''
       const dlName = this.download || ''
-      // Skip .zip — WP rejects archive uploads for non-admins and a .zip in
-      // the Media Library isn't what users want. See isZipDownload() comment.
       if (isZipDownload(dlName) || isZipDownload(href)) {
         return origClick.call(this)
       }
       if (href.startsWith('blob:') || href.startsWith('data:')) {
-        lastDownloadFilename = dlName || 'image.jpg'
-        // Fetch the blob before it gets revoked
+        lastDownloadFilename = dlName || 'file'
         fetch(href).then(r => r.blob()).then(blob => {
           lastDownloadBlob = blob
           showFloatingWpBtn()
@@ -340,25 +424,21 @@ function pickFileInput(url) {
       status.textContent = 'Sending...'
 
       try {
-        const formData = new FormData()
-        formData.append('file', blob, filename)
-        formData.append('token', wp.token)
-        const res = await fetch(wp.wpsite + '?token=' + encodeURIComponent(wp.token), { method: 'POST', body: formData })
-        const data = await res.json()
-        if (data.success) {
+        const data = await uploadToWp(wp, blob, filename)
+        if (data && data.success) {
           btn.textContent = 'Sent!'
           btn.style.background = '#46b450'
           status.style.color = '#46b450'
-          status.textContent = 'Image added to Media Library.'
-          const siteUrl = new URL(wp.wpsite).origin
-          window.open(siteUrl + '/wp-admin/upload.php', '_blank')
-        } else { throw new Error(data.message || 'Failed') }
+          status.textContent = 'Added to Media Library.'
+          const adminUrl = getAdminUploadUrl(wp)
+          if (adminUrl) window.open(adminUrl, '_blank')
+        } else { throw new Error('Failed') }
       } catch (err) {
         btn.textContent = 'Send to WordPress'
         btn.style.background = '#0073aa'
         btn.disabled = false
         status.style.color = '#dc3232'
-        status.textContent = 'Failed: ' + err.message
+        status.textContent = 'Failed: ' + (err && err.message ? err.message : 'Could not upload.')
       }
     })
 
