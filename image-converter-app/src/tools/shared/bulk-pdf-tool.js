@@ -299,7 +299,15 @@ export function initBulkPdfTool(config) {
       const statusLabel = STATUS_LABELS[status] || status
       let action = ''
       if (status === 'done' && e.pdfBlob) {
-        action = `<button class="fr-action primary" data-action="download" data-id="${e.id}">${escapeHtml(t.download || 'Download')}</button>`
+        // Render as <a download> (not <button>) so wp-upload.js can detect
+        // it via its MutationObserver and attach an inline "Send to
+        // WordPress" button next to it when the WP plugin handoff is active.
+        // Bulk engine's old programmatic-click path only fired the floating
+        // prompt (60s, easy to miss); the inline button is persistent.
+        const dlName = (e.name || fileBaseFallback).replace(/\.[^.]+$/, '') + '.' + outputExt
+        const dlUrl = e.downloadUrl || URL.createObjectURL(e.pdfBlob)
+        if (!e.downloadUrl) e.downloadUrl = dlUrl
+        action = `<a class="fr-action primary" href="${escapeHtml(dlUrl)}" download="${escapeHtml(dlName)}">${escapeHtml(t.download || 'Download')}</a>`
       } else if (status === 'error') {
         action = `<button class="fr-action" data-action="retry" data-id="${e.id}">${escapeHtml(retryLbl)}</button>`
       }

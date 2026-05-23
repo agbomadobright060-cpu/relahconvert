@@ -13,6 +13,15 @@ function getWpParams() {
   return { wpsite, token }
 }
 
+// Suppress the "Send to WordPress?" prompt for .zip downloads.
+// WordPress rejects .zip uploads from non-admins, and a .zip in the Media
+// Library isn't what the user wanted anyway — they wanted the bundled files,
+// not the archive. Silent failure here would generate confused support
+// requests, so we don't offer the prompt for ZIPs at all.
+function isZipDownload(filename) {
+  return /\.zip$/i.test(filename || '')
+}
+
 export { getWpParams, createWpUploadButton }
 
 function createWpUploadButton(getBlob, getFilename) {
@@ -82,14 +91,50 @@ function buildWpButton(wp, getBlob, getFilename) {
   return wrapper
 }
 
-// ── Global auto-load image from ?url= into any tool ─────────────────────
+// ── Global auto-load file from ?url= into any tool ─────────────────────
+//
+// Picks the best file input for the URL's extension. Tools with multiple
+// file inputs (e.g., watermark-pdf has both a PDF input and an image
+// watermark input) used to pick the wrong one because the old selector
+// preferred `[accept*="image"]` unconditionally — PDF URL would land in
+// the image input. Now we sniff the URL extension and pick accordingly.
+function pickFileInput(url) {
+  const inputs = Array.from(document.querySelectorAll('input[type="file"]'))
+  if (inputs.length === 0) return null
+  if (inputs.length === 1) return inputs[0]
+
+  const ext = (url.split('?')[0].split('#')[0].split('.').pop() || '').toLowerCase()
+  // Map of extensions → accept-token substrings that input.accept should contain.
+  const tokens = {
+    pdf:  ['pdf'],
+    docx: ['wordprocessingml', '.docx', 'msword'],
+    doc:  ['msword', '.doc'],
+    xlsx: ['spreadsheetml', '.xlsx', 'ms-excel'],
+    xls:  ['ms-excel', '.xls'],
+    pptx: ['presentationml', '.pptx', 'ms-powerpoint'],
+    ppt:  ['ms-powerpoint', '.ppt'],
+    jpg:  ['image', 'jpeg', 'jpg'],
+    jpeg: ['image', 'jpeg', 'jpg'],
+    png:  ['image', 'png'],
+    webp: ['image', 'webp'],
+    gif:  ['image', 'gif'],
+  }
+  const wanted = tokens[ext] || ['image']
+  for (const tok of wanted) {
+    const hit = inputs.find(inp => (inp.accept || '').toLowerCase().includes(tok))
+    if (hit) return hit
+  }
+  // Fallback to the first input.
+  return inputs[0]
+}
+
 ;(function autoLoadFromUrl() {
   const params = new URLSearchParams(window.location.search)
   const imgUrl = params.get('url')
   if (!imgUrl) return
 
   setTimeout(() => {
-    const fileInput = document.querySelector('input[type="file"][accept*="image"]') || document.querySelector('input[type="file"]')
+    const fileInput = pickFileInput(imgUrl)
     if (!fileInput) return
 
     const img = new Image()
@@ -144,6 +189,8 @@ function buildWpButton(wp, getBlob, getFilename) {
       const isDownload = a.hasAttribute('download') || a.id.includes('download') || a.className.includes('download')
       const isVisible = a.offsetParent !== null && a.style.display !== 'none'
       if (!isDownload || !isVisible) return
+      // Skip .zip downloads — see isZipDownload() comment.
+      if (isZipDownload(a.download || a.getAttribute('download') || a.href || '')) return
 
       processed.add(a)
 
@@ -241,8 +288,14 @@ function buildWpButton(wp, getBlob, getFilename) {
   HTMLAnchorElement.prototype.click = function () {
     if (this.download || this.hasAttribute('download')) {
       const href = this.href || this.getAttribute('href') || ''
+      const dlName = this.download || ''
+      // Skip .zip — WP rejects archive uploads for non-admins and a .zip in
+      // the Media Library isn't what users want. See isZipDownload() comment.
+      if (isZipDownload(dlName) || isZipDownload(href)) {
+        return origClick.call(this)
+      }
       if (href.startsWith('blob:') || href.startsWith('data:')) {
-        lastDownloadFilename = this.download || 'image.jpg'
+        lastDownloadFilename = dlName || 'image.jpg'
         // Fetch the blob before it gets revoked
         fetch(href).then(r => r.blob()).then(blob => {
           lastDownloadBlob = blob
