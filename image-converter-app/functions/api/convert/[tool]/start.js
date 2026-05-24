@@ -25,8 +25,16 @@ const TOOL_CONFIG = {
   // browser-side via mammoth + sheetjs — see src/tools/word-to-excel.js.
 }
 
+import { isAllowedOrigin, forbidden } from '../../../_lib/guard.js'
+
 export async function onRequestPost(context) {
   const { request, params, env } = context
+  // Reject requests not originating from relahconvert.com — protects the
+  // paid CloudConvert API key from drive-by abuse, same lock-down applied
+  // to /api/screenshot and /api/remove-bg after the 2026-05-24 ApiFlash
+  // incident.
+  if (!isAllowedOrigin(request)) return forbidden()
+
   const tool = params.tool
   const config = TOOL_CONFIG[tool]
   if (!config) return json({ error: 'unknown_tool' }, 404)

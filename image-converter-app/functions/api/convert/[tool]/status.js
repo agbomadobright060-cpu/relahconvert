@@ -3,8 +3,11 @@
 // Query: ?jobId=X
 // Returns: { status: 'processing'|'finished'|'error', downloadUrl?, filename?, code?, message? }
 
+import { isAllowedOrigin, forbidden } from '../../../_lib/guard.js'
+
 export async function onRequestGet(context) {
   const { request, env } = context
+  if (!isAllowedOrigin(request)) return forbidden()
   if (!env.CC_API_KEY) return json({ status: 'error', code: 'service_misconfigured' }, 500)
 
   const url = new URL(request.url)

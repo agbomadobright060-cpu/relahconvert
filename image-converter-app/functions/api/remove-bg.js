@@ -1,9 +1,8 @@
+import { isAllowedOrigin, corsHeaders, forbidden } from '../_lib/guard.js'
+
 export async function onRequestPost(context) {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  }
+  if (!isAllowedOrigin(context.request)) return forbidden()
+  const cors = corsHeaders(context.request)
 
   try {
     const formData = await context.request.formData()
@@ -11,7 +10,7 @@ export async function onRequestPost(context) {
     if (!imageFile) {
       return new Response(JSON.stringify({ error: 'Missing image file' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...cors },
       })
     }
 
@@ -19,7 +18,7 @@ export async function onRequestPost(context) {
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API key not configured' }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...cors },
       })
     }
 
@@ -37,7 +36,7 @@ export async function onRequestPost(context) {
       const err = await response.text()
       return new Response(JSON.stringify({ error: 'Remove.bg API error', detail: err }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...cors },
       })
     }
 
@@ -45,23 +44,18 @@ export async function onRequestPost(context) {
     return new Response(resultBuffer, {
       headers: {
         'Content-Type': 'image/png',
-        ...corsHeaders,
+        ...cors,
       },
     })
   } catch (err) {
     return new Response(JSON.stringify({ error: 'Server error', detail: err.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      headers: { 'Content-Type': 'application/json', ...cors },
     })
   }
 }
 
-export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+export async function onRequestOptions(context) {
+  if (!isAllowedOrigin(context.request)) return forbidden()
+  return new Response(null, { headers: corsHeaders(context.request) })
 }
