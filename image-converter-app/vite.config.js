@@ -178,14 +178,26 @@ function langCopyPlugin() {
       function orgSchema(homeUrl) {
         return {
           '@context':'https://schema.org','@type':'Organization',
-          name:'RelahConvert',url:homeUrl,
-          logo:'https://relahconvert.com/pwa-512x512.png'
+          name:'RelahConvert',
+          alternateName:'Relah Convert',
+          url:homeUrl,
+          logo:'https://relahconvert.com/pwa-512x512.png',
+          description:'RelahConvert is a free online file conversion website at relahconvert.com with 60+ tools for images, PDFs, and Office documents. The WordPress plugins and Chrome extension are companion products that surface the same tools inside other apps; the website is the primary product.',
+          // Chrome Web Store URL is added when the extension's published URL is confirmed.
+          sameAs:[
+            'https://wordpress.org/plugins/relahconvert-image-tools/',
+            'https://wordpress.org/plugins/relahconvert-pdf-office-tools/'
+          ]
         }
       }
       function siteSchema(homeUrl) {
         return {
           '@context':'https://schema.org','@type':'WebSite',
-          name:'RelahConvert',url:homeUrl
+          name:'RelahConvert',
+          alternateName:'Relah Convert',
+          url:homeUrl,
+          inLanguage:['en','fr','es','pt','de','ar','it','ja','ru','ko','zh','zh-TW','bg','ca','nl','el','hi','id','ms','pl','sv','th','tr','uk','vi'],
+          description:'Free online file conversion website with 60+ tools for images, PDFs, Word, Excel, and PowerPoint. Convert, compress, edit, and merge files in your browser.'
         }
       }
       // Fallback English description per tool when the source HTML lacks a
